@@ -16,12 +16,13 @@ const { title, description } = Astro.props;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={description ?? "Luotopia —— 整合校园服务，构建开源生态"} />
+    <meta name="description" content={description ?? "Luotopia —— 整合校园服务，构建开放生态"} />
     <meta property="og:title" content={title} />
-    <meta property="og:description" content={description ?? "校园服务一站式平台，开源社区驱动"} />
+    <meta property="og:description" content={description ?? "校园服务一站式平台，开放社区驱动"} />
     <meta property="og:image" content="/img/app-icon.png" />
     <meta property="og:type" content="website" />
-    <link rel="icon" type="image/png" href="/img/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" type="image/png" href="/img/app-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />

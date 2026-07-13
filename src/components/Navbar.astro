@@ -4,17 +4,14 @@ const links = [
   { href: "/features", label: "功能" },
   { href: "/download", label: "下载" },
   { href: "/community", label: "社区" },
-  { href: "/changelog", label: "更新日志" },
+  { href: "/legal", label: "法律信息" },
 ];
 ---
 
 <nav class="fixed top-0 left-0 right-0 z-50 bg-[var(--md-sys-color-surface)] dark:bg-[var(--md-sys-color-surface-dark)] shadow-[var(--md-sys-elevation-level1)] transition-shadow">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-    <a href="/" class="flex items-center gap-2 text-[var(--md-sys-typescale-title-large-size)] font-bold text-[var(--md-sys-color-primary)] no-underline state-layer rounded-[var(--md-sys-shape-corner-small)] px-2 py-1">
-      <svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-        <rect width="28" height="28" rx="8" fill="currentColor"/>
-        <path d="M7 10h3v8H7zm5.5-3h3v14h-3zm5.5 6h3v8h-3z" fill="white" opacity="0.9"/>
-      </svg>
+    <a href="/" class="flex items-center gap-2 text-[length:var(--md-sys-typescale-title-large-size)] font-bold text-[var(--md-sys-color-primary)] no-underline state-layer rounded-[var(--md-sys-shape-corner-small)] px-2 py-1">
+      <img src="/img/app-icon.png" alt="Luotopia" class="w-6 h-6 rounded-[6px]" />
       Luotopia
     </a>
 
@@ -23,7 +20,7 @@ const links = [
         links.map((link) => (
           <a
             href={link.href}
-            class="state-layer rounded-[var(--md-sys-shape-corner-small)] px-3 py-2 text-[var(--md-sys-typescale-body-large-size)] leading-[var(--md-sys-typescale-body-large-line)] text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] no-underline transition-colors"
+            class="state-layer rounded-[var(--md-sys-shape-corner-small)] px-3 py-2 text-[length:var(--md-sys-typescale-body-large-size)] leading-[var(--md-sys-typescale-body-large-line)] text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] no-underline transition-colors"
           >
             {link.label}
           </a>
@@ -45,7 +42,7 @@ const links = [
       links.map((link) => (
         <a
           href={link.href}
-          class="block state-layer rounded-[var(--md-sys-shape-corner-small)] px-3 py-2 text-[var(--md-sys-typescale-body-large-size)] text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] no-underline transition-colors"
+          class="block state-layer rounded-[var(--md-sys-shape-corner-small)] px-3 py-2 text-[length:var(--md-sys-typescale-body-large-size)] text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] no-underline transition-colors"
         >
           {link.label}
         </a>

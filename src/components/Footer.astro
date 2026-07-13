@@ -6,38 +6,35 @@ const year = new Date().getFullYear();
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       <div>
-        <div class="flex items-center gap-2 text-[var(--md-sys-typescale-title-large-size)] font-[var(--md-sys-typescale-title-large-weight)] text-[var(--md-sys-color-primary)] mb-3">
-          <svg width="22" height="22" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-            <rect width="28" height="28" rx="8" fill="currentColor"/>
-            <path d="M7 10h3v8H7zm5.5-3h3v14h-3zm5.5 6h3v8h-3z" fill="white" opacity="0.9"/>
-          </svg>
+        <div class="flex items-center gap-2 text-[length:var(--md-sys-typescale-title-large-size)] font-[var(--md-sys-typescale-title-large-weight)] text-[var(--md-sys-color-primary)] mb-3">
+          <img src="/img/app-icon.png" alt="Luotopia" class="w-[22px] h-[22px] rounded-[5px]" />
           Luotopia
         </div>
-        <p class="text-[var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)]">整合校园服务，构建开源生态。</p>
+        <p class="text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)]">整合校园服务，构建开放生态。</p>
       </div>
 
       <div>
-        <h4 class="text-[var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-3">导航</h4>
-        <ul class="space-y-2 text-[var(--md-sys-typescale-body-medium-size)]">
+        <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-3">导航</h4>
+        <ul class="space-y-2 text-[length:var(--md-sys-typescale-body-medium-size)]">
           <li><a href="/features" class="text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] no-underline transition-colors">功能概览</a></li>
           <li><a href="/download" class="text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] no-underline transition-colors">下载</a></li>
           <li><a href="/community" class="text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] no-underline transition-colors">社区</a></li>
-          <li><a href="/changelog" class="text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] no-underline transition-colors">更新日志</a></li>
+          <li><a href="/legal" class="text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] no-underline transition-colors">法律信息</a></li>
         </ul>
       </div>
 
       <div>
-        <h4 class="text-[var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-3">相关资源</h4>
-        <ul class="space-y-2 text-[var(--md-sys-typescale-body-medium-size)]">
+        <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-3">相关资源</h4>
+        <ul class="space-y-2 text-[length:var(--md-sys-typescale-body-medium-size)]">
           <li><a href="https://docs.whu.sb" class="text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] no-underline transition-colors" target="_blank">开发者文档</a></li>
           <li><a href="https://github.com/ClosedWHU" class="text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] no-underline transition-colors" target="_blank">GitHub 组织</a></li>
-          <li><a href="https://github.com/ClosedWHU/Luotopia" class="text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] no-underline transition-colors" target="_blank">项目仓库</a></li>
+          <li><a href="https://github.com/ClosedWHU/Luotopia" class="text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] no-underline transition-colors" target="_blank">本站开源仓库</a></li>
         </ul>
       </div>
     </div>
 
-    <div class="mt-8 pt-6 border-t border-[var(--md-sys-color-outline-variant)] dark:border-[var(--md-sys-color-outline-variant-dark)] text-center text-[var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">
-      &copy; {year} ClosedWHU. Built with Astro.
+    <div class="mt-8 pt-6 border-t border-[var(--md-sys-color-outline-variant)] dark:border-[var(--md-sys-color-outline-variant-dark)] text-center text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">
+      &copy; {year} Made with ❤ by ClosedWHU Team · All rights reserved.
     </div>
   </div>
 </footer>

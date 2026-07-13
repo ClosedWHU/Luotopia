@@ -20,23 +20,23 @@ const features = [
   <section class="pt-32 pb-20 px-4 text-center">
     <div class="max-w-6xl mx-auto">
       <img src="/img/app-icon.png" alt="Luotopia" class="w-20 h-20 mx-auto mb-6 rounded-[var(--md-sys-shape-corner-large)] shadow-[var(--md-sys-elevation-level1)]" />
-      <h1 class="text-[var(--md-sys-typescale-display-small-size)] sm:text-[var(--md-sys-typescale-display-medium-size)] lg:text-[var(--md-sys-typescale-display-large-size)] leading-[var(--md-sys-typescale-display-small-line)] sm:leading-[var(--md-sys-typescale-display-medium-line)] lg:leading-[var(--md-sys-typescale-display-large-line)] font-[var(--md-sys-typescale-display-large-weight)] text-[var(--md-sys-color-on-surface)]">
+      <h1 class="text-[length:var(--md-sys-typescale-display-small-size)] sm:text-[length:var(--md-sys-typescale-display-medium-size)] lg:text-[length:var(--md-sys-typescale-display-large-size)] leading-[var(--md-sys-typescale-display-small-line)] sm:leading-[var(--md-sys-typescale-display-medium-line)] lg:leading-[var(--md-sys-typescale-display-large-line)] font-[var(--md-sys-typescale-display-large-weight)] text-[var(--md-sys-color-on-surface)]">
         Luotopia
-        <span class="block text-[var(--md-sys-color-primary)] mt-2">珞课王国</span>
+        <span class="block text-[var(--md-sys-color-primary)] mt-2">珞家</span>
       </h1>
-      <p class="mt-6 text-[var(--md-sys-typescale-title-large-size)] sm:text-[var(--md-sys-typescale-headline-small-size)] leading-[var(--md-sys-typescale-title-large-line)] sm:leading-[var(--md-sys-typescale-headline-small-line)] text-[var(--md-sys-color-on-surface-variant)] max-w-2xl mx-auto">
-        整合校园服务，构建开源生态。武汉大学一站式数字校园平台。
+      <p class="mt-6 text-[length:var(--md-sys-typescale-title-large-size)] sm:text-[length:var(--md-sys-typescale-headline-small-size)] leading-[var(--md-sys-typescale-title-large-line)] sm:leading-[var(--md-sys-typescale-headline-small-line)] text-[var(--md-sys-color-on-surface-variant)] max-w-2xl mx-auto">
+        整合校园服务，构建开放生态。武汉大学一站式数字校园平台。
       </p>
       <div class="mt-10">
         <DownloadButtons variant="hero" />
       </div>
-      <p class="mt-4 text-[var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">支持 Android / iOS / Windows / macOS / Linux</p>
+      <p class="mt-4 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">支持 Android / iOS / HarmonyOS / Windows / macOS / Linux / Web</p>
     </div>
   </section>
 
   <section class="py-20 px-4 bg-[var(--md-sys-color-surface-container)] dark:bg-[var(--md-sys-color-surface-container-dark)]">
     <div class="max-w-6xl mx-auto">
-      <h2 class="text-[var(--md-sys-typescale-headline-small-size)] leading-[var(--md-sys-typescale-headline-small-line)] font-[var(--md-sys-typescale-headline-small-weight)] text-center text-[var(--md-sys-color-on-surface)] mb-12">核心功能</h2>
+      <h2 class="text-[length:var(--md-sys-typescale-headline-small-size)] leading-[var(--md-sys-typescale-headline-small-line)] font-[var(--md-sys-typescale-headline-small-weight)] text-center text-[var(--md-sys-color-on-surface)] mb-12">核心功能</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {features.map((f) => <FeatureCard {...f} />)}
       </div>
@@ -45,18 +45,16 @@ const features = [
 
   <section class="py-20 px-4">
     <div class="max-w-6xl mx-auto">
-      <h2 class="text-[var(--md-sys-typescale-headline-small-size)] leading-[var(--md-sys-typescale-headline-small-line)] font-[var(--md-sys-typescale-headline-small-weight)] text-center text-[var(--md-sys-color-on-surface)] mb-8">应用预览</h2>
-      <div class="max-w-sm mx-auto">
-        <ScreenshotCarousel />
-      </div>
+      <h2 class="text-[length:var(--md-sys-typescale-headline-small-size)] leading-[var(--md-sys-typescale-headline-small-line)] font-[var(--md-sys-typescale-headline-small-weight)] text-center text-[var(--md-sys-color-on-surface)] mb-8">应用预览</h2>
+      <ScreenshotCarousel />
     </div>
   </section>
 
-  <section class="py-20 px-4 bg-[var(--md-sys-color-primary-container)] dark:bg-[var(--md-sys-color-primary-container)]/10 text-center">
+  <section class="py-20 px-4 bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] text-center">
     <div class="max-w-6xl mx-auto">
-      <h2 class="text-[var(--md-sys-typescale-headline-small-size)] leading-[var(--md-sys-typescale-headline-small-line)] font-[var(--md-sys-typescale-headline-small-weight)] text-[var(--md-sys-color-on-primary-container)] mb-4">立即体验</h2>
-      <p class="text-[var(--md-sys-typescale-body-large-size)] text-[var(--md-sys-color-on-surface-variant)] mb-8">免费、开源、纯净，让校园生活更简单。</p>
-      <DownloadButtons />
+      <h2 class="text-[length:var(--md-sys-typescale-headline-small-size)] leading-[var(--md-sys-typescale-headline-small-line)] font-[var(--md-sys-typescale-headline-small-weight)] text-[var(--md-sys-color-on-surface)] mb-4">立即体验</h2>
+      <p class="text-[length:var(--md-sys-typescale-body-large-size)] text-[var(--md-sys-color-on-surface-variant)] mb-8">免费、开放、纯净，让校园生活更简单。</p>
+      <DownloadButtons variant="hero" />
     </div>
   </section>
 </BaseLayout>

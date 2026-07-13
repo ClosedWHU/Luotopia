@@ -1,18 +1,206 @@
 ---
-import { friendLinkCatalog } from "../data/friend-links";
-const links = friendLinkCatalog.items;
+import { friendLinkCatalog, categoryLabels } from "../config/friendLinks";
+
+const items = friendLinkCatalog.items;
+const grouped = new Map<string, typeof items>();
+for (const item of items) {
+  const cat = item.category || "other";
+  if (!grouped.has(cat)) grouped.set(cat, []);
+  grouped.get(cat)!.push(item);
+}
+const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
+
+const dialogData = Object.fromEntries(
+  items
+    .filter((i) => i.action.type === "dialog")
+    .map((i) => [
+      i.id,
+      {
+        title: i.action.title ?? i.title,
+        body: i.action.body ?? "",
+        image: i.action.image?.url ?? null,
+        button: i.action.button
+          ? { label: i.action.button.label, url: i.action.button.url }
+          : null,
+      },
+    ]),
+);
 ---
 
-<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-  {links.map((link) => (
-    <a
-      href={(() => { const a = link.action; return a.type === "openUrl" && a.url ? a.url : "#"; })()}
-      target="_blank"
-      rel="noopener noreferrer"
-      class="flex flex-col items-center gap-2 p-4 rounded-[var(--md-sys-shape-corner-small)] hover:bg-[var(--md-sys-color-surface-container-high)] dark:hover:bg-[var(--md-sys-color-surface-container-high-dark)] transition-colors no-underline"
+{
+  catOrder.map((cat) => {
+    const group = grouped.get(cat);
+    if (!group) return null;
+    return (
+      <div class="mb-8 last:mb-0">
+        <h3 class="text-[length:var(--md-sys-typescale-title-small-size)] leading-[var(--md-sys-typescale-title-small-line)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-outline)] mb-4">{categoryLabels[cat] || cat}</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {group.map((link) => {
+            if (link.action.type === "dialog") {
+              return (
+                <button
+                  type="button"
+                  data-friend-link-dialog={link.id}
+                  class="flex items-center gap-3 p-3 rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface)] dark:bg-[var(--md-sys-color-surface-dark)] hover:bg-[var(--md-sys-color-surface-container-high)] dark:hover:bg-[var(--md-sys-color-surface-container-high-dark)] transition-colors cursor-pointer border-none w-full text-left state-layer"
+                >
+                  {link.image && (
+                    <img src={link.image.url} alt="" class="w-10 h-10 rounded-full object-cover shrink-0" loading="lazy" width="40" height="40" />
+                  )}
+                  <div class="min-w-0 flex-1">
+                    <span class="block text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] truncate">{link.title}</span>
+                    <span class="block text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-on-surface-variant)] line-clamp-2 mt-0.5">{link.subtitle}</span>
+                  </div>
+                  <span class="material-symbols-outlined text-[var(--md-sys-color-outline)] text-xl shrink-0">chevron_right</span>
+                </button>
+              );
+            }
+            if (link.action.type === "openUrl" && link.action.url) {
+              return (
+                <a
+                  href={link.action.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center gap-3 p-3 rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface)] dark:bg-[var(--md-sys-color-surface-dark)] hover:bg-[var(--md-sys-color-surface-container-high)] dark:hover:bg-[var(--md-sys-color-surface-container-high-dark)] transition-colors no-underline state-layer"
+                >
+                  {link.image && (
+                    <img src={link.image.url} alt="" class="w-10 h-10 rounded-full object-cover shrink-0" loading="lazy" width="40" height="40" />
+                  )}
+                  <div class="min-w-0 flex-1">
+                    <span class="block text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] truncate">{link.title}</span>
+                    <span class="block text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-on-surface-variant)] line-clamp-2 mt-0.5">{link.subtitle}</span>
+                  </div>
+                  <span class="material-symbols-outlined text-[var(--md-sys-color-outline)] text-xl shrink-0">open_in_new</span>
+                </a>
+              );
+            }
+            return (
+              <div class="flex items-center gap-3 p-3 rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface)] dark:bg-[var(--md-sys-color-surface-dark)] opacity-70">
+                {link.image && (
+                  <img src={link.image.url} alt="" class="w-10 h-10 rounded-full object-cover shrink-0" loading="lazy" width="40" height="40" />
+                )}
+                <div class="min-w-0 flex-1">
+                  <span class="block text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] truncate">{link.title}</span>
+                  <span class="block text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-on-surface-variant)] line-clamp-2 mt-0.5">{link.subtitle}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  })
+}
+
+<div
+  id="friend-link-dialog-root"
+  class="fixed inset-0 z-[100] hidden"
+  aria-hidden="true"
+>
+  <div id="friend-link-dialog-backdrop" class="absolute inset-0 bg-black/40"></div>
+  <div class="relative z-10 flex min-h-full items-center justify-center p-4">
+    <div
+      id="friend-link-dialog-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="friend-link-dialog-title"
+      class="w-full max-w-sm rounded-[var(--md-sys-shape-corner-extra-large)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] p-6 shadow-[var(--md-sys-elevation-level3)]"
     >
-      {link.image && <img src={link.image.url} alt={link.title} class="w-12 h-12 rounded-full object-cover" loading="lazy" />}
-      <span class="text-[var(--md-sys-typescale-body-small-size)] font-[var(--md-sys-typescale-label-large-weight)] text-[var(--md-sys-color-on-surface-variant)]">{link.title}</span>
-    </a>
-  ))}
+      <h3 id="friend-link-dialog-title" class="text-[length:var(--md-sys-typescale-title-large-size)] font-[var(--md-sys-typescale-title-large-weight)] text-[var(--md-sys-color-on-surface)] select-text mb-4"></h3>
+      <div id="friend-link-dialog-image-wrap" class="hidden mb-4">
+        <img id="friend-link-dialog-image" src="" alt="" class="mx-auto w-[220px] h-[220px] rounded-[var(--md-sys-shape-corner-medium)] object-contain bg-[var(--md-sys-color-surface)] dark:bg-[var(--md-sys-color-surface-dark)]" />
+      </div>
+      <p id="friend-link-dialog-body" class="text-[length:var(--md-sys-typescale-body-medium-size)] leading-[var(--md-sys-typescale-body-medium-line)] text-[var(--md-sys-color-on-surface-variant)] whitespace-pre-line select-text mb-6"></p>
+      <div class="flex flex-wrap justify-end gap-2">
+        <a
+          id="friend-link-dialog-action"
+          href="#"
+          target="_blank"
+          rel="noopener noreferrer"
+          hidden
+          class="state-layer inline-flex items-center rounded-[var(--md-sys-shape-corner-full)] px-5 py-2.5 bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] no-underline font-[var(--md-sys-typescale-label-large-weight)] text-[length:var(--md-sys-typescale-label-large-size)]"
+        ></a>
+        <button
+          type="button"
+          id="friend-link-dialog-close"
+          class="state-layer inline-flex items-center rounded-[var(--md-sys-shape-corner-full)] px-5 py-2.5 bg-transparent text-[var(--md-sys-color-primary)] border-none cursor-pointer font-[var(--md-sys-typescale-label-large-weight)] text-[length:var(--md-sys-typescale-label-large-size)]"
+        >
+          关闭
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
+
+<script define:vars={{ dialogData }}>
+  (function () {
+    const root = document.getElementById("friend-link-dialog-root");
+    const backdrop = document.getElementById("friend-link-dialog-backdrop");
+    const titleEl = document.getElementById("friend-link-dialog-title");
+    const bodyEl = document.getElementById("friend-link-dialog-body");
+    const imageWrap = document.getElementById("friend-link-dialog-image-wrap");
+    const imageEl = document.getElementById("friend-link-dialog-image");
+    const actionEl = document.getElementById("friend-link-dialog-action");
+    const closeEl = document.getElementById("friend-link-dialog-close");
+    if (!root || !titleEl || !bodyEl || !imageWrap || !imageEl || !actionEl || !closeEl) return;
+
+    function openDialog(id) {
+      const data = dialogData[id];
+      if (!data) return;
+
+      titleEl.textContent = data.title || "";
+      titleEl.classList.toggle("hidden", !data.title);
+
+      bodyEl.textContent = data.body || "";
+      bodyEl.classList.toggle("hidden", !data.body);
+
+      if (data.image) {
+        imageEl.src = data.image;
+        imageEl.alt = data.title || "";
+        imageWrap.classList.remove("hidden");
+      } else {
+        imageEl.removeAttribute("src");
+        imageWrap.classList.add("hidden");
+      }
+
+      if (data.button && data.button.url) {
+        actionEl.href = data.button.url;
+        actionEl.textContent = data.button.label || "打开";
+        actionEl.hidden = false;
+      } else {
+        actionEl.removeAttribute("href");
+        actionEl.textContent = "";
+        actionEl.hidden = true;
+      }
+
+      root.classList.remove("hidden");
+      root.setAttribute("aria-hidden", "false");
+      const sbw = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.overflow = "hidden";
+      if (sbw > 0) document.body.style.paddingRight = sbw + "px";
+      closeEl.focus();
+    }
+
+    function closeDialog() {
+      root.classList.add("hidden");
+      root.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    }
+
+    document.querySelectorAll("[data-friend-link-dialog]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        openDialog(btn.getAttribute("data-friend-link-dialog"));
+      });
+    });
+
+    closeEl.addEventListener("click", closeDialog);
+    backdrop?.addEventListener("click", closeDialog);
+    actionEl.addEventListener("click", () => {
+      // allow navigation; close dialog after click
+      setTimeout(closeDialog, 0);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !root.classList.contains("hidden")) closeDialog();
+    });
+  })();
+</script>

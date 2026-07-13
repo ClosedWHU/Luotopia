@@ -1,0 +1,86 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { legalDocuments, getLegalBySlug } from "../../config/legal";
+
+export function getStaticPaths() {
+  return legalDocuments.map((doc) => ({ params: { slug: doc.slug } }));
+}
+
+const doc = getLegalBySlug(Astro.params.slug!);
+if (!doc) throw new Error(`Unknown legal slug: ${Astro.params.slug}`);
+
+function escapeHtml(text: string) {
+  return text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+/** Renders a subset of Markdown: `inline code` only. */
+function renderInlineMd(text: string) {
+  const codeClass =
+    "rounded-[var(--md-sys-shape-corner-extra-small)] bg-[var(--md-sys-color-surface-container)] dark:bg-[var(--md-sys-color-surface-container-dark)] px-1.5 py-0.5 font-mono text-[0.92em] text-[var(--md-sys-color-on-surface)]";
+  return text
+    .split(/(`[^`]+`)/g)
+    .map((part) => {
+      if (part.startsWith("`") && part.endsWith("`") && part.length >= 2) {
+        return `<code class="${codeClass}">${escapeHtml(part.slice(1, -1))}</code>`;
+      }
+      return escapeHtml(part);
+    })
+    .join("");
+}
+---
+
+<BaseLayout title={doc.title} description={doc.description}>
+  <section class="pt-28 pb-16 px-4">
+    <div class="max-w-3xl mx-auto">
+      <a href="/legal/" class="inline-flex items-center gap-1 text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-primary)] no-underline mb-6 hover:underline">
+        <span class="material-symbols-outlined text-base">arrow_back</span>
+        返回法律信息
+      </a>
+
+      <h1 class="text-[length:var(--md-sys-typescale-display-small-size)] leading-[var(--md-sys-typescale-display-small-line)] font-[var(--md-sys-typescale-display-small-weight)] text-[var(--md-sys-color-on-surface)] mb-2">{doc.title}</h1>
+      <p class="text-[length:var(--md-sys-typescale-body-large-size)] text-[var(--md-sys-color-on-surface-variant)] mb-10">{doc.description}</p>
+
+      <div class="space-y-8">
+        {doc.sections.map((section) => (
+          <section>
+            <h2 class="text-[length:var(--md-sys-typescale-title-large-size)] leading-[var(--md-sys-typescale-title-large-line)] font-[var(--md-sys-typescale-title-large-weight)] text-[var(--md-sys-color-on-surface)] mb-4">{section.heading}</h2>
+            {section.body && section.body.length > 0 && (
+              <div class="space-y-3">
+                {section.body.map((p) => (
+                  <p class="text-[length:var(--md-sys-typescale-body-medium-size)] leading-[var(--md-sys-typescale-body-medium-line)] text-[var(--md-sys-color-on-surface-variant)]" set:html={renderInlineMd(p)} />
+                ))}
+              </div>
+            )}
+            {section.subsections && section.subsections.length > 0 && (
+              <div class={`space-y-6 ${section.body && section.body.length > 0 ? "mt-6" : ""}`}>
+                {section.subsections.map((sub) => (
+                  <div>
+                    <h3 class="text-[length:var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)] mb-2">{sub.heading}</h3>
+                    <div class="space-y-3">
+                      {sub.body.map((p) => (
+                        <p class="text-[length:var(--md-sys-typescale-body-medium-size)] leading-[var(--md-sys-typescale-body-medium-line)] text-[var(--md-sys-color-on-surface-variant)]" set:html={renderInlineMd(p)} />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        ))}
+      </div>
+
+      <footer class="mt-16 pt-6 border-t border-[var(--md-sys-color-outline-variant)] dark:border-[var(--md-sys-color-outline-variant-dark)]">
+        <p class="text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">
+          最后更新：{doc.lastUpdated}
+        </p>
+        <p class="mt-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">
+          ClosedWHU Team · Luotopia
+        </p>
+      </footer>
+    </div>
+  </section>
+</BaseLayout>

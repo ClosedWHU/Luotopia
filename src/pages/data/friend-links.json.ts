@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { friendLinkCatalog } from "../../data/friend-links";
+import { friendLinkCatalog } from "../../config/friendLinks";
 
 export const GET: APIRoute = async () => {
   return new Response(JSON.stringify(friendLinkCatalog, null, 2), {

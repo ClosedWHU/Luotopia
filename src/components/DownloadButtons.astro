@@ -5,9 +5,9 @@ export interface Props {
 
 const { variant = "default" } = Astro.props;
 
-const primaryClass = "state-layer inline-flex items-center gap-2 rounded-[var(--md-sys-shape-corner-full)] no-underline font-[var(--md-sys-typescale-label-large-weight)] transition-shadow bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] shadow-[var(--md-sys-elevation-level1)] hover:shadow-[var(--md-sys-elevation-level3)]" + (variant === "hero" ? " px-7 py-3 text-[17px]" : " px-6 py-2.5 text-[var(--md-sys-typescale-label-large-size)]");
+const primaryClass = "state-layer inline-flex items-center gap-2 rounded-[var(--md-sys-shape-corner-full)] no-underline font-[var(--md-sys-typescale-label-large-weight)] transition-shadow bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] shadow-[var(--md-sys-elevation-level1)] hover:shadow-[var(--md-sys-elevation-level3)]" + (variant === "hero" ? " px-7 py-3 text-[17px]" : " px-6 py-2.5 text-[length:var(--md-sys-typescale-label-large-size)]");
 
-const outlinedClass = "state-layer inline-flex items-center gap-2 rounded-[var(--md-sys-shape-corner-full)] no-underline font-[var(--md-sys-typescale-label-large-weight)] transition-shadow bg-transparent text-[var(--md-sys-color-primary)] border border-[var(--md-sys-color-outline)] hover:border-[var(--md-sys-color-primary)]" + (variant === "hero" ? " px-7 py-3 text-[17px]" : " px-6 py-2.5 text-[var(--md-sys-typescale-label-large-size)]");
+const outlinedClass = "state-layer inline-flex items-center gap-2 rounded-[var(--md-sys-shape-corner-full)] no-underline font-[var(--md-sys-typescale-label-large-weight)] transition-shadow bg-transparent text-[var(--md-sys-color-primary)] border border-[var(--md-sys-color-outline)] hover:border-[var(--md-sys-color-primary)]" + (variant === "hero" ? " px-7 py-3 text-[17px]" : " px-6 py-2.5 text-[length:var(--md-sys-typescale-label-large-size)]");
 
 const iconSize = variant === "hero" ? "text-xl" : "text-lg";
 ---

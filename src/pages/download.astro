@@ -2,89 +2,298 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const platforms = [
-  {
-    name: "Android",
-    icon: "smartphone",
-    desc: "APK 直接安装，支持侧载",
-    status: "稳定版 v1.0.0+2",
-    note: "Android 8+ 兼容",
-  },
-  {
-    name: "iOS",
-    icon: "tablet_mac",
-    desc: "TestFlight / 侧载安装",
-    status: "内测中",
-    note: "需联系社区获取邀请",
-  },
-  {
-    name: "Windows",
-    icon: "desktop_windows",
-    desc: "Windows 桌面客户端",
-    status: "稳定版 v1.0.0+2",
-    note: "Windows 10+ 兼容",
-  },
-  {
-    name: "macOS",
-    icon: "laptop",
-    desc: "macOS 原生体验",
-    status: "开发中",
-    note: "敬请期待",
-  },
-  {
-    name: "Linux",
-    icon: "terminal",
-    desc: "Linux 桌面客户端",
-    status: "开发中",
-    note: "敬请期待",
-  },
+  { id: "android", name: "Android", icon: "smartphone", desc: "APK 直接安装，支持侧载", note: "Android 8+ 兼容" },
+  { id: "ios", name: "iOS", icon: "tablet_mac", desc: "TestFlight / 侧载安装", note: "需联系社区获取邀请" },
+  { id: "windows", name: "Windows", icon: "desktop_windows", desc: "Windows 桌面客户端", note: "Windows 10+ 兼容" },
+  { id: "macos", name: "macOS", icon: "laptop", desc: "macOS 原生体验", note: "敬请期待" },
+  { id: "linux", name: "Linux", icon: "terminal", desc: "Linux 桌面客户端", note: "敬请期待" },
 ];
 ---
 
 <BaseLayout title="下载">
   <section class="pt-28 pb-16 px-4">
     <div class="max-w-6xl mx-auto">
-      <h1 class="text-[var(--md-sys-typescale-headline-medium-size)] leading-[var(--md-sys-typescale-headline-medium-line)] font-[var(--md-sys-typescale-headline-medium-weight)] text-[var(--md-sys-color-on-surface)] mb-2">下载 Luotopia</h1>
-      <p class="text-[var(--md-sys-typescale-body-large-size)] text-[var(--md-sys-color-on-surface-variant)] mb-12">选择你的平台，获取最新版本</p>
+      <h1 class="text-[length:var(--md-sys-typescale-display-small-size)] leading-[var(--md-sys-typescale-display-small-line)] font-[var(--md-sys-typescale-display-small-weight)] text-[var(--md-sys-color-on-surface)] mb-2">下载 Luotopia</h1>
+      <p class="text-[length:var(--md-sys-typescale-title-large-size)] leading-[var(--md-sys-typescale-title-large-line)] text-[var(--md-sys-color-on-surface-variant)] mb-4">选择你的平台，获取最新版本</p>
+      <p id="latest-meta" class="text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-outline)] mb-12">正在从 GitHub Releases 加载…</p>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div id="platform-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {platforms.map((p) => (
-          <div class="rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)] p-5 flex flex-col">
+          <div
+            class="platform-card rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)] p-5 flex flex-col"
+            data-platform={p.id}
+          >
             <span class="material-symbols-outlined text-[var(--md-sys-color-primary)] text-3xl mb-3">{p.icon}</span>
-            <h3 class="text-[var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)]">{p.name}</h3>
-            <p class="text-[var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)] mt-1">{p.desc}</p>
-            <div class="mt-4">
-              <span class="inline-block px-2.5 py-0.5 rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] text-[var(--md-sys-typescale-label-medium-size)] font-[var(--md-sys-typescale-label-medium-weight)]">{p.status}</span>
+            <h3 class="text-[length:var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)]">{p.name}</h3>
+            <p class="text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)] mt-1">{p.desc}</p>
+            <div class="mt-4 flex flex-wrap gap-1.5 items-center platform-badges">
+              <span class="platform-status inline-block px-2.5 py-0.5 rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] text-[var(--md-sys-color-on-surface-variant)] text-[length:var(--md-sys-typescale-label-medium-size)] font-[var(--md-sys-typescale-label-medium-weight)]">加载中…</span>
             </div>
-            <p class="mt-2 text-[var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">{p.note}</p>
+            <div class="platform-assets mt-3 space-y-1.5 hidden"></div>
+            <p class="mt-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">{p.note}</p>
           </div>
         ))}
       </div>
 
       <div class="mt-16 rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)] p-6">
-        <h2 class="text-[var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)] mb-4">安装说明</h2>
-        <div class="space-y-4 text-[var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)]">
+        <h2 class="text-[length:var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)] mb-4">安装说明</h2>
+        <div class="space-y-4 text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)]">
           <div>
-            <h4 class="text-[var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">Android</h4>
+            <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">Android</h4>
             <p>下载 APK 后直接安装。如提示"未知来源"，请在系统设置中允许安装。我们建议从 GitHub Releases 页面获取最新版本以确保完整性。</p>
           </div>
           <div>
-            <h4 class="text-[var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">iOS</h4>
+            <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">iOS</h4>
             <p>iOS 版本通过 TestFlight 分发。加入社区 QQ 群或关注 GitHub 动态获取 TestFlight 邀请链接。由于 Apple 政策限制，非越狱设备需通过 TestFlight 安装。</p>
           </div>
           <div>
-            <h4 class="text-[var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">Windows</h4>
+            <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">Windows</h4>
             <p>Windows 版本为 MSIX 安装包或便携版（即将提供）。需 Windows 10 1809 及以上版本。</p>
           </div>
         </div>
       </div>
 
-      <div class="mt-8 text-center">
-        <p class="text-[var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">
+      <div class="mt-8 text-center mb-20">
+        <p class="text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">
           你也可以直接访问
-          <a href="https://github.com/ClosedWHU/Luotopia/releases" target="_blank" class="text-[var(--md-sys-color-primary)] hover:underline">GitHub Releases</a>
+          <a href="https://github.com/ClosedWHU/Luotopia/releases" target="_blank" rel="noopener noreferrer" class="text-[var(--md-sys-color-primary)] hover:underline">GitHub Releases</a>
           查看所有历史版本和发布说明。
         </p>
+      </div>
+
+      <div id="changelog">
+        <h2 class="text-[length:var(--md-sys-typescale-headline-small-size)] leading-[var(--md-sys-typescale-headline-small-line)] font-[var(--md-sys-typescale-headline-small-weight)] text-[var(--md-sys-color-on-surface)] mb-2">更新日志</h2>
+        <p class="text-[length:var(--md-sys-typescale-body-large-size)] text-[var(--md-sys-color-on-surface-variant)] mb-8">来自 GitHub Releases 的发布历史</p>
+
+        <div id="changelog-list" class="space-y-6">
+          <p class="text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-outline)]">加载中…</p>
+        </div>
+
+        <div id="changelog-pager" class="mt-8 flex items-center justify-center gap-3 hidden">
+          <button type="button" id="changelog-prev" class="state-layer rounded-[var(--md-sys-shape-corner-full)] px-5 py-2 border border-[var(--md-sys-color-outline)] text-[var(--md-sys-color-primary)] bg-transparent cursor-pointer font-[var(--md-sys-typescale-label-large-weight)] disabled:opacity-40 disabled:cursor-not-allowed">上一页</button>
+          <span id="changelog-page-label" class="text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]"></span>
+          <button type="button" id="changelog-next" class="state-layer rounded-[var(--md-sys-shape-corner-full)] px-5 py-2 border border-[var(--md-sys-color-outline)] text-[var(--md-sys-color-primary)] bg-transparent cursor-pointer font-[var(--md-sys-typescale-label-large-weight)] disabled:opacity-40 disabled:cursor-not-allowed">下一页</button>
+        </div>
       </div>
     </div>
   </section>
 </BaseLayout>
+
+<script>
+  (function () {
+    const PER_PAGE = 5;
+    let page = 1;
+    let hasNext = false;
+    let hasPrev = false;
+
+    const latestMeta = document.getElementById("latest-meta");
+    const listEl = document.getElementById("changelog-list");
+    const pager = document.getElementById("changelog-pager");
+    const prevBtn = document.getElementById("changelog-prev");
+    const nextBtn = document.getElementById("changelog-next");
+    const pageLabel = document.getElementById("changelog-page-label");
+
+    function formatSize(bytes) {
+      if (!bytes && bytes !== 0) return "";
+      if (bytes < 1024) return bytes + " B";
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+      return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+    }
+
+    function formatDate(iso) {
+      if (!iso) return "";
+      try {
+        return new Date(iso).toLocaleDateString("zh-CN", { year: "numeric", month: "short", day: "numeric" });
+      } catch {
+        return iso.slice(0, 10);
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    /** Lightweight markdown-ish: keep line breaks, strip raw HTML */
+    function formatBody(body) {
+      if (!body) return "<p class=\"text-[var(--md-sys-color-outline)]\">暂无说明</p>";
+      const lines = escapeHtml(body).split(/\r?\n/);
+      const html = [];
+      let inList = false;
+      for (const line of lines) {
+        const item = line.match(/^\s*[-*•]\s+(.+)/);
+        if (item) {
+          if (!inList) {
+            html.push('<ul class="space-y-1 my-2">');
+            inList = true;
+          }
+          html.push(`<li class="flex gap-2"><span class="text-[var(--md-sys-color-primary)] shrink-0">•</span><span>${item[1]}</span></li>`);
+        } else {
+          if (inList) {
+            html.push("</ul>");
+            inList = false;
+          }
+          if (line.trim() === "") html.push("<div class=\"h-2\"></div>");
+          else html.push(`<p>${line}</p>`);
+        }
+      }
+      if (inList) html.push("</ul>");
+      return html.join("");
+    }
+
+    function prereleaseBadge() {
+      return `<span class="inline-block px-2 py-0.5 rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-error-container)] text-[var(--md-sys-color-on-error-container)] text-[length:var(--md-sys-typescale-label-medium-size)] font-[var(--md-sys-typescale-label-medium-weight)]">测试版</span>`;
+    }
+
+    function stableBadge(text) {
+      return `<span class="inline-block px-2.5 py-0.5 rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] text-[length:var(--md-sys-typescale-label-medium-size)] font-[var(--md-sys-typescale-label-medium-weight)]">${escapeHtml(text)}</span>`;
+    }
+
+    function mutedBadge(text) {
+      return `<span class="inline-block px-2.5 py-0.5 rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] text-[var(--md-sys-color-on-surface-variant)] text-[length:var(--md-sys-typescale-label-medium-size)] font-[var(--md-sys-typescale-label-medium-weight)]">${escapeHtml(text)}</span>`;
+    }
+
+    async function loadLatest() {
+      // Prefer newest including prerelease so testers see pre builds; badge will mark it
+      let release = null;
+      try {
+        const r = await fetch("/api/releases/latest?prerelease=1");
+        if (r.ok) release = await r.json();
+      } catch { /* ignore */ }
+
+      if (!release || release.error) {
+        if (latestMeta) latestMeta.textContent = "暂时无法获取最新版本，请前往 GitHub Releases。";
+        document.querySelectorAll(".platform-status").forEach((el) => {
+          el.textContent = "暂无数据";
+        });
+        return;
+      }
+
+      const verLabel = release.version || release.tag || release.title;
+      if (latestMeta) {
+        latestMeta.innerHTML =
+          `当前最新：<strong class="text-[var(--md-sys-color-on-surface)]">${escapeHtml(verLabel)}</strong>` +
+          (release.prerelease ? ` ${prereleaseBadge()}` : "") +
+          (release.publishedAt ? ` · ${formatDate(release.publishedAt)}` : "") +
+          (release.htmlUrl
+            ? ` · <a href="${escapeHtml(release.htmlUrl)}" target="_blank" rel="noopener noreferrer" class="text-[var(--md-sys-color-primary)] hover:underline">Release 详情</a>`
+            : "");
+      }
+
+      const byPlatform = {};
+      for (const a of release.assets || []) {
+        const p = a.platform || "other";
+        if (!byPlatform[p]) byPlatform[p] = [];
+        byPlatform[p].push(a);
+      }
+
+      document.querySelectorAll(".platform-card").forEach((card) => {
+        const id = card.getAttribute("data-platform");
+        const status = card.querySelector(".platform-status");
+        const badges = card.querySelector(".platform-badges");
+        const assetsEl = card.querySelector(".platform-assets");
+        const assets = byPlatform[id] || [];
+
+        if (!status || !badges || !assetsEl) return;
+
+        if (assets.length === 0) {
+          status.textContent = release.prerelease ? `测试版 ${verLabel}` : `最新 ${verLabel}`;
+          status.className =
+            "platform-status inline-block px-2.5 py-0.5 rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] text-[var(--md-sys-color-on-surface-variant)] text-[length:var(--md-sys-typescale-label-medium-size)] font-[var(--md-sys-typescale-label-medium-weight)]";
+          // iOS often has no artifact
+          if (id === "ios") status.textContent = "内测中";
+          assetsEl.classList.add("hidden");
+          assetsEl.innerHTML = "";
+          return;
+        }
+
+        badges.innerHTML = "";
+        if (release.prerelease) {
+          badges.insertAdjacentHTML("beforeend", prereleaseBadge());
+        }
+        badges.insertAdjacentHTML("beforeend", stableBadge(verLabel));
+
+        assetsEl.classList.remove("hidden");
+        assetsEl.innerHTML = assets
+          .map(
+            (a) =>
+              `<a href="${escapeHtml(a.url)}" class="flex items-center gap-1 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-primary)] hover:underline no-underline" download>
+                <span class="material-symbols-outlined text-base">download</span>
+                <span class="truncate">${escapeHtml(a.name)}</span>
+                <span class="text-[var(--md-sys-color-outline)] shrink-0">${formatSize(a.size)}</span>
+              </a>`,
+          )
+          .join("");
+      });
+    }
+
+    async function loadChangelog(p) {
+      if (!listEl) return;
+      listEl.innerHTML = `<p class="text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-outline)]">加载中…</p>`;
+      try {
+        const r = await fetch(`/api/releases?page=${p}&per_page=${PER_PAGE}`);
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        const data = await r.json();
+        page = data.page || p;
+        hasNext = !!data.hasNext;
+        hasPrev = !!data.hasPrev || page > 1;
+        const items = data.items || [];
+
+        if (items.length === 0) {
+          listEl.innerHTML = `<p class="text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-outline)]">暂无发布记录。请访问 <a href="https://github.com/ClosedWHU/Luotopia/releases" class="text-[var(--md-sys-color-primary)] hover:underline" target="_blank" rel="noopener noreferrer">GitHub Releases</a>。</p>`;
+        } else {
+          listEl.innerHTML = items
+            .map((rel) => {
+              const ver = rel.version || rel.tag || rel.title;
+              const assets =
+                (rel.assets || []).length > 0
+                  ? `<div class="mt-4 flex flex-wrap gap-2">${rel.assets
+                      .map(
+                        (a) =>
+                          `<a href="${escapeHtml(a.url)}" class="inline-flex items-center gap-1 px-3 py-1 rounded-[var(--md-sys-shape-corner-full)] bg-[var(--md-sys-color-surface-container)] dark:bg-[var(--md-sys-color-surface-container-dark)] text-[length:var(--md-sys-typescale-label-medium-size)] text-[var(--md-sys-color-primary)] no-underline hover:underline" download>
+                            <span class="material-symbols-outlined text-sm">download</span>${escapeHtml(a.name)}
+                          </a>`,
+                      )
+                      .join("")}</div>`
+                  : "";
+              return `<article class="rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)] p-6">
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                  <h3 class="text-[length:var(--md-sys-typescale-title-large-size)] leading-[var(--md-sys-typescale-title-large-line)] font-[var(--md-sys-typescale-title-large-weight)] text-[var(--md-sys-color-on-surface)]">${escapeHtml(ver)}</h3>
+                  ${rel.prerelease ? prereleaseBadge() : ""}
+                  <span class="text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)] ml-auto">${formatDate(rel.publishedAt)}</span>
+                </div>
+                ${rel.title && rel.title !== ver && rel.title !== rel.tag ? `<p class="text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)] mb-3">${escapeHtml(rel.title)}</p>` : ""}
+                <div class="text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)]">${formatBody(rel.body)}</div>
+                ${assets}
+                ${rel.htmlUrl ? `<p class="mt-4 text-[length:var(--md-sys-typescale-body-small-size)]"><a href="${escapeHtml(rel.htmlUrl)}" target="_blank" rel="noopener noreferrer" class="text-[var(--md-sys-color-primary)] hover:underline">在 GitHub 上查看</a></p>` : ""}
+              </article>`;
+            })
+            .join("");
+        }
+
+        if (pager && prevBtn && nextBtn && pageLabel) {
+          pager.classList.remove("hidden");
+          prevBtn.disabled = !hasPrev;
+          nextBtn.disabled = !hasNext;
+          pageLabel.textContent = `第 ${page} 页`;
+        }
+      } catch {
+        listEl.innerHTML = `<p class="text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-outline)]">加载失败（本地开发需部署 Pages Functions，或配置 GITHUB_TOKEN）。请访问 <a href="https://github.com/ClosedWHU/Luotopia/releases" class="text-[var(--md-sys-color-primary)] hover:underline" target="_blank" rel="noopener noreferrer">GitHub Releases</a>。</p>`;
+        pager?.classList.add("hidden");
+      }
+    }
+
+    prevBtn?.addEventListener("click", () => {
+      if (page > 1) loadChangelog(page - 1);
+    });
+    nextBtn?.addEventListener("click", () => {
+      if (hasNext) loadChangelog(page + 1);
+    });
+
+    loadLatest();
+    loadChangelog(1);
+  })();
+</script>
