@@ -1,46 +1,67 @@
-# Astro Starter Kit: Basics
+# Luotopia
 
-```sh
-npm create astro@latest -- --template basics
+珞珈托邦 — 武汉大学综合校园服务 App。
+
+> 本仓库为项目主页源码（Astro 构建），托管于 [ClosedWHU/Luotopia](https://github.com/ClosedWHU/Luotopia)。
+> APK 发行版通过 GitHub Releases / Pre-releases 发布，请访问 [Releases](https://github.com/ClosedWHU/Luotopia/releases) 页面下载。
+
+## 项目简介
+
+Luotopia 是一款面向武汉大学师生的综合校园服务应用，提供课表查询、校园资讯、生活服务等功能。
+
+- 主页：[https://www.whu.sb](https://www.whu.sb)
+
+## 本地开发
+
+```bash
+npm install
+npm run dev        # 启动开发服务器 localhost:4321
+npm run build      # 构建到 dist/
+npm run preview    # 本地预览构建产物
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## 部署
 
-## 🚀 Project Structure
+### Cloudflare Pages
 
-Inside of your Astro project, you'll see the following folders and files:
+1. 在 Cloudflare Dashboard 中创建 Pages 项目，连接本 GitHub 仓库
+2. 构建配置：
+   - **框架预设**: Astro
+   - **构建命令**: `npm run build`
+   - **构建输出目录**: `dist`
+3. 可选：添加环境变量 `PUBLIC_SITE_URL` 为你的自定义域名
+4. 部署后可在 Pages 设置中绑定自定义域名
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+### Cloudflare Workers (通过 `@astrojs/cloudflare`)
+
+若需 SSR / Workers 部署模式：
+
+```bash
+npx astro add cloudflare
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+然后在 `astro.config.mjs` 中配置 `output: 'server'` 与 `adapter: cloudflare()` 模块，之后：
 
-## 🧞 Commands
+```bash
+npm run build
+```
 
-All commands are run from the root of the project, from a terminal:
+将 `dist/` 或 `dist/_worker.js` 部署到 Cloudflare Workers。
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+### Vercel
 
-## 👀 Want to learn more?
+1. 在 Vercel 中导入本 GitHub 仓库
+2. 框架自动检测为 Astro，无需额外配置
+3. 默认 Framework Preset 选择 **Astro**
+4. 部署后可在 Vercel 项目设置中绑定自定义域名
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+### 手动部署（静态）
+
+```bash
+npm run build
+# 将 dist/ 目录部署到任意静态托管服务（Nginx, GitHub Pages, Netlify 等）
+```
+
+## 许可证
+
+[MIT](LICENSE)
