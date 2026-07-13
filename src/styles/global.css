@@ -174,6 +174,41 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+:root {
+  color-scheme: light;
+}
+
+:root.dark {
+  color-scheme: dark;
+  --md-sys-color-primary: #99d0ff;
+  --md-sys-color-on-primary: #003660;
+  --md-sys-color-primary-container: #004d8c;
+  --md-sys-color-on-primary-container: #cce6ff;
+  --md-sys-color-secondary: #bfc6dd;
+  --md-sys-color-on-secondary: #293041;
+  --md-sys-color-secondary-container: #3f4759;
+  --md-sys-color-on-secondary-container: #dbe2f9;
+  --md-sys-color-tertiary: #57d6f2;
+  --md-sys-color-on-tertiary: #003543;
+  --md-sys-color-tertiary-container: #004d5f;
+  --md-sys-color-on-tertiary-container: #9eeaff;
+  --md-sys-color-error: #ffb4ab;
+  --md-sys-color-on-error: #690005;
+  --md-sys-color-error-container: #93000a;
+  --md-sys-color-on-error-container: #ffdad6;
+  --md-sys-color-surface: var(--md-sys-color-surface-dark);
+  --md-sys-color-on-surface: var(--md-sys-color-on-surface-dark);
+  --md-sys-color-surface-container-low: var(--md-sys-color-surface-container-low-dark);
+  --md-sys-color-surface-container: var(--md-sys-color-surface-container-dark);
+  --md-sys-color-surface-container-high: var(--md-sys-color-surface-container-high-dark);
+  --md-sys-color-on-surface-variant: var(--md-sys-color-on-surface-variant-dark);
+  --md-sys-color-outline: var(--md-sys-color-outline-dark);
+  --md-sys-color-outline-variant: var(--md-sys-color-outline-variant-dark);
+  --md-sys-color-inverse-surface: var(--md-sys-color-inverse-surface-dark);
+  --md-sys-color-inverse-on-surface: var(--md-sys-color-inverse-on-surface-dark);
+  --md-sys-color-inverse-primary: #0068b4;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--md-sys-color-surface);
@@ -182,8 +217,8 @@ body {
 }
 
 .dark body {
-  background-color: var(--md-sys-color-surface-dark);
-  color: var(--md-sys-color-on-surface-dark);
+  background-color: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
 }
 
 .material-symbols-outlined {
