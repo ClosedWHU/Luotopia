@@ -16,6 +16,7 @@ const { title, description } = Astro.props;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
     <meta name="description" content={description ?? "Luotopia —— 整合校园服务，构建开放生态"} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description ?? "校园服务一站式平台，开放社区驱动"} />
@@ -26,6 +27,11 @@ const { title, description } = Astro.props;
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script is:inline>
+      const storedTheme = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.classList.toggle("dark", storedTheme === "dark" || (!storedTheme && prefersDark));
+    </script>
     <title>{title} | Luotopia</title>
   </head>
   <body class="min-h-screen flex flex-col">
@@ -34,11 +40,5 @@ const { title, description } = Astro.props;
       <slot />
     </main>
     <Footer />
-    <script>
-      const stored = localStorage.getItem("theme");
-      if (stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-        document.documentElement.classList.add("dark");
-      }
-    </script>
   </body>
 </html>
