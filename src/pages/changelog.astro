@@ -1,0 +1,57 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const releases = [
+  {
+    version: "v1.0.0+2",
+    date: "2026-07",
+    items: [
+      "全平台发布：Android / iOS / Windows / macOS / Linux",
+      "课程表多源导入（教务 / WakeUp / 本地编辑）",
+      "空闲教室多维查询与日程生成",
+      "图书馆座位预约全流程",
+      "运动场馆预约管理",
+      "珞珈E卡与付款码 WebView",
+      "天气多数据源（OpenMeteo / 小米 / AccuWeather）",
+      "校车实时位置与线路查询",
+      "武大校历展示",
+      "学业状态与成绩查询",
+      "AI 助手会话管理",
+      "壁纸中心（本地 / Bing 每日）",
+      "提醒与系统通知调度",
+      "桌面小组件（Android Glance）",
+    ],
+  },
+];
+---
+
+<BaseLayout title="更新日志">
+  <section class="pt-28 pb-16 px-4">
+    <div class="max-w-3xl mx-auto">
+      <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4">更新日志</h1>
+      <p class="text-gray-500 dark:text-gray-400 mb-12">Luotopia 的版本发布历史与里程碑</p>
+
+      {releases.map((release) => (
+        <div class="rounded-card bg-surface-card dark:bg-surface-card-dark p-6 mb-6">
+          <div class="flex items-baseline justify-between mb-4">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">{release.version}</h2>
+            <span class="text-xs text-gray-400 dark:text-gray-500">{release.date}</span>
+          </div>
+          <ul class="space-y-2">
+            {release.items.map((item) => (
+              <li class="flex gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <span class="text-luotopia-400 mt-0.5 shrink-0">•</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+
+      <p class="text-center text-sm text-gray-400 dark:text-gray-500 mt-12">
+        更多历史版本请查看
+        <a href="https://github.com/ClosedWHU/Luotopia/releases" target="_blank" class="text-luotopia-500 dark:text-luotopia-300 hover:underline">GitHub Releases</a>
+      </p>
+    </div>
+  </section>
+</BaseLayout>

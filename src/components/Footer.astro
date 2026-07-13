@@ -1,0 +1,43 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-luotopia-100/30 dark:border-luotopia-800/30 bg-surface dark:bg-surface-dark">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <div class="flex items-center gap-2 text-lg font-bold text-luotopia-600 dark:text-luotopia-300 mb-3">
+          <svg width="22" height="22" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+            <rect width="28" height="28" rx="8" fill="currentColor"/>
+            <path d="M7 10h3v8H7zm5.5-3h3v14h-3zm5.5 6h3v8h-3z" fill="white" opacity="0.9"/>
+          </svg>
+          Luotopia
+        </div>
+        <p class="text-sm text-gray-500 dark:text-gray-400">整合校园服务，构建开源生态。珞珈山脚下的数字家园。</p>
+      </div>
+
+      <div>
+        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">导航</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="/features" class="text-gray-500 dark:text-gray-400 hover:text-luotopia-600 dark:hover:text-luotopia-300 no-underline">功能概览</a></li>
+          <li><a href="/download" class="text-gray-500 dark:text-gray-400 hover:text-luotopia-600 dark:hover:text-luotopia-300 no-underline">下载</a></li>
+          <li><a href="/community" class="text-gray-500 dark:text-gray-400 hover:text-luotopia-600 dark:hover:text-luotopia-300 no-underline">社区</a></li>
+          <li><a href="/changelog" class="text-gray-500 dark:text-gray-400 hover:text-luotopia-600 dark:hover:text-luotopia-300 no-underline">更新日志</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">相关资源</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="https://docs.whu.sb" class="text-gray-500 dark:text-gray-400 hover:text-luotopia-600 dark:hover:text-luotopia-300 no-underline" target="_blank">开发者文档</a></li>
+          <li><a href="https://github.com/ClosedWHU" class="text-gray-500 dark:text-gray-400 hover:text-luotopia-600 dark:hover:text-luotopia-300 no-underline" target="_blank">GitHub 组织</a></li>
+          <li><a href="https://github.com/ClosedWHU/Luotopia" class="text-gray-500 dark:text-gray-400 hover:text-luotopia-600 dark:hover:text-luotopia-300 no-underline" target="_blank">项目仓库</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-8 pt-6 border-t border-luotopia-100/20 dark:border-luotopia-800/20 text-center text-xs text-gray-400 dark:text-gray-500">
+      &copy; {year} ClosedWHU. Built with Astro.
+    </div>
+  </div>
+</footer>

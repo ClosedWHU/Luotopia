@@ -1,0 +1,18 @@
+---
+import { friendLinkCatalog } from "../data/friend-links";
+const links = friendLinkCatalog.items;
+---
+
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+  {links.map((link) => (
+    <a
+      href={(() => { const a = link.action; return a.type === "openUrl" && a.url ? a.url : "#"; })()}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-surface-hover dark:hover:bg-surface-hover-dark transition-colors no-underline"
+    >
+      {link.image && <img src={link.image.url} alt={link.title} class="w-12 h-12 rounded-full object-cover" loading="lazy" />}
+      <span class="text-xs font-medium text-gray-600 dark:text-gray-300">{link.title}</span>
+    </a>
+  ))}
+</div>

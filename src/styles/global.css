@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@theme {
+  --color-luotopia-50: #eaf5ff;
+  --color-luotopia-100: #d0e8ff;
+  --color-luotopia-200: #aad1ff;
+  --color-luotopia-300: #73b2ff;
+  --color-luotopia-400: #3b8aff;
+  --color-luotopia-500: #005bac;
+  --color-luotopia-600: #004a8f;
+  --color-luotopia-700: #003a72;
+  --color-luotopia-800: #002b55;
+  --color-luotopia-900: #001c38;
+
+  --color-surface: oklch(98% 0.003 260);
+  --color-surface-card: oklch(96% 0.006 260);
+  --color-surface-hover: oklch(94% 0.008 260);
+
+  --color-surface-dark: oklch(14% 0.005 260);
+  --color-surface-card-dark: oklch(18% 0.008 260);
+  --color-surface-hover-dark: oklch(22% 0.01 260);
+
+  --font-family-sans: "Noto Sans SC", "Noto Sans", system-ui, sans-serif;
+
+  --radius-card: 16px;
+  --radius-sm: 8px;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+body {
+  font-family: var(--font-family-sans);
+  background-color: var(--color-surface);
+  color: oklch(20% 0.01 260);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.dark body {
+  background-color: var(--color-surface-dark);
+  color: oklch(90% 0.005 260);
+}
+
+.glass {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background-color: oklch(98% 0.003 260 / 0.72);
+}
+
+.dark .glass {
+  background-color: oklch(14% 0.005 260 / 0.72);
+}

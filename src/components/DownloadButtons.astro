@@ -1,0 +1,24 @@
+---
+export interface Props {
+  variant?: "hero" | "section";
+}
+
+const { variant = "section" } = Astro.props;
+const large = variant === "hero";
+---
+
+<div class="flex flex-wrap gap-3 justify-center">
+  <a
+    href="/download"
+    class="inline-flex items-center gap-2 rounded-lg bg-luotopia-500 text-white hover:bg-luotopia-600 transition-colors no-underline font-medium {large ? 'px-6 py-3 text-base' : 'px-5 py-2.5 text-sm'}"
+  >
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    下载 {large ? "Luotopia" : ""}
+  </a>
+  <a
+    href="/features"
+    class="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors no-underline font-medium {large ? 'px-6 py-3 text-base' : 'px-5 py-2.5 text-sm'}"
+  >
+    了解功能
+  </a>
+</div>
