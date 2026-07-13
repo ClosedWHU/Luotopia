@@ -8,10 +8,10 @@ const links = [
 ];
 ---
 
-<nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-luotopia-100/30 dark:border-luotopia-800/30">
+<nav class="fixed top-0 left-0 right-0 z-50 bg-[var(--md-sys-color-surface)] dark:bg-[var(--md-sys-color-surface-dark)] shadow-[var(--md-sys-elevation-level1)] transition-shadow">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-    <a href="/" class="flex items-center gap-2 text-xl font-bold text-luotopia-600 dark:text-luotopia-300 no-underline">
-      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+    <a href="/" class="flex items-center gap-2 text-[var(--md-sys-typescale-title-large-size)] font-bold text-[var(--md-sys-color-primary)] no-underline state-layer rounded-[var(--md-sys-shape-corner-small)] px-2 py-1">
+      <svg width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true">
         <rect width="28" height="28" rx="8" fill="currentColor"/>
         <path d="M7 10h3v8H7zm5.5-3h3v14h-3zm5.5 6h3v8h-3z" fill="white" opacity="0.9"/>
       </svg>
@@ -23,29 +23,29 @@ const links = [
         links.map((link) => (
           <a
             href={link.href}
-            class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-luotopia-600 dark:hover:text-luotopia-300 hover:bg-luotopia-50 dark:hover:bg-luotopia-900/30 transition-colors no-underline"
+            class="state-layer rounded-[var(--md-sys-shape-corner-small)] px-3 py-2 text-[var(--md-sys-typescale-body-large-size)] leading-[var(--md-sys-typescale-body-large-line)] text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] no-underline transition-colors"
           >
             {link.label}
           </a>
         ))
       }
-      <button id="theme-toggle" class="ml-2 p-2 rounded-lg text-gray-500 hover:text-luotopia-600 dark:hover:text-luotopia-300 hover:bg-luotopia-50 dark:hover:bg-luotopia-900/30 transition-colors cursor-pointer" aria-label="切换深色模式">
+      <button id="theme-toggle" class="state-layer rounded-[var(--md-sys-shape-corner-small)] p-2 text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] transition-colors cursor-pointer" aria-label="切换深色模式">
         <svg class="dark:hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        <svg class="hidden dark:block" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="hidden dark:block" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42"/></svg>
       </button>
     </div>
 
-    <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg text-gray-500 hover:text-luotopia-600 transition-colors cursor-pointer" aria-label="菜单">
+    <button id="mobile-menu-btn" class="md:hidden state-layer rounded-[var(--md-sys-shape-corner-small)] p-2 text-[var(--md-sys-color-on-surface-variant)] cursor-pointer" aria-label="菜单">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
     </button>
   </div>
 
-  <div id="mobile-menu" class="hidden md:hidden border-t border-luotopia-100/30 dark:border-luotopia-800/30 px-4 py-3">
+  <div id="mobile-menu" class="hidden md:hidden border-t border-[var(--md-sys-color-outline-variant)] px-4 py-3">
     {
       links.map((link) => (
         <a
           href={link.href}
-          class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-luotopia-600 dark:hover:text-luotopia-300 hover:bg-luotopia-50 dark:hover:bg-luotopia-900/30 transition-colors no-underline"
+          class="block state-layer rounded-[var(--md-sys-shape-corner-small)] px-3 py-2 text-[var(--md-sys-typescale-body-large-size)] text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] no-underline transition-colors"
         >
           {link.label}
         </a>

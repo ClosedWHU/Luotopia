@@ -6,27 +6,29 @@ import FriendLinks from "../components/FriendLinks.astro";
 <BaseLayout title="社区">
   <section class="pt-28 pb-16 px-4">
     <div class="max-w-4xl mx-auto">
-      <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4">社区</h1>
-      <p class="text-gray-500 dark:text-gray-400 mb-12">加入我们，一起构建更好的校园数字生态</p>
+      <h1 class="text-[var(--md-sys-typescale-headline-medium-size)] leading-[var(--md-sys-typescale-headline-medium-line)] font-[var(--md-sys-typescale-headline-medium-weight)] text-[var(--md-sys-color-on-surface)] mb-2">社区</h1>
+      <p class="text-[var(--md-sys-typescale-body-large-size)] text-[var(--md-sys-color-on-surface-variant)] mb-12">加入我们，一起构建更好的校园数字生态</p>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
-        <div class="rounded-card bg-surface-card dark:bg-surface-card-dark p-6">
-          <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">💬 QQ 群</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">加入 Luotopia 用户交流群，获取最新动态和帮助。</p>
-          <p class="text-sm font-medium text-luotopia-500 dark:text-luotopia-300">群号：请关注 GitHub 主页</p>
+        <div class="rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)] p-5">
+          <span class="material-symbols-outlined text-[var(--md-sys-color-primary)] text-2xl mb-2 block">forum</span>
+          <h3 class="text-[var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)] mb-1">QQ 群</h3>
+          <p class="text-[var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)] mb-3">加入 Luotopia 用户交流群，获取最新动态和帮助。</p>
+          <p class="text-[var(--md-sys-typescale-body-small-size)] font-[var(--md-sys-typescale-label-large-weight)] text-[var(--md-sys-color-primary)]">群号：请关注 GitHub 主页</p>
         </div>
-        <div class="rounded-card bg-surface-card dark:bg-surface-card-dark p-6">
-          <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">🐙 GitHub</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">代码开源，欢迎 Star、Issue 与 Pull Request。</p>
-          <a href="https://github.com/ClosedWHU" target="_blank" class="inline-flex items-center gap-2 text-sm font-medium text-luotopia-500 dark:text-luotopia-300 hover:underline">
+        <div class="rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)] p-5">
+          <span class="material-symbols-outlined text-[var(--md-sys-color-primary)] text-2xl mb-2 block">code</span>
+          <h3 class="text-[var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)] mb-1">GitHub</h3>
+          <p class="text-[var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)] mb-3">代码开源，欢迎 Star、Issue 与 Pull Request。</p>
+          <a href="https://github.com/ClosedWHU" target="_blank" class="inline-flex items-center gap-1 text-[var(--md-sys-typescale-body-medium-size)] font-[var(--md-sys-typescale-label-large-weight)] text-[var(--md-sys-color-primary)] hover:underline">
             github.com/ClosedWHU
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
           </a>
         </div>
       </div>
 
-      <div class="rounded-card bg-surface-card dark:bg-surface-card-dark p-6">
-        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-6">友情链接</h2>
+      <div class="rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)] p-6">
+        <h2 class="text-[var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)] mb-6">友情链接</h2>
         <FriendLinks />
       </div>
     </div>

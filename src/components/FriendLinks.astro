@@ -9,10 +9,10 @@ const links = friendLinkCatalog.items;
       href={(() => { const a = link.action; return a.type === "openUrl" && a.url ? a.url : "#"; })()}
       target="_blank"
       rel="noopener noreferrer"
-      class="flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-surface-hover dark:hover:bg-surface-hover-dark transition-colors no-underline"
+      class="flex flex-col items-center gap-2 p-4 rounded-[var(--md-sys-shape-corner-small)] hover:bg-[var(--md-sys-color-surface-container-high)] dark:hover:bg-[var(--md-sys-color-surface-container-high-dark)] transition-colors no-underline"
     >
       {link.image && <img src={link.image.url} alt={link.title} class="w-12 h-12 rounded-full object-cover" loading="lazy" />}
-      <span class="text-xs font-medium text-gray-600 dark:text-gray-300">{link.title}</span>
+      <span class="text-[var(--md-sys-typescale-body-small-size)] font-[var(--md-sys-typescale-label-large-weight)] text-[var(--md-sys-color-on-surface-variant)]">{link.title}</span>
     </a>
   ))}
 </div>

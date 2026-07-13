@@ -1,37 +1,37 @@
 ---
 const slides = [
-  { label: "课程表", color: "bg-luotopia-100 dark:bg-luotopia-900/50" },
-  { label: "校园服务", color: "bg-luotopia-200 dark:bg-luotopia-800/50" },
-  { label: "AI 助手", color: "bg-luotopia-300 dark:bg-luotopia-700/50" },
-  { label: "天气", color: "bg-luotopia-100 dark:bg-luotopia-900/50" },
+  { label: "课程表" },
+  { label: "校园服务" },
+  { label: "AI 助手" },
+  { label: "天气" },
 ];
 ---
 
-<div class="relative overflow-hidden rounded-card bg-surface-card dark:bg-surface-card-dark">
+<div class="relative overflow-hidden rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)]">
   <div id="carousel-track" class="flex transition-transform duration-500 ease-out">
     {slides.map((slide, i) => (
-      <div class="min-w-full flex items-center justify-center {slide.color} aspect-[9/16] max-h-[500px]">
+      <div class="min-w-full flex items-center justify-center aspect-[9/16] max-h-[500px] bg-[var(--md-sys-color-surface-container)] dark:bg-[var(--md-sys-color-surface-container-dark)]">
         <div class="text-center p-8">
-          <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/30 dark:bg-white/10 flex items-center justify-center">
-            <svg class="w-8 h-8 text-luotopia-600 dark:text-luotopia-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>
+          <div class="w-16 h-16 mx-auto mb-4 rounded-[var(--md-sys-shape-corner-large)] bg-[var(--md-sys-color-primary-container)] flex items-center justify-center">
+            <svg class="w-8 h-8 text-[var(--md-sys-color-primary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>
           </div>
-          <p class="text-lg font-medium text-luotopia-700 dark:text-luotopia-200">{slide.label}</p>
-          <p class="text-sm text-luotopia-500 dark:text-luotopia-400 mt-1">截图待添加</p>
+          <p class="text-[var(--md-sys-typescale-title-medium-size)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)]">{slide.label}</p>
+          <p class="text-[var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-on-surface-variant)] mt-1">截图待添加</p>
         </div>
       </div>
     ))}
   </div>
 
-  <button id="carousel-prev" class="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-pointer shadow-sm" aria-label="上一张">
+  <button id="carousel-prev" class="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] transition-colors cursor-pointer shadow-[var(--md-sys-elevation-level2)]" aria-label="上一张">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
   </button>
-  <button id="carousel-next" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-pointer shadow-sm" aria-label="下一张">
+  <button id="carousel-next" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] transition-colors cursor-pointer shadow-[var(--md-sys-elevation-level2)]" aria-label="下一张">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
   </button>
 
   <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
     {slides.map((_, i) => (
-      <button class="carousel-dot w-2 h-2 rounded-full bg-luotopia-300 dark:bg-luotopia-600 transition-all cursor-pointer data-[active=true]:w-4 data-[active=true]:bg-luotopia-500 dark:data-[active=true]:bg-luotopia-300" data-index={i} aria-label={`第 ${i + 1} 张截图`}></button>
+      <button class="carousel-dot w-2 h-2 rounded-full bg-[var(--md-sys-color-outline)] transition-all cursor-pointer data-[active=true]:w-4 data-[active=true]:bg-[var(--md-sys-color-primary)]" data-index={i} aria-label={`第 ${i + 1} 张截图`}></button>
     ))}
   </div>
 </div>

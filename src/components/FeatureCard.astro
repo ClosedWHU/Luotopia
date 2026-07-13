@@ -8,8 +8,8 @@ export interface Props {
 const { icon, title, description } = Astro.props;
 ---
 
-<div class="rounded-card bg-surface-card dark:bg-surface-card-dark p-6 hover:bg-surface-hover dark:hover:bg-surface-hover-dark transition-colors">
-  <div class="text-2xl mb-3 text-luotopia-500 dark:text-luotopia-300">{icon}</div>
-  <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">{title}</h3>
-  <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{description}</p>
+<div class="state-layer rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)] p-5 transition-shadow hover:shadow-[var(--md-sys-elevation-level2)] shadow-[var(--md-sys-elevation-level0)]">
+  <span class="material-symbols-outlined text-[var(--md-sys-color-primary)] text-2xl mb-3 block">{icon}</span>
+  <h3 class="text-[var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)] mb-1.5">{title}</h3>
+  <p class="text-[var(--md-sys-typescale-body-medium-size)] leading-[var(--md-sys-typescale-body-medium-line)] text-[var(--md-sys-color-on-surface-variant)]">{description}</p>
 </div>

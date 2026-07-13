@@ -4,35 +4,35 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 const platforms = [
   {
     name: "Android",
-    icon: "🤖",
+    icon: "smartphone",
     desc: "APK 直接安装，支持侧载",
     status: "稳定版 v1.0.0+2",
     note: "Android 8+ 兼容",
   },
   {
     name: "iOS",
-    icon: "🍎",
+    icon: "tablet_mac",
     desc: "TestFlight / 侧载安装",
     status: "内测中",
     note: "需联系社区获取邀请",
   },
   {
     name: "Windows",
-    icon: "🪟",
+    icon: "desktop_windows",
     desc: "Windows 桌面客户端",
     status: "稳定版 v1.0.0+2",
     note: "Windows 10+ 兼容",
   },
   {
     name: "macOS",
-    icon: "💻",
+    icon: "laptop",
     desc: "macOS 原生体验",
     status: "开发中",
     note: "敬请期待",
   },
   {
     name: "Linux",
-    icon: "🐧",
+    icon: "terminal",
     desc: "Linux 桌面客户端",
     status: "开发中",
     note: "敬请期待",
@@ -43,45 +43,45 @@ const platforms = [
 <BaseLayout title="下载">
   <section class="pt-28 pb-16 px-4">
     <div class="max-w-4xl mx-auto">
-      <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4">下载 Luotopia</h1>
-      <p class="text-gray-500 dark:text-gray-400 mb-12">选择你的平台，获取最新版本</p>
+      <h1 class="text-[var(--md-sys-typescale-headline-medium-size)] leading-[var(--md-sys-typescale-headline-medium-line)] font-[var(--md-sys-typescale-headline-medium-weight)] text-[var(--md-sys-color-on-surface)] mb-2">下载 Luotopia</h1>
+      <p class="text-[var(--md-sys-typescale-body-large-size)] text-[var(--md-sys-color-on-surface-variant)] mb-12">选择你的平台，获取最新版本</p>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {platforms.map((p) => (
-          <div class="rounded-card bg-surface-card dark:bg-surface-card-dark p-6 flex flex-col">
-            <div class="text-3xl mb-3">{p.icon}</div>
-            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{p.name}</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{p.desc}</p>
-            <div class="mt-4 text-xs">
-              <span class="inline-block px-2 py-1 rounded bg-luotopia-100 dark:bg-luotopia-900/40 text-luotopia-700 dark:text-luotopia-300 font-medium">{p.status}</span>
+          <div class="rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)] p-5 flex flex-col">
+            <span class="material-symbols-outlined text-[var(--md-sys-color-primary)] text-3xl mb-3">{p.icon}</span>
+            <h3 class="text-[var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)]">{p.name}</h3>
+            <p class="text-[var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)] mt-1">{p.desc}</p>
+            <div class="mt-4">
+              <span class="inline-block px-2.5 py-0.5 rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] text-[var(--md-sys-typescale-label-medium-size)] font-[var(--md-sys-typescale-label-medium-weight)]">{p.status}</span>
             </div>
-            <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{p.note}</p>
+            <p class="mt-2 text-[var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">{p.note}</p>
           </div>
         ))}
       </div>
 
-      <div class="mt-16 rounded-card bg-surface-card dark:bg-surface-card-dark p-6">
-        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">安装说明</h2>
-        <div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-400 space-y-4">
+      <div class="mt-16 rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)] p-6">
+        <h2 class="text-[var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)] mb-4">安装说明</h2>
+        <div class="space-y-4 text-[var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)]">
           <div>
-            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">Android</h4>
-            <p class="text-xs">下载 APK 后直接安装。如提示"未知来源"，请在系统设置中允许安装。我们建议从 GitHub Releases 页面获取最新版本以确保完整性。</p>
+            <h4 class="text-[var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">Android</h4>
+            <p>下载 APK 后直接安装。如提示"未知来源"，请在系统设置中允许安装。我们建议从 GitHub Releases 页面获取最新版本以确保完整性。</p>
           </div>
           <div>
-            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">iOS</h4>
-            <p class="text-xs">iOS 版本通过 TestFlight 分发。加入社区 QQ 群或关注 GitHub 动态获取 TestFlight 邀请链接。由于 Apple 政策限制，非越狱设备需通过 TestFlight 安装。</p>
+            <h4 class="text-[var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">iOS</h4>
+            <p>iOS 版本通过 TestFlight 分发。加入社区 QQ 群或关注 GitHub 动态获取 TestFlight 邀请链接。由于 Apple 政策限制，非越狱设备需通过 TestFlight 安装。</p>
           </div>
           <div>
-            <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">Windows</h4>
-            <p class="text-xs">Windows 版本为 MSIX 安装包或便携版（即将提供）。需 Windows 10 1809 及以上版本。</p>
+            <h4 class="text-[var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">Windows</h4>
+            <p>Windows 版本为 MSIX 安装包或便携版（即将提供）。需 Windows 10 1809 及以上版本。</p>
           </div>
         </div>
       </div>
 
       <div class="mt-8 text-center">
-        <p class="text-sm text-gray-400 dark:text-gray-500">
+        <p class="text-[var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">
           你也可以直接访问
-          <a href="https://github.com/ClosedWHU/Luotopia/releases" target="_blank" class="text-luotopia-500 dark:text-luotopia-300 hover:underline">GitHub Releases</a>
+          <a href="https://github.com/ClosedWHU/Luotopia/releases" target="_blank" class="text-[var(--md-sys-color-primary)] hover:underline">GitHub Releases</a>
           查看所有历史版本和发布说明。
         </p>
       </div>

@@ -5,37 +5,37 @@ import ScreenshotCarousel from "../components/ScreenshotCarousel.astro";
 import DownloadButtons from "../components/DownloadButtons.astro";
 
 const features = [
-  { icon: "📅", title: "课程表", description: "多源导入（教务/WakeUp/本地），多课表管理，周月视图随心切换。" },
-  { icon: "🏫", title: "空闲教室", description: "按日期、校区、楼栋、节次查询空闲教室，一键生成日程事项。" },
-  { icon: "📚", title: "图书馆座位预约", description: "空间/日期/时段/座位灵活查询，创建与取消预约一站式管理。" },
-  { icon: "🏸", title: "运动场馆预约", description: "场馆、项目、时段自由选择，预约/取消/订单管理尽在掌握。" },
-  { icon: "💳", title: "珞珈E卡", description: "校园卡余额、流水查询与付款码，WebView 无缝对接。" },
-  { icon: "🌤️", title: "天气", description: "直连多数据源，逐小时预报、AQI、预警信息，稳定可靠。" },
-  { icon: "🚌", title: "校车", description: "实时校车位置追踪，线路查询，出行不再久等。" },
-  { icon: "🤖", title: "AI 助手", description: "智能会话管理，事项查询与创建，让校园生活更高效。" },
+  { icon: "calendar_month", title: "课程表", description: "多源导入（教务/WakeUp/本地），多课表管理，周月视图随心切换。" },
+  { icon: "school", title: "空闲教室", description: "按日期、校区、楼栋、节次查询空闲教室，一键生成日程事项。" },
+  { icon: "library_books", title: "图书馆座位预约", description: "空间/日期/时段/座位灵活查询，创建与取消预约一站式管理。" },
+  { icon: "sports_tennis", title: "运动场馆预约", description: "场馆、项目、时段自由选择，预约/取消/订单管理尽在掌握。" },
+  { icon: "credit_card", title: "珞珈E卡", description: "校园卡余额、流水查询与付款码，WebView 无缝对接。" },
+  { icon: "partly_cloudy_day", title: "天气", description: "直连多数据源，逐小时预报、AQI、预警信息，稳定可靠。" },
+  { icon: "directions_bus", title: "校车", description: "实时校车位置追踪，线路查询，出行不再久等。" },
+  { icon: "smart_toy", title: "AI 助手", description: "智能会话管理，事项查询与创建，让校园生活更高效。" },
 ];
 ---
 
 <BaseLayout title="首页">
   <section class="pt-32 pb-20 px-4 text-center">
     <div class="max-w-3xl mx-auto">
-      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-gray-50 leading-tight">
+      <h1 class="text-[var(--md-sys-typescale-display-small-size)] sm:text-[var(--md-sys-typescale-display-medium-size)] lg:text-[var(--md-sys-typescale-display-large-size)] leading-[var(--md-sys-typescale-display-small-line)] sm:leading-[var(--md-sys-typescale-display-medium-line)] lg:leading-[var(--md-sys-typescale-display-large-line)] font-[var(--md-sys-typescale-display-large-weight)] text-[var(--md-sys-color-on-surface)]">
         Luotopia
-        <span class="block text-luotopia-500 dark:text-luotopia-300 mt-2">珞课王国</span>
+        <span class="block text-[var(--md-sys-color-primary)] mt-2">珞课王国</span>
       </h1>
-      <p class="mt-6 text-lg sm:text-xl text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
+      <p class="mt-6 text-[var(--md-sys-typescale-body-large-size)] leading-[var(--md-sys-typescale-body-large-line)] text-[var(--md-sys-color-on-surface-variant)] max-w-xl mx-auto">
         整合校园服务，构建开源生态。武汉大学一站式数字校园平台。
       </p>
       <div class="mt-10">
         <DownloadButtons variant="hero" />
       </div>
-      <p class="mt-4 text-xs text-gray-400 dark:text-gray-500">支持 Android / iOS / Windows / macOS / Linux</p>
+      <p class="mt-4 text-[var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">支持 Android / iOS / Windows / macOS / Linux</p>
     </div>
   </section>
 
-  <section class="py-20 px-4 bg-surface-card dark:bg-surface-card-dark">
+  <section class="py-20 px-4 bg-[var(--md-sys-color-surface-container)] dark:bg-[var(--md-sys-color-surface-container-dark)]">
     <div class="max-w-6xl mx-auto">
-      <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-800 dark:text-gray-100 mb-12">核心功能</h2>
+      <h2 class="text-[var(--md-sys-typescale-headline-small-size)] leading-[var(--md-sys-typescale-headline-small-line)] font-[var(--md-sys-typescale-headline-small-weight)] text-center text-[var(--md-sys-color-on-surface)] mb-12">核心功能</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {features.map((f) => <FeatureCard {...f} />)}
       </div>
@@ -44,15 +44,15 @@ const features = [
 
   <section class="py-20 px-4">
     <div class="max-w-xs mx-auto">
-      <h2 class="text-2xl sm:text-3xl font-bold text-center text-gray-800 dark:text-gray-100 mb-8">应用预览</h2>
+      <h2 class="text-[var(--md-sys-typescale-headline-small-size)] leading-[var(--md-sys-typescale-headline-small-line)] font-[var(--md-sys-typescale-headline-small-weight)] text-center text-[var(--md-sys-color-on-surface)] mb-8">应用预览</h2>
       <ScreenshotCarousel />
     </div>
   </section>
 
-  <section class="py-20 px-4 bg-luotopia-50 dark:bg-luotopia-900/20 text-center">
+  <section class="py-20 px-4 bg-[var(--md-sys-color-primary-container)] dark:bg-[var(--md-sys-color-primary-container)]/10 text-center">
     <div class="max-w-xl mx-auto">
-      <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4">立即体验</h2>
-      <p class="text-gray-500 dark:text-gray-400 mb-8">免费、开源、纯净，让校园生活更简单。</p>
+      <h2 class="text-[var(--md-sys-typescale-headline-small-size)] leading-[var(--md-sys-typescale-headline-small-line)] font-[var(--md-sys-typescale-headline-small-weight)] text-[var(--md-sys-color-on-primary-container)] mb-4">立即体验</h2>
+      <p class="text-[var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)] mb-8">免费、开源、纯净，让校园生活更简单。</p>
       <DownloadButtons />
     </div>
   </section>
