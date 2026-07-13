@@ -26,6 +26,9 @@ pnpm-debug.log*
 # vscode
 .vscode/
 
+# wrangler
+.wrangler/
+
 # claude agent config
 AGENTS.md
 CLAUDE.md
