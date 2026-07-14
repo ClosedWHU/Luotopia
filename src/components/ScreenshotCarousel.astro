@@ -10,7 +10,7 @@ const slides = [
 ];
 ---
 
-<div class="relative overflow-hidden rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)]">
+<div class="relative overflow-hidden rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] pb-8 dark:bg-[var(--md-sys-color-surface-container-low-dark)]">
   <div id="carousel-track" class="flex transition-transform duration-500 ease-out">
     {slides.map((slide, i) => (
       <div class="shrink-0 w-full sm:w-1/2 lg:w-1/4 p-1.5">
@@ -22,7 +22,7 @@ const slides = [
             height="780"
             loading={i < 2 ? "eager" : "lazy"}
             decoding="async"
-            class="w-full h-auto object-cover object-top aspect-[9/16] max-h-[500px]"
+            class="w-full h-auto object-cover object-center aspect-[9/16] max-h-[500px]"
           />
           <figcaption class="px-3 py-2 text-center text-[length:var(--md-sys-typescale-label-large-size)] font-[var(--md-sys-typescale-label-large-weight)] text-[var(--md-sys-color-on-surface-variant)]">
             {slide.label}
