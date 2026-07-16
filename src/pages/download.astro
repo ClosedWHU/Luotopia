@@ -290,6 +290,70 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
       }
     }
 
+    /** Enrich iOS card with App Store / Connect lookup (version / release date). */
+    async function loadAppStoreIos() {
+      const card = document.querySelector('.platform-card[data-platform="ios"]');
+      if (!card) return;
+
+      let info = null;
+      try {
+        const r = await fetch("/api/appstore/latest");
+        if (r.ok) info = await r.json();
+      } catch {
+        /* ignore */
+      }
+
+      if (!info || info.error || !info.version) return;
+
+      const badges = card.querySelector(".platform-badges");
+      const assetsEl = card.querySelector(".platform-assets");
+      const noteEl = card.querySelector("p.mt-2");
+      if (!badges || !assetsEl) return;
+
+      const isTf = info.channel === "testflight" || info.source === "appstoreconnect";
+      const channelLabel = isTf ? "TestFlight" : "App Store";
+
+      badges.innerHTML = "";
+      if (isTf) {
+        badges.insertAdjacentHTML("beforeend", prereleaseBadge().replace("测试版", "TestFlight"));
+      }
+      badges.insertAdjacentHTML("beforeend", stableBadge(info.version));
+      badges.insertAdjacentHTML(
+        "beforeend",
+        mutedBadge(info.publishedAt ? formatDate(info.publishedAt) : channelLabel),
+      );
+
+      const externalUrl = card.getAttribute("data-external-url") || "";
+      const externalLabel = card.getAttribute("data-external-label") || "加入 TestFlight";
+      const storeUrl = info.storeUrl || "";
+      const links = [];
+      if (storeUrl && !isTf) {
+        links.push(
+          `<a href="${escapeHtml(storeUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-primary)] hover:underline no-underline">
+            <span class="material-symbols-outlined text-base">storefront</span>
+            <span>App Store</span>
+          </a>`,
+        );
+      }
+      if (externalUrl) {
+        links.push(
+          `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-primary)] hover:underline no-underline">
+            <span class="material-symbols-outlined text-base">open_in_new</span>
+            <span>${escapeHtml(externalLabel)}</span>
+          </a>`,
+        );
+      }
+      assetsEl.classList.remove("hidden");
+      assetsEl.innerHTML = links.join("");
+
+      if (noteEl) {
+        noteEl.textContent =
+          `${channelLabel} ${info.version}` +
+          (info.publishedAt ? ` · ${formatDate(info.publishedAt)}` : "") +
+          (info.minOsVersion ? ` · 需 iOS ${info.minOsVersion}+` : "");
+      }
+    }
+
     async function loadLatest() {
       // Prefer newest including prerelease so testers see pre builds; badge will mark it
       let release = null;
@@ -432,7 +496,7 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
       if (hasNext) loadChangelog(page + 1);
     });
 
-    loadLatest();
+    loadLatest().then(() => loadAppStoreIos());
     loadChangelog(1);
   })();
 </script>
