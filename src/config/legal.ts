@@ -180,7 +180,7 @@ export const legalDocuments: LegalDocument[] = [
           {
             heading: "2.9 日志与调试信息",
             body: [
-              "开发/调试构建中可能输出网络状态、错误信息等日志（例如 `debugPrint`）。我们未集成常见的第三方商业统计分析或崩溃收集 SDK（如 Firebase Analytics、Sentry 等）。服务端若启用审计日志、限流或人机验证（如 Cloudflare Turnstile），仅用于安全与运维，不用于出售用户画像。",
+              "开发/调试构建中可能输出网络状态、错误信息等日志（例如 `debugPrint`）。我们未集成常见的第三方商业统计分析或崩溃收集 SDK（如 Firebase Analytics、Sentry 等）。服务端若启用审计日志、限流或人机验证（如 Altcha），仅用于安全与运维，不用于出售用户画像。",
             ],
           },
         ],
@@ -214,7 +214,7 @@ export const legalDocuments: LegalDocument[] = [
           "天气与地理服务：Open-Meteo、小米天气、AccuWeather、OpenStreetMap Nominatim、IP 定位服务（如 `api.ip.sb`、`ip-api.com`）等，仅在功能需要时发送位置或查询参数。",
           "壁纸服务：必应每日壁纸可能请求 Bing 相关接口并缓存图片至本机。",
           "AI 服务商：由您选择的大模型 API 接收对话与日程摘要上下文。",
-          "基础设施与内容分发：官网、静态资源、友情链接配置等可能经 Cloudflare 等平台分发；服务端可能使用 Turnstile 等人机验证。",
+          "基础设施与内容分发：官网、静态资源、友情链接配置等可能经 Cloudflare 等平台分发；服务端可能使用 Altcha 等人机验证。",
           "开源与协作链接：访问 GitHub、Weblate 等由您主动触发，适用对应平台政策。",
           "除实现功能所必要、获得您的同意或法律要求外，我们不会与无关第三方共享可用于识别您身份的个人信息。",
         ],
@@ -314,7 +314,7 @@ export const legalDocuments: LegalDocument[] = [
             heading: "2.4 官网、静态资源与安全验证",
             body: [
               "Luotopia 官网与部分静态资源（如 `whu.sb` 站点、友情链接 JSON、法律文案、应用截图等）可能托管于 Cloudflare Pages 或经 Cloudflare 网络分发，访问日志与请求可能经过境外节点。",
-              "服务端若启用 Cloudflare Turnstile 等人机验证，验证过程可能涉及 Cloudflare 境外基础设施。",
+              "服务端使用 Altcha 人机验证，其工作量证明在客户端完成并由服务端验证。",
             ],
           },
           {

@@ -32,6 +32,25 @@ const { title, description } = Astro.props;
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       document.documentElement.classList.toggle("dark", storedTheme === "dark" || (!storedTheme && prefersDark));
     </script>
+    <script is:inline>
+      // Drop legacy Service Workers / caches from the previous site on this domain
+      (function () {
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function (regs) {
+            regs.forEach(function (reg) {
+              reg.unregister();
+            });
+          });
+        }
+        if ("caches" in window) {
+          caches.keys().then(function (keys) {
+            keys.forEach(function (key) {
+              caches.delete(key);
+            });
+          });
+        }
+      })();
+    </script>
     <title>{title} | Luotopia</title>
   </head>
   <body class="min-h-screen flex flex-col">
