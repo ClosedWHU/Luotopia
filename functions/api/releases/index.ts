@@ -4,7 +4,7 @@
  * Env: REPO (default ClosedWHU/Luotopia), GITHUB_TOKEN (optional)
  */
 
-import { ghFetch, json, mapRelease, type GhRelease } from "../../lib/github-releases";
+import { apiCacheHeaders, ghFetch, json, mapRelease, type GhRelease } from "../../lib/github-releases";
 
 export async function onRequestGet(context: {
   request: Request;
@@ -30,6 +30,7 @@ export async function onRequestGet(context: {
       return json(
         { error: "github_error", status: res.status, message: text.slice(0, 200) },
         res.status === 403 ? 502 : res.status,
+        { "Cache-Control": "public, s-maxage=30" },
       );
     }
 
@@ -50,14 +51,13 @@ export async function onRequestGet(context: {
         items: items.map(mapRelease),
       },
       200,
-      {
-        "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600",
-      },
+      apiCacheHeaders(),
     );
   } catch (e) {
     return json(
       { error: "fetch_failed", message: e instanceof Error ? e.message : String(e) },
       502,
+      { "Cache-Control": "no-store" },
     );
   }
 }
