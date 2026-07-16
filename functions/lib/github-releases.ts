@@ -13,6 +13,26 @@ export type ArchId =
   | "universal"
   | "unknown";
 
+/** Package format (extension / kind) for display. */
+export type FormatId =
+  | "apk"
+  | "aab"
+  | "ipa"
+  | "msix"
+  | "msi"
+  | "exe"
+  | "zip"
+  | "dmg"
+  | "pkg"
+  | "appimage"
+  | "deb"
+  | "rpm"
+  | "flatpak"
+  | "tar"
+  | "scoop"
+  | "winget"
+  | "other";
+
 export interface GhAsset {
   id: number;
   name: string;
@@ -30,16 +50,49 @@ const RECOMMENDED_ARCH: Partial<Record<PlatformId, ArchId>> = {
   linux: "amd64",
 };
 
+/** Preferred install format when multiple exist for the same arch. */
+const RECOMMENDED_FORMAT: Partial<Record<PlatformId, FormatId>> = {
+  android: "apk",
+  windows: "zip",
+  linux: "tar",
+  macos: "dmg",
+};
+
 const ARCH_LABELS: Record<ArchId, string> = {
   "arm64-v8a": "arm64-v8a",
   "armeabi-v7a": "armeabi-v7a",
   x86_64: "x86_64",
   x86: "x86",
-  amd64: "x64 / amd64",
+  amd64: "x64",
   arm64: "arm64",
   universal: "通用",
-  unknown: "通用包",
+  unknown: "通用",
 };
+
+const FORMAT_LABELS: Record<FormatId, string> = {
+  apk: "APK",
+  aab: "AAB",
+  ipa: "IPA",
+  msix: "MSIX",
+  msi: "MSI",
+  exe: "EXE",
+  zip: "zip",
+  dmg: "DMG",
+  pkg: "PKG",
+  appimage: "AppImage",
+  deb: "deb",
+  rpm: "rpm",
+  flatpak: "Flatpak",
+  tar: "tar.gz",
+  scoop: "Scoop",
+  winget: "winget",
+  other: "",
+};
+
+/** Manifests / non-installer assets — keep out of platform cards & default changelog chips. */
+export function isMetaAsset(platform: PlatformId, format: FormatId): boolean {
+  return platform === "other" || format === "scoop" || format === "winget";
+}
 
 export interface GhRelease {
   id: number;
@@ -84,23 +137,63 @@ export function parseFlutterVersion(tagOrTitle: string) {
   };
 }
 
+export function detectFormat(filename: string): FormatId {
+  const n = filename.toLowerCase();
+  if (/scoop-.*\.json$/i.test(n)) return "scoop";
+  if (/^winget-/i.test(n) || n.includes("winget-")) return "winget";
+  if (/\.apk$/i.test(n)) return "apk";
+  if (/\.aab$/i.test(n)) return "aab";
+  if (/\.ipa$/i.test(n)) return "ipa";
+  if (/\.msix$/i.test(n) || /\.appx$/i.test(n)) return "msix";
+  if (/\.msi$/i.test(n)) return "msi";
+  if (/\.exe$/i.test(n)) return "exe";
+  if (/\.dmg$/i.test(n)) return "dmg";
+  if (/\.pkg$/i.test(n)) return "pkg";
+  if (/\.appimage$/i.test(n)) return "appimage";
+  if (/\.deb$/i.test(n)) return "deb";
+  if (/\.rpm$/i.test(n)) return "rpm";
+  if (/\.flatpak$/i.test(n)) return "flatpak";
+  if (/\.(tar\.gz|tgz)$/i.test(n)) return "tar";
+  if (/\.zip$/i.test(n)) return "zip";
+  return "other";
+}
+
+export function formatLabel(format: FormatId): string {
+  return FORMAT_LABELS[format] ?? "";
+}
+
 export function detectPlatform(filename: string): PlatformId {
   const n = filename.toLowerCase();
-  if (/\.apk$/i.test(n) || n.includes("android") || n.includes("aab")) return "android";
-  if (/\.ipa$/i.test(n) || n.includes("ios") || n.includes("iphone")) return "ios";
-  // Skip package-manager manifests (not installers)
-  if (/scoop-.*\.json$/i.test(n) || /^winget-/i.test(n)) return "other";
+  const format = detectFormat(filename);
+  // Package-manager manifests (not installers)
+  if (format === "scoop" || format === "winget") return "other";
+  if (format === "apk" || format === "aab" || n.includes("android")) return "android";
+  if (format === "ipa" || n.includes("ios") || n.includes("iphone")) return "ios";
   if (
-    /\.(msix|msi|exe|appx)$/i.test(n) ||
-    (/\.zip$/i.test(n) && (n.includes("windows") || n.includes("win-") || n.includes("win32") || n.includes("win64"))) ||
+    format === "msix" ||
+    format === "msi" ||
+    format === "exe" ||
+    (format === "zip" &&
+      (n.includes("windows") || n.includes("win-") || n.includes("win32") || n.includes("win64"))) ||
     n.includes("windows") ||
     n.includes("win32") ||
     n.includes("win-x64")
   )
     return "windows";
-  if (/\.(dmg|pkg)$/i.test(n) || n.includes("macos") || n.includes("darwin") || n.includes("osx")) return "macos";
   if (
-    /\.(appimage|deb|rpm|flatpak|tar\.gz|tgz)$/i.test(n) ||
+    format === "dmg" ||
+    format === "pkg" ||
+    n.includes("macos") ||
+    n.includes("darwin") ||
+    n.includes("osx")
+  )
+    return "macos";
+  if (
+    format === "appimage" ||
+    format === "deb" ||
+    format === "rpm" ||
+    format === "flatpak" ||
+    format === "tar" ||
     n.includes("linux") ||
     n.includes("appimage")
   )
@@ -154,18 +247,48 @@ export function isRecommendedArch(platform: PlatformId, arch: ArchId): boolean {
   const pref = RECOMMENDED_ARCH[platform];
   if (!pref) return false;
   if (arch === pref) return true;
-  // Treat unknown universal desktop packages as non-recommended (user should pick arch)
   return false;
+}
+
+/** Preferred arch + preferred format only (one “推荐” per platform). */
+export function isRecommendedAsset(
+  platform: PlatformId,
+  arch: ArchId,
+  format: FormatId,
+): boolean {
+  if (isMetaAsset(platform, format)) return false;
+  if (!isRecommendedArch(platform, arch)) return false;
+  const prefFmt = RECOMMENDED_FORMAT[platform];
+  if (!prefFmt) return true;
+  return format === prefFmt;
 }
 
 export function archLabel(arch: ArchId): string {
   return ARCH_LABELS[arch] ?? arch;
 }
 
+/** Short chip label: "linux · x64 · tar.gz" / "windows · x64 · zip" */
+export function assetDisplayLabel(
+  platform: PlatformId,
+  arch: ArchId,
+  format: FormatId,
+  filename: string,
+): string {
+  if (format === "scoop") return "Scoop 清单";
+  if (format === "winget") return "winget 清单";
+  const parts: string[] = [];
+  if (platform && platform !== "other") parts.push(platform);
+  const al = archLabel(arch);
+  if (al && arch !== "unknown") parts.push(al);
+  const fl = formatLabel(format);
+  if (fl) parts.push(fl);
+  if (parts.length === 0) return filename;
+  return parts.join(" · ");
+}
+
 function archSortKey(platform: PlatformId, arch: ArchId): number {
   const pref = RECOMMENDED_ARCH[platform];
   if (pref && arch === pref) return 0;
-  // Preferred secondary order per platform
   const order: ArchId[] =
     platform === "android"
       ? ["arm64-v8a", "armeabi-v7a", "x86_64", "x86", "universal", "unknown"]
@@ -173,6 +296,21 @@ function archSortKey(platform: PlatformId, arch: ArchId): number {
         ? ["arm64", "amd64", "universal", "unknown"]
         : ["amd64", "arm64", "universal", "unknown"];
   const i = order.indexOf(arch);
+  return i === -1 ? 50 : i + 1;
+}
+
+function formatSortKey(platform: PlatformId, format: FormatId): number {
+  const pref = RECOMMENDED_FORMAT[platform];
+  if (pref && format === pref) return 0;
+  const order: FormatId[] =
+    platform === "linux"
+      ? ["tar", "appimage", "deb", "flatpak", "rpm", "other"]
+      : platform === "windows"
+        ? ["zip", "msix", "msi", "exe", "other"]
+        : platform === "android"
+          ? ["apk", "aab", "other"]
+          : ["other"];
+  const i = order.indexOf(format);
   return i === -1 ? 50 : i + 1;
 }
 
@@ -186,6 +324,8 @@ export function mapRelease(r: GhRelease) {
   const assets = (r.assets || []).map((a) => {
     const platform = detectPlatform(a.name);
     const arch = detectArch(a.name, platform);
+    const format = detectFormat(a.name);
+    const fl = formatLabel(format);
     return {
       id: a.id,
       name: a.name,
@@ -198,15 +338,24 @@ export function mapRelease(r: GhRelease) {
       platform,
       arch,
       archLabel: archLabel(arch),
-      recommended: isRecommendedArch(platform, arch),
+      format,
+      formatLabel: fl,
+      label: assetDisplayLabel(platform, arch, format, a.name),
+      meta: isMetaAsset(platform, format),
+      recommended: isRecommendedAsset(platform, arch, format),
     };
   });
 
   assets.sort((a, b) => {
+    // Installers first, then scoop/winget manifests
+    if (a.meta !== b.meta) return a.meta ? 1 : -1;
     if (a.platform !== b.platform) return a.platform.localeCompare(b.platform);
     const ka = archSortKey(a.platform, a.arch);
     const kb = archSortKey(b.platform, b.arch);
     if (ka !== kb) return ka - kb;
+    const fa = formatSortKey(a.platform, a.format);
+    const fb = formatSortKey(b.platform, b.format);
+    if (fa !== fb) return fa - fb;
     return a.name.localeCompare(b.name);
   });
 

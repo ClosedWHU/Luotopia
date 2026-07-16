@@ -408,10 +408,14 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
         }
         badges.insertAdjacentHTML("beforeend", stableBadge(verLabel));
 
+        const installers = assets.filter((a) => !a.meta);
         assetsEl.classList.remove("hidden");
-        assetsEl.innerHTML = assets
+        assetsEl.innerHTML = installers
           .map((a) => {
-            const archText = a.archLabel || a.arch || "";
+            const title =
+              a.label ||
+              [a.archLabel || a.arch, a.formatLabel].filter(Boolean).join(" · ") ||
+              a.name;
             const rec = a.recommended
               ? `<span class="shrink-0 px-1.5 py-0.5 rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] text-[10px] font-[var(--md-sys-typescale-label-medium-weight)] leading-none">推荐</span>`
               : "";
@@ -419,7 +423,7 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
                 <span class="material-symbols-outlined text-base shrink-0 mt-0.5">download</span>
                 <span class="min-w-0 flex-1">
                   <span class="flex flex-wrap items-center gap-1.5">
-                    <span class="font-[var(--md-sys-typescale-label-large-weight)] text-[var(--md-sys-color-on-surface)]">${escapeHtml(archText || a.name)}</span>
+                    <span class="font-[var(--md-sys-typescale-label-large-weight)] text-[var(--md-sys-color-on-surface)]">${escapeHtml(title)}</span>
                     ${rec}
                   </span>
                   <span class="block truncate text-[var(--md-sys-color-outline)] text-[11px] mt-0.5">${escapeHtml(a.name)} · ${formatSize(a.size)}</span>
@@ -448,16 +452,20 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
           listEl.innerHTML = items
             .map((rel) => {
               const ver = rel.version || rel.tag || rel.title;
+              const assetList = (rel.assets || []).filter((a) => !a.meta);
               const assets =
-                (rel.assets || []).length > 0
-                  ? `<div class="mt-4 flex flex-wrap gap-2">${rel.assets
+                assetList.length > 0
+                  ? `<div class="mt-4 flex flex-wrap gap-2">${assetList
                       .map((a) => {
-                        const arch = a.archLabel || a.arch || "";
-                        const label = arch
-                          ? `${a.platform || "?"} · ${arch}${a.recommended ? " · 推荐" : ""}`
-                          : a.name;
+                        const label =
+                          a.label ||
+                          [a.platform, a.archLabel || a.arch, a.formatLabel]
+                            .filter(Boolean)
+                            .join(" · ") ||
+                          a.name;
+                        const rec = a.recommended ? " · 推荐" : "";
                         return `<a href="${escapeHtml(a.url)}" title="${escapeHtml(a.name)}" class="inline-flex items-center gap-1 px-3 py-1 rounded-[var(--md-sys-shape-corner-full)] bg-[var(--md-sys-color-surface-container)] dark:bg-[var(--md-sys-color-surface-container-dark)] text-[length:var(--md-sys-typescale-label-medium-size)] text-[var(--md-sys-color-primary)] no-underline hover:underline" download>
-                            <span class="material-symbols-outlined text-sm">download</span>${escapeHtml(label)}
+                            <span class="material-symbols-outlined text-sm">download</span>${escapeHtml(label + rec)}
                           </a>`;
                       })
                       .join("")}</div>`
