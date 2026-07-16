@@ -1,0 +1,48 @@
+# When a Release / Pre-release is published on the homepage repo,
+# ask Luotopia-app to produce signed installers and attach them here.
+name: Trigger app release build
+
+on:
+  release:
+    types: [published]
+
+concurrency:
+  group: trigger-app-build-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    name: Dispatch to Luotopia-app
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require cross-repo token
+        env:
+          TOKEN: ${{ secrets.CROSS_REPO_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::error::Missing secret CROSS_REPO_TOKEN (needs Actions write on Luotopia-app)."
+            exit 1
+          fi
+
+      - name: repository_dispatch → ClosedWHU/Luotopia-app
+        env:
+          GH_TOKEN: ${{ secrets.CROSS_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG='${{ github.event.release.tag_name }}'
+          PRE='${{ github.event.release.prerelease }}'
+          RID='${{ github.event.release.id }}'
+          URL='${{ github.event.release.html_url }}'
+
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            /repos/ClosedWHU/Luotopia-app/dispatches \
+            -f event_type='homepage_release' \
+            -f "client_payload[tag]=${TAG}" \
+            -F "client_payload[release_id]=${RID}" \
+            -F "client_payload[prerelease]=${PRE}" \
+            -f "client_payload[html_url]=${URL}" \
+            -f "client_payload[target_repo]=ClosedWHU/Luotopia"
+
+          echo "Dispatched homepage_release for tag ${TAG} (prerelease=${PRE})"
