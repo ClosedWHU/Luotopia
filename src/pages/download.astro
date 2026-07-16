@@ -161,6 +161,18 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
       return (bytes / (1024 * 1024)).toFixed(1) + " MB";
     }
 
+    /** Split name so UI can truncate base while keeping suffix (e.g. .tar.gz) visible. */
+    function splitFilename(name) {
+      const n = String(name || "");
+      const multi = n.match(/(\.(tar\.gz|tgz))$/i);
+      if (multi) {
+        return { base: n.slice(0, -multi[1].length), ext: multi[1] };
+      }
+      const i = n.lastIndexOf(".");
+      if (i > 0) return { base: n.slice(0, i), ext: n.slice(i) };
+      return { base: n, ext: "" };
+    }
+
     function formatDate(iso) {
       if (!iso) return "";
       try {
@@ -419,14 +431,19 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
             const rec = a.recommended
               ? `<span class="shrink-0 px-1.5 py-0.5 rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] text-[10px] font-[var(--md-sys-typescale-label-medium-weight)] leading-none">推荐</span>`
               : "";
-            return `<a href="${escapeHtml(a.url)}" class="flex items-start gap-1.5 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-primary)] hover:underline no-underline" download>
+            const { base, ext } = splitFilename(a.name);
+            return `<a href="${escapeHtml(a.url)}" title="${escapeHtml(a.name)}" class="flex items-start gap-1.5 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-primary)] hover:underline no-underline" download>
                 <span class="material-symbols-outlined text-base shrink-0 mt-0.5">download</span>
                 <span class="min-w-0 flex-1">
                   <span class="flex flex-wrap items-center gap-1.5">
                     <span class="font-[var(--md-sys-typescale-label-large-weight)] text-[var(--md-sys-color-on-surface)]">${escapeHtml(title)}</span>
                     ${rec}
                   </span>
-                  <span class="block truncate text-[var(--md-sys-color-outline)] text-[11px] mt-0.5">${escapeHtml(a.name)} · ${formatSize(a.size)}</span>
+                  <span class="flex min-w-0 items-baseline text-[var(--md-sys-color-outline)] text-[11px] mt-0.5">
+                    <span class="truncate min-w-0">${escapeHtml(base)}</span>
+                    <span class="shrink-0">${escapeHtml(ext)}</span>
+                    <span class="shrink-0"> · ${formatSize(a.size)}</span>
+                  </span>
                 </span>
               </a>`;
           })
