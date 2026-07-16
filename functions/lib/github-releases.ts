@@ -88,6 +88,8 @@ export function detectPlatform(filename: string): PlatformId {
   const n = filename.toLowerCase();
   if (/\.apk$/i.test(n) || n.includes("android") || n.includes("aab")) return "android";
   if (/\.ipa$/i.test(n) || n.includes("ios") || n.includes("iphone")) return "ios";
+  // Skip package-manager manifests (not installers)
+  if (/scoop-.*\.json$/i.test(n) || /^winget-/i.test(n)) return "other";
   if (
     /\.(msix|msi|exe|appx)$/i.test(n) ||
     (/\.zip$/i.test(n) && (n.includes("windows") || n.includes("win-") || n.includes("win32") || n.includes("win64"))) ||
