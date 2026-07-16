@@ -178,30 +178,77 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
         .replaceAll('"', "&quot;");
     }
 
-    /** Lightweight markdown-ish: keep line breaks, strip raw HTML */
+    /** Inline markdown after HTML escape: **bold**, `code`, [text](url) */
+    function formatInline(s) {
+      return s
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, (_, t, u) => {
+          return `<a href="${u}" target="_blank" rel="noopener noreferrer" class="text-[var(--md-sys-color-primary)] hover:underline">${t}</a>`;
+        })
+        .replace(/`([^`]+)`/g, '<code class="px-1 rounded-[4px] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] text-[var(--md-sys-color-on-surface)] text-[0.9em]">$1</code>')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)]">$1</strong>');
+    }
+
+    /** Release notes markdown: headings, lists, hr, paragraphs */
     function formatBody(body) {
-      if (!body) return "<p class=\"text-[var(--md-sys-color-outline)]\">暂无说明</p>";
+      if (!body) return '<p class="text-[var(--md-sys-color-outline)]">暂无说明</p>';
       const lines = escapeHtml(body).split(/\r?\n/);
       const html = [];
       let inList = false;
-      for (const line of lines) {
+      const closeList = () => {
+        if (inList) {
+          html.push("</ul>");
+          inList = false;
+        }
+      };
+      for (const raw of lines) {
+        const line = raw.replace(/\s+$/, "");
+        if (line.trim() === "") {
+          closeList();
+          html.push('<div class="h-2"></div>');
+          continue;
+        }
+        if (/^---+$/.test(line.trim()) || /^\*\*\*+$/.test(line.trim())) {
+          closeList();
+          html.push('<hr class="my-3 border-[var(--md-sys-color-outline-variant)]" />');
+          continue;
+        }
+        const h = line.match(/^(#{1,4})\s+(.+)$/);
+        if (h) {
+          closeList();
+          const level = h[1].length;
+          const text = formatInline(h[2]);
+          if (level === 1) {
+            html.push(
+              `<h3 class="mt-4 mb-2 text-[length:var(--md-sys-typescale-title-large-size)] leading-[var(--md-sys-typescale-title-large-line)] font-[var(--md-sys-typescale-title-large-weight)] text-[var(--md-sys-color-on-surface)]">${text}</h3>`,
+            );
+          } else if (level === 2) {
+            html.push(
+              `<h3 class="mt-4 mb-2 text-[length:var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)]">${text}</h3>`,
+            );
+          } else {
+            html.push(
+              `<h4 class="mt-3 mb-1.5 text-[length:var(--md-sys-typescale-title-small-size)] leading-[var(--md-sys-typescale-title-small-line)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)]">${text}</h4>`,
+            );
+          }
+          continue;
+        }
         const item = line.match(/^\s*[-*•]\s+(.+)/);
         if (item) {
           if (!inList) {
-            html.push('<ul class="space-y-1 my-2">');
+            html.push('<ul class="space-y-1.5 my-2 pl-0 list-none">');
             inList = true;
           }
-          html.push(`<li class="flex gap-2"><span class="text-[var(--md-sys-color-primary)] shrink-0">•</span><span>${item[1]}</span></li>`);
-        } else {
-          if (inList) {
-            html.push("</ul>");
-            inList = false;
-          }
-          if (line.trim() === "") html.push("<div class=\"h-2\"></div>");
-          else html.push(`<p>${line}</p>`);
+          html.push(
+            `<li class="flex gap-2 text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)]"><span class="text-[var(--md-sys-color-primary)] shrink-0 select-none">•</span><span class="min-w-0">${formatInline(item[1])}</span></li>`,
+          );
+          continue;
         }
+        closeList();
+        html.push(
+          `<p class="text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)]">${formatInline(line)}</p>`,
+        );
       }
-      if (inList) html.push("</ul>");
+      closeList();
       return html.join("");
     }
 
