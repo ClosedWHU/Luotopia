@@ -63,10 +63,17 @@ import { platforms, testFlightUrl } from "../config/downloads";
           </div>
           <div>
             <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">Linux</h4>
-            <p>提供 <strong class="text-[var(--md-sys-color-on-surface)]">x64 便携 tar.gz</strong>（Flutter Linux <code class="text-[var(--md-sys-color-on-surface)]">release</code> bundle，含 <code class="text-[var(--md-sys-color-on-surface)]">luotopia</code> 与 <code class="text-[var(--md-sys-color-on-surface)]">lib/</code>、<code class="text-[var(--md-sys-color-on-surface)]">data/</code>）。需较新的 glibc 发行版与 GTK3。示例：</p>
-            <pre class="mt-2 overflow-x-auto rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] px-3 py-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-on-surface)]"><code>tar -xzf luotopia-*-linux-x64.tar.gz
-./luotopia/luotopia</code></pre>
-            <p class="mt-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">当前 CI 在 Ubuntu 上构建 amd64；未做 AppImage / Flatpak / deb。仅 release 产物，不含 debug 符号包。</p>
+            <p>每个 Release 按<strong class="text-[var(--md-sys-color-on-surface)]">架构</strong>（x64 / arm64）与<strong class="text-[var(--md-sys-color-on-surface)]">格式</strong>发布（均为 <code class="text-[var(--md-sys-color-on-surface)]">--release</code>，无 debug 符号）：</p>
+            <ul class="mt-2 list-disc pl-5 space-y-1">
+              <li><strong class="text-[var(--md-sys-color-on-surface)]">tar.gz</strong> — 便携目录，推荐通用；标「推荐」的多为 x64/amd64</li>
+              <li><strong class="text-[var(--md-sys-color-on-surface)]">AppImage</strong> — 单文件运行（需 FUSE 或直接可执行）</li>
+              <li><strong class="text-[var(--md-sys-color-on-surface)]">deb</strong> — Debian/Ubuntu：<code class="text-[var(--md-sys-color-on-surface)]">sudo apt install ./luotopia-*-linux-*.deb</code></li>
+              <li><strong class="text-[var(--md-sys-color-on-surface)]">flatpak</strong> — 本地 bundle（若 CI 成功生成）：<code class="text-[var(--md-sys-color-on-surface)]">flatpak install --user ./luotopia-*-linux-*.flatpak</code></li>
+            </ul>
+            <pre class="mt-2 overflow-x-auto rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] px-3 py-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-on-surface)]"><code>tar -xzf luotopia-*-linux-x64.tar.gz &amp;&amp; ./luotopia/luotopia
+# 或
+chmod +x luotopia-*-linux-x64.AppImage &amp;&amp; ./luotopia-*-linux-x64.AppImage</code></pre>
+            <p class="mt-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">依赖较新 glibc + GTK3。arm64 在 GitHub ARM runner 上原生构建。手动重跑 CI 可选架构（x64/arm64/both）与格式（tar,appimage,deb,flatpak）。</p>
           </div>
         </div>
       </div>
@@ -95,6 +102,14 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
             <p>下载 <code class="text-[var(--md-sys-color-on-surface)]">*-windows-x64.msix</code> 后双击安装，或：</p>
             <pre class="mt-2 overflow-x-auto rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] px-3 py-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-on-surface)]"><code>Add-AppxPackage .\luotopia-*-windows-x64.msix</code></pre>
             <p class="mt-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">未提供 Windows 代码签名证书时为未签名包。可选在仓库配置 <code class="text-[var(--md-sys-color-on-surface)]">WINDOWS_PFX_BASE64</code> / <code class="text-[var(--md-sys-color-on-surface)]">WINDOWS_PFX_PASSWORD</code> 以在 CI 中签名。传统 WiX MSI 暂不维护。</p>
+          </div>
+          <div>
+            <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">Linux 包格式速查</h4>
+            <pre class="overflow-x-auto rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] px-3 py-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-on-surface)]"><code># 架构：x64 或 arm64（文件名含 linux-x64 / linux-arm64）
+sudo apt install ./luotopia-*-linux-x64.deb
+chmod +x ./luotopia-*-linux-x64.AppImage &amp;&amp; ./luotopia-*-linux-x64.AppImage
+flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
+            <p class="mt-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">deb 控制字段 Architecture 为 amd64/arm64；Release 文件名用 <code class="text-[var(--md-sys-color-on-surface)]">x64</code>/<code class="text-[var(--md-sys-color-on-surface)]">arm64</code> 以便官网识别。</p>
           </div>
         </div>
       </div>
