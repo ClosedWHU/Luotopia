@@ -59,7 +59,35 @@ import { platforms, testFlightUrl } from "../config/downloads";
           </div>
           <div>
             <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">Windows</h4>
-            <p>提供 <strong class="text-[var(--md-sys-color-on-surface)]">x64 便携版 zip</strong>（解压后运行 <code class="text-[var(--md-sys-color-on-surface)]">luotopia.exe</code>）。多数 PC 选标有「推荐」的 <strong class="text-[var(--md-sys-color-on-surface)]">x64 / amd64</strong>。需 Windows 10 1809 及以上。MSI/MSIX 安装包暂未提供。</p>
+            <p>Release 提供 <strong class="text-[var(--md-sys-color-on-surface)]">x64 便携 zip</strong>（解压运行 <code class="text-[var(--md-sys-color-on-surface)]">luotopia.exe</code>）与 <strong class="text-[var(--md-sys-color-on-surface)]">MSIX</strong>。多数 PC 选标有「推荐」的 <strong class="text-[var(--md-sys-color-on-surface)]">x64 / amd64</strong>。需 Windows 10 1809 及以上。未签名包可能触发 SmartScreen，选「仍要运行」；MSIX 无签时需开启开发人员模式或允许旁加载。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)] p-6">
+        <h2 class="text-[length:var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)] mb-2">高级用户 / 包管理器</h2>
+        <p class="text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)] mb-4">面向喜欢 CLI 安装、可复现升级的用户。资产随每个 GitHub Release 发布（含 prerelease）。</p>
+        <div class="space-y-5 text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)]">
+          <div>
+            <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">Scoop</h4>
+            <p class="mb-2">从对应 Release 的清单直接安装（将 <code class="text-[var(--md-sys-color-on-surface)]">&lt;tag&gt;</code> 换成版本，如 <code class="text-[var(--md-sys-color-on-surface)]">v1.0.0+2</code>）：</p>
+            <pre class="overflow-x-auto rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] px-3 py-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-on-surface)]"><code>scoop install https://github.com/ClosedWHU/Luotopia/releases/download/&lt;tag&gt;/scoop-luotopia.json</code></pre>
+            <p class="mt-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">清单基于便携 zip；升级可重新 install 新 tag 的 json，或自行维护 bucket。</p>
+          </div>
+          <div>
+            <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">winget</h4>
+            <p class="mb-2">官方社区源合并前，可用 Release 里的草稿清单本地验证：</p>
+            <pre class="overflow-x-auto rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] px-3 py-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-on-surface)]"><code># 下载 winget-ClosedWHU.Luotopia*.yaml 后
+winget install --manifest .\path\to\manifests\folder</code></pre>
+            <p class="mt-2">合并到 <a href="https://github.com/microsoft/winget-pkgs" target="_blank" rel="noopener noreferrer" class="text-[var(--md-sys-color-primary)] hover:underline">microsoft/winget-pkgs</a> 之后：</p>
+            <pre class="mt-2 overflow-x-auto rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] px-3 py-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-on-surface)]"><code>winget install ClosedWHU.Luotopia</code></pre>
+            <p class="mt-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">当前清单默认指向 zip 便携包；有签名 MSIX 后再可改为 MSIX 安装器以改善 SmartScreen 体验。</p>
+          </div>
+          <div>
+            <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">MSIX 旁加载</h4>
+            <p>下载 <code class="text-[var(--md-sys-color-on-surface)]">*-windows-x64.msix</code> 后双击安装，或：</p>
+            <pre class="mt-2 overflow-x-auto rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] px-3 py-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-on-surface)]"><code>Add-AppxPackage .\luotopia-*-windows-x64.msix</code></pre>
+            <p class="mt-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">未提供 Windows 代码签名证书时为未签名包。可选在仓库配置 <code class="text-[var(--md-sys-color-on-surface)]">WINDOWS_PFX_BASE64</code> / <code class="text-[var(--md-sys-color-on-surface)]">WINDOWS_PFX_PASSWORD</code> 以在 CI 中签名。传统 WiX MSI 暂不维护。</p>
           </div>
         </div>
       </div>
