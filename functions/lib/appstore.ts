@@ -268,11 +268,13 @@ export async function createAppStoreConnectJwt(
 ): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const header = { alg: "ES256", kid: keyId, typ: "JWT" };
+  // Apple docs: aud must be exactly "appstoreconnect-v1"
+  // https://developer.apple.com/documentation/appstoreconnectapi/generating-tokens-for-api-requests
   const payload = {
     iss: issuerId,
     iat: now,
     exp: now + 20 * 60,
-    aud: "appstoreconnect-apple.com",
+    aud: "appstoreconnect-v1",
   };
   const h = base64UrlEncode(JSON.stringify(header));
   const p = base64UrlEncode(JSON.stringify(payload));
