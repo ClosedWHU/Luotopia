@@ -4,7 +4,7 @@
  * prerelease=1 allows the newest release including pre-releases.
  */
 
-import { ghFetch, json, mapRelease, type GhRelease } from "../../lib/github-releases";
+import { apiCacheHeaders, ghFetch, json, mapRelease, type GhRelease } from "../../lib/github-releases";
 
 export async function onRequestGet(context: {
   request: Request;
@@ -22,9 +22,7 @@ export async function onRequestGet(context: {
       if (res.ok) {
         const data = (await res.json()) as GhRelease;
         if (!data.draft) {
-          return json(mapRelease(data), 200, {
-            "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600",
-          });
+          return json(mapRelease(data), 200, apiCacheHeaders());
         }
       }
     }
@@ -35,20 +33,22 @@ export async function onRequestGet(context: {
       return json(
         { error: "github_error", status: listRes.status, message: text.slice(0, 200) },
         502,
+        { "Cache-Control": "public, s-maxage=30" },
       );
     }
     const list = (await listRes.json()) as GhRelease[];
     const found = list.find((r) => !r.draft && (allowPre || !r.prerelease));
     if (!found) {
-      return json({ error: "not_found", message: "No releases" }, 404);
+      return json({ error: "not_found", message: "No releases" }, 404, {
+        "Cache-Control": "public, s-maxage=60",
+      });
     }
-    return json(mapRelease(found), 200, {
-      "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600",
-    });
+    return json(mapRelease(found), 200, apiCacheHeaders());
   } catch (e) {
     return json(
       { error: "fetch_failed", message: e instanceof Error ? e.message : String(e) },
       502,
+      { "Cache-Control": "no-store" },
     );
   }
 }

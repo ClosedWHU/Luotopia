@@ -182,6 +182,7 @@ export function mapRelease(r: GhRelease) {
   const version =
     titleParsed && titleParsed.buildNumber && !parsed.buildNumber ? titleParsed : parsed;
 
+  const tag = r.tag_name;
   const assets = (r.assets || []).map((a) => {
     const platform = detectPlatform(a.name);
     const arch = detectArch(a.name, platform);
@@ -190,7 +191,9 @@ export function mapRelease(r: GhRelease) {
       name: a.name,
       size: a.size,
       downloadCount: a.download_count,
-      url: a.browser_download_url,
+      // Prefer same-origin proxy (CDN-cached); keep GitHub URL as fallback field
+      url: proxyAssetUrl(tag, a.name),
+      githubUrl: a.browser_download_url,
       contentType: a.content_type,
       platform,
       arch,
@@ -223,14 +226,65 @@ export function mapRelease(r: GhRelease) {
   };
 }
 
-export async function ghFetch(path: string, token: string) {
+/** Edge cache for GitHub JSON API (minutes). */
+export const GH_API_CACHE_TTL = 300; // 5 min origin/edge fetch cache
+export const GH_API_S_MAXAGE = 300; // 5 min CDN for /api/releases*
+export const GH_API_SWR = 1800; // 30 min stale-while-revalidate
+
+/** Edge cache for immutable release binaries (seconds). */
+export const GH_ASSET_CACHE_TTL = 7 * 24 * 3600; // 7 days
+export const GH_ASSET_S_MAXAGE = 7 * 24 * 3600;
+export const GH_ASSET_BROWSER_MAXAGE = 24 * 3600; // 1 day browser
+
+export function apiCacheHeaders(): Record<string, string> {
+  return {
+    "Cache-Control": `public, s-maxage=${GH_API_S_MAXAGE}, stale-while-revalidate=${GH_API_SWR}`,
+    "CDN-Cache-Control": `public, max-age=${GH_API_S_MAXAGE}, stale-while-revalidate=${GH_API_SWR}`,
+  };
+}
+
+export function assetCacheHeaders(): Record<string, string> {
+  return {
+    "Cache-Control": `public, max-age=${GH_ASSET_BROWSER_MAXAGE}, s-maxage=${GH_ASSET_S_MAXAGE}, immutable`,
+    "CDN-Cache-Control": `public, max-age=${GH_ASSET_S_MAXAGE}, immutable`,
+  };
+}
+
+type GhFetchOptions = {
+  /** Override Accept (asset download uses application/octet-stream). */
+  accept?: string;
+  /** Cloudflare edge cache TTL for this upstream fetch. */
+  cacheTtl?: number;
+  /** Follow redirects (default true). */
+  redirect?: RequestRedirect;
+};
+
+export async function ghFetch(path: string, token: string, opts: GhFetchOptions = {}) {
   const headers: Record<string, string> = {
-    Accept: "application/vnd.github+json",
+    Accept: opts.accept || "application/vnd.github+json",
     "User-Agent": "Luotopia-Homepage-Pages",
     "X-GitHub-Api-Version": "2022-11-28",
   };
   if (token) headers.Authorization = `Bearer ${token}`;
-  return fetch(`https://api.github.com${path}`, { headers });
+
+  const cacheTtl = opts.cacheTtl ?? GH_API_CACHE_TTL;
+  // Pages Functions run on CF; `cf` is honored on the edge
+  return fetch(`https://api.github.com${path}`, {
+    headers,
+    redirect: opts.redirect ?? "follow",
+    cf: {
+      cacheTtl,
+      cacheEverything: true,
+      cacheTtlByStatus: { "200-299": cacheTtl, "404": 60, "500-599": 0 },
+    },
+  } as RequestInit);
+}
+
+/** Build same-origin proxy URL so downloads go through our CDN cache. */
+export function proxyAssetUrl(tag: string, filename: string): string {
+  const t = encodeURIComponent(tag);
+  const n = encodeURIComponent(filename);
+  return `/api/releases/download/${t}/${n}`;
 }
 
 export function json(body: unknown, status = 200, extraHeaders: Record<string, string> = {}) {
@@ -239,6 +293,7 @@ export function json(body: unknown, status = 200, extraHeaders: Record<string, s
     headers: {
       "Content-Type": "application/json; charset=utf-8",
       "Access-Control-Allow-Origin": "*",
+      ...apiCacheHeaders(),
       ...extraHeaders,
     },
   });
