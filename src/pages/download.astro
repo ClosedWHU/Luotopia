@@ -22,9 +22,23 @@ import { platforms, testFlightUrl } from "../config/downloads";
             <h3 class="text-[length:var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)]">{p.name}</h3>
             <p class="text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)] mt-1">{p.desc}</p>
             <div class="mt-4 flex flex-wrap gap-1.5 items-center platform-badges">
-              <span class="platform-status inline-block px-2.5 py-0.5 rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] text-[var(--md-sys-color-on-surface-variant)] text-[length:var(--md-sys-typescale-label-medium-size)] font-[var(--md-sys-typescale-label-medium-weight)]">加载中…</span>
+              <span class="platform-status inline-block px-2.5 py-0.5 rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] text-[var(--md-sys-color-on-surface-variant)] text-[length:var(--md-sys-typescale-label-medium-size)] font-[var(--md-sys-typescale-label-medium-weight)]">
+                {p.externalUrl ? (p.id === "ios" ? "TestFlight 内测" : p.externalLabel) : "加载中…"}
+              </span>
             </div>
-            <div class="platform-assets mt-3 space-y-1.5 hidden"></div>
+            <div class:list={["platform-assets", "mt-3", "space-y-1.5", !p.externalUrl && "hidden"]}>
+              {p.externalUrl && (
+                <a
+                  href={p.externalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center gap-1 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-primary)] hover:underline no-underline"
+                >
+                  <span class="material-symbols-outlined text-base">open_in_new</span>
+                  <span>{p.externalLabel ?? "外部安装"}</span>
+                </a>
+              )}
+            </div>
             <p class="mt-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">{p.note}</p>
           </div>
         ))}
@@ -35,7 +49,7 @@ import { platforms, testFlightUrl } from "../config/downloads";
         <div class="space-y-4 text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)]">
           <div>
             <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">Android</h4>
-            <p>下载 APK 后直接安装。如提示"未知来源"，请在系统设置中允许安装。我们建议从 GitHub Releases 页面获取最新版本以确保完整性。</p>
+            <p>按 ABI 分发包（与 <code class="text-[var(--md-sys-color-on-surface)]">build-release.bat --split-per-abi</code> 一致）：优先选标有「推荐」的 <strong class="text-[var(--md-sys-color-on-surface)]">arm64-v8a</strong>（近年金属机）；老设备用 armeabi-v7a。下载 APK 后直接安装；如提示「未知来源」，请在系统设置中允许安装。</p>
           </div>
           <div>
             <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">iOS</h4>
@@ -45,7 +59,7 @@ import { platforms, testFlightUrl } from "../config/downloads";
           </div>
           <div>
             <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">Windows</h4>
-            <p>Windows 版本为 MSIX 安装包或便携版（即将提供）。需 Windows 10 1809 及以上版本。</p>
+            <p>Windows 版本为 MSIX / EXE 等安装包。多数 PC 选标有「推荐」的 <strong class="text-[var(--md-sys-color-on-surface)]">x64 / amd64</strong>。需 Windows 10 1809 及以上版本。</p>
           </div>
         </div>
       </div>
@@ -153,6 +167,32 @@ import { platforms, testFlightUrl } from "../config/downloads";
       return `<span class="inline-block px-2.5 py-0.5 rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] text-[var(--md-sys-color-on-surface-variant)] text-[length:var(--md-sys-typescale-label-medium-size)] font-[var(--md-sys-typescale-label-medium-weight)]">${escapeHtml(text)}</span>`;
     }
 
+    function applyExternalLink(card, statusText) {
+      const status = card.querySelector(".platform-status");
+      const assetsEl = card.querySelector(".platform-assets");
+      if (!status || !assetsEl) return;
+
+      const externalUrl = card.getAttribute("data-external-url") || "";
+      const externalLabel = card.getAttribute("data-external-label") || "外部安装";
+      const id = card.getAttribute("data-platform");
+
+      status.className =
+        "platform-status inline-block px-2.5 py-0.5 rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] text-[var(--md-sys-color-on-surface-variant)] text-[length:var(--md-sys-typescale-label-medium-size)] font-[var(--md-sys-typescale-label-medium-weight)]";
+
+      if (externalUrl) {
+        status.textContent = id === "ios" ? "TestFlight 内测" : statusText;
+        assetsEl.classList.remove("hidden");
+        assetsEl.innerHTML = `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-primary)] hover:underline no-underline">
+            <span class="material-symbols-outlined text-base">open_in_new</span>
+            <span>${escapeHtml(externalLabel)}</span>
+          </a>`;
+      } else {
+        status.textContent = statusText;
+        assetsEl.classList.add("hidden");
+        assetsEl.innerHTML = "";
+      }
+    }
+
     async function loadLatest() {
       // Prefer newest including prerelease so testers see pre builds; badge will mark it
       let release = null;
@@ -163,8 +203,8 @@ import { platforms, testFlightUrl } from "../config/downloads";
 
       if (!release || release.error) {
         if (latestMeta) latestMeta.textContent = "暂时无法获取最新版本，请前往 GitHub Releases。";
-        document.querySelectorAll(".platform-status").forEach((el) => {
-          el.textContent = "暂无数据";
+        document.querySelectorAll(".platform-card").forEach((card) => {
+          applyExternalLink(card, "暂无数据");
         });
         return;
       }
@@ -189,30 +229,15 @@ import { platforms, testFlightUrl } from "../config/downloads";
 
       document.querySelectorAll(".platform-card").forEach((card) => {
         const id = card.getAttribute("data-platform");
-        const status = card.querySelector(".platform-status");
         const badges = card.querySelector(".platform-badges");
         const assetsEl = card.querySelector(".platform-assets");
         const assets = byPlatform[id] || [];
 
-        if (!status || !badges || !assetsEl) return;
+        if (!badges || !assetsEl) return;
 
         if (assets.length === 0) {
-          const externalUrl = card.getAttribute("data-external-url") || "";
-          const externalLabel = card.getAttribute("data-external-label") || "外部安装";
-          status.textContent = release.prerelease ? `测试版 ${verLabel}` : `最新 ${verLabel}`;
-          status.className =
-            "platform-status inline-block px-2.5 py-0.5 rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] text-[var(--md-sys-color-on-surface-variant)] text-[length:var(--md-sys-typescale-label-medium-size)] font-[var(--md-sys-typescale-label-medium-weight)]";
-          if (id === "ios") status.textContent = "TestFlight 内测";
-          if (externalUrl) {
-            assetsEl.classList.remove("hidden");
-            assetsEl.innerHTML = `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-primary)] hover:underline no-underline">
-                <span class="material-symbols-outlined text-base">open_in_new</span>
-                <span>${escapeHtml(externalLabel)}</span>
-              </a>`;
-          } else {
-            assetsEl.classList.add("hidden");
-            assetsEl.innerHTML = "";
-          }
+          const fallback = release.prerelease ? `测试版 ${verLabel}` : `最新 ${verLabel}`;
+          applyExternalLink(card, fallback);
           return;
         }
 
@@ -224,14 +249,22 @@ import { platforms, testFlightUrl } from "../config/downloads";
 
         assetsEl.classList.remove("hidden");
         assetsEl.innerHTML = assets
-          .map(
-            (a) =>
-              `<a href="${escapeHtml(a.url)}" class="flex items-center gap-1 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-primary)] hover:underline no-underline" download>
-                <span class="material-symbols-outlined text-base">download</span>
-                <span class="truncate">${escapeHtml(a.name)}</span>
-                <span class="text-[var(--md-sys-color-outline)] shrink-0">${formatSize(a.size)}</span>
-              </a>`,
-          )
+          .map((a) => {
+            const archText = a.archLabel || a.arch || "";
+            const rec = a.recommended
+              ? `<span class="shrink-0 px-1.5 py-0.5 rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] text-[10px] font-[var(--md-sys-typescale-label-medium-weight)] leading-none">推荐</span>`
+              : "";
+            return `<a href="${escapeHtml(a.url)}" class="flex items-start gap-1.5 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-primary)] hover:underline no-underline" download>
+                <span class="material-symbols-outlined text-base shrink-0 mt-0.5">download</span>
+                <span class="min-w-0 flex-1">
+                  <span class="flex flex-wrap items-center gap-1.5">
+                    <span class="font-[var(--md-sys-typescale-label-large-weight)] text-[var(--md-sys-color-on-surface)]">${escapeHtml(archText || a.name)}</span>
+                    ${rec}
+                  </span>
+                  <span class="block truncate text-[var(--md-sys-color-outline)] text-[11px] mt-0.5">${escapeHtml(a.name)} · ${formatSize(a.size)}</span>
+                </span>
+              </a>`;
+          })
           .join("");
       });
     }
@@ -257,12 +290,15 @@ import { platforms, testFlightUrl } from "../config/downloads";
               const assets =
                 (rel.assets || []).length > 0
                   ? `<div class="mt-4 flex flex-wrap gap-2">${rel.assets
-                      .map(
-                        (a) =>
-                          `<a href="${escapeHtml(a.url)}" class="inline-flex items-center gap-1 px-3 py-1 rounded-[var(--md-sys-shape-corner-full)] bg-[var(--md-sys-color-surface-container)] dark:bg-[var(--md-sys-color-surface-container-dark)] text-[length:var(--md-sys-typescale-label-medium-size)] text-[var(--md-sys-color-primary)] no-underline hover:underline" download>
-                            <span class="material-symbols-outlined text-sm">download</span>${escapeHtml(a.name)}
-                          </a>`,
-                      )
+                      .map((a) => {
+                        const arch = a.archLabel || a.arch || "";
+                        const label = arch
+                          ? `${a.platform || "?"} · ${arch}${a.recommended ? " · 推荐" : ""}`
+                          : a.name;
+                        return `<a href="${escapeHtml(a.url)}" title="${escapeHtml(a.name)}" class="inline-flex items-center gap-1 px-3 py-1 rounded-[var(--md-sys-shape-corner-full)] bg-[var(--md-sys-color-surface-container)] dark:bg-[var(--md-sys-color-surface-container-dark)] text-[length:var(--md-sys-typescale-label-medium-size)] text-[var(--md-sys-color-primary)] no-underline hover:underline" download>
+                            <span class="material-symbols-outlined text-sm">download</span>${escapeHtml(label)}
+                          </a>`;
+                      })
                       .join("")}</div>`
                   : "";
               return `<article class="rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)] p-6">
