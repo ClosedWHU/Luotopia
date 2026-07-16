@@ -46,7 +46,7 @@ export const platforms: PlatformDownload[] = [
     id: "linux",
     name: "Linux",
     icon: "terminal",
-    desc: "x64 便携包（tar.gz）",
-    note: "解压后运行 luotopia",
+    desc: "多格式 / 多架构",
+    note: "x64·arm64 · tar/AppImage/deb",
   },
 ];

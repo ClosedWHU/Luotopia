@@ -99,7 +99,12 @@ export function detectPlatform(filename: string): PlatformId {
   )
     return "windows";
   if (/\.(dmg|pkg)$/i.test(n) || n.includes("macos") || n.includes("darwin") || n.includes("osx")) return "macos";
-  if (/\.(appimage|deb|rpm|tar\.gz|tgz)$/i.test(n) || n.includes("linux")) return "linux";
+  if (
+    /\.(appimage|deb|rpm|flatpak|tar\.gz|tgz)$/i.test(n) ||
+    n.includes("linux") ||
+    n.includes("appimage")
+  )
+    return "linux";
   return "other";
 }
 
