@@ -61,6 +61,13 @@ import { platforms, testFlightUrl } from "../config/downloads";
             <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">Windows</h4>
             <p>Release 提供 <strong class="text-[var(--md-sys-color-on-surface)]">x64 便携 zip</strong>（解压运行 <code class="text-[var(--md-sys-color-on-surface)]">luotopia.exe</code>）与 <strong class="text-[var(--md-sys-color-on-surface)]">MSIX</strong>。多数 PC 选标有「推荐」的 <strong class="text-[var(--md-sys-color-on-surface)]">x64 / amd64</strong>。需 Windows 10 1809 及以上。未签名包可能触发 SmartScreen，选「仍要运行」；MSIX 无签时需开启开发人员模式或允许旁加载。</p>
           </div>
+          <div>
+            <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">Linux</h4>
+            <p>提供 <strong class="text-[var(--md-sys-color-on-surface)]">x64 便携 tar.gz</strong>（Flutter Linux <code class="text-[var(--md-sys-color-on-surface)]">release</code> bundle，含 <code class="text-[var(--md-sys-color-on-surface)]">luotopia</code> 与 <code class="text-[var(--md-sys-color-on-surface)]">lib/</code>、<code class="text-[var(--md-sys-color-on-surface)]">data/</code>）。需较新的 glibc 发行版与 GTK3。示例：</p>
+            <pre class="mt-2 overflow-x-auto rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] px-3 py-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-on-surface)]"><code>tar -xzf luotopia-*-linux-x64.tar.gz
+./luotopia/luotopia</code></pre>
+            <p class="mt-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">当前 CI 在 Ubuntu 上构建 amd64；未做 AppImage / Flatpak / deb。仅 release 产物，不含 debug 符号包。</p>
+          </div>
         </div>
       </div>
 
