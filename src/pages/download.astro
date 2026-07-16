@@ -1,13 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-
-const platforms = [
-  { id: "android", name: "Android", icon: "smartphone", desc: "APK 直接安装，支持侧载", note: "Android 8+ 兼容" },
-  { id: "ios", name: "iOS", icon: "tablet_mac", desc: "TestFlight / 侧载安装", note: "需联系社区获取邀请" },
-  { id: "windows", name: "Windows", icon: "desktop_windows", desc: "Windows 桌面客户端", note: "Windows 10+ 兼容" },
-  { id: "macos", name: "macOS", icon: "laptop", desc: "macOS 原生体验", note: "敬请期待" },
-  { id: "linux", name: "Linux", icon: "terminal", desc: "Linux 桌面客户端", note: "敬请期待" },
-];
+import { platforms, testFlightUrl } from "../config/downloads";
 ---
 
 <BaseLayout title="下载">
@@ -22,6 +15,8 @@ const platforms = [
           <div
             class="platform-card rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)] p-5 flex flex-col"
             data-platform={p.id}
+            data-external-url={p.externalUrl ?? ""}
+            data-external-label={p.externalLabel ?? ""}
           >
             <span class="material-symbols-outlined text-[var(--md-sys-color-primary)] text-3xl mb-3">{p.icon}</span>
             <h3 class="text-[length:var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)]">{p.name}</h3>
@@ -44,7 +39,9 @@ const platforms = [
           </div>
           <div>
             <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">iOS</h4>
-            <p>iOS 版本通过 TestFlight 分发。加入社区 QQ 群或关注 GitHub 动态获取 TestFlight 邀请链接。由于 Apple 政策限制，非越狱设备需通过 TestFlight 安装。</p>
+            <p>iOS 版本通过 TestFlight 分发。打开
+              <a href={testFlightUrl} target="_blank" rel="noopener noreferrer" class="text-[var(--md-sys-color-primary)] hover:underline">TestFlight 加入链接</a>
+              即可申请内测。由于 Apple 政策限制，非越狱设备需通过 TestFlight 安装。</p>
           </div>
           <div>
             <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">Windows</h4>
@@ -200,13 +197,22 @@ const platforms = [
         if (!status || !badges || !assetsEl) return;
 
         if (assets.length === 0) {
+          const externalUrl = card.getAttribute("data-external-url") || "";
+          const externalLabel = card.getAttribute("data-external-label") || "外部安装";
           status.textContent = release.prerelease ? `测试版 ${verLabel}` : `最新 ${verLabel}`;
           status.className =
             "platform-status inline-block px-2.5 py-0.5 rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] text-[var(--md-sys-color-on-surface-variant)] text-[length:var(--md-sys-typescale-label-medium-size)] font-[var(--md-sys-typescale-label-medium-weight)]";
-          // iOS often has no artifact
-          if (id === "ios") status.textContent = "内测中";
-          assetsEl.classList.add("hidden");
-          assetsEl.innerHTML = "";
+          if (id === "ios") status.textContent = "TestFlight 内测";
+          if (externalUrl) {
+            assetsEl.classList.remove("hidden");
+            assetsEl.innerHTML = `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-primary)] hover:underline no-underline">
+                <span class="material-symbols-outlined text-base">open_in_new</span>
+                <span>${escapeHtml(externalLabel)}</span>
+              </a>`;
+          } else {
+            assetsEl.classList.add("hidden");
+            assetsEl.innerHTML = "";
+          }
           return;
         }
 
