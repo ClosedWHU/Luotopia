@@ -12,6 +12,3 @@
 *.woff2 binary
 *.ttf binary
 *.otf binary
-*** Add File: Q:\FullStack\luotopia\app\lib\core\l10n\arb\.gitattributes
-# ARB catalogs are JSON and must remain LF-only in every checkout.
-* text=auto eol=lf
