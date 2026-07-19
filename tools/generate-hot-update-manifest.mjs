@@ -42,7 +42,7 @@ const labels = {
 
 const versions = {
   'course-parser': 2,
-  'score-parser': 2,
+  'score-parser': 3,
   'study-status-course-parser': 2,
   'study-status-index-parser': 2,
 };

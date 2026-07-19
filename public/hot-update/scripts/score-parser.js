@@ -7,7 +7,7 @@ function parse(rawJson) {
 
     var xnmStr = (item.xnm || '').toString();
     var kcmc = (item.kcmc || '').toString();
-    var jsxm = (item.jsxm || '').toString();
+    var jsxm = (item.jsxm || item.jsxmmc || '').toString();
     var jxbmc = (item.jxbmc || '').toString();
     var xfStr = (item.xf || '').toString();
     var kcxzmc = (item.kcxzmc || '').toString();
