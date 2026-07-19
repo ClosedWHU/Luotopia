@@ -1,0 +1,17 @@
+# Keep source and static text files stable across Windows, CI, and Unix.
+* text=auto eol=lf
+
+# Static binary assets must not be line-ending normalized.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*** Add File: Q:\FullStack\luotopia\app\lib\core\l10n\arb\.gitattributes
+# ARB catalogs are JSON and must remain LF-only in every checkout.
+* text=auto eol=lf
