@@ -1,7 +1,52 @@
 {
-  "version": 6,
-  "updatedAt": "2026-07-19T00:00:00Z",
+  "schemaVersion": 1,
+  "version": 7,
+  "updatedAt": "2026-07-19T13:34:22.775Z",
+  "expiresAt": "2027-01-15T13:34:22.775Z",
+  "keyId": "luotopia-hot-update-2026-01",
   "scripts": [
+    {
+      "name": "ai-structured-output-parser",
+      "label": "AI 结构化输出解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/ai-structured-output-parser.js",
+      "checksum": "sha256:eab9597bcc74a0681fc8c432c0981b2aac21f755a924a7f5804907cb3ff2208e",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "kind": "extract",
+        "text": "```json\n{\"intent\":\"create\"}\n```"
+      },
+      "testExpect": {
+        "schemaVersion": 1
+      }
+    },
+    {
+      "name": "campus-bus-parser",
+      "label": "校园巴士解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/campus-bus-parser.js",
+      "checksum": "sha256:b09f016a4f0dd7e417eaf488d68bff65097c0b031b5c990e5b3d988f2c6b52ca",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "kind": "vehicles",
+        "vehicles": [
+          "1|x|2|1|114.3|30.5"
+        ]
+      },
+      "testExpect": {
+        "schemaVersion": 1,
+        "kind": "vehicles",
+        "vehicles": [
+          {
+            "num": "1",
+            "stationIndex": 2,
+            "arrive": true
+          }
+        ]
+      }
+    },
     {
       "name": "course-parser",
       "label": "课程表解析器",
@@ -9,17 +54,18 @@
       "url": "/hot-update/scripts/course-parser.js",
       "checksum": "sha256:a0fc4e9c1b1aa93abf48e52055e0430d161371fb632b4c92068cfd07351cdf4b",
       "minAppVersion": "1.0.0",
+      "apiVersion": 1,
       "testInput": {
         "kbList": [
           {
-            "kcmc": "\u9ad8\u7b49\u6570\u5b66",
+            "kcmc": "高等数学",
             "xqj": "1",
             "jcs": "1-2",
-            "zcd": "1-16\u5468",
+            "zcd": "1-2周",
             "jxbmc": "001",
-            "cdmc": "\u6559\u5ba4A",
-            "xm": "\u5f20\u4e09",
-            "kcxz": "\u5fc5\u4fee",
+            "cdmc": "教室A",
+            "xm": "张三",
+            "kcxz": "必修",
             "xf": "4.0",
             "kssj": "08:00",
             "jssj": "09:35"
@@ -29,103 +75,12 @@
       "testExpect": {
         "courses": [
           {
-            "title": "\u9ad8\u7b49\u6570\u5b66",
+            "title": "高等数学",
             "weekday": 1,
             "classFrom": 1,
-            "classTo": 2,
-            "weeks": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
-            "courseId": "001",
-            "courseNature": "\u5fc5\u4fee",
-            "instructor": "\u5f20\u4e09",
-            "location": "\u6559\u5ba4A",
-            "startText": "08:00",
-            "endText": "09:35"
+            "classTo": 2
           }
         ]
-      }
-    },
-    {
-      "name": "score-parser",
-      "label": "成绩解析器",
-      "version": 2,
-      "url": "/hot-update/scripts/score-parser.js",
-      "checksum": "sha256:21e39a966f993a9485ea7b6f86e0a0c6809d07496a9ad6346983d2da836b1a7c",
-      "minAppVersion": "1.0.0",
-      "testInput": {
-        "items": [
-          {
-            "xnm": "2024",
-            "xqm": "3",
-            "kcmc": "\u9ad8\u7b49\u6570\u5b66",
-            "jsxm": "\u5f20\u4e09",
-            "jxbmc": "001",
-            "xf": "4.0",
-            "kcxzmc": "\u5fc5\u4fee",
-            "bfzcj": "92",
-            "kkbmmc": "\u6570\u5b66\u5b66\u9662",
-            "cjbz": "",
-            "ksxz": "\u6b63\u5e38\u8003\u8bd5"
-          }
-        ]
-      },
-      "testExpect": {
-        "scores": [
-          {
-            "year": 2024,
-            "semester": 1,
-            "name": "\u9ad8\u7b49\u6570\u5b66",
-            "credit": 4.0,
-            "score": 92,
-            "isSpoiler": false
-          }
-        ]
-      }
-    },
-    {
-      "name": "study-status-course-parser",
-      "label": "学习状态-课程解析器",
-      "version": 1,
-      "url": "/hot-update/scripts/study-status-course-parser.js",
-      "checksum": "sha256:987dd807ba1730d44f4665c53f5cbd772a989d98e79b6037431583d9be6c8421",
-      "minAppVersion": "1.0.0",
-      "testInput": {
-        "items": [
-          {
-            "KCMC": "\u9ad8\u7b49\u6570\u5b66",
-            "KCXZMC": "\u5fc5\u4fee",
-            "XF": "4.0",
-            "CJ": "92",
-            "JD": "4.0",
-            "MAXCJ": "92",
-            "XDZT": "4",
-            "KCLBMC": "\u57fa\u7840\u8bfe"
-          }
-        ]
-      },
-      "testExpect": {
-        "courses": [
-          {
-            "name": "\u9ad8\u7b49\u6570\u5b66",
-            "credit": 4.0,
-            "score": 92,
-            "status": "passed"
-          }
-        ]
-      }
-    },
-    {
-      "name": "study-status-index-parser",
-      "label": "学习状态-首页解析器",
-      "version": 1,
-      "url": "/hot-update/scripts/study-status-index-parser.js",
-      "checksum": "sha256:404f15225b479c37d01d4bc10506c0fe694384a550939ed58b517d647cb2f34f",
-      "minAppVersion": "1.0.0",
-      "testInput": {
-        "html": "<p class='title1' id='pABC123DEF456ABC123DEF456ABC123DE'>&nbsp;\u5fc5\u4fee\u8bfe\u7a0b</p>"
-      },
-      "testExpect": {
-        "ids": ["ABC123DEF456ABC123DEF456ABC123DE", "qtkcxfyq", "cxcyqkxfyq"],
-        "names": {"ABC123DEF456ABC123DEF456ABC123DE": "\u5fc5\u4fee\u8bfe\u7a0b"}
       }
     },
     {
@@ -135,13 +90,13 @@
       "url": "/hot-update/scripts/datarepo-parser.js",
       "checksum": "sha256:7e8ebc14583252a0858e1b6a112339355cb2aace7846cf8fcb6052397d212c20",
       "minAppVersion": "1.0.0",
+      "apiVersion": 1,
       "testInput": {
-        "body": "<div><p>\u5b66\u53f7</p><p>2021001234</p><p>\u5b66\u751f\u59d3\u540d</p><p>\u5f20\u4e09</p><p>\u5b66\u9662\u540d\u79f0</p><p>\u6570\u5b66\u5b66\u9662</p></div>"
+        "body": "<p>学号：</p><p>2021001234</p><p>学生姓名：</p><p>张三</p>"
       },
       "testExpect": {
         "studentId": "2021001234",
-        "name": "\u5f20\u4e09",
-        "college": "\u6570\u5b66\u5b66\u9662"
+        "name": "张三"
       }
     },
     {
@@ -151,15 +106,15 @@
       "url": "/hot-update/scripts/empty-room-parser.js",
       "checksum": "sha256:5d381a4cbad3ba7fa9e178f7c0a309e79eda06ca40ce3af67cdb3faca28f248f",
       "minAppVersion": "1.0.0",
+      "apiVersion": 1,
       "testInput": {
         "data": [
           {
-            "cdmc": "\u6559\u5ba4101",
-            "jxl": "\u7406\u79d1\u697c",
-            "cdlb": "\u666e\u901a\u6559\u5ba4",
+            "cdmc": "教室101",
+            "jxl": "理科楼",
             "zws": "60",
             "kszws": "45",
-            "jc": "1,2,3",
+            "jc": "1,2",
             "lh": "1"
           }
         ]
@@ -167,11 +122,8 @@
       "testExpect": {
         "rooms": [
           {
-            "name": "\u6559\u5ba4101",
-            "building": "\u7406\u79d1\u697c",
-            "totalSeats": 60,
-            "availableSeats": 45,
-            "availableSections": [1, 2, 3]
+            "name": "教室101",
+            "totalSeats": 60
           }
         ]
       }
@@ -183,19 +135,17 @@
       "url": "/hot-update/scripts/messages-parser.js",
       "checksum": "sha256:69881e07846237c3ce84ed181a85c95badb153697735e0942478ec2b46c75a8d",
       "minAppVersion": "1.0.0",
+      "apiVersion": 1,
       "testInput": {
         "resultData": {
           "total": 1,
           "rows": [
             {
               "msgId": "test123",
-              "msgtitle": "Test Message",
-              "summary": "This is a test",
+              "msgtitle": "Test",
               "senderName": "Admin",
-              "sendTime": "2026-01-01 10:00:00",
-              "sendMsgType": "1",
-              "receiptStatus": "0",
-              "appId": "app1"
+              "sendTime": "2026-01-01",
+              "receiptStatus": "0"
             }
           ]
         }
@@ -204,17 +154,253 @@
         "messages": [
           {
             "msgId": "test123",
-            "title": "Test Message",
-            "summary": "This is a test",
-            "senderName": "Admin",
-            "sendTime": "2026-01-01 10:00:00",
-            "sendMsgType": "1",
-            "isRead": false,
-            "appId": "app1"
+            "title": "Test",
+            "isRead": false
           }
         ],
         "totalCount": 1
       }
+    },
+    {
+      "name": "school-net-parser",
+      "label": "校园网解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/school-net-parser.js",
+      "checksum": "sha256:ca003c1260e2d1a33d9e3374366c900b247986dca663ceaa0ebf6c4c677bccdc",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "operation": "landing",
+        "html": "<button id=\"suspend\">暂停</button>"
+      },
+      "testExpect": {
+        "operation": "landing",
+        "status": "active"
+      }
+    },
+    {
+      "name": "score-parser",
+      "label": "成绩解析器",
+      "version": 2,
+      "url": "/hot-update/scripts/score-parser.js",
+      "checksum": "sha256:21e39a966f993a9485ea7b6f86e0a0c6809d07496a9ad6346983d2da836b1a7c",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "items": [
+          {
+            "xnm": "2024",
+            "xqm": "3",
+            "kcmc": "高等数学",
+            "jsxmmc": "张三",
+            "jxbmc": "001",
+            "xf": "4.0",
+            "kcxzmc": "必修",
+            "bfzcj": "92",
+            "kkbmmc": "数学学院",
+            "cjbz": "",
+            "ksxz": "正常考试"
+          }
+        ]
+      },
+      "testExpect": {
+        "scores": [
+          {
+            "year": 2024,
+            "semester": 1,
+            "name": "高等数学",
+            "score": 92
+          }
+        ]
+      }
+    },
+    {
+      "name": "sports-reservation-parser",
+      "label": "体育场馆预约解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/sports-reservation-parser.js",
+      "checksum": "sha256:cc80987d8eb7d16b5894eed856c2f3b8f8b5f1cf1f721237dee92f5b7dc66ad4",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "decoded": {
+          "Success": true,
+          "Code": 0,
+          "Data": {
+            "Items": []
+          }
+        }
+      },
+      "testExpect": {
+        "normalized": {
+          "success": true,
+          "status": 0
+        }
+      }
+    },
+    {
+      "name": "study-status-course-parser",
+      "label": "学习状态-课程解析器",
+      "version": 2,
+      "url": "/hot-update/scripts/study-status-course-parser.js",
+      "checksum": "sha256:724077d83e4b6183c856913d128344d01d12121579ff8daa911c617c0b9c587d",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "items": [
+          {
+            "KCMC": "高等数学",
+            "KCXZMC": "必修",
+            "XF": "4.0",
+            "CJ": "92",
+            "JD": "4.0",
+            "MAXCJ": "92",
+            "XDZT": "4",
+            "KCLBMC": "基础课"
+          }
+        ]
+      },
+      "testExpect": {
+        "courses": [
+          {
+            "name": "高等数学",
+            "credit": 4,
+            "score": 92,
+            "status": "passed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "study-status-index-parser",
+      "label": "学习状态-首页解析器",
+      "version": 2,
+      "url": "/hot-update/scripts/study-status-index-parser.js",
+      "checksum": "sha256:23fe4ffc05b08cd0a1a8cd851879eeba4e756df4592146ad140b1b23b930c70d",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "html": "<p class='title1' id='pABC123DEF456ABC123DEF456ABC123DE'>必修课程&nbsp;</p>"
+      },
+      "testExpect": {
+        "names": {
+          "ABC123DEF456ABC123DEF456ABC123DE": "必修课程"
+        }
+      }
+    },
+    {
+      "name": "third-party-timetable-parser",
+      "label": "第三方课程表解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/third-party-timetable-parser.js",
+      "checksum": "sha256:ca7f244fa082a929d41258ab0e417ab0c0e79f9ad5cb305ffe459f5d8ab36079",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "source": "shiguang",
+        "data": {
+          "name": "测试课表",
+          "courses": [
+            {
+              "name": "高等数学",
+              "day": 1,
+              "startSection": 1,
+              "endSection": 2,
+              "startTime": "08:00",
+              "endTime": "09:35"
+            }
+          ]
+        }
+      },
+      "testExpect": {
+        "normalized": true,
+        "name": "测试课表",
+        "courses": [
+          {
+            "name": "高等数学",
+            "day": 1
+          }
+        ]
+      }
+    },
+    {
+      "name": "transcript-score-parser",
+      "label": "成绩单解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/transcript-score-parser.js",
+      "checksum": "sha256:3cdf31f5f51932128014c56bbc86043173a8383316ca2b2746bfc2a82671dc73",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "lines": [
+          "武汉大学学生成绩单",
+          "2024学年1学期",
+          "高等数学",
+          "必修",
+          "正常考试",
+          "4.0",
+          "92"
+        ]
+      },
+      "testExpect": {
+        "scores": [
+          {
+            "year": 2024,
+            "semester": 1,
+            "name": "高等数学",
+            "credit": 4,
+            "score": 92
+          }
+        ]
+      }
+    },
+    {
+      "name": "wakeup-parser",
+      "label": "WakeUp 课程表解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/wakeup-parser.js",
+      "checksum": "sha256:a269cce4a87ef2a0f826ef6ce84d57b0d16a405b1c23a47aa04c8a3b2ad24513",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "format": "csv",
+        "content": "课程名称,星期,开始节数,结束节数,教师,地点,周次\n高等数学,1,1,2,张三,教室A,1-16",
+        "fileName": "test.csv"
+      },
+      "testExpect": {
+        "name": "test",
+        "items": [
+          {
+            "name": "高等数学",
+            "day": 1,
+            "startNode": 1,
+            "endNode": 2
+          }
+        ]
+      }
+    },
+    {
+      "name": "whu-email-envelope-parser",
+      "label": "武大邮箱响应解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/whu-email-envelope-parser.js",
+      "checksum": "sha256:295b6d6061a084e9bf464d8b8e5efe14c740ec7a1dc2763b2760b6c92bc4724b",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "body": {
+          "code": 200,
+          "data": {
+            "unreadCount": 3
+          }
+        }
+      },
+      "testExpect": {
+        "schemaVersion": 1,
+        "success": true,
+        "unreadCount": 3
+      }
     }
-  ]
+  ],
+  "signature": "K/HZdnMPukOmUAVU7wBT6+fMeB6292SuL0xFHFujarJJgX8XJtAo+u19RxV9C7U86VOFSYuDxRvCXcSCDnIEAw=="
 }

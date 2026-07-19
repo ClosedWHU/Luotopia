@@ -9,7 +9,11 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "hot-update:init-key": "node tools/generate-hot-update-manifest.mjs --init-key",
+    "hot-update:generate": "node tools/generate-hot-update-manifest.mjs",
+    "hot-update:verify": "node tools/generate-hot-update-manifest.mjs --verify",
+    "prebuild": "npm run hot-update:generate"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.0",

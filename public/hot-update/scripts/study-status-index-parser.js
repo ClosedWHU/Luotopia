@@ -1,11 +1,11 @@
 function parse(rawJson) {
   var input = JSON.parse(rawJson);
-  var html = input.html;
+  var html = typeof input.html === 'string' ? input.html : '';
 
   var ids = discoverIds(html);
-  var names = discoverNames(html);
+  var names = input.names || discoverNames(html);
   var modes = discoverModes(html);
-  var credits = discoverCredits(html);
+  var credits = input.credits || discoverCredits(html);
   var tree = buildTree(html, names, credits);
 
   return JSON.stringify({
@@ -107,6 +107,7 @@ function buildTree(html, idToName, idToCredits) {
     var previousHtml = html.substring(0, m.index);
     var pMatches = [];
     var pm;
+    pIdPattern.lastIndex = 0;
     while ((pm = pIdPattern.exec(previousHtml)) !== null) {
       pMatches.push(pm);
     }
