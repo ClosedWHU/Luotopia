@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": 7,
-  "updatedAt": "2026-07-19T13:34:22.775Z",
-  "expiresAt": "2027-01-15T13:34:22.775Z",
+  "version": 8,
+  "updatedAt": "2026-07-19T19:12:50.248Z",
+  "expiresAt": "2027-01-15T19:12:50.248Z",
   "keyId": "luotopia-hot-update-2026-01",
   "scripts": [
     {
@@ -181,9 +181,9 @@
     {
       "name": "score-parser",
       "label": "成绩解析器",
-      "version": 2,
+      "version": 3,
       "url": "/hot-update/scripts/score-parser.js",
-      "checksum": "sha256:21e39a966f993a9485ea7b6f86e0a0c6809d07496a9ad6346983d2da836b1a7c",
+      "checksum": "sha256:9613bcc470872b0de2e3e80504e4ab2f5096a299352fe4ad3ea692ef0919efd8",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -402,5 +402,5 @@
       }
     }
   ],
-  "signature": "K/HZdnMPukOmUAVU7wBT6+fMeB6292SuL0xFHFujarJJgX8XJtAo+u19RxV9C7U86VOFSYuDxRvCXcSCDnIEAw=="
+  "signature": "bTqRmhvlKU3d5cyqJEieR7d/zPlZJSlxhmuyGpVDwEDaS9C6/WUkucfgP4rWVaPOKJSnYMLn/ZPqxHTZm8t5AQ=="
 }
