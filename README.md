@@ -65,3 +65,28 @@ npm run build
 ## 许可证
 
 [MIT](LICENSE)
+# Hot-update scripts
+
+Parser hot updates live in `public/hot-update/scripts/`. The app accepts only
+the signed `public/hot-update/manifest.json`; checksums without a valid Ed25519
+signature are rejected.
+
+Initialize a local signing key once:
+
+```sh
+npm run hot-update:init-key
+```
+
+This writes the private key to ignored `.env.hot-update` and installs only the
+public key in the adjacent app workspace. Never commit `.env.hot-update`.
+
+Generate and verify the manifest:
+
+```sh
+npm run hot-update:generate
+npm run hot-update:verify
+```
+
+`npm run build` generates the manifest automatically and fails when the signing
+key is unavailable. Production must provide `HOT_UPDATE_ED25519_PRIVATE_KEY` as
+a secret containing the base64 PKCS#8 Ed25519 private key generated above.

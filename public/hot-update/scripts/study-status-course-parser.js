@@ -3,8 +3,8 @@ function parse(rawJson) {
   var items = data.items || data;
   if (!Array.isArray(items)) items = [];
   var result = [];
-  for (var i = 0; i < data.length; i++) {
-    var item = data[i];
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i];
     var xdzt = (item.XDZT || '').toString();
     var status = parseStatus(xdzt);
     var score = (item.CJ || '').toString();
