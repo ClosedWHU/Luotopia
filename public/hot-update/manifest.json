@@ -1,0 +1,220 @@
+{
+  "version": 6,
+  "updatedAt": "2026-07-19T00:00:00Z",
+  "scripts": [
+    {
+      "name": "course-parser",
+      "label": "课程表解析器",
+      "version": 2,
+      "url": "/hot-update/scripts/course-parser.js",
+      "checksum": "sha256:a0fc4e9c1b1aa93abf48e52055e0430d161371fb632b4c92068cfd07351cdf4b",
+      "minAppVersion": "1.0.0",
+      "testInput": {
+        "kbList": [
+          {
+            "kcmc": "\u9ad8\u7b49\u6570\u5b66",
+            "xqj": "1",
+            "jcs": "1-2",
+            "zcd": "1-16\u5468",
+            "jxbmc": "001",
+            "cdmc": "\u6559\u5ba4A",
+            "xm": "\u5f20\u4e09",
+            "kcxz": "\u5fc5\u4fee",
+            "xf": "4.0",
+            "kssj": "08:00",
+            "jssj": "09:35"
+          }
+        ]
+      },
+      "testExpect": {
+        "courses": [
+          {
+            "title": "\u9ad8\u7b49\u6570\u5b66",
+            "weekday": 1,
+            "classFrom": 1,
+            "classTo": 2,
+            "weeks": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+            "courseId": "001",
+            "courseNature": "\u5fc5\u4fee",
+            "instructor": "\u5f20\u4e09",
+            "location": "\u6559\u5ba4A",
+            "startText": "08:00",
+            "endText": "09:35"
+          }
+        ]
+      }
+    },
+    {
+      "name": "score-parser",
+      "label": "成绩解析器",
+      "version": 2,
+      "url": "/hot-update/scripts/score-parser.js",
+      "checksum": "sha256:21e39a966f993a9485ea7b6f86e0a0c6809d07496a9ad6346983d2da836b1a7c",
+      "minAppVersion": "1.0.0",
+      "testInput": {
+        "items": [
+          {
+            "xnm": "2024",
+            "xqm": "3",
+            "kcmc": "\u9ad8\u7b49\u6570\u5b66",
+            "jsxm": "\u5f20\u4e09",
+            "jxbmc": "001",
+            "xf": "4.0",
+            "kcxzmc": "\u5fc5\u4fee",
+            "bfzcj": "92",
+            "kkbmmc": "\u6570\u5b66\u5b66\u9662",
+            "cjbz": "",
+            "ksxz": "\u6b63\u5e38\u8003\u8bd5"
+          }
+        ]
+      },
+      "testExpect": {
+        "scores": [
+          {
+            "year": 2024,
+            "semester": 1,
+            "name": "\u9ad8\u7b49\u6570\u5b66",
+            "credit": 4.0,
+            "score": 92,
+            "isSpoiler": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "study-status-course-parser",
+      "label": "学习状态-课程解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/study-status-course-parser.js",
+      "checksum": "sha256:987dd807ba1730d44f4665c53f5cbd772a989d98e79b6037431583d9be6c8421",
+      "minAppVersion": "1.0.0",
+      "testInput": {
+        "items": [
+          {
+            "KCMC": "\u9ad8\u7b49\u6570\u5b66",
+            "KCXZMC": "\u5fc5\u4fee",
+            "XF": "4.0",
+            "CJ": "92",
+            "JD": "4.0",
+            "MAXCJ": "92",
+            "XDZT": "4",
+            "KCLBMC": "\u57fa\u7840\u8bfe"
+          }
+        ]
+      },
+      "testExpect": {
+        "courses": [
+          {
+            "name": "\u9ad8\u7b49\u6570\u5b66",
+            "credit": 4.0,
+            "score": 92,
+            "status": "passed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "study-status-index-parser",
+      "label": "学习状态-首页解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/study-status-index-parser.js",
+      "checksum": "sha256:404f15225b479c37d01d4bc10506c0fe694384a550939ed58b517d647cb2f34f",
+      "minAppVersion": "1.0.0",
+      "testInput": {
+        "html": "<p class='title1' id='pABC123DEF456ABC123DEF456ABC123DE'>&nbsp;\u5fc5\u4fee\u8bfe\u7a0b</p>"
+      },
+      "testExpect": {
+        "ids": ["ABC123DEF456ABC123DEF456ABC123DE", "qtkcxfyq", "cxcyqkxfyq"],
+        "names": {"ABC123DEF456ABC123DEF456ABC123DE": "\u5fc5\u4fee\u8bfe\u7a0b"}
+      }
+    },
+    {
+      "name": "datarepo-parser",
+      "label": "学生信息解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/datarepo-parser.js",
+      "checksum": "sha256:7e8ebc14583252a0858e1b6a112339355cb2aace7846cf8fcb6052397d212c20",
+      "minAppVersion": "1.0.0",
+      "testInput": {
+        "body": "<div><p>\u5b66\u53f7</p><p>2021001234</p><p>\u5b66\u751f\u59d3\u540d</p><p>\u5f20\u4e09</p><p>\u5b66\u9662\u540d\u79f0</p><p>\u6570\u5b66\u5b66\u9662</p></div>"
+      },
+      "testExpect": {
+        "studentId": "2021001234",
+        "name": "\u5f20\u4e09",
+        "college": "\u6570\u5b66\u5b66\u9662"
+      }
+    },
+    {
+      "name": "empty-room-parser",
+      "label": "空教室解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/empty-room-parser.js",
+      "checksum": "sha256:5d381a4cbad3ba7fa9e178f7c0a309e79eda06ca40ce3af67cdb3faca28f248f",
+      "minAppVersion": "1.0.0",
+      "testInput": {
+        "data": [
+          {
+            "cdmc": "\u6559\u5ba4101",
+            "jxl": "\u7406\u79d1\u697c",
+            "cdlb": "\u666e\u901a\u6559\u5ba4",
+            "zws": "60",
+            "kszws": "45",
+            "jc": "1,2,3",
+            "lh": "1"
+          }
+        ]
+      },
+      "testExpect": {
+        "rooms": [
+          {
+            "name": "\u6559\u5ba4101",
+            "building": "\u7406\u79d1\u697c",
+            "totalSeats": 60,
+            "availableSeats": 45,
+            "availableSections": [1, 2, 3]
+          }
+        ]
+      }
+    },
+    {
+      "name": "messages-parser",
+      "label": "消息解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/messages-parser.js",
+      "checksum": "sha256:69881e07846237c3ce84ed181a85c95badb153697735e0942478ec2b46c75a8d",
+      "minAppVersion": "1.0.0",
+      "testInput": {
+        "resultData": {
+          "total": 1,
+          "rows": [
+            {
+              "msgId": "test123",
+              "msgtitle": "Test Message",
+              "summary": "This is a test",
+              "senderName": "Admin",
+              "sendTime": "2026-01-01 10:00:00",
+              "sendMsgType": "1",
+              "receiptStatus": "0",
+              "appId": "app1"
+            }
+          ]
+        }
+      },
+      "testExpect": {
+        "messages": [
+          {
+            "msgId": "test123",
+            "title": "Test Message",
+            "summary": "This is a test",
+            "senderName": "Admin",
+            "sendTime": "2026-01-01 10:00:00",
+            "sendMsgType": "1",
+            "isRead": false,
+            "appId": "app1"
+          }
+        ],
+        "totalCount": 1
+      }
+    }
+  ]
+}
