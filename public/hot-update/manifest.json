@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": 8,
-  "updatedAt": "2026-07-19T19:12:50.248Z",
-  "expiresAt": "2027-01-15T19:12:50.248Z",
+  "version": 11,
+  "updatedAt": "2026-07-20T16:51:37.527Z",
+  "expiresAt": "2027-01-16T16:51:37.527Z",
   "keyId": "luotopia-hot-update-2026-01",
   "scripts": [
     {
@@ -126,6 +126,79 @@
             "totalSeats": 60
           }
         ]
+      }
+    },
+    {
+      "name": "medical-exam-detail-parser",
+      "label": "校医院检查详情解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/medical-exam-detail-parser.js",
+      "checksum": "sha256:20af72326ac331b0d7222ea65508979df59c47cc6c744a3ae817f142574394cb",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "html": "<p class=\"font6 f18\">胸部检查</p><div class=\"p10 bgw borderBottom\"><p>放射科</p><p>发布时间: 2026-01-01</p></div><p class=\"font333 opacity90\">检查所见:</p><p>未见异常</p>"
+      },
+      "testExpect": {
+        "schemaVersion": 1,
+        "title": "胸部检查",
+        "fields": {
+          "检查科室": "放射科"
+        },
+        "sections": [
+          {
+            "title": "检查所见",
+            "content": "未见异常"
+          }
+        ]
+      }
+    },
+    {
+      "name": "medical-lab-detail-parser",
+      "label": "校医院检验详情解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/medical-lab-detail-parser.js",
+      "checksum": "sha256:3af14cb2eedf321f5929ab829fc19a6654463be34cd8d61ad7c08f89c5bb8925",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "html": "<table><tr><td>项目名称</td><td>缩写</td><td>结果</td><td>单位</td><td>异常</td><td>参考范围</td></tr><tr><td>白细胞</td><td>WBC</td><td>6.66</td><td>10^9/L</td><td></td><td>3.5-9.5</td></tr></table>"
+      },
+      "testExpect": {
+        "schemaVersion": 1,
+        "results": [
+          {
+            "itemName": "白细胞",
+            "result": "6.66",
+            "referenceRange": "3.5-9.5"
+          }
+        ]
+      }
+    },
+    {
+      "name": "medical-report-list-parser",
+      "label": "校医院报告列表解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/medical-report-list-parser.js",
+      "checksum": "sha256:0dd95791b3ed14ef065b17e0688b5d0c46203de5e515b78cfda8d845986f5a61",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "kind": "page",
+        "html": "<div id=\"lisId\"><div class=\"f14 mt10\"><p>血常规</p><a onclick=\"lisReportDetail('adm&sign=s','item','lab')\"><p>2026-01-01</p><div class=\"weui-cell__ft\">报告已出</div></a></div></div><div id=\"risId\"></div><script>var lisLoadEnd=!!('');var risLoadEnd=!!('1');</script>"
+      },
+      "testExpect": {
+        "schemaVersion": 1,
+        "laboratoryReports": [
+          {
+            "title": "血常规",
+            "status": "报告已出",
+            "detail": {
+              "path": "lisreportdetail"
+            }
+          }
+        ],
+        "examinationIsLast": true
       }
     },
     {
@@ -402,5 +475,5 @@
       }
     }
   ],
-  "signature": "bTqRmhvlKU3d5cyqJEieR7d/zPlZJSlxhmuyGpVDwEDaS9C6/WUkucfgP4rWVaPOKJSnYMLn/ZPqxHTZm8t5AQ=="
+  "signature": "dQkv9mUyIfoIj5qTUSzKUCrTr6V/BMi1ApWfjZLdF/XYg/kQ+CyRa4HN2wWsDf49JV7nDF9gnswmHv12AuuMAw=="
 }

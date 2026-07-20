@@ -27,6 +27,9 @@ const tests = {
   'campus-bus-parser': { input: { kind: 'vehicles', vehicles: ['1|x|2|1|114.3|30.5'] }, expect: { schemaVersion: 1, kind: 'vehicles', vehicles: [{ num: '1', stationIndex: 2, arrive: true }] } },
   'ai-structured-output-parser': { input: { kind: 'extract', text: '```json\n{"intent":"create"}\n```' }, expect: { schemaVersion: 1 } },
   'whu-email-envelope-parser': { input: { body: { code: 200, data: { unreadCount: 3 } } }, expect: { schemaVersion: 1, success: true, unreadCount: 3 } },
+  'medical-report-list-parser': { input: { kind: 'page', html: '<div id="lisId"><div class="f14 mt10"><p>血常规</p><a onclick="lisReportDetail(\'adm&sign=s\',\'item\',\'lab\')"><p>2026-01-01</p><div class="weui-cell__ft">报告已出</div></a></div></div><div id="risId"></div><script>var lisLoadEnd=!!(\'\');var risLoadEnd=!!(\'1\');</script>' }, expect: { schemaVersion: 1, laboratoryReports: [{ title: '血常规', status: '报告已出', detail: { path: 'lisreportdetail' } }], examinationIsLast: true } },
+  'medical-lab-detail-parser': { input: { html: '<table><tr><td>项目名称</td><td>缩写</td><td>结果</td><td>单位</td><td>异常</td><td>参考范围</td></tr><tr><td>白细胞</td><td>WBC</td><td>6.66</td><td>10^9/L</td><td></td><td>3.5-9.5</td></tr></table>' }, expect: { schemaVersion: 1, results: [{ itemName: '白细胞', result: '6.66', referenceRange: '3.5-9.5' }] } },
+  'medical-exam-detail-parser': { input: { html: '<p class="font6 f18">胸部检查</p><div class="p10 bgw borderBottom"><p>放射科</p><p>发布时间: 2026-01-01</p></div><p class="font333 opacity90">检查所见:</p><p>未见异常</p>' }, expect: { schemaVersion: 1, title: '胸部检查', fields: { '检查科室': '放射科' }, sections: [{ title: '检查所见', content: '未见异常' }] } },
 };
 
 const labels = {
@@ -38,6 +41,7 @@ const labels = {
   'third-party-timetable-parser': '第三方课程表解析器', 'sports-reservation-parser': '体育场馆预约解析器',
   'campus-bus-parser': '校园巴士解析器', 'ai-structured-output-parser': 'AI 结构化输出解析器',
   'whu-email-envelope-parser': '武大邮箱响应解析器',
+  'medical-report-list-parser': '校医院报告列表解析器', 'medical-lab-detail-parser': '校医院检验详情解析器', 'medical-exam-detail-parser': '校医院检查详情解析器',
 };
 
 const versions = {
