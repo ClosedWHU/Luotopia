@@ -42,19 +42,18 @@ function parseDevices(html) {
   var ipPattern = /<input\b[^>]*\bid=["']userIp([^"']*)["'][^>]*>/gi;
   var match;
   while ((match = ipPattern.exec(html)) !== null) {
-    var recordId = match[1];
-    if (!recordId) continue;
-    var rowStart = html.toLowerCase().lastIndexOf('<tr', match.index);
-    var rowEnd = html.toLowerCase().indexOf('</tr>', match.index);
+    if (!match[1]) continue;
+    var lower = html.toLowerCase();
+    var rowStart = lower.lastIndexOf('<tr', match.index);
+    var rowEnd = lower.indexOf('</tr>', match.index);
     var container = rowStart >= 0 && rowEnd >= 0
       ? html.substring(rowStart, rowEnd + 5)
       : html.substring(Math.max(0, match.index - 2000), Math.min(html.length, match.index + 2000));
-    var ipAddress = attribute(match[0], 'value');
     var cancelTag = findInputByValue(container, '取消无感认证');
     devices.push({
       name: hiddenValue(container, 'inputrow') || labelTitle(container) || '我的设备',
       onlineSince: hiddenValue(container, 'createTimeStr'),
-      ipAddress: ipAddress,
+      ipAddress: clean(attribute(match[0], 'value')),
       macAddress: hiddenValue(container, 'usermac'),
       cancelId: cancelTag ? actionArgument(attribute(cancelTag, 'onclick')) : null
     });

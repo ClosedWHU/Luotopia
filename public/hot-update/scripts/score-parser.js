@@ -6,13 +6,13 @@ function parse(rawJson) {
     var item = items[i];
 
     var xnmStr = (item.xnm || '').toString();
-    var kcmc = (item.kcmc || '').toString();
-    var jsxm = (item.jsxm || item.jsxmmc || '').toString();
-    var jxbmc = (item.jxbmc || '').toString();
+    var kcmc = (item.kcmc || '').toString().trim();
+    var jsxm = (item.jsxm || item.jsxmmc || '').toString().trim();
+    var jxbmc = (item.jxbmc || '').toString().trim();
     var xfStr = (item.xf || '').toString();
-    var kcxzmc = (item.kcxzmc || '').toString();
+    var kcxzmc = (item.kcxzmc || '').toString().trim();
     var bfzcjStr = (item.bfzcj || '').toString();
-    var kkbmmc = (item.kkbmmc || '').toString();
+    var kkbmmc = (item.kkbmmc || '').toString().trim();
     var xqmStr = (item.xqm || '').toString();
     var cjbz = (item.cjbz || '').toString();
     var examType = ((item.ksxz || item.ksxzmc || '') + '' || '正常考试').trim();

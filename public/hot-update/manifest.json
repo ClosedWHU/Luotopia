@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": 11,
-  "updatedAt": "2026-07-20T16:51:37.527Z",
-  "expiresAt": "2027-01-16T16:51:37.527Z",
+  "version": 12,
+  "updatedAt": "2026-07-23T16:25:57.656Z",
+  "expiresAt": "2027-01-19T16:25:57.656Z",
   "keyId": "luotopia-hot-update-2026-01",
   "scripts": [
     {
@@ -178,9 +178,9 @@
     {
       "name": "medical-report-list-parser",
       "label": "校医院报告列表解析器",
-      "version": 1,
+      "version": 2,
       "url": "/hot-update/scripts/medical-report-list-parser.js",
-      "checksum": "sha256:0dd95791b3ed14ef065b17e0688b5d0c46203de5e515b78cfda8d845986f5a61",
+      "checksum": "sha256:3aafcdc06ebc9bdd4837d2c44f3c76e54642be88397b53016cecb63185051aeb",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -237,9 +237,9 @@
     {
       "name": "school-net-parser",
       "label": "校园网解析器",
-      "version": 1,
+      "version": 2,
       "url": "/hot-update/scripts/school-net-parser.js",
-      "checksum": "sha256:ca003c1260e2d1a33d9e3374366c900b247986dca663ceaa0ebf6c4c677bccdc",
+      "checksum": "sha256:51d7ab8446036688e957c5a5770cc3ff386f695435828d5781929b927a8a4273",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -254,9 +254,9 @@
     {
       "name": "score-parser",
       "label": "成绩解析器",
-      "version": 3,
+      "version": 4,
       "url": "/hot-update/scripts/score-parser.js",
-      "checksum": "sha256:9613bcc470872b0de2e3e80504e4ab2f5096a299352fe4ad3ea692ef0919efd8",
+      "checksum": "sha256:2eb6ae55ebcf00e4430d77bc0d91a87d6a39fb06af56dd529836cc2785e80ea7",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -399,16 +399,20 @@
     {
       "name": "transcript-score-parser",
       "label": "成绩单解析器",
-      "version": 3,
+      "version": 4,
       "url": "/hot-update/scripts/transcript-score-parser.js",
-      "checksum": "sha256:c14d4083b1b67bbcff91301bb1dc5d273604296ce2b80dc8004eb30257c072d8",
+      "checksum": "sha256:81a0af13f27b3c84cd2a468b9046e623517edc48c24f4bb60c1fc2c1eaa3600c",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
         "lines": [
           "武汉大学学生成绩单",
           "2024学年1学期",
-          "高等数学 公共基础必修 普通 4.0 92"
+          "高等数学",
+          "必修",
+          "正常考试",
+          "4.0",
+          "92"
         ]
       },
       "testExpect": {
@@ -471,5 +475,5 @@
       }
     }
   ],
-  "signature": "dQkv9mUyIfoIj5qTUSzKUCrTr6V/BMi1ApWfjZLdF/XYg/kQ+CyRa4HN2wWsDf49JV7nDF9gnswmHv12AuuMAw=="
+  "signature": "iKvIclOlFSVxGMySJcU97e+HQJ0i9YT3Klrm3iOzHWVYxNczwoTFxITrIn9IWQ5pJdJsd86XChN0T8yTk+4/Dw=="
 }
