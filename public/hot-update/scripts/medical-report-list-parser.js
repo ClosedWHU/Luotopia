@@ -1,7 +1,15 @@
 function parse(rawJson) {
   var input = JSON.parse(rawJson), html = text(input.html), kind = text(input.kind) || 'page';
   if (kind === 'fragment') return JSON.stringify({ schemaVersion: 1, reports: reports(html, text(input.type)), isLast: false });
-  return JSON.stringify({ schemaVersion: 1, laboratoryReports: reports(block(html, 'lisId'), 'laboratory'), examinationReports: reports(block(html, 'risId'), 'examination'), laboratoryIsLast: loadEnd(html, 'lis'), examinationIsLast: loadEnd(html, 'ris') });
+  var laboratoryReports = reports(block(html, 'lisId'), 'laboratory');
+  var examinationReports = reports(block(html, 'risId'), 'examination');
+  return JSON.stringify({
+    schemaVersion: 1,
+    laboratoryReports: laboratoryReports,
+    examinationReports: examinationReports,
+    laboratoryIsLast: laboratoryReports.length === 0 || loadEnd(html, 'lis'),
+    examinationIsLast: examinationReports.length === 0 || loadEnd(html, 'ris')
+  });
 }
 function reports(html, type) {
   var fn = type === 'examination' ? 'risReportDetail' : 'lisReportDetail', path = type === 'examination' ? 'risreportdetail' : 'lisreportdetail';

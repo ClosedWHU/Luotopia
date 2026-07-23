@@ -55,6 +55,14 @@ function parse(rawJson) {
       continue;
     }
 
+    // Dart fallback: full row may be split across adjacent visual lines.
+    var joined = fullRow.exec(line + ' ' + nextLine);
+    if (joined) {
+      addScore(joined[1], joined[2] + joined[3], joined[4], joined[5], joined[6]);
+      i++;
+      continue;
+    }
+
     if (i + 4 >= lines.length) continue;
     var courseType = ('' + lines[i + 1]).trim();
     var examType = ('' + lines[i + 2]).trim();
