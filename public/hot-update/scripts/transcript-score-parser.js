@@ -5,12 +5,12 @@ function parse(rawJson) {
 
   var scores = [], year = null, semester = null;
   var header = /^课程\s+课程类型\s+学习类型\s+学分\s+成绩\s*/;
-  var fullRow = /^(.*?)\s+(通识教育|公共基础|专业教育)\s*(必修|选修)\s+(普通|重修)\s+(\d+(?:\.\d+)?)\s+(\d{1,3}|W)$/;
-  var reversedRow = /^(.*?)\s*(通识教育|公共基础|专业教育)\s*(必修|选修)\s+(\d+(?:\.\d+)?)\s+(\d{1,3}|W)$/;
+  var fullRow = /^(.*?)\s+(通识教育|公共基础|专业教育)\s*(必修|选修)\s+(普通|重修)\s+(\d+(?:\.\d+)?)\s+(\d{1,3}|W|合格|不合格)$/;
+  var reversedRow = /^(.*?)\s*(通识教育|公共基础|专业教育)\s*(必修|选修)\s+(\d+(?:\.\d+)?)\s+(\d{1,3}|W|合格|不合格)$/;
   var courseWithStudyType = /^(.*)\s+(普通|重修)$/;
 
   function addScore(name, courseType, examType, credit, grade) {
-    var withdrawn = grade === 'W';
+    var withdrawn = !/^\d{1,3}$/.test(grade);
     scores.push({
       year: year,
       semester: semester,
@@ -19,7 +19,8 @@ function parse(rawJson) {
       examType: examType,
       credit: parseFloat(credit),
       score: withdrawn ? 0 : parseInt(grade, 10),
-      isWithdrawn: withdrawn
+      isWithdrawn: withdrawn,
+      scoreLabel: withdrawn ? (grade === 'W' ? '中期退课' : grade) : null
     });
   }
 
@@ -59,7 +60,7 @@ function parse(rawJson) {
     var examType = ('' + lines[i + 2]).trim();
     var credit = ('' + lines[i + 3]).trim();
     var grade = ('' + lines[i + 4]).trim();
-    if (/^\d+(?:\.\d+)?$/.test(credit) && /^(?:\d{1,3}|W)$/.test(grade)) {
+    if (/^\d+(?:\.\d+)?$/.test(credit) && /^(?:\d{1,3}|W|合格|不合格)$/.test(grade)) {
       addScore(line, courseType, examType, credit, grade);
       i += 4;
     }
