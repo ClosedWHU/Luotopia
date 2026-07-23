@@ -399,20 +399,16 @@
     {
       "name": "transcript-score-parser",
       "label": "成绩单解析器",
-      "version": 1,
+      "version": 2,
       "url": "/hot-update/scripts/transcript-score-parser.js",
-      "checksum": "sha256:3cdf31f5f51932128014c56bbc86043173a8383316ca2b2746bfc2a82671dc73",
+      "checksum": "sha256:613c57a6814dc21af056bb3b06afce31e500f150a079b420d9ee13ed86cbd219",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
         "lines": [
           "武汉大学学生成绩单",
           "2024学年1学期",
-          "高等数学",
-          "必修",
-          "正常考试",
-          "4.0",
-          "92"
+          "高等数学 公共基础必修 普通 4.0 92"
         ]
       },
       "testExpect": {
