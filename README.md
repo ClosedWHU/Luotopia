@@ -62,6 +62,16 @@ npm run build
 # 将 dist/ 目录部署到任意静态托管服务（Nginx, GitHub Pages, Netlify 等）
 ```
 
+## Star History
+
+<a href="https://star-history.tsinbei.com/#ClosedWHU/Luotopia&type=date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://star-history.tsinbei.com/svg?repos=ClosedWHU/Luotopia&type=date&theme=dark&legend=top-left" />
+    <source media="(prefers-color-scheme: light)" srcset="https://star-history.tsinbei.com/svg?repos=ClosedWHU/Luotopia&type=date&legend=top-left" />
+    <img alt="Star History Chart" src="https://star-history.tsinbei.com/svg?repos=ClosedWHU/Luotopia&type=date&legend=top-left" />
+  </picture>
+</a>
+
 ## 许可证
 
 [MIT](LICENSE)
