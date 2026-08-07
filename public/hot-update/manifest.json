@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": 12,
-  "updatedAt": "2026-07-23T16:25:57.656Z",
-  "expiresAt": "2027-01-19T16:25:57.656Z",
+  "version": 16,
+  "updatedAt": "2026-07-28T12:00:22.542Z",
+  "expiresAt": "2027-01-24T12:00:22.542Z",
   "keyId": "luotopia-hot-update-2026-01",
   "scripts": [
     {
@@ -50,9 +50,9 @@
     {
       "name": "course-parser",
       "label": "课程表解析器",
-      "version": 2,
+      "version": 4,
       "url": "/hot-update/scripts/course-parser.js",
-      "checksum": "sha256:a0fc4e9c1b1aa93abf48e52055e0430d161371fb632b4c92068cfd07351cdf4b",
+      "checksum": "sha256:97c23ffa4978353fcbd9a73a4098b7583440e6de19765ae9cac42fcf181f15bb",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -399,9 +399,9 @@
     {
       "name": "transcript-score-parser",
       "label": "成绩单解析器",
-      "version": 4,
+      "version": 5,
       "url": "/hot-update/scripts/transcript-score-parser.js",
-      "checksum": "sha256:81a0af13f27b3c84cd2a468b9046e623517edc48c24f4bb60c1fc2c1eaa3600c",
+      "checksum": "sha256:e72a9b9a846f58f63c63c1cbce17c9e7ff6f5c5317aa7ad6f31c6f9954c1c9f4",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -475,5 +475,5 @@
       }
     }
   ],
-  "signature": "iKvIclOlFSVxGMySJcU97e+HQJ0i9YT3Klrm3iOzHWVYxNczwoTFxITrIn9IWQ5pJdJsd86XChN0T8yTk+4/Dw=="
+  "signature": "qLbtWqeriZzXr8JGmZbjL7ODVZU6VoLS+0/C0JMO/ygaExdEZkjKTokEr5u4YolErGp1kRsiNgTe8pPD1xivDQ=="
 }
