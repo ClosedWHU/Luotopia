@@ -4,7 +4,7 @@ function parse(rawJson) {
   var result = [];
   for (var i = 0; i < kbList.length; i++) {
     var item = kbList[i];
-    var title = (item.kcmc || '').trim();
+    var title = sanitizeDisplay(item.kcmc || '');
     if (!title) continue;
 
     var weekday = parseWeekday(item.xqj, item.xqjmc);
@@ -18,14 +18,16 @@ function parse(rawJson) {
 
     result.push({
       title: title,
+      titleRaw: '' + (item.kcmc || ''),
       weekday: weekday,
       classFrom: classPeriod.from,
       classTo: classPeriod.to,
       weeks: weeks,
       courseId: (item.jxbmc || '').trim(),
-      courseNature: pickFirst(item, ['kcxz', 'kcxzmc', 'kclbmc', 'kclb']),
-      instructor: (item.xm || '').trim(),
-      location: (item.cdmc || '').trim(),
+      courseNature: sanitizeDisplay(pickFirst(item, ['kcxz', 'kcxzmc', 'kclbmc', 'kclb'])),
+      instructor: sanitizeDisplay(item.xm || ''),
+      instructorRaw: '' + (item.xm || ''),
+      location: sanitizeDisplay(item.cdmc || ''),
       weekMeta: (item.zcd || '').trim(),
       startText: pickFirst(item, ['kssj', 'sksj_kssj', 'kssj_hhmm']),
       endText: pickFirst(item, ['jssj', 'sksj_jssj', 'jssj_hhmm'])
@@ -43,6 +45,14 @@ function pickFirst(obj, keys) {
     }
   }
   return '';
+}
+
+function sanitizeDisplay(value) {
+  return ('' + value)
+    .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f\u00ad\u200b-\u200f\u202a-\u202e\u2060\u2066-\u2069\ufeff]/g, '')
+    .replace(/[\u00a0\u2000-\u200a\u202f\u205f]/g, ' ')
+    .replace(/[ \t\f\v]+/g, ' ')
+    .trim();
 }
 
 function parseWeekday(raw, label) {

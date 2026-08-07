@@ -45,12 +45,12 @@ const labels = {
 };
 
 const versions = {
-  'course-parser': 2,
+  'course-parser': 4,
   'score-parser': 4,
   'study-status-course-parser': 2,
   'study-status-index-parser': 2,
   'school-net-parser': 2,
-  'transcript-score-parser': 4,
+  'transcript-score-parser': 5,
   'medical-report-list-parser': 2,
 };
 
