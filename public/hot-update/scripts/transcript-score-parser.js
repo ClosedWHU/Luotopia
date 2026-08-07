@@ -1,6 +1,6 @@
 function parse(rawJson) {
   var input = JSON.parse(rawJson);
-  var lines = Array.isArray(input.lines) ? input.lines : [];
+  var lines = Array.isArray(input.lines) ? input.lines.map(sanitizeDisplay) : [];
   if (lines.indexOf('武汉大学学生成绩单') === -1) throw new Error('not a WHU transcript');
 
   var scores = [], year = null, semester = null;
@@ -14,7 +14,7 @@ function parse(rawJson) {
     scores.push({
       year: year,
       semester: semester,
-      name: name.trim(),
+      name: sanitizeDisplay(name),
       courseType: courseType,
       examType: examType,
       credit: parseFloat(credit),
@@ -75,4 +75,12 @@ function parse(rawJson) {
   }
   if (scores.length === 0) throw new Error('no transcript scores');
   return JSON.stringify({ scores: scores });
+}
+
+function sanitizeDisplay(value) {
+  return ('' + value)
+    .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f\u00ad\u200b-\u200f\u202a-\u202e\u2060\u2066-\u2069\ufeff]/g, '')
+    .replace(/[\u00a0\u2000-\u200a\u202f\u205f]/g, ' ')
+    .replace(/[ \t\f\v]+/g, ' ')
+    .trim();
 }
