@@ -4,7 +4,14 @@
  * prerelease=1 allows the newest release including pre-releases.
  */
 
-import { apiCacheHeaders, ghFetch, json, mapRelease, type GhRelease } from "../../lib/github-releases";
+import {
+  apiCacheHeaders,
+  compareReleasesNewestFirst,
+  ghFetch,
+  json,
+  mapRelease,
+  type GhRelease,
+} from "../../lib/github-releases";
 
 export async function onRequestGet(context: {
   request: Request;
@@ -37,7 +44,9 @@ export async function onRequestGet(context: {
       );
     }
     const list = (await listRes.json()) as GhRelease[];
-    const found = list.find((r) => !r.draft && (allowPre || !r.prerelease));
+    const found = list
+      .filter((r) => !r.draft && (allowPre || !r.prerelease))
+      .sort(compareReleasesNewestFirst)[0];
     if (!found) {
       return json({ error: "not_found", message: "No releases" }, 404, {
         "Cache-Control": "public, s-maxage=60",
