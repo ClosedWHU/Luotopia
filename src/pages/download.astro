@@ -63,7 +63,10 @@ import { platforms, testFlightUrl } from "../config/downloads";
           </div>
           <div>
             <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">macOS</h4>
-            <p>下载 Release 中的 <strong class="text-[var(--md-sys-color-on-surface)]">DMG</strong>，打开后将 <code class="text-[var(--md-sys-color-on-surface)]">Luotopia.app</code> 拖入「应用程序」文件夹。需要 macOS 13.5 或更高版本；如果系统首次运行时拦截，请在 Finder 中右键应用并选择「打开」。</p>
+            <p>下载 Release 中的 <strong class="text-[var(--md-sys-color-on-surface)]">DMG</strong>，打开后将 <code class="text-[var(--md-sys-color-on-surface)]">Luotopia.app</code> 拖入「应用程序」文件夹。需要 macOS 13.5 或更高版本；如果系统首次运行时拦截，请先在 Finder 中右键应用并选择「打开」。</p>
+            <p class="mt-2">如果系统提示「应用已损坏」「无法验证开发者」，或应用仍然无法打开，请先确认 DMG 来自 Luotopia 官网或 ClosedWHU 官方 GitHub Release，然后在「终端」中运行：</p>
+            <pre class="mt-2 overflow-x-auto rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] px-3 py-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-on-surface)]"><code>xattr -cr /Applications/Luotopia.app</code></pre>
+            <p class="mt-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">该命令只清除 Luotopia.app 的下载隔离扩展属性。不要对来源不明的应用执行此命令。</p>
           </div>
           <div>
             <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">Linux</h4>
