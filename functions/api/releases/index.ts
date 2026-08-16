@@ -4,7 +4,14 @@
  * Env: REPO (default ClosedWHU/Luotopia), GITHUB_TOKEN (optional)
  */
 
-import { apiCacheHeaders, ghFetch, json, mapRelease, type GhRelease } from "../../lib/github-releases";
+import {
+  apiCacheHeaders,
+  compareReleasesNewestFirst,
+  ghFetch,
+  json,
+  mapRelease,
+  type GhRelease,
+} from "../../lib/github-releases";
 
 export async function onRequestGet(context: {
   request: Request;
@@ -37,6 +44,7 @@ export async function onRequestGet(context: {
     const data = (await res.json()) as GhRelease[];
     let items = data.filter((r) => !r.draft);
     if (!includePrerelease) items = items.filter((r) => !r.prerelease);
+    items.sort(compareReleasesNewestFirst);
 
     const link = res.headers.get("Link") || "";
     const hasNext = link.includes('rel="next"');
