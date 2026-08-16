@@ -137,6 +137,30 @@ export function parseFlutterVersion(tagOrTitle: string) {
   };
 }
 
+export function compareReleasesNewestFirst(a: GhRelease, b: GhRelease): number {
+  const left = parseFlutterVersion(a.tag_name || a.name || "");
+  const right = parseFlutterVersion(b.tag_name || b.name || "");
+  const leftVersion = left.versionName.match(/^(\d+)\.(\d+)\.(\d+)/);
+  const rightVersion = right.versionName.match(/^(\d+)\.(\d+)\.(\d+)/);
+
+  if (leftVersion && rightVersion) {
+    for (let index = 1; index <= 3; index += 1) {
+      const difference = Number(rightVersion[index]) - Number(leftVersion[index]);
+      if (difference !== 0) return difference;
+    }
+
+    const leftBuild = Number(left.buildNumber);
+    const rightBuild = Number(right.buildNumber);
+    if (Number.isFinite(leftBuild) && Number.isFinite(rightBuild) && leftBuild !== rightBuild) {
+      return rightBuild - leftBuild;
+    }
+  }
+
+  const leftDate = Date.parse(a.published_at || a.created_at || "") || 0;
+  const rightDate = Date.parse(b.published_at || b.created_at || "") || 0;
+  return rightDate - leftDate;
+}
+
 export function detectFormat(filename: string): FormatId {
   const n = filename.toLowerCase();
   if (/scoop-.*\.json$/i.test(n)) return "scoop";
