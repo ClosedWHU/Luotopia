@@ -40,7 +40,7 @@ export const platforms: PlatformDownload[] = [
     name: "macOS",
     icon: "laptop",
     desc: "macOS 原生体验",
-    note: "敬请期待",
+    note: "macOS 13.5+ · DMG 安装",
   },
   {
     id: "linux",
