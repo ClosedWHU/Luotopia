@@ -13,7 +13,7 @@ concurrency:
 jobs:
   dispatch:
     name: Dispatch to Luotopia-app
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64]
     steps:
       - name: Require cross-repo token
         env:
