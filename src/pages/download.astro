@@ -10,7 +10,7 @@ import { platforms, testFlightUrl } from "../config/downloads";
       <p class="text-[length:var(--md-sys-typescale-title-large-size)] leading-[var(--md-sys-typescale-title-large-line)] text-[var(--md-sys-color-on-surface-variant)] mb-4">选择你的平台，获取最新版本</p>
       <p id="latest-meta" class="text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-outline)] mb-12">正在从 GitHub Releases 加载…</p>
 
-      <div id="platform-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div id="platform-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {platforms.map((p) => (
           <div
             class="platform-card rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)] p-5 flex flex-col"
@@ -23,7 +23,7 @@ import { platforms, testFlightUrl } from "../config/downloads";
             <p class="text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)] mt-1">{p.desc}</p>
             <div class="mt-4 flex flex-wrap gap-1.5 items-center platform-badges">
               <span class="platform-status inline-block px-2.5 py-0.5 rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] text-[var(--md-sys-color-on-surface-variant)] text-[length:var(--md-sys-typescale-label-medium-size)] font-[var(--md-sys-typescale-label-medium-weight)]">
-                {p.externalUrl ? (p.id === "ios" ? "TestFlight 内测" : p.externalLabel) : "加载中…"}
+                {p.externalUrl ? (p.id === "apple" ? "TestFlight 内测" : p.externalLabel) : "加载中…"}
               </span>
             </div>
             <div class:list={["platform-assets", "mt-3", "space-y-1.5", !p.externalUrl && "hidden"]}>
@@ -52,18 +52,11 @@ import { platforms, testFlightUrl } from "../config/downloads";
             <p>按 ABI 分发包（与 <code class="text-[var(--md-sys-color-on-surface)]">build-release.bat --split-per-abi</code> 一致）：优先选标有「推荐」的 <strong class="text-[var(--md-sys-color-on-surface)]">arm64-v8a</strong>（近年金属机）；老设备用 armeabi-v7a。下载 APK 后直接安装；如提示「未知来源」，请在系统设置中允许安装。</p>
           </div>
           <div>
-            <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">iOS</h4>
-            <p>iOS 版本通过 TestFlight 分发。打开
+            <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">Apple</h4>
+            <p><strong class="text-[var(--md-sys-color-on-surface)]">iOS / iPadOS：</strong>通过同一 TestFlight 链接分发。打开
               <a href={testFlightUrl} target="_blank" rel="noopener noreferrer" class="text-[var(--md-sys-color-primary)] hover:underline">TestFlight 加入链接</a>
-              即可申请内测。由于 Apple 政策限制，非越狱设备需通过 TestFlight 安装。</p>
-          </div>
-          <div>
-            <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">Windows</h4>
-            <p>Release 提供 <strong class="text-[var(--md-sys-color-on-surface)]">x64 便携 zip</strong>（解压运行 <code class="text-[var(--md-sys-color-on-surface)]">luotopia.exe</code>）与 <strong class="text-[var(--md-sys-color-on-surface)]">MSIX</strong>。多数 PC 选标有「推荐」的 <strong class="text-[var(--md-sys-color-on-surface)]">x64 / amd64</strong>。需 Windows 10 1809 及以上。未签名包可能触发 SmartScreen，选「仍要运行」；MSIX 无签时需开启开发人员模式或允许旁加载。</p>
-          </div>
-          <div>
-            <h4 class="text-[length:var(--md-sys-typescale-title-small-size)] font-[var(--md-sys-typescale-title-small-weight)] text-[var(--md-sys-color-on-surface)] mb-1">macOS</h4>
-            <p>下载 Release 中的 <strong class="text-[var(--md-sys-color-on-surface)]">DMG</strong>，打开后将 <code class="text-[var(--md-sys-color-on-surface)]">Luotopia.app</code> 拖入「应用程序」文件夹。需要 macOS 13.5 或更高版本；如果系统首次运行时拦截，请先在 Finder 中右键应用并选择「打开」。</p>
+              即可在 iPhone 或 iPad 上申请内测。由于 Apple 政策限制，非越狱设备需通过 TestFlight 安装。</p>
+            <p class="mt-3"><strong class="text-[var(--md-sys-color-on-surface)]">macOS：</strong>下载 Release 中的 <strong class="text-[var(--md-sys-color-on-surface)]">DMG</strong>，打开后将 <code class="text-[var(--md-sys-color-on-surface)]">Luotopia.app</code> 拖入「应用程序」文件夹。需要 macOS 13.5 或更高版本；如果系统首次运行时拦截，请先在 Finder 中右键应用并选择「打开」。</p>
             <p class="mt-2">如果系统提示「应用已损坏」「无法验证开发者」，或应用仍然无法打开，请先确认 DMG 来自 Luotopia 官网或 ClosedWHU 官方 GitHub Release，然后在「终端」中运行：</p>
             <pre class="mt-2 overflow-x-auto rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] px-3 py-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-on-surface)]"><code>xattr -cr /Applications/Luotopia.app</code></pre>
             <p class="mt-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">该命令只清除 Luotopia.app 的下载隔离扩展属性。不要对来源不明的应用执行此命令。</p>
@@ -296,7 +289,7 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
         "platform-status inline-block px-2.5 py-0.5 rounded-[var(--md-sys-shape-corner-small)] bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] text-[var(--md-sys-color-on-surface-variant)] text-[length:var(--md-sys-typescale-label-medium-size)] font-[var(--md-sys-typescale-label-medium-weight)]";
 
       if (externalUrl) {
-        status.textContent = id === "ios" ? "TestFlight 内测" : statusText;
+        status.textContent = id === "apple" ? "TestFlight 内测" : statusText;
         assetsEl.classList.remove("hidden");
         assetsEl.innerHTML = `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-primary)] hover:underline no-underline">
             <span class="material-symbols-outlined text-base">open_in_new</span>
@@ -306,70 +299,6 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
         status.textContent = statusText;
         assetsEl.classList.add("hidden");
         assetsEl.innerHTML = "";
-      }
-    }
-
-    /** Enrich iOS card with App Store / Connect lookup (version / release date). */
-    async function loadAppStoreIos() {
-      const card = document.querySelector('.platform-card[data-platform="ios"]');
-      if (!card) return;
-
-      let info = null;
-      try {
-        const r = await fetch("/api/appstore/latest");
-        if (r.ok) info = await r.json();
-      } catch {
-        /* ignore */
-      }
-
-      if (!info || info.error || !info.version) return;
-
-      const badges = card.querySelector(".platform-badges");
-      const assetsEl = card.querySelector(".platform-assets");
-      const noteEl = card.querySelector("p.mt-2");
-      if (!badges || !assetsEl) return;
-
-      const isTf = info.channel === "testflight" || info.source === "appstoreconnect";
-      const channelLabel = isTf ? "TestFlight" : "App Store";
-
-      badges.innerHTML = "";
-      if (isTf) {
-        badges.insertAdjacentHTML("beforeend", prereleaseBadge().replace("测试版", "TestFlight"));
-      }
-      badges.insertAdjacentHTML("beforeend", stableBadge(info.version));
-      badges.insertAdjacentHTML(
-        "beforeend",
-        mutedBadge(info.publishedAt ? formatDate(info.publishedAt) : channelLabel),
-      );
-
-      const externalUrl = card.getAttribute("data-external-url") || "";
-      const externalLabel = card.getAttribute("data-external-label") || "加入 TestFlight";
-      const storeUrl = info.storeUrl || "";
-      const links = [];
-      if (storeUrl && !isTf) {
-        links.push(
-          `<a href="${escapeHtml(storeUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-primary)] hover:underline no-underline">
-            <span class="material-symbols-outlined text-base">storefront</span>
-            <span>App Store</span>
-          </a>`,
-        );
-      }
-      if (externalUrl) {
-        links.push(
-          `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-primary)] hover:underline no-underline">
-            <span class="material-symbols-outlined text-base">open_in_new</span>
-            <span>${escapeHtml(externalLabel)}</span>
-          </a>`,
-        );
-      }
-      assetsEl.classList.remove("hidden");
-      assetsEl.innerHTML = links.join("");
-
-      if (noteEl) {
-        noteEl.textContent =
-          `${channelLabel} ${info.version}` +
-          (info.publishedAt ? ` · ${formatDate(info.publishedAt)}` : "") +
-          (info.minOsVersion ? ` · 需 iOS ${info.minOsVersion}+` : "");
       }
     }
 
@@ -411,7 +340,7 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
         const id = card.getAttribute("data-platform");
         const badges = card.querySelector(".platform-badges");
         const assetsEl = card.querySelector(".platform-assets");
-        const assets = byPlatform[id] || [];
+        const assets = id === "apple" ? byPlatform.macos || [] : byPlatform[id] || [];
 
         if (!badges || !assetsEl) return;
 
@@ -429,7 +358,15 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
 
         const installers = assets.filter((a) => !a.meta);
         assetsEl.classList.remove("hidden");
-        assetsEl.innerHTML = installers
+        const externalUrl = card.getAttribute("data-external-url") || "";
+        const externalLabel = card.getAttribute("data-external-label") || "外部安装";
+        const externalLink = externalUrl
+          ? `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-primary)] hover:underline no-underline">
+              <span class="material-symbols-outlined text-base">open_in_new</span>
+              <span>${escapeHtml(externalLabel)}</span>
+            </a>`
+          : "";
+        assetsEl.innerHTML = externalLink + installers
           .map((a) => {
             const title =
               a.label ||
@@ -528,7 +465,7 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
       if (hasNext) loadChangelog(page + 1);
     });
 
-    loadLatest().then(() => loadAppStoreIos());
+    loadLatest();
     loadChangelog(1);
   })();
 </script>
