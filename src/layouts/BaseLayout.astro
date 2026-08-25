@@ -37,7 +37,7 @@ const { title, description } = Astro.props;
         document.documentElement.dataset.kiosk = "true";
       }
     </script>
-    <style>
+    <style is:global>
       html[data-kiosk="true"] body > nav,
       html[data-kiosk="true"] body > footer {
         display: none;
