@@ -361,12 +361,17 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
         const externalUrl = card.getAttribute("data-external-url") || "";
         const externalLabel = card.getAttribute("data-external-label") || "外部安装";
         const externalLink = externalUrl
-          ? `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-primary)] hover:underline no-underline">
+          ? `${id === "apple" ? '<p class="text-[length:var(--md-sys-typescale-label-medium-size)] font-[var(--md-sys-typescale-label-medium-weight)] text-[var(--md-sys-color-on-surface-variant)]">iOS / iPadOS</p>' : ""}
+            <a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-primary)] hover:underline no-underline">
               <span class="material-symbols-outlined text-base">open_in_new</span>
               <span>${escapeHtml(externalLabel)}</span>
             </a>`
           : "";
-        assetsEl.innerHTML = externalLink + installers
+        const macosLabel =
+          id === "apple" && installers.length > 0
+            ? '<p class="pt-1 text-[length:var(--md-sys-typescale-label-medium-size)] font-[var(--md-sys-typescale-label-medium-weight)] text-[var(--md-sys-color-on-surface-variant)]">macOS</p>'
+            : "";
+        assetsEl.innerHTML = externalLink + macosLabel + installers
           .map((a) => {
             const title =
               a.label ||
