@@ -1,6 +1,8 @@
 # Luotopia
 
-珞珈托邦 — 武汉大学综合校园服务 App。
+珞家 — 武汉大学综合校园服务 App。
+
+[English](README.en.md)
 
 > 本仓库为项目主页源码（Astro 构建），托管于 [ClosedWHU/Luotopia](https://github.com/ClosedWHU/Luotopia)。
 > APK 发行版通过 GitHub Releases / Pre-releases 发布，请访问 [Releases](https://github.com/ClosedWHU/Luotopia/releases) 页面下载。
@@ -19,6 +21,30 @@ npm run dev        # 启动开发服务器 localhost:4321
 npm run build      # 构建到 dist/
 npm run preview    # 本地预览构建产物
 ```
+
+## 热更新脚本
+
+解析器热更新脚本位于 `public/hot-update/scripts/`。应用仅接受已签名的
+`public/hot-update/manifest.json`；即使校验和正确，没有有效 Ed25519 签名的清单也会被拒绝。
+
+首次本地开发时初始化签名密钥：
+
+```sh
+npm run hot-update:init-key
+```
+
+该命令会将私钥写入已被忽略的 `.env.hot-update`，并仅将公钥安装到相邻的 App 工作区。
+请勿提交 `.env.hot-update`。
+
+生成并校验清单：
+
+```sh
+npm run hot-update:generate
+npm run hot-update:verify
+```
+
+`npm run build` 会自动生成清单，并在签名密钥不可用时失败。生产环境必须以 secret 的形式提供
+`HOT_UPDATE_ED25519_PRIVATE_KEY`，其值为上述命令生成的 base64 编码 PKCS#8 Ed25519 私钥。
 
 ## 部署
 
@@ -75,28 +101,3 @@ npm run build
 ## 许可证
 
 [MIT](LICENSE)
-# Hot-update scripts
-
-Parser hot updates live in `public/hot-update/scripts/`. The app accepts only
-the signed `public/hot-update/manifest.json`; checksums without a valid Ed25519
-signature are rejected.
-
-Initialize a local signing key once:
-
-```sh
-npm run hot-update:init-key
-```
-
-This writes the private key to ignored `.env.hot-update` and installs only the
-public key in the adjacent app workspace. Never commit `.env.hot-update`.
-
-Generate and verify the manifest:
-
-```sh
-npm run hot-update:generate
-npm run hot-update:verify
-```
-
-`npm run build` generates the manifest automatically and fails when the signing
-key is unavailable. Production must provide `HOT_UPDATE_ED25519_PRIVATE_KEY` as
-a secret containing the base64 PKCS#8 Ed25519 private key generated above.
