@@ -34,7 +34,7 @@ function renderInlineMd(text: string) {
 ---
 
 <BaseLayout title={doc.title} description={doc.description}>
-  <section class="pt-28 pb-16 px-4">
+  <section class="pt-28 pb-16 px-4" data-legal-document>
     <div class="max-w-3xl mx-auto">
       <a href="/legal/" class="inline-flex items-center gap-1 text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-primary)] no-underline mb-6 hover:underline">
         <span class="material-symbols-outlined text-base">arrow_back</span>
@@ -84,3 +84,13 @@ function renderInlineMd(text: string) {
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  :global(html[data-kiosk="true"] [data-legal-document]) {
+    padding-top: calc(var(--spacing) * 8);
+  }
+
+  :global(html[data-kiosk="true"] [data-legal-document] > div > a[href="/legal/"]) {
+    display: none;
+  }
+</style>
