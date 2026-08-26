@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": 16,
-  "updatedAt": "2026-07-28T12:00:22.542Z",
-  "expiresAt": "2027-01-24T12:00:22.542Z",
+  "version": 17,
+  "updatedAt": "2026-08-26T04:00:30.077Z",
+  "expiresAt": "2027-02-22T04:00:30.077Z",
   "keyId": "luotopia-hot-update-2026-01",
   "scripts": [
     {
@@ -129,6 +129,48 @@
       }
     },
     {
+      "name": "medical-card-detail-parser",
+      "label": "校医院卡详情解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/medical-card-detail-parser.js",
+      "checksum": "sha256:d0b5d2ab765102b52727361df97f55d50fd85e0bc96dd978bfdb1dc544a1477e",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "html": "<div class=\"carddetail\"><div class=\"weui-cell\"><div class=\"weui-cell__bd\">真实姓名</div><div class=\"weui-cell__ft\">张三</div></div><div class=\"weui-cell\"><div class=\"weui-cell__bd\">身份证号</div><div class=\"weui-cell__ft\">420100199001010001</div></div></div><script>deleteCard(\"enc789\")</script>"
+      },
+      "testExpect": {
+        "schemaVersion": 1,
+        "fields": {
+          "真实姓名": "张三"
+        },
+        "encryptedId": "enc789"
+      }
+    },
+    {
+      "name": "medical-choose-card-parser",
+      "label": "校医院选卡解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/medical-choose-card-parser.js",
+      "checksum": "sha256:a0b0304a94b5d1a924c56c2d3a5ce32fa51951d7cf4d9ff2080443d20904db33",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "html": "<div onclick=\"chooseCard('张三','','','enc456','002')\"><div class=\"weui-cell\"><div class=\"weui-cell__bd\">卡类型</div><span class=\"font333\">普通卡</span></div></div><div class=\"weui-cell bgdefault\"></div>"
+      },
+      "testExpect": {
+        "schemaVersion": 1,
+        "cards": [
+          {
+            "patientName": "张三",
+            "cardDisplay": "002",
+            "cardType": "普通卡",
+            "encryptedId": "enc456"
+          }
+        ]
+      }
+    },
+    {
       "name": "medical-exam-detail-parser",
       "label": "校医院检查详情解析器",
       "version": 1,
@@ -154,6 +196,56 @@
       }
     },
     {
+      "name": "medical-invoice-detail-parser",
+      "label": "校医院发票详情解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/medical-invoice-detail-parser.js",
+      "checksum": "sha256:e1e6b3c22d6deb12c048190730f8833caa34595fb163cc8e3b8859f95d8e7579",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "html": "<p id=\"prtId\">PRT001</p><div class=\"weui-cell bgw\" style=\"display:block\"><div class=\"weui-cell__bd\">就诊人: 张三</div><div class=\"weui-cell__bd\">登记号: REG001</div></div><li id=\"cat1\"><div class=\"bgtitleyellow\">西药 <span class=\"font-yellow\">10.00</span></div></li><div class=\"postFix\"><div class=\"weui-cell__bd\">总计 <span class=\"font-yellow\">10.00</span></div></div>"
+      },
+      "testExpect": {
+        "schemaVersion": 1,
+        "patientName": "张三",
+        "registrationNumber": "REG001",
+        "totalAmount": "10.00",
+        "prtId": "PRT001",
+        "categories": [
+          {
+            "id": "cat1",
+            "title": "西药",
+            "amount": "10.00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "medical-invoice-item-parser",
+      "label": "校医院发票明细解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/medical-invoice-item-parser.js",
+      "checksum": "sha256:42fef8078f717a229958d24ba40596f5aeff023db0c2d4997a7ae2c323695ce2",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "html": "<table><tr><td>阿莫西林胶囊[10*5]<p>数量: 10</p></td><td></td><td></td><td>2.00</td><td>20.00</td></tr></table>"
+      },
+      "testExpect": {
+        "schemaVersion": 1,
+        "items": [
+          {
+            "name": "阿莫西林胶囊",
+            "spec": "[10*5]",
+            "quantity": "10",
+            "amount": "20.00",
+            "packageCount": 2
+          }
+        ]
+      }
+    },
+    {
       "name": "medical-lab-detail-parser",
       "label": "校医院检验详情解析器",
       "version": 1,
@@ -171,6 +263,101 @@
             "itemName": "白细胞",
             "result": "6.66",
             "referenceRange": "3.5-9.5"
+          }
+        ]
+      }
+    },
+    {
+      "name": "medical-paid-invoice-parser",
+      "label": "校医院已缴费发票解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/medical-paid-invoice-parser.js",
+      "checksum": "sha256:ed7b540e9c9d1782de4d2b2178cd009a9068652ca43d17406d56093592f17f47",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "html": "<div class=\"f14 mt10 bgw\" id=\"inv1\"><div class=\"pl20\"><p class=\"mt5\">发票号<span>INV001</span></p><p class=\"mt5\">收费时间<span>2026-01-01</span></p><p class=\"mt5\">就诊科室<span>内科</span></p><p class=\"mt5\">就诊时间<span>2026-01-01</span></p></div><a href=\"/payment/opbilledinvdetail?id=1\">详情</a><p class=\"fontmoney\">￥10.00</p></div>"
+      },
+      "testExpect": {
+        "schemaVersion": 1,
+        "invoices": [
+          {
+            "invoiceNumber": "INV001",
+            "chargedAt": "2026-01-01",
+            "departmentName": "内科",
+            "visitedAt": "2026-01-01",
+            "amount": "10.00",
+            "href": "/payment/opbilledinvdetail?id=1"
+          }
+        ]
+      }
+    },
+    {
+      "name": "medical-patient-card-parser",
+      "label": "校医院就诊卡解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/medical-patient-card-parser.js",
+      "checksum": "sha256:1ba86cd340c5d1b647bf9eded2f1886ffaa04ddd4611f52ddb6162734e1bec9c",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "html": "<div class=\"cardlist\"><p>姓名<span class=\"font333\">张三</span></p><p>常用卡<span class=\"font333\">001</span></p><p>卡类型<span class=\"font333\">普通卡</span></p><input name=\"cardlist\" value=\"enc123\" checked></div>"
+      },
+      "testExpect": {
+        "schemaVersion": 1,
+        "cards": [
+          {
+            "patientName": "张三",
+            "cardDisplay": "001",
+            "cardType": "普通卡",
+            "encryptedId": "enc123",
+            "isDefault": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "medical-registration-detail-parser",
+      "label": "校医院挂号详情解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/medical-registration-detail-parser.js",
+      "checksum": "sha256:1c5dec538af6ad338e35e082836bb52d97c6c454af266182a4f639e53070867f",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "html": "<li class=\"weui-flex\"><p class=\"justifynow\">科室</p><span class=\"font333\">内科</span></li><p>挂号费用<span class=\"f18\">10.00</span></p>"
+      },
+      "testExpect": {
+        "schemaVersion": 1,
+        "fields": {
+          "科室": "内科"
+        },
+        "fee": "10.00"
+      }
+    },
+    {
+      "name": "medical-registration-record-parser",
+      "label": "校医院挂号记录解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/medical-registration-record-parser.js",
+      "checksum": "sha256:1bc5b1ed653cea991992dee2b503bac9fd48b2987e44f9ed579e30d6de32a7a9",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "html": "<a class=\"lcount\" href=\"/detail/123\"><div class=\"weui-cell_access\"><p class=\"weui-cell__bd\">张医生</p><div class=\"weui-cell__ft\">已就诊</div></div><div class=\"pl20\"><p class=\"font333 opacity90\"><span>内科</span><span>普通号</span></p><p class=\"mt10\"><span>2026-01-01</span><span>上午</span></p><p class=\"fontmoney\">￥10.00</p></div></a>"
+      },
+      "testExpect": {
+        "schemaVersion": 1,
+        "records": [
+          {
+            "doctorName": "张医生",
+            "status": "已就诊",
+            "departmentName": "内科",
+            "registrationType": "普通号",
+            "visitDate": "2026-01-01",
+            "session": "上午",
+            "fee": "10.00",
+            "href": "/detail/123"
           }
         ]
       }
@@ -475,5 +662,5 @@
       }
     }
   ],
-  "signature": "qLbtWqeriZzXr8JGmZbjL7ODVZU6VoLS+0/C0JMO/ygaExdEZkjKTokEr5u4YolErGp1kRsiNgTe8pPD1xivDQ=="
+  "signature": "NhZiKYy8iKg9MRl2zVHvQJp1bGhWPpQ67g01IDXALvUz/fzl/t2eowBQiOzOlmEw0XBBle2JPF6P3PFS2Rk+DA=="
 }
