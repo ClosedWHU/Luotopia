@@ -1,3 +1,4 @@
+// Parses the student data repository page into student profile fields.
 function parse(rawJson) {
   var input = JSON.parse(rawJson);
   var body = input.body || '';
@@ -6,6 +7,7 @@ function parse(rawJson) {
   var pairs = labelValuePairs(texts);
   var blob = texts.join('\n');
 
+  // Try labeled pairs first; fall back to a regex for the student id.
   var studentId = pick(pairs, blob, ['\u5b66\u53f7']);
   if (!studentId) {
     var m = blob.match(/(?<![0-9])(20\d{8,12})(?![0-9])/);
@@ -33,6 +35,7 @@ function parse(rawJson) {
   });
 }
 
+// If the body is a JSON envelope with an html field, unwrap it.
 function extractHtml(body) {
   var trimmed = body.trim();
   if (trimmed.charAt(0) === '{') {
@@ -44,6 +47,8 @@ function extractHtml(body) {
   return body;
 }
 
+// Extracts visible text nodes (between tags) from HTML, skipping
+// script/style content and common tag-name artifacts.
 function extractTexts(html) {
   var cleaned = html
     .replace(/<script[\s\S]*?<\/script>/gi, '')
@@ -62,6 +67,8 @@ function extractTexts(html) {
   return result;
 }
 
+// Builds label -> value pairs from adjacent text nodes where the label ends
+// with a colon.
 function labelValuePairs(texts) {
   var pairs = {};
   for (var i = 0; i < texts.length - 1; i++) {
@@ -77,6 +84,8 @@ function labelValuePairs(texts) {
   return pairs;
 }
 
+// Returns the first non-empty value for a list of label candidates, first from
+// the labeled pairs, then from an inline regex on the text blob.
 function pick(pairs, blob, keys) {
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i];
@@ -94,6 +103,8 @@ function matchLabeled(blob, label) {
   return m[1].trim().split(/\s{2,}/)[0].trim();
 }
 
+// Guesses the student name: prefer text following a "name" label; otherwise
+// the first Chinese-characters-only token that isn't the student id.
 function guessName(texts, studentId) {
   for (var i = 0; i < texts.length - 1; i++) {
     var label = texts[i].replace(/[：:]\s*$/, '');

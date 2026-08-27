@@ -1,3 +1,6 @@
+// Parses the patient card list page into a list of card objects.
+// Each card block is a "cardlist" div containing name, card number, type,
+// and a hidden input carrying the encrypted id and default flag.
 function parse(rawJson) {
   var html = text(JSON.parse(rawJson).html);
   var cards = [];
@@ -6,6 +9,7 @@ function parse(rawJson) {
     var block = m[1];
     if (block.indexOf('font333') < 0) continue;
     var name = spanField(block, '姓名'), card = spanField(block, '常用卡'), cardType = spanField(block, '卡类型');
+    // Hidden input with the encrypted card id and checked flag for default.
     var encMatch = /<input[^>]*name=["']cardlist["'][^>]*>/i.exec(block);
     var encryptedId = '', isDefault = false;
     if (encMatch) { var v = /value=["']([^"']*)["']/i.exec(encMatch[0]); encryptedId = v ? v[1] : ''; isDefault = /\bchecked\b/i.test(encMatch[0]); }
@@ -13,6 +17,7 @@ function parse(rawJson) {
   }
   return JSON.stringify({ schemaVersion: 1, cards: cards });
 }
+// Extracts the text of the first font333 span that follows the given label.
 function spanField(block, label) {
   var re = new RegExp(label + '[\\s\\S]*?<span[^>]*class=["\'][^"\']*font333[^"\']*["\'][^>]*>([\\s\\S]*?)<\\/span>', 'i');
   var m = re.exec(block); return m ? clean(m[1]) : '';

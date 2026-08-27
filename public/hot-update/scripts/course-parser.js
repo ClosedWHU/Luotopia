@@ -1,9 +1,13 @@
+// Parses the academic system timetable (kbList) into a normalized course list.
 function parse(rawJson) {
   var data = JSON.parse(rawJson);
+  // kbList = 课表列表 (timetable list); courses from the academic system.
   var kbList = data.kbList || [];
   var result = [];
+
   for (var i = 0; i < kbList.length; i++) {
     var item = kbList[i];
+    // kcmc = 课程名称 (course name).
     var title = sanitizeDisplay(item.kcmc || '');
     if (!title) continue;
 
@@ -23,12 +27,18 @@ function parse(rawJson) {
       classFrom: classPeriod.from,
       classTo: classPeriod.to,
       weeks: weeks,
+      // jxbmc = 教学班名称 code; teaching class id used as course id.
       courseId: (item.jxbmc || '').trim(),
       courseNature: sanitizeDisplay(pickFirst(item, ['kcxz', 'kcxzmc', 'kclbmc', 'kclb'])),
+      // xm = 姓名 (teacher name).
       instructor: sanitizeDisplay(item.xm || ''),
       instructorRaw: '' + (item.xm || ''),
+      // cdmc = 场地名称 (venue/room name).
       location: sanitizeDisplay(item.cdmc || ''),
+      // zcd = 周次段 code; raw week-range string (e.g. "1-16周").
       weekMeta: (item.zcd || '').trim(),
+      // kssj / jssj = 开始时间 / 结束时间 (start/end time).
+      // sksj_kssj / sksj_jssj / kssj_hhmm are alternative field names.
       startText: pickFirst(item, ['kssj', 'sksj_kssj', 'kssj_hhmm']),
       endText: pickFirst(item, ['jssj', 'sksj_jssj', 'jssj_hhmm'])
     });
@@ -36,6 +46,7 @@ function parse(rawJson) {
   return JSON.stringify({ courses: result });
 }
 
+// Returns the first non-empty trimmed value among the given keys.
 function pickFirst(obj, keys) {
   for (var i = 0; i < keys.length; i++) {
     var v = obj[keys[i]];
@@ -47,6 +58,7 @@ function pickFirst(obj, keys) {
   return '';
 }
 
+// Removes control/format/whitespace Unicode characters and collapses spaces.
 function sanitizeDisplay(value) {
   return ('' + value)
     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f\u00ad\u200b-\u200f\u202a-\u202e\u2060\u2066-\u2069\ufeff]/g, '')
@@ -55,22 +67,26 @@ function sanitizeDisplay(value) {
     .trim();
 }
 
+// Converts a weekday value to 1-7; falls back to matching Chinese day labels.
+// xqj = 星期几 (weekday number), xqjmc = 星期几名称 code (weekday label).
 function parseWeekday(raw, label) {
   if (raw !== undefined && raw !== null) {
     var n = parseInt(raw, 10);
     if (n >= 1 && n <= 7) return n;
   }
   var text = '' + (label || raw || '');
-  if (text.indexOf('\u4e00') !== -1) return 1;
-  if (text.indexOf('\u4e8c') !== -1) return 2;
-  if (text.indexOf('\u4e09') !== -1) return 3;
-  if (text.indexOf('\u56db') !== -1) return 4;
-  if (text.indexOf('\u4e94') !== -1) return 5;
-  if (text.indexOf('\u516d') !== -1) return 6;
-  if (text.indexOf('\u65e5') !== -1 || text.indexOf('\u5929') !== -1 || text.indexOf('\u4e03') !== -1) return 7;
+  if (text.indexOf('\u4e00') !== -1) return 1; // 一 (Mon)
+  if (text.indexOf('\u4e8c') !== -1) return 2; // 二 (Tue)
+  if (text.indexOf('\u4e09') !== -1) return 3; // 三 (Wed)
+  if (text.indexOf('\u56db') !== -1) return 4; // 四 (Thu)
+  if (text.indexOf('\u4e94') !== -1) return 5; // 五 (Fri)
+  if (text.indexOf('\u516d') !== -1) return 6; // 六 (Sat)
+  if (text.indexOf('\u65e5') !== -1 || text.indexOf('\u5929') !== -1 || text.indexOf('\u4e03') !== -1) return 7; // 日/天/七 (Sun)
   return -1;
 }
 
+// Parses a class period range like "1-2" into {from,to}; normalizes dashes.
+// jc / jcs / jcsm = 节次 / 节次段 / 节次说明 (class period range).
 function parseClassPeriod(text) {
   if (!text) return null;
   var raw = text.trim().replace(/\s+/g, '')
@@ -83,6 +99,8 @@ function parseClassPeriod(text) {
   return { from: from, to: to };
 }
 
+// Parses a week string like "1-16周,18周,单周" into a sorted unique week list.
+// zcd / zcmc / zc = 周次段 code / 周次名称 code / 周次 (week range).
 function parseWeeks(weekStr) {
   if (!weekStr) return [];
   var result = [];
@@ -90,8 +108,8 @@ function parseWeeks(weekStr) {
   for (var p = 0; p < parts.length; p++) {
     var seg = parts[p].trim();
     if (!seg) continue;
-    var odd = seg.indexOf('\u5355') !== -1;
-    var even = seg.indexOf('\u53cc') !== -1;
+    var odd = seg.indexOf('\u5355') !== -1; // 单 (odd-week only)
+    var even = seg.indexOf('\u53cc') !== -1; // 双 (even-week only)
     var nums = seg.match(/\d+/g);
     if (!nums) continue;
     var start = parseInt(nums[0], 10);

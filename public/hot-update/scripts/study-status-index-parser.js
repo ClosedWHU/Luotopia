@@ -1,3 +1,11 @@
+// Parses the study-status index page HTML into ids, names, modes, credits,
+// and a credit-requirement tree.
+//
+// The page embeds credit requirements via HTML attributes using Pinyin
+// abbreviations: xfyqjd_id = 学分要求节点_id (requirement node id),
+// fxfyqjd_id = 父学分要求节点_id (parent node id),
+// jdkcsx = 节点课程属性 (requirement type),
+// yxxf = 已修学分 (earned credits), yqzdxf = 要求最低学分 (min required credits).
 function parse(rawJson) {
   var input = JSON.parse(rawJson);
   var html = typeof input.html === 'string' ? input.html : '';
@@ -17,6 +25,7 @@ function parse(rawJson) {
   });
 }
 
+// Collects all requirement ids (plus two synthetic fixed ids) from the page.
 function discoverIds(html) {
   var pattern = /xfyqjd_id='([A-F0-9]{32})'/g;
   var ids = {};
@@ -25,10 +34,12 @@ function discoverIds(html) {
     ids[m[1]] = true;
   }
   var result = Object.keys(ids);
+  // qtkcxfyq = 其他课程学分要求 / cxcyqkxfyq = 创新创业区学分要求 (scope ids).
   result.push('qtkcxfyq', 'cxcyqkxfyq');
   return result;
 }
 
+// Maps requirement ids to their display names by reading <p class='title1'>.
 function discoverNames(html) {
   var result = {};
   var pattern = /<p class='title1' id='p([A-F0-9]{32})'/g;
@@ -50,6 +61,7 @@ function discoverNames(html) {
   return result;
 }
 
+// Maps requirement ids to their requirement type code (jdkcsx = 节点课程属性).
 function discoverModes(html) {
   var result = {};
   var pattern = /xfyqjd_id='([A-F0-9]{32})' jdkcsx='([0-9]+)'/g;
@@ -60,6 +72,8 @@ function discoverModes(html) {
   return result;
 }
 
+// Maps requirement ids to earned/required credit pairs (yxxf / yqzdxf).
+// yxxf = 已修学分, yqzdxf = 要求最低学分.
 function discoverCredits(html) {
   var result = {};
   var pattern = /id='p([A-F0-9]{32})' yxxf='([0-9.]+)' yqzdxf='([0-9.]+)'/g;
@@ -75,16 +89,21 @@ function discoverCredits(html) {
   return result;
 }
 
+// Reconstructs the parent/child relationships between credit requirements.
+// Relationships can be encoded either as li attributes or .appendTo calls.
+// fxfyqjd_id = 父学分要求节点_id (parent node id).
 function buildTree(html, idToName, idToCredits) {
   var childToParent = {};
   var discoveredIds = {};
 
   var liPattern = /<li\b[^>]*>/g;
+  // liIdPattern = id='li...' form; childAttrPattern = xfyqjd_id form.
   var liIdPattern = /\bid='li([A-F0-9]{32})'/;
   var childAttrPattern = /\bxfyqjd_id='([A-F0-9]{32})'/;
   var parentAttrPattern = /\bfxfyqjd_id='([A-F0-9]{32})'/;
 
   var m;
+  // Strategy 1: derive parent-child from li attributes on the same element.
   while ((m = liPattern.exec(html)) !== null) {
     var li = m[0];
     var childIdMatch = liIdPattern.exec(li) || childAttrPattern.exec(li);
@@ -102,6 +121,8 @@ function buildTree(html, idToName, idToCredits) {
   var appendToPattern = /\.appendTo\(\$\((['\"])#ul([A-F0-9]{32})\1\)\)/g;
   var pIdPattern = /<p class='title1' id='p([A-F0-9]{32})'/g;
 
+  // Strategy 2: derive parent-child from .appendTo(#ul...) calls; the child
+  // name is the last title preceding the appendTo call.
   while ((m = appendToPattern.exec(html)) !== null) {
     var parentId = m[2];
     var previousHtml = html.substring(0, m.index);
@@ -120,6 +141,7 @@ function buildTree(html, idToName, idToCredits) {
     }
   }
 
+  // Build a parent -> children mapping for every known id.
   var parentToChildren = {};
   var allIds = {};
   var k;
@@ -136,6 +158,7 @@ function buildTree(html, idToName, idToCredits) {
     if (!parentToChildren[child]) parentToChildren[child] = [];
   }
 
+  // Roots are named nodes that are never a child.
   var childSet = {};
   for (var c in childToParent) childSet[c] = true;
 
@@ -144,6 +167,7 @@ function buildTree(html, idToName, idToCredits) {
     if (idToName[id] && !childSet[id]) rootIds.push(id);
   }
 
+  // Depth-first build with cycle detection via the visiting set.
   var visiting = {};
   function buildNode(id) {
     if (visiting[id]) {

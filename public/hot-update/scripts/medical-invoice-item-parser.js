@@ -1,7 +1,11 @@
+// Parses invoice line items from either a <table> layout or a weui-cell
+// fallback layout. Each item includes name, spec, quantity, unit price,
+// amount, and an optional package count derived from the spec.
 function parse(rawJson) {
   var html = text(JSON.parse(rawJson).html);
   var items = [];
   var rows = [];
+  // Primary layout: table rows where columns are name/spec/quantity/price/amount.
   var trRe = /<tr\b[^>]*>([\s\S]*?)<\/tr>/gi, tr;
   while ((tr = trRe.exec(html)) !== null) {
     var cells = [], tdRe = /<td\b[^>]*>([\s\S]*?)<\/td>/gi, td;
@@ -17,6 +21,7 @@ function parse(rawJson) {
       packageCount: parts.packageCount
     });
   }
+  // Fallback layout: weui-cell body/footer pairs when no table rows matched.
   if (items.length === 0) {
     var cellRe = /<div[^>]*class=["'][^"']*\bweui-cell\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/gi, cell;
     while ((cell = cellRe.exec(html)) !== null) {
@@ -31,12 +36,17 @@ function parse(rawJson) {
   }
   return JSON.stringify({ schemaVersion: 1, items: items });
 }
+// Splits a cell's HTML into name, spec (in brackets), quantity (from <p>), and
+// a package count (derived from total quantity and spec's trailing "*N").
 function nameParts(cellHtml) {
   var pRe = /<p\b[^>]*>([\s\S]*?)<\/p>/i;
   var pMatch = pRe.exec(cellHtml);
+  // quantityText comes from a <p> child (often "数量: 10").
   var quantityText = pMatch ? clean(pMatch[1]) : '';
+  // rawName is the cell text without the quantity portion.
   var rawText = clean(cellHtml);
   var rawName = quantityText ? rawText.replace(quantityText, '').trim() : rawText;
+  // spec is the last bracketed token in the name (e.g. "[10*5]").
   var specStart = rawName.lastIndexOf('['), specEnd = rawName.lastIndexOf(']');
   var hasSpec = specStart >= 0 && specEnd > specStart;
   var name = hasSpec ? rawName.substring(0, specStart).trim() : rawName;
@@ -44,6 +54,7 @@ function nameParts(cellHtml) {
   var quantity = quantityText.replace(/^数量\s*[:：]?\s*/, '').trim();
   var total = parseInt(quantity, 10);
   if (isNaN(total)) total = null;
+  // perPackage comes from a trailing "*N" in the spec body.
   var specBody = spec.length >= 2 ? spec.substring(1, spec.length - 1).trim() : spec;
   var unitMatch = /(?:\*|^)(\d+)$/.exec(specBody);
   var perPackage = unitMatch ? parseInt(unitMatch[1], 10) : null;

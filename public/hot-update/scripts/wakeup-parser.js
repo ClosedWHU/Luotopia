@@ -1,7 +1,11 @@
+// Parses WakeUp-format timetables, supporting both CSV and legacy layouts.
 function parse(rawJson) {
   var input = JSON.parse(rawJson), content = '' + (input.content || ''), fileName = '' + (input.fileName || '');
   return JSON.stringify(input.format === 'legacy' ? parseLegacy(content) : parseCsv(content, fileName));
 }
+
+// Parses a CSV timetable with columns:
+// name, day, startNode, endNode, teacher, location, weekMeta.
 function parseCsv(content, fileName) {
   var lines = content.split(/\r?\n/).filter(function(line) { return line.trim().length > 0; });
   if (lines.length < 2) throw new Error('CSV has no courses');
@@ -15,6 +19,9 @@ function parseCsv(content, fileName) {
   }
   return { name: fileName.replace(/\.[^.]+$/, ''), items: items };
 }
+
+// Parses the legacy WakeUp format, which stores JSON lines for table,
+// base course list, and per-slot details.
 function parseLegacy(content) {
   var lines = content.split(/\r?\n/);
   if (lines.length < 5) throw new Error('incomplete WakeUp file');
@@ -30,9 +37,27 @@ function parseLegacy(content) {
   if (items.length === 0) throw new Error('no WakeUp courses');
   return { name: typeof table.tableName === 'string' ? table.tableName : 'WakeUp 课程表', items: items };
 }
+
+// Splits a CSV line honoring double-quoted fields and escaped quotes.
 function splitCsv(line) {
   var values = [], value = '', quoted = false;
-  for (var i = 0; i < line.length; i++) { var ch = line.charAt(i); if (ch === '"') { if (quoted && line.charAt(i + 1) === '"') { value += '"'; i++; } else quoted = !quoted; } else if (ch === ',' && !quoted) { values.push(value); value = ''; } else value += ch; }
+  for (var i = 0; i < line.length; i++) {
+    var ch = line.charAt(i);
+    if (ch === '"') {
+      // A doubled quote inside a quoted field is a literal escaped quote.
+      if (quoted && line.charAt(i + 1) === '"') { value += '"'; i++; }
+      else quoted = !quoted;
+    } else if (ch === ',' && !quoted) {
+      values.push(value); value = '';
+    } else {
+      value += ch;
+    }
+  }
   values.push(value); return values;
 }
-function parseStrictInt(value) { var text = ('' + value).trim(); return /^\d+$/.test(text) ? parseInt(text, 10) : -1; }
+
+// Parses an integer strictly; returns -1 on failure.
+function parseStrictInt(value) {
+  var text = ('' + value).trim();
+  return /^\d+$/.test(text) ? parseInt(text, 10) : -1;
+}
