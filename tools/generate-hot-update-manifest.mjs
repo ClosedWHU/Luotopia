@@ -96,16 +96,22 @@ async function initKey() {
 async function generate() {
   const privateKey = await loadPrivateKey();
   const existing = JSON.parse(await readFile(manifestPath, 'utf8'));
-  const existingVersions = Object.fromEntries((existing.scripts || []).map((item) => [item.name, item.version]));
+  const existingScripts = Object.fromEntries((existing.scripts || []).map((item) => [item.name, item]));
   const files = (await readdir(scriptsDir)).filter((name) => name.endsWith('.js')).sort();
   for (const file of files) if (!tests[file.slice(0, -3)]) throw new Error(`Missing test vector for ${file}`);
   const scripts = await Promise.all(files.map(async (file) => {
     const name = file.slice(0, -3);
     const bytes = await readFile(path.join(scriptsDir, file));
+    const checksum = `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
+    // Bump the script version whenever its content (checksum) changed, so
+    // clients re-download it. The `versions` map acts as a manual minimum.
+    const prev = existingScripts[name];
+    const changed = !prev || prev.checksum !== checksum;
+    const version = Math.max(versions[name] || 0, (prev?.version || 0) + (changed ? 1 : 0), 1);
     return {
-      name, label: labels[name] || name, version: versions[name] || existingVersions[name] || 1,
+      name, label: labels[name] || name, version,
       url: `/hot-update/scripts/${file}`,
-      checksum: `sha256:${createHash('sha256').update(bytes).digest('hex')}`,
+      checksum,
       minAppVersion: '1.0.0', apiVersion: 1,
       testInput: tests[name].input, testExpect: tests[name].expect,
     };
