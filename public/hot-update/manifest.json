@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": 17,
-  "updatedAt": "2026-08-26T04:00:30.077Z",
-  "expiresAt": "2027-02-22T04:00:30.077Z",
+  "version": 20,
+  "updatedAt": "2026-08-27T06:28:21.919Z",
+  "expiresAt": "2027-02-23T06:28:21.919Z",
   "keyId": "luotopia-hot-update-2026-01",
   "scripts": [
     {
@@ -10,7 +10,7 @@
       "label": "AI 结构化输出解析器",
       "version": 1,
       "url": "/hot-update/scripts/ai-structured-output-parser.js",
-      "checksum": "sha256:eab9597bcc74a0681fc8c432c0981b2aac21f755a924a7f5804907cb3ff2208e",
+      "checksum": "sha256:768c93751824694671a17ba3e9c26d77329f441ced8ba74524f90e1a31e64e75",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -26,7 +26,7 @@
       "label": "校园巴士解析器",
       "version": 1,
       "url": "/hot-update/scripts/campus-bus-parser.js",
-      "checksum": "sha256:b09f016a4f0dd7e417eaf488d68bff65097c0b031b5c990e5b3d988f2c6b52ca",
+      "checksum": "sha256:07ff97aef793cdc1ba41f458e908b4b79c93be996e0e5223023e0e62f2697525",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -52,7 +52,7 @@
       "label": "课程表解析器",
       "version": 4,
       "url": "/hot-update/scripts/course-parser.js",
-      "checksum": "sha256:97c23ffa4978353fcbd9a73a4098b7583440e6de19765ae9cac42fcf181f15bb",
+      "checksum": "sha256:1fdfbd6cf28fbf2fd899706ab1a9caf76884e9d60373a686658c197805df0e91",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -88,7 +88,7 @@
       "label": "学生信息解析器",
       "version": 1,
       "url": "/hot-update/scripts/datarepo-parser.js",
-      "checksum": "sha256:7e8ebc14583252a0858e1b6a112339355cb2aace7846cf8fcb6052397d212c20",
+      "checksum": "sha256:7263ca8308e53a815fa3334da1538499573c18b4d270a450a3c3c45a53bd014c",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -104,7 +104,7 @@
       "label": "空教室解析器",
       "version": 1,
       "url": "/hot-update/scripts/empty-room-parser.js",
-      "checksum": "sha256:5d381a4cbad3ba7fa9e178f7c0a309e79eda06ca40ce3af67cdb3faca28f248f",
+      "checksum": "sha256:be97426f424842f52524f1971299ad37f2207c7b64562672274b41e7ae8c200e",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -133,7 +133,7 @@
       "label": "校医院卡详情解析器",
       "version": 1,
       "url": "/hot-update/scripts/medical-card-detail-parser.js",
-      "checksum": "sha256:d0b5d2ab765102b52727361df97f55d50fd85e0bc96dd978bfdb1dc544a1477e",
+      "checksum": "sha256:057ef4be93d89afee6350c1ef23c6d120ec0d83ce967c5bb50e0a1e09f28a312",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -152,7 +152,7 @@
       "label": "校医院选卡解析器",
       "version": 1,
       "url": "/hot-update/scripts/medical-choose-card-parser.js",
-      "checksum": "sha256:a0b0304a94b5d1a924c56c2d3a5ce32fa51951d7cf4d9ff2080443d20904db33",
+      "checksum": "sha256:b1f18959704b22bbb19745fe1ca2c005c43b3197b2d6f7556591dc1efd6ed5cf",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -175,7 +175,7 @@
       "label": "校医院检查详情解析器",
       "version": 1,
       "url": "/hot-update/scripts/medical-exam-detail-parser.js",
-      "checksum": "sha256:20af72326ac331b0d7222ea65508979df59c47cc6c744a3ae817f142574394cb",
+      "checksum": "sha256:d0988b65fe4879061b2d67eab4f3d9c019acf866e276799b234361a457a5bed5",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -200,7 +200,7 @@
       "label": "校医院发票详情解析器",
       "version": 1,
       "url": "/hot-update/scripts/medical-invoice-detail-parser.js",
-      "checksum": "sha256:e1e6b3c22d6deb12c048190730f8833caa34595fb163cc8e3b8859f95d8e7579",
+      "checksum": "sha256:c5ee934b6c760657f46689f1f6626223d1f3060c5090d722630e5820affd462e",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -226,7 +226,7 @@
       "label": "校医院发票明细解析器",
       "version": 1,
       "url": "/hot-update/scripts/medical-invoice-item-parser.js",
-      "checksum": "sha256:42fef8078f717a229958d24ba40596f5aeff023db0c2d4997a7ae2c323695ce2",
+      "checksum": "sha256:f80957215ed0c2f242df3550eb9dc0494fd2ba66242e555d139a57d8b8e7f8fc",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -250,7 +250,7 @@
       "label": "校医院检验详情解析器",
       "version": 1,
       "url": "/hot-update/scripts/medical-lab-detail-parser.js",
-      "checksum": "sha256:3af14cb2eedf321f5929ab829fc19a6654463be34cd8d61ad7c08f89c5bb8925",
+      "checksum": "sha256:e46387542b9cf5568b8efdeae545c64a042bffffdc64bb701827fed88960ca44",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -272,7 +272,7 @@
       "label": "校医院已缴费发票解析器",
       "version": 1,
       "url": "/hot-update/scripts/medical-paid-invoice-parser.js",
-      "checksum": "sha256:ed7b540e9c9d1782de4d2b2178cd009a9068652ca43d17406d56093592f17f47",
+      "checksum": "sha256:e074f1790dba5c735d66a815a19036696e59f149e5cf519a04e8c509dd440509",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -297,7 +297,7 @@
       "label": "校医院就诊卡解析器",
       "version": 1,
       "url": "/hot-update/scripts/medical-patient-card-parser.js",
-      "checksum": "sha256:1ba86cd340c5d1b647bf9eded2f1886ffaa04ddd4611f52ddb6162734e1bec9c",
+      "checksum": "sha256:e41eb23f8791269f68e93f2ef29820fb57355d949f7866ac7686aa289edacf67",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -321,7 +321,7 @@
       "label": "校医院挂号详情解析器",
       "version": 1,
       "url": "/hot-update/scripts/medical-registration-detail-parser.js",
-      "checksum": "sha256:1c5dec538af6ad338e35e082836bb52d97c6c454af266182a4f639e53070867f",
+      "checksum": "sha256:2a21a3ea8bdac20a8d1b46848ec11af56b629c0abde289a7ebd2d2ed7d424688",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -340,7 +340,7 @@
       "label": "校医院挂号记录解析器",
       "version": 1,
       "url": "/hot-update/scripts/medical-registration-record-parser.js",
-      "checksum": "sha256:1bc5b1ed653cea991992dee2b503bac9fd48b2987e44f9ed579e30d6de32a7a9",
+      "checksum": "sha256:f2e1cfbfe045a3b4d69933360cf615016796167fbad43039e4e05b1e4202f01c",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -367,7 +367,7 @@
       "label": "校医院报告列表解析器",
       "version": 2,
       "url": "/hot-update/scripts/medical-report-list-parser.js",
-      "checksum": "sha256:3aafcdc06ebc9bdd4837d2c44f3c76e54642be88397b53016cecb63185051aeb",
+      "checksum": "sha256:5c60717dbed9bd576fd729d45e8157ef71b67fabe23d1d58333e2f586532778d",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -393,7 +393,7 @@
       "label": "消息解析器",
       "version": 1,
       "url": "/hot-update/scripts/messages-parser.js",
-      "checksum": "sha256:69881e07846237c3ce84ed181a85c95badb153697735e0942478ec2b46c75a8d",
+      "checksum": "sha256:ca1e652050b0f2a3a626e55c67ba85eee63734a266bb9c23526581d6704f2de6",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -426,7 +426,7 @@
       "label": "校园网解析器",
       "version": 2,
       "url": "/hot-update/scripts/school-net-parser.js",
-      "checksum": "sha256:51d7ab8446036688e957c5a5770cc3ff386f695435828d5781929b927a8a4273",
+      "checksum": "sha256:7788c6abdb240821a34d7260deecaee855ae88cd207e89359cfa586404042822",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -443,7 +443,7 @@
       "label": "成绩解析器",
       "version": 4,
       "url": "/hot-update/scripts/score-parser.js",
-      "checksum": "sha256:2eb6ae55ebcf00e4430d77bc0d91a87d6a39fb06af56dd529836cc2785e80ea7",
+      "checksum": "sha256:c9a62b08513599df86ffc0845f7f15dd5d3b82d4fe2ea40fb7ec1f93e8afc294",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -479,7 +479,7 @@
       "label": "体育场馆预约解析器",
       "version": 1,
       "url": "/hot-update/scripts/sports-reservation-parser.js",
-      "checksum": "sha256:cc80987d8eb7d16b5894eed856c2f3b8f8b5f1cf1f721237dee92f5b7dc66ad4",
+      "checksum": "sha256:c2da8f01770b87f61ee57cd7c611adad5a0e083d342ce0780f3b2dc4231f3b3b",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -503,7 +503,7 @@
       "label": "学习状态-课程解析器",
       "version": 2,
       "url": "/hot-update/scripts/study-status-course-parser.js",
-      "checksum": "sha256:724077d83e4b6183c856913d128344d01d12121579ff8daa911c617c0b9c587d",
+      "checksum": "sha256:7796f275e7e6cc1bb17c2c61616070eb932d5e0fb0d475ed941075f01b3f0a0a",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -536,7 +536,7 @@
       "label": "学习状态-首页解析器",
       "version": 2,
       "url": "/hot-update/scripts/study-status-index-parser.js",
-      "checksum": "sha256:23fe4ffc05b08cd0a1a8cd851879eeba4e756df4592146ad140b1b23b930c70d",
+      "checksum": "sha256:7fb012665833c00e40d90bf7e0692be6dc2daca24472fe5d936f5c21336c5566",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -553,7 +553,7 @@
       "label": "第三方课程表解析器",
       "version": 1,
       "url": "/hot-update/scripts/third-party-timetable-parser.js",
-      "checksum": "sha256:ca7f244fa082a929d41258ab0e417ab0c0e79f9ad5cb305ffe459f5d8ab36079",
+      "checksum": "sha256:3f27f7e9c710cb753c10542193b5c297b6be3063ca67a330d9e86d2d8785648c",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -588,7 +588,7 @@
       "label": "成绩单解析器",
       "version": 5,
       "url": "/hot-update/scripts/transcript-score-parser.js",
-      "checksum": "sha256:e72a9b9a846f58f63c63c1cbce17c9e7ff6f5c5317aa7ad6f31c6f9954c1c9f4",
+      "checksum": "sha256:36f2150d9d6062c8d04913cc0c02f8d20e1db0b0a0f1d954e21003aadac8d545",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -619,7 +619,7 @@
       "label": "WakeUp 课程表解析器",
       "version": 1,
       "url": "/hot-update/scripts/wakeup-parser.js",
-      "checksum": "sha256:a269cce4a87ef2a0f826ef6ce84d57b0d16a405b1c23a47aa04c8a3b2ad24513",
+      "checksum": "sha256:4b0aa6c73ff5f141debdd904af3ff04efe46989be129dfeb80f13efb7155a4de",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -644,7 +644,7 @@
       "label": "武大邮箱响应解析器",
       "version": 1,
       "url": "/hot-update/scripts/whu-email-envelope-parser.js",
-      "checksum": "sha256:295b6d6061a084e9bf464d8b8e5efe14c740ec7a1dc2763b2760b6c92bc4724b",
+      "checksum": "sha256:eccec76a0ce2502e7f03a73e2f087f53d2e82d763d3d83b5a98859adc6f414df",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -662,5 +662,5 @@
       }
     }
   ],
-  "signature": "NhZiKYy8iKg9MRl2zVHvQJp1bGhWPpQ67g01IDXALvUz/fzl/t2eowBQiOzOlmEw0XBBle2JPF6P3PFS2Rk+DA=="
+  "signature": "jqCS7qtpZtuSS9/p/d7uHlcz9WyNMoLPg1BvVdGtEFoGC+m3ZVDpKeix+yu5zEPx7XYCLc049AI57SVwuDFmBw=="
 }

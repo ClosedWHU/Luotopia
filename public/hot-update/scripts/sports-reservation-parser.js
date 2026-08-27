@@ -1,3 +1,5 @@
+// Parses sports venue reservation data, normalizing varying field names into
+// a canonical schema. Source data may use PascalCase or camelCase fields.
 function parse(rawJson) {
   var input = JSON.parse(rawJson);
   var source = input.decoded;
@@ -18,6 +20,9 @@ function parse(rawJson) {
   });
 }
 
+// Canonical field names recognized in the source data.
+// Keys from different sources are matched by a token (letters/digits only,
+// lowercased) and mapped to the canonical name below.
 var canonicalKeys = [
   'Id', 'Title', 'ImageUrl', 'AreaType', 'Sort', 'Address', 'CampusTitle',
   'Status', 'Content', 'Images', 'SportsTypes', 'SportsTypeTitle',
@@ -42,6 +47,8 @@ for (var canonicalIndex = 0; canonicalIndex < canonicalKeys.length; canonicalInd
   canonicalByToken[keyToken(canonicalKeys[canonicalIndex])] = canonicalKeys[canonicalIndex];
 }
 
+// Recursively normalizes arrays/objects: rewrites keys to canonical form and
+// coerces Status/PayStatus/RefundStatus to integers.
 function normalizeValue(value) {
   if (Array.isArray(value)) {
     var list = [];
@@ -88,6 +95,7 @@ function normalizeInteger(value) {
   return value;
 }
 
+// Returns a token used to match equivalent keys regardless of case/separators.
 function keyToken(value) {
   return String(value).replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
 }

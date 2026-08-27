@@ -1,3 +1,5 @@
+// Parses the campus network self-service page for one of three operations:
+// landing (account status), plan (current plan), or devices (connected list).
 function parse(rawJson) {
   var input = JSON.parse(rawJson);
   var operation = input.operation;
@@ -8,6 +10,8 @@ function parse(rawJson) {
   return JSON.stringify({ operation: 'invalid' });
 }
 
+// Determines whether the account is active or suspended from the landing page.
+// A "resume" button means suspended; a "suspend" button means active.
 function parseLanding(html) {
   if (/\bid=["']resume["']/i.test(html)) {
     return { operation: 'landing', status: 'suspended' };
@@ -37,6 +41,8 @@ function parsePlan(html) {
   };
 }
 
+// Extracts connected devices by locating each "userIpN" hidden input and then
+// reading related fields from the enclosing table row.
 function parseDevices(html) {
   var devices = [];
   var ipPattern = /<input\b[^>]*\bid=["']userIp([^"']*)["'][^>]*>/gi;
@@ -67,6 +73,7 @@ function parseDevices(html) {
   };
 }
 
+// Returns the visible text of an HTML string by stripping script/style and tags.
 function visibleText(html) {
   return decodeEntities(html
     .replace(/<script\b[\s\S]*?<\/script>/gi, ' ')
@@ -77,6 +84,7 @@ function visibleText(html) {
     .trim();
 }
 
+// Extracts a labeled field value from text, stopping at the next known label.
 function field(text, label) {
   var labels = ['当前状态', '上次自助暂停时间', '当前套餐', '套餐截止日', '暂停后效果', '恢复后效果'];
   var following = labels.filter(function(value) { return value !== label; }).join('|');
@@ -103,6 +111,7 @@ function labelTitle(container) {
   return match ? clean(match[2]) : null;
 }
 
+// Extracts the last quoted argument from an onclick handler (the id to cancel).
 function actionArgument(onclick) {
   if (!onclick) return null;
   var pattern = /["']([^"']+)["']/g;

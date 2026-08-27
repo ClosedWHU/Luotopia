@@ -1,9 +1,13 @@
+// Parses AI structured output: extracts a reply portion and a JSON payload
+// from raw model output (which may use <data> tags or fenced code blocks).
 function parse(rawJson) {
   var input = JSON.parse(rawJson);
   var content = typeof input.content === 'string' ? input.content : '';
+  // Reply is the text before <data>; payload comes from inside <data>.
   var dataMatch = /<data>\s*([\s\S]*?)\s*<\/data>/i.exec(content);
   var reply = dataMatch ? content.substring(0, dataMatch.index).trim() : '';
   var candidate = dataMatch ? dataMatch[1] : content;
+  // Unwrap ```json fenced blocks if present.
   var fenced = /```(?:json)?\s*([\s\S]*?)```/i.exec(candidate);
   if (fenced) candidate = fenced[1];
   var payload = extractObject(candidate);
@@ -15,6 +19,8 @@ function parse(rawJson) {
   return JSON.stringify({ schemaVersion: 1, reply: reply, payload: payload });
 }
 
+// Extracts the outermost JSON object from a string by locating the first
+// "{" and the last "}".
 function extractObject(value) {
   var first = value.indexOf('{');
   var last = value.lastIndexOf('}');
@@ -27,6 +33,8 @@ function extractObject(value) {
   }
 }
 
+// Normalizes various field names into a stable schema with an intent that is
+// either "create_item", "answer", or "fallback".
 function normalizePayload(payload) {
   var intent = text(payload.intent || payload.action || payload.intent_type).toLowerCase();
   if (intent === 'create' || intent === 'createitem' || intent === 'create-item' || intent === 'add_item') intent = 'create_item';
