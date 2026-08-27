@@ -1,3 +1,5 @@
+// Parses a WHU transcript (raw text lines) into a list of scores.
+// Handles several layout variations including rows split across visual lines.
 function parse(rawJson) {
   var input = JSON.parse(rawJson);
   var lines = Array.isArray(input.lines) ? input.lines.map(sanitizeDisplay) : [];
@@ -5,7 +7,9 @@ function parse(rawJson) {
 
   var scores = [], year = null, semester = null;
   var header = /^课程\s+课程类型\s+学习类型\s+学分\s+成绩\s*/;
+  // fullRow: course name + course type + study type + credit + grade.
   var fullRow = /^(.*?)\s+(通识教育|公共基础|专业教育)\s*(必修|选修)\s+(普通|重修)\s+(\d+(?:\.\d+)?)\s+(\d{1,3}|W|合格|不合格)$/;
+  // reversedRow: same but without the study type (study type on the next line).
   var reversedRow = /^(.*?)\s*(通识教育|公共基础|专业教育)\s*(必修|选修)\s+(\d+(?:\.\d+)?)\s+(\d{1,3}|W|合格|不合格)$/;
   var courseWithStudyType = /^(.*)\s+(普通|重修)$/;
 
@@ -34,6 +38,7 @@ function parse(rawJson) {
     }
     if (year === null || semester === null) continue;
 
+    // Case 1: a full row containing the study type.
     var full = fullRow.exec(line);
     if (full) {
       addScore(full[1], full[2] + full[3], full[4], full[5], full[6]);
@@ -43,19 +48,21 @@ function parse(rawJson) {
     var nextLine = i + 1 < lines.length ? ('' + lines[i + 1]).trim() : '';
     var reversed = reversedRow.exec(line);
     var course = courseWithStudyType.exec(nextLine);
+    // Case 2: reversed row where next line is "course name study type".
     if (reversed && course) {
       addScore(reversed[1] + course[1], reversed[2] + reversed[3], course[2], reversed[4], reversed[5]);
       i++;
       continue;
     }
 
+    // Case 3: reversed row where next line is just the study type.
     if (reversed && (nextLine === '普通' || nextLine === '重修')) {
       addScore(reversed[1], reversed[2] + reversed[3], nextLine, reversed[4], reversed[5]);
       i++;
       continue;
     }
 
-    // Dart fallback: full row may be split across adjacent visual lines.
+    // Case 4: Dart fallback: full row may be split across adjacent visual lines.
     var joined = fullRow.exec(line + ' ' + nextLine);
     if (joined) {
       addScore(joined[1], joined[2] + joined[3], joined[4], joined[5], joined[6]);
@@ -63,6 +70,7 @@ function parse(rawJson) {
       continue;
     }
 
+    // Case 5: cell-based layout where each field is on its own line.
     if (i + 4 >= lines.length) continue;
     var courseType = ('' + lines[i + 1]).trim();
     var examType = ('' + lines[i + 2]).trim();

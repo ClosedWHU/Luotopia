@@ -1,8 +1,10 @@
+// Parses a lab report detail page (table of test items) into a results list.
 function parse(rawJson) {
   var html = text(JSON.parse(rawJson).html), out = [], re = /<tr\b[^>]*>([\s\S]*?)<\/tr>/gi, m;
   while ((m = re.exec(html)) !== null) {
     var cells = [], cellRe = /<td\b[^>]*>([\s\S]*?)<\/td>/gi, c;
     while ((c = cellRe.exec(m[1])) !== null) cells.push(clean(c[1]));
+    // Skip header row and rows without enough columns.
     if (cells.length < 6 || cells[0] === '项目名称') continue;
     out.push({ itemName: cells[0], abbreviation: cells[1], result: cells[2], unit: cells[3], abnormal: cells[4], referenceRange: cells[5] });
   }

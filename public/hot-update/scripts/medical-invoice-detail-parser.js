@@ -1,7 +1,10 @@
+// Parses an invoice detail page: patient info, registration number, parsed
+// charge categories, total amount, prtId, and an optional barcode image.
 function parse(rawJson) {
   var html = text(JSON.parse(rawJson).html);
   var prtId = first(html, /<[^>]*id=["']prtId["'][^>]*>([\s\S]*?)<\/\w+>/i);
   var patientName = '', registrationNumber = '', barcodeBase64 = null;
+  // Patient info block: a weui-cell bgw with display:block style.
   var infoMatch = /<div[^>]*class=["'][^"']*\bweui-cell\b[^"']*\bbgw\b[^"']*["'][^>]*style=["'][^"']*display:block[^"']*["'][^>]*/i.exec(html);
   if (infoMatch) {
     var infoStart = infoMatch.index + infoMatch[0].length + 1;
@@ -14,9 +17,11 @@ function parse(rawJson) {
       if (t.indexOf('就诊人') >= 0) patientName = t.replace(/^.*就诊人[:：]\s*/, '');
       if (t.indexOf('登记号') >= 0) registrationNumber = t.replace(/^.*登记号[:：]\s*/, '');
     }
+    // Optional barcode image (data: URI).
     var imgRe = /<img[^>]*src=["'](data:image[^"']*)["']/i, img;
     if ((img = imgRe.exec(infoBlock)) !== null) barcodeBase64 = img[1];
   }
+  // Charge categories: each <li id="..."> has a header with title and amount.
   var categories = [];
   var catRe = /<li[^>]*\bid=["']([^"']+)["'][^>]*>([\s\S]*?)<\/li>/gi, c;
   while ((c = catRe.exec(html)) !== null) {
@@ -27,6 +32,7 @@ function parse(rawJson) {
     var title = amount ? titleText.replace(amount, '').trim() : titleText;
     categories.push({ id: c[1], title: title, amount: amount });
   }
+  // Total amount: located in the postFix block after "总计".
   var totalAmount = '';
   var totMatch = /<div[^>]*class=["'][^"']*\bpostFix\b[^"']*["'][^>]*/i.exec(html);
   if (totMatch) {
