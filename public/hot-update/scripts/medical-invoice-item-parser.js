@@ -23,13 +23,13 @@ function parse(rawJson) {
   }
   // Fallback layout: weui-cell body/footer pairs when no table rows matched.
   if (items.length === 0) {
-    var cellRe = /<div[^>]*class=["'][^"']*\bweui-cell\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/gi, cell;
+  var cellRe = /<div[^>]*class=["'][^"']*\bweui-cell\b[^"']*["'][^>]*>([\s\S]*?)(?=<div[^>]*class=["'][^"']*\bweui-cell\b|$)/gi, cell;
     while ((cell = cellRe.exec(html)) !== null) {
       var block = cell[1];
       var bd = /<div[^>]*class=["'][^"']*\bweui-cell__bd\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/i.exec(block);
       var ft = /<div[^>]*class=["'][^"']*\bweui-cell__ft\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/i.exec(block);
       var parts2 = bd ? nameParts(bd[1]) : { name: '', spec: '', quantity: '', packageCount: null };
-      var amount2 = first(block, /<span[^>]*class=["'][^"']*fontmoney[^"']*["'][^>]*>([\s\S]*?)<\/span>/i) || (ft ? clean(ft[1]) : '');
+      var amount2 = first(block, /<(?:p|div)[^>]*class=["'][^"']*fontmoney[^"']*["'][^>]*>([\s\S]*?)<\/(?:p|div)>/i) || (ft ? clean(ft[1]) : '');
       if (!parts2.name && !amount2) continue;
       items.push({ name: parts2.name, spec: parts2.spec, quantity: parts2.quantity, unitPrice: '', amount: amount2, packageCount: parts2.packageCount });
     }
