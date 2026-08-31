@@ -28,7 +28,7 @@ function parse(rawJson) {
     invoices.push({
       invoiceNumber: values['发票号'] || '', chargedAt: values['收费时间'] || '',
       departmentName: values['就诊科室'] || '', visitedAt: values['就诊时间'] || '',
-      amount: money(amount), href: href
+      amount: money(amount), href: href, isPaid: true
     });
   }
   return JSON.stringify({ schemaVersion: 1, invoices: invoices });

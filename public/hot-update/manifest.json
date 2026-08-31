@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": 20,
-  "updatedAt": "2026-08-27T06:28:21.919Z",
-  "expiresAt": "2027-02-23T06:28:21.919Z",
+  "version": 22,
+  "updatedAt": "2026-08-31T04:08:37.806Z",
+  "expiresAt": "2027-02-27T04:08:37.806Z",
   "keyId": "luotopia-hot-update-2026-01",
   "scripts": [
     {
@@ -224,9 +224,9 @@
     {
       "name": "medical-invoice-item-parser",
       "label": "校医院发票明细解析器",
-      "version": 2,
+      "version": 3,
       "url": "/hot-update/scripts/medical-invoice-item-parser.js",
-      "checksum": "sha256:f80957215ed0c2f242df3550eb9dc0494fd2ba66242e555d139a57d8b8e7f8fc",
+      "checksum": "sha256:f033f586087564408bb66f6475ebbac501179cbf33445c9d64bd9941e816e40e",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -270,9 +270,9 @@
     {
       "name": "medical-paid-invoice-parser",
       "label": "校医院已缴费发票解析器",
-      "version": 2,
+      "version": 3,
       "url": "/hot-update/scripts/medical-paid-invoice-parser.js",
-      "checksum": "sha256:e074f1790dba5c735d66a815a19036696e59f149e5cf519a04e8c509dd440509",
+      "checksum": "sha256:d58137ce75aa7cfcd2d258f3bd724a0d58c2fe52e502d0b11d895f9e49b5ea62",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -338,9 +338,9 @@
     {
       "name": "medical-registration-record-parser",
       "label": "校医院挂号记录解析器",
-      "version": 2,
+      "version": 4,
       "url": "/hot-update/scripts/medical-registration-record-parser.js",
-      "checksum": "sha256:f2e1cfbfe045a3b4d69933360cf615016796167fbad43039e4e05b1e4202f01c",
+      "checksum": "sha256:56b7635a39779910342681ae609721b14af5e32334077dfd48c636954f81ebe5",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -662,5 +662,5 @@
       }
     }
   ],
-  "signature": "eZg7lP4+KaSZRF/ou0KaQ+XEtlEN9u5y8kQ3r9FObSGq96sFw3GjFyTBK5kafWvEg+1tdVUXtdzaJzcrqOY3CA=="
+  "signature": "2+VFDg6B3eKvEOjiNbkD8xtTtRCjxJV+aJ7+7eyppDNdYeXAhqJi4ptQ9+xMGAOrIjx48CzORjyYJkfQWPp+Ag=="
 }
