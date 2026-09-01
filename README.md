@@ -1,4 +1,6 @@
 # Luotopia
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FClosedWHU%2FLuotopia.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FClosedWHU%2FLuotopia?ref=badge_shield)
+
 
 珞家 — 武汉大学综合校园服务 App。
 
@@ -101,3 +103,7 @@ npm run build
 ## 许可证
 
 [MIT](LICENSE)
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FClosedWHU%2FLuotopia.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FClosedWHU%2FLuotopia?ref=badge_large)
