@@ -16,7 +16,7 @@
     "prebuild": "npm run hot-update:generate"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.1.0",
+    "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.0.7",
     "tailwindcss": "^4.1.0"
   }
