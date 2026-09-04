@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": 22,
-  "updatedAt": "2026-08-31T04:08:37.806Z",
-  "expiresAt": "2027-02-27T04:08:37.806Z",
+  "version": 24,
+  "updatedAt": "2026-09-01T06:09:37.965Z",
+  "expiresAt": "2027-02-28T06:09:37.965Z",
   "keyId": "luotopia-hot-update-2026-01",
   "scripts": [
     {
@@ -319,9 +319,9 @@
     {
       "name": "medical-registration-detail-parser",
       "label": "校医院挂号详情解析器",
-      "version": 2,
+      "version": 3,
       "url": "/hot-update/scripts/medical-registration-detail-parser.js",
-      "checksum": "sha256:2a21a3ea8bdac20a8d1b46848ec11af56b629c0abde289a7ebd2d2ed7d424688",
+      "checksum": "sha256:22fbe85257c903acb7c02da6e308ea7c2fd234740f4ba43a5400a525d297d336",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -338,9 +338,9 @@
     {
       "name": "medical-registration-record-parser",
       "label": "校医院挂号记录解析器",
-      "version": 4,
+      "version": 5,
       "url": "/hot-update/scripts/medical-registration-record-parser.js",
-      "checksum": "sha256:56b7635a39779910342681ae609721b14af5e32334077dfd48c636954f81ebe5",
+      "checksum": "sha256:964296be93906a44c7550865c7fee2e0f0db6d3307b8c1434b07209f07a2fc9f",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
@@ -386,6 +386,30 @@
           }
         ],
         "examinationIsLast": true
+      }
+    },
+    {
+      "name": "medical-unpaid-invoice-parser",
+      "label": "校医院未缴费账单解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/medical-unpaid-invoice-parser.js",
+      "checksum": "sha256:f859558c5b09227de215565d61acc8b01ae75eaacca8baecdaf657fe4e6d0c52",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "html": "<div class=\"weui-cell bgw\"><p>就诊科室：<span>内科</span></p><p>就诊时间：<span>2026-01-01</span></p><p class=\"fontmoney\">￥10.00</p><a href=\"/payment/opbilldetail?id=1\">待缴费</a></div>"
+      },
+      "testExpect": {
+        "schemaVersion": 1,
+        "invoices": [
+          {
+            "departmentName": "内科",
+            "visitedAt": "2026-01-01",
+            "amount": "10.00",
+            "href": "/payment/opbilldetail?id=1",
+            "isPaid": false
+          }
+        ]
       }
     },
     {
@@ -662,5 +686,5 @@
       }
     }
   ],
-  "signature": "2+VFDg6B3eKvEOjiNbkD8xtTtRCjxJV+aJ7+7eyppDNdYeXAhqJi4ptQ9+xMGAOrIjx48CzORjyYJkfQWPp+Ag=="
+  "signature": "gt4aReKdZvER/g0lv4p2Gh1odSeB9z3fdWOr/i6IEzs7GoL7snXU4Xb5WV+3JChEKnuGR+R/EsyaRsB3JtEnAw=="
 }

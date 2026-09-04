@@ -8,9 +8,12 @@ function parse(rawJson) {
   for (var t = 0; t < tabs.length; t++) {
     var tab = new RegExp("<div[^>]*id=[\"']" + tabs[t].id + "[\"'][^>]*>([\\s\\S]*?)(?=<div[^>]*id=[\"']tab[12][\"']|<script|$)", "i").exec(html);
     if (!tab) continue;
-    var re = /<a[^>]*class=["'][^"']*\blcount\b[^"']*["'][^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, m;
+    var re = /<a\b([^>]*)>([\s\S]*?)<\/a>/gi, m;
     while ((m = re.exec(tab[1])) !== null) {
-      var href = m[1], block = m[2];
+      if (!/\bclass=["'][^"']*\blcount\b[^"']*["']/i.test(m[1])) continue;
+      var hrefMatch = /\bhref=["']([^"']+)["']/i.exec(m[1]);
+      if (!hrefMatch) continue;
+      var href = hrefMatch[1], block = m[2];
     var summary = /<div[^>]*class=["'][^"']*\bpl20\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/i.exec(block);
     var summaryHtml = summary ? summary[1] : block;
     // department / registration type come from the first p with opacity90
@@ -19,8 +22,10 @@ function parse(rawJson) {
     var dateSpans = spans(summaryHtml, /<p[^>]*class=["'][^"']*\bmt10\b[^"']*["'][^>]*>(?:[^<]*<span[^>]*>([\s\S]*?)<\/span>){0,}/i);
     var doctor = first(block, /<div[^>]*class=["'][^"']*\bweui-cell_access\b[^"']*["'][^>]*>\s*<p[^>]*class=["'][^"']*\bweui-cell__bd\b[^"']*["'][^>]*>([\s\S]*?)<\/p>/i);
     var fee = first(block, /<p[^>]*class=["'][^"']*fontmoney[^"']*["'][^>]*>([\s\S]*?)<\/p>/i);
-    records.push({
-      doctorName: doctor, status: tabs[t].pending ? '待就诊' : '已就诊', isPending: tabs[t].pending,
+      var rawStatus = first(block, /<div[^>]*class=["'][^"']*\bweui-cell__ft\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/i);
+      var pending = rawStatus.indexOf('待就诊') >= 0;
+      records.push({
+      doctorName: doctor, status: pending ? '待就诊' : '已就诊', isPending: pending,
       departmentName: firstSpans[0] || '', registrationType: firstSpans[1] || '',
       visitDate: dateSpans[0] || '', session: dateSpans[1] || '',
       fee: money(fee), href: href
