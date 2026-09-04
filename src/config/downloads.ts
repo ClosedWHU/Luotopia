@@ -24,7 +24,7 @@ export const platforms: PlatformDownload[] = [
     name: "Apple",
     icon: "phone_iphone",
     desc: "iOS / iPadOS TestFlight 与 macOS DMG",
-    note: "iOS / iPadOS 需 TestFlight · macOS 13.5+",
+    note: "iOS / iPadOS 需 TestFlight · macOS 13.5+（Apple 芯片）",
     externalUrl: testFlightUrl,
     externalLabel: "加入 TestFlight",
   },
