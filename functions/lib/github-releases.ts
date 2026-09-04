@@ -137,6 +137,19 @@ export function parseFlutterVersion(tagOrTitle: string) {
   };
 }
 
+const APP_RELEASE_DATES: Record<string, string> = {
+  "1.0.0+3": "2026-07-16T15:51:53+08:00",
+  "1.0.0+4": "2026-07-16T23:04:41+08:00",
+  "1.0.0+5": "2026-07-21T04:42:35+08:00",
+  "1.0.0+6": "2026-08-16T23:43:20+08:00",
+  "1.0.0+7": "2026-09-04T00:00:00+08:00",
+};
+
+function releaseDate(r: GhRelease): string {
+  const parsed = parseFlutterVersion(r.tag_name || r.name || "");
+  return APP_RELEASE_DATES[parsed.display] || r.published_at || r.created_at;
+}
+
 export function compareReleasesNewestFirst(a: GhRelease, b: GhRelease): number {
   const left = parseFlutterVersion(a.tag_name || a.name || "");
   const right = parseFlutterVersion(b.tag_name || b.name || "");
@@ -156,8 +169,8 @@ export function compareReleasesNewestFirst(a: GhRelease, b: GhRelease): number {
     }
   }
 
-  const leftDate = Date.parse(a.published_at || a.created_at || "") || 0;
-  const rightDate = Date.parse(b.published_at || b.created_at || "") || 0;
+  const leftDate = Date.parse(releaseDate(a)) || 0;
+  const rightDate = Date.parse(releaseDate(b)) || 0;
   return rightDate - leftDate;
 }
 
@@ -394,7 +407,7 @@ export function mapRelease(r: GhRelease) {
     prerelease: r.prerelease,
     draft: r.draft,
     htmlUrl: r.html_url,
-    publishedAt: r.published_at || r.created_at,
+    publishedAt: releaseDate(r),
     assets,
   };
 }
