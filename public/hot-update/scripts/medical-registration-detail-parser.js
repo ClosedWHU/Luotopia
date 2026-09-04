@@ -3,7 +3,7 @@ function parse(rawJson) {
   var html = text(JSON.parse(rawJson).html);
   var fields = {};
   // Each <li class="weui-flex"><p class="justifynow">label</p><span class="font333">value</span>
-  var re = /<li[^>]*class=["'][^"']*\bweui-flex\b[^"']*["'][^>]*>\s*<p[^>]*class=["'][^"']*\bjustifynow\b[^"']*["'][^>]*>([\s\S]*?)<\/p>\s*<span[^>]*class=["'][^"']*font333[^"']*["'][^>]*>([\s\S]*?)<\/span>/gi, m;
+  var re = /<li[^>]*class=["'][^"']*\bweui-flex\b[^"']*["'][^>]*>\s*<p[^>]*class=["'][^"']*\bjustifynow\b[^"']*["'][^>]*>([\s\S]*?)<\/p>[\s\S]*?<span[^>]*class=["'][^"']*font333[^"']*["'][^>]*>([\s\S]*?)<\/span>/gi, m;
   while ((m = re.exec(html)) !== null) {
     var label = clean(m[1]), value = clean(m[2]);
     if (label && value) fields[label] = value;

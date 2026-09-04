@@ -38,6 +38,7 @@ const tests = {
   'medical-registration-record-parser': { input: { html: '<a class="lcount" href="/detail/123"><div class="weui-cell_access"><p class="weui-cell__bd">张医生</p><div class="weui-cell__ft">已就诊</div></div><div class="pl20"><p class="font333 opacity90"><span>内科</span><span>普通号</span></p><p class="mt10"><span>2026-01-01</span><span>上午</span></p><p class="fontmoney">￥10.00</p></div></a>' }, expect: { schemaVersion: 1, records: [{ doctorName: '张医生', status: '已就诊', departmentName: '内科', registrationType: '普通号', visitDate: '2026-01-01', session: '上午', fee: '10.00', href: '/detail/123' }] } },
   'medical-registration-detail-parser': { input: { html: '<li class="weui-flex"><p class="justifynow">科室</p><span class="font333">内科</span></li><p>挂号费用<span class="f18">10.00</span></p>' }, expect: { schemaVersion: 1, fields: { '科室': '内科' }, fee: '10.00' } },
   'medical-paid-invoice-parser': { input: { html: '<div class="f14 mt10 bgw" id="inv1"><div class="pl20"><p class="mt5">发票号<span>INV001</span></p><p class="mt5">收费时间<span>2026-01-01</span></p><p class="mt5">就诊科室<span>内科</span></p><p class="mt5">就诊时间<span>2026-01-01</span></p></div><a href="/payment/opbilledinvdetail?id=1">详情</a><p class="fontmoney">￥10.00</p></div>' }, expect: { schemaVersion: 1, invoices: [{ invoiceNumber: 'INV001', chargedAt: '2026-01-01', departmentName: '内科', visitedAt: '2026-01-01', amount: '10.00', href: '/payment/opbilledinvdetail?id=1' }] } },
+  'medical-unpaid-invoice-parser': { input: { html: '<div class="weui-cell bgw"><p>就诊科室：<span>内科</span></p><p>就诊时间：<span>2026-01-01</span></p><p class="fontmoney">￥10.00</p><a href="/payment/opbilldetail?id=1">待缴费</a></div>' }, expect: { schemaVersion: 1, invoices: [{ departmentName: '内科', visitedAt: '2026-01-01', amount: '10.00', href: '/payment/opbilldetail?id=1', isPaid: false }] } },
 };
 
 const labels = {
@@ -52,7 +53,7 @@ const labels = {
   'medical-report-list-parser': '校医院报告列表解析器', 'medical-lab-detail-parser': '校医院检验详情解析器', 'medical-exam-detail-parser': '校医院检查详情解析器',
   'medical-patient-card-parser': '校医院就诊卡解析器', 'medical-choose-card-parser': '校医院选卡解析器', 'medical-card-detail-parser': '校医院卡详情解析器',
   'medical-invoice-detail-parser': '校医院发票详情解析器', 'medical-invoice-item-parser': '校医院发票明细解析器', 'medical-registration-record-parser': '校医院挂号记录解析器',
-  'medical-registration-detail-parser': '校医院挂号详情解析器', 'medical-paid-invoice-parser': '校医院已缴费发票解析器',
+  'medical-registration-detail-parser': '校医院挂号详情解析器', 'medical-paid-invoice-parser': '校医院已缴费发票解析器', 'medical-unpaid-invoice-parser': '校医院未缴费账单解析器',
 };
 
 const versions = {
