@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": 24,
-  "updatedAt": "2026-09-01T06:09:37.965Z",
-  "expiresAt": "2027-02-28T06:09:37.965Z",
+  "version": 27,
+  "updatedAt": "2026-09-07T06:19:36.053Z",
+  "expiresAt": "2027-03-06T06:19:36.053Z",
   "keyId": "luotopia-hot-update-2026-01",
   "scripts": [
     {
@@ -14,11 +14,13 @@
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
-        "kind": "extract",
-        "text": "```json\n{\"intent\":\"create\"}\n```"
+        "content": "```json\n{\"intent\":\"create\"}\n```"
       },
       "testExpect": {
-        "schemaVersion": 1
+        "schemaVersion": 1,
+        "payload": {
+          "intent": "create_item"
+        }
       }
     },
     {
@@ -204,7 +206,7 @@
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
-        "html": "<p id=\"prtId\">PRT001</p><div class=\"weui-cell bgw\" style=\"display:block\"><div class=\"weui-cell__bd\">就诊人: 张三</div><div class=\"weui-cell__bd\">登记号: REG001</div></div><li id=\"cat1\"><div class=\"bgtitleyellow\">西药 <span class=\"font-yellow\">10.00</span></div></li><div class=\"postFix\"><div class=\"weui-cell__bd\">总计 <span class=\"font-yellow\">10.00</span></div></div>"
+        "html": "<p id=\"prtId\">PRT001</p><div class=\"weui-cell bgw\" style=\"display:block\"><div class=\"weui-cell__bd\">就诊人: 张三</div><div class=\"weui-cell__bd\">登记号: REG001</div></div><ul><li id=\"cat1\"><div class=\"bgtitleyellow\">西药 <span class=\"font-yellow\">10.00</span></div></li></ul><div class=\"postFix\"><div class=\"weui-cell__bd\">总计 <span class=\"font-yellow\">10.00</span></div></div>"
       },
       "testExpect": {
         "schemaVersion": 1,
@@ -301,7 +303,7 @@
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
-        "html": "<div class=\"cardlist\"><p>姓名<span class=\"font333\">张三</span></p><p>常用卡<span class=\"font333\">001</span></p><p>卡类型<span class=\"font333\">普通卡</span></p><input name=\"cardlist\" value=\"enc123\" checked></div>"
+        "html": "<div class=\"cardlistwrap\"><div class=\"cardlist\"><p>姓名<span class=\"font333\">张三</span></p><p>常用卡<span class=\"font333\">001</span></p><p>卡类型<span class=\"font333\">普通卡</span></p><input name=\"cardlist\" value=\"enc123\" checked=\"checked\"></div></div>"
       },
       "testExpect": {
         "schemaVersion": 1,
@@ -372,7 +374,7 @@
       "apiVersion": 1,
       "testInput": {
         "kind": "page",
-        "html": "<div id=\"lisId\"><div class=\"f14 mt10\"><p>血常规</p><a onclick=\"lisReportDetail('adm&sign=s','item','lab')\"><p>2026-01-01</p><div class=\"weui-cell__ft\">报告已出</div></a></div></div><div id=\"risId\"></div><script>var lisLoadEnd=!!('');var risLoadEnd=!!('1');</script>"
+        "html": "<div id=\"lisId\"><div class=\"f14 mt10 font333 bgw\"><div class=\"p10\"><p>血常规</p><p>门诊</p></div><div><a onclick=\"lisReportDetail('adm-token&amp;sign=signed-token', 'item-token', 'lab-token')\"><p>2026-07-20 10:00:00</p><span class=\"weui-cell__ft\">报告已出</span></a></div></div></div><div id=\"risId\"></div><script>var lisLoadEnd=!!('');var risLoadEnd=!!('1');</script>"
       },
       "testExpect": {
         "schemaVersion": 1,
@@ -391,22 +393,22 @@
     {
       "name": "medical-unpaid-invoice-parser",
       "label": "校医院未缴费账单解析器",
-      "version": 1,
+      "version": 2,
       "url": "/hot-update/scripts/medical-unpaid-invoice-parser.js",
-      "checksum": "sha256:f859558c5b09227de215565d61acc8b01ae75eaacca8baecdaf657fe4e6d0c52",
+      "checksum": "sha256:f99ae9f84aad67e4842283f8b59f1cd90779e1241210d8eec69da741821d4859",
       "minAppVersion": "1.0.0",
       "apiVersion": 1,
       "testInput": {
-        "html": "<div class=\"weui-cell bgw\"><p>就诊科室：<span>内科</span></p><p>就诊时间：<span>2026-01-01</span></p><p class=\"fontmoney\">￥10.00</p><a href=\"/payment/opbilldetail?id=1\">待缴费</a></div>"
+        "html": "<div class=\"f14 mt10 bgw\" id =\"1390630\"><div class=\"pl20 borderBottom pt10 pb10 font333 f13 ls2\"><p class=\"mt5\">就诊科室&nbsp;:&nbsp;<span>本部精神科门诊</span></p><p class=\"mt5\">就诊时间&nbsp;:&nbsp;<span>2026-09-07</span></p></div><div class=\"borderBottom\"><a class=\"weui-cell weui-cell_access\" href=\"/wehospital/payment/opbillorderlist?admId=b3VvK1cxSGZKQT09\"><div class=\"weui-cell__bd\"><p class=\"fontmoney f16\"><span class=\"f12\">￥</span>39.69</p></div><div class=\"weui-cell__ft font-blue f13\">去支付</div></a></div></div>"
       },
       "testExpect": {
         "schemaVersion": 1,
         "invoices": [
           {
-            "departmentName": "内科",
-            "visitedAt": "2026-01-01",
-            "amount": "10.00",
-            "href": "/payment/opbilldetail?id=1",
+            "departmentName": "本部精神科门诊",
+            "visitedAt": "2026-09-07",
+            "amount": "39.69",
+            "href": "/wehospital/payment/opbillorderlist?admId=b3VvK1cxSGZKQT09",
             "isPaid": false
           }
         ]
@@ -686,5 +688,5 @@
       }
     }
   ],
-  "signature": "gt4aReKdZvER/g0lv4p2Gh1odSeB9z3fdWOr/i6IEzs7GoL7snXU4Xb5WV+3JChEKnuGR+R/EsyaRsB3JtEnAw=="
+  "signature": "uo06T/siHVwCJCTd9AhBO6EEHRtYjmBg2IiP77Khho6WQ2x+jZtstnwshpcU5SGi2M5CyE7M1I9BO7axN5/YBA=="
 }
