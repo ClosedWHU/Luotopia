@@ -1,30 +1,41 @@
 ---
+import { Picture } from "astro:assets";
+import scheduleShot from "../assets/screenshots/schedule.png";
+import campusShot from "../assets/screenshots/campus.png";
+import aiAssistantShot from "../assets/screenshots/ai-assistant.png";
+import weatherDetailShot from "../assets/screenshots/weather-detail.png";
+import weatherAqiShot from "../assets/screenshots/weather-aqi.png";
+import busShot from "../assets/screenshots/bus.png";
+import wallpaperShot from "../assets/screenshots/wallpaper.png";
+
 const slides = [
-  { label: "课程表", src: "/img/screenshots/schedule.png" },
-  { label: "校园应用", src: "/img/screenshots/campus.png" },
-  { label: "AI 助手", src: "/img/screenshots/ai-assistant.png" },
-  { label: "天气详情", src: "/img/screenshots/weather-detail.png" },
-  { label: "空气质量", src: "/img/screenshots/weather-aqi.png" },
-  { label: "校车", src: "/img/screenshots/bus.png" },
-  { label: "壁纸中心", src: "/img/screenshots/wallpaper.png" },
+  { label: "课程表", src: scheduleShot },
+  { label: "校园应用", src: campusShot },
+  { label: "AI 助手", src: aiAssistantShot },
+  { label: "天气详情", src: weatherDetailShot },
+  { label: "空气质量", src: weatherAqiShot },
+  { label: "校车", src: busShot },
+  { label: "壁纸中心", src: wallpaperShot },
 ];
 ---
 
-<div class="relative overflow-hidden rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] pb-8 dark:bg-[var(--md-sys-color-surface-container-low-dark)]">
+<div class="lt-carousel glass relative overflow-hidden rounded-group pb-10">
   <div id="carousel-track" class="flex transition-transform duration-500 ease-out">
-    {slides.map((slide, i) => (
+    {slides.map((slide) => (
       <div class="shrink-0 w-full sm:w-1/2 lg:w-1/4 p-1.5">
-        <figure class="overflow-hidden rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container)] dark:bg-[var(--md-sys-color-surface-container-dark)] shadow-[var(--md-sys-elevation-level1)]">
-          <img
+        <figure class="lt-shot overflow-hidden rounded-nested">
+          <Picture
             src={slide.src}
             alt={slide.label}
-            width="360"
-            height="780"
-            loading={i < 2 ? "eager" : "lazy"}
+            formats={["avif", "webp"]}
+            widths={[360, 720]}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            quality={72}
+            loading="lazy"
             decoding="async"
             class="w-full h-auto object-cover object-center aspect-[9/16] max-h-[500px]"
           />
-          <figcaption class="px-3 py-2 text-center text-[length:var(--md-sys-typescale-label-large-size)] font-[var(--md-sys-typescale-label-large-weight)] text-[var(--md-sys-color-on-surface-variant)]">
+          <figcaption class="lt-shot-caption px-3 py-2 text-center text-label-large text-on-surface">
             {slide.label}
           </figcaption>
         </figure>
@@ -32,30 +43,127 @@ const slides = [
     ))}
   </div>
 
-  <button id="carousel-prev" class="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] transition-colors cursor-pointer shadow-[var(--md-sys-elevation-level2)]" aria-label="上一张">
+  <button id="carousel-prev" class="lt-arrow absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full cursor-pointer" aria-label="上一张">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
   </button>
-  <button id="carousel-next" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] transition-colors cursor-pointer shadow-[var(--md-sys-elevation-level2)]" aria-label="下一张">
+  <button id="carousel-next" class="lt-arrow absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full cursor-pointer" aria-label="下一张">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
   </button>
 
-  <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+  <div class="absolute bottom-3.5 left-1/2 -translate-x-1/2 flex gap-1.5">
     {slides.map((_, i) => (
-      <button class="carousel-dot w-2 h-2 rounded-full bg-[var(--md-sys-color-outline)] transition-all cursor-pointer data-[active=true]:w-4 data-[active=true]:bg-[var(--md-sys-color-primary)]" data-index={i} aria-label={`第 ${i + 1} 张截图`}></button>
+      <button class="lt-dot" data-index={i} aria-label={`第 ${i + 1} 张截图`}></button>
     ))}
   </div>
 </div>
 
+<style>
+  /*
+   * The panel is glass, so everything inside it inherits a blurred backdrop —
+   * which means the nested surfaces must NOT blur again. A second
+   * `backdrop-filter` over an already-blurred root costs a compositor layer and
+   * changes nothing visually, so the shots and the arrows take translucency
+   * only.
+   */
+  .lt-shot {
+    background-color: var(--lt-glass-subtle);
+    box-shadow:
+      inset 0 0 0 0.6px var(--lt-glass-edge),
+      0 10px 28px -16px hsl(215 45% 18% / 0.4);
+    transition: box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .lt-shot:hover {
+    box-shadow:
+      inset 0 0 0 0.6px var(--lt-glass-edge),
+      0 18px 40px -18px hsl(215 55% 18% / 0.52);
+  }
+
+  .lt-shot-caption {
+    background-color: var(--lt-glass-overlay);
+    border-top: 0.6px solid var(--lt-glass-edge);
+  }
+
+  .lt-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--lt-color-on-surface-variant);
+    background-color: var(--lt-glass-overlay);
+    border: none;
+    box-shadow:
+      inset 0 1px 0 0 var(--lt-glass-rim),
+      inset 0 0 0 0.6px var(--lt-glass-edge),
+      0 6px 18px -8px hsl(215 45% 18% / 0.36);
+    transition:
+      color 0.25s ease,
+      transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.25s ease;
+  }
+
+  .lt-arrow:hover {
+    color: var(--lt-color-primary);
+    box-shadow:
+      inset 0 1px 0 0 var(--lt-glass-rim),
+      inset 0 0 0 0.6px var(--lt-glass-edge),
+      0 10px 26px -10px hsl(215 45% 18% / 0.44);
+  }
+
+  /* `-translate-y-1/2` owns the resting transform, so hover scales via the
+   * individual `scale` property rather than a competing `transform`. */
+  .lt-arrow:hover {
+    scale: 1.08;
+  }
+
+  .lt-arrow:active {
+    scale: 0.95;
+  }
+
+  .lt-dot {
+    width: 0.4rem;
+    height: 0.4rem;
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    background-color: var(--lt-color-outline);
+    opacity: 0.45;
+    cursor: pointer;
+    transition:
+      width 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.35s ease,
+      background-color 0.35s ease;
+  }
+
+  .lt-dot[data-active="true"] {
+    width: 1.15rem;
+    opacity: 1;
+    background-color: var(--lt-color-primary);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lt-shot,
+    .lt-arrow,
+    .lt-dot {
+      transition: none;
+    }
+  }
+</style>
+
 <script>
-  (function () {
+  import { onPageSetup } from "../scripts/page-lifecycle";
+
+  onPageSetup((signal) => {
     const track = document.getElementById("carousel-track");
     const prev = document.getElementById("carousel-prev");
     const next = document.getElementById("carousel-next");
-    const dots = document.querySelectorAll(".carousel-dot");
+    const dots = Array.from(document.querySelectorAll<HTMLElement>(".lt-dot"));
     if (!track || !prev || !next) return;
 
     const total = dots.length;
+    const container = track.parentElement;
     let current = 0;
+    let resizeTimer = 0;
+    let autoplay = 0;
 
     function getCols() {
       if (window.innerWidth < 640) return 1;
@@ -69,41 +177,54 @@ const slides = [
       if (current > max) current = max;
       const pct = 100 / cols;
       track.style.transform = `translateX(-${current * pct}%)`;
-      dots.forEach((dot, i) => { dot.dataset.active = String(i >= current && i < current + cols); });
+      dots.forEach((dot, i) => {
+        dot.dataset.active = String(i >= current && i < current + cols);
+      });
     }
 
-    prev.addEventListener("click", () => { current = Math.max(0, current - 1); update(); });
-    next.addEventListener("click", () => {
-      const cols = getCols();
-      const max = Math.max(0, total - cols);
-      current = Math.min(max, current + 1);
+    function advance() {
+      const max = Math.max(0, total - getCols());
+      current = current >= max ? 0 : current + 1;
       update();
-    });
+    }
+
+    function startAutoplay() {
+      stopAutoplay();
+      autoplay = window.setInterval(advance, 5000);
+    }
+
+    function stopAutoplay() {
+      window.clearInterval(autoplay);
+      autoplay = 0;
+    }
+
+    prev.addEventListener("click", () => { current = Math.max(0, current - 1); update(); }, { signal });
+    next.addEventListener("click", () => {
+      const max = Math.max(0, total - getCols());
+      current = Math.min(current + 1, max);
+      update();
+    }, { signal });
     dots.forEach((dot) => {
       dot.addEventListener("click", () => {
         current = Math.min(parseInt(dot.dataset.index ?? "0"), Math.max(0, total - getCols()));
         update();
-      });
+      }, { signal });
     });
 
-    let resizeTimer;
-    window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(update, 100); });
+    window.addEventListener("resize", () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(update, 100);
+    }, { signal });
 
-    let autoplay = setInterval(() => {
-      const cols = getCols();
-      const max = Math.max(0, total - cols);
-      current = current >= max ? 0 : current + 1;
-      update();
-    }, 5000);
-    const container = track.parentElement;
-    container?.addEventListener("mouseenter", () => clearInterval(autoplay));
-    container?.addEventListener("mouseleave", () => {
-      autoplay = setInterval(() => {
-        const cols = getCols();
-        const max = Math.max(0, total - cols);
-        current = current >= max ? 0 : current + 1;
-        update();
-      }, 5000);
+    container?.addEventListener("mouseenter", stopAutoplay, { signal });
+    container?.addEventListener("mouseleave", startAutoplay, { signal });
+
+    startAutoplay();
+    update();
+
+    signal.addEventListener("abort", () => {
+      stopAutoplay();
+      window.clearTimeout(resizeTimer);
     });
-  })();
+  });
 </script>

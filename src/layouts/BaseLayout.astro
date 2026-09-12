@@ -1,14 +1,26 @@
 ---
-import "../styles/global.css";
-import Navbar from "../components/Navbar.astro";
-import Footer from "../components/Footer.astro";
+  /*
+   * MiSans supplies CJK; Plus Jakarta Sans supplies Latin and sits ahead of it
+   * in --font-sans. Both are self-hosted and imported as modules so Vite emits
+   * hashed font assets and the MiSans weight-remap plugin can run.
+   */
+  import { ClientRouter } from "astro:transitions";
+  import "@fontsource-variable/plus-jakarta-sans/wght.css";
+  import "misans/lib/Normal/MiSans-Regular.min.css";
+  import "misans/lib/Normal/MiSans-Medium.min.css";
+  import "misans/lib/Normal/MiSans-Bold.min.css";
+  import "../styles/global.css";
+  import Navbar from "../components/Navbar.astro";
+  import Footer from "../components/Footer.astro";
+  import AuroraBackground from "../components/AuroraBackground.astro";
+  import plusJakartaSansLatin from "@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2";
 
-export interface Props {
-  title: string;
-  description?: string;
-}
+  export interface Props {
+    title: string;
+    description?: string;
+  }
 
-const { title, description } = Astro.props;
+  const { title, description } = Astro.props;
 ---
 
 <!doctype html>
@@ -17,6 +29,7 @@ const { title, description } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
+    <ClientRouter fallback="swap" />
     <meta name="description" content={description ?? "Luotopia —— 整合校园服务，构建开放生态"} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description ?? "校园服务一站式平台，开放社区驱动"} />
@@ -29,9 +42,13 @@ const { title, description } = Astro.props;
     <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" media="(prefers-color-scheme: light)" />
     <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192-dark.png" media="(prefers-color-scheme: dark)" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href={plusJakartaSansLatin}
+      crossorigin
+    />
     <script is:inline>
       if (new URLSearchParams(window.location.search).get("kiosk") === "1") {
         document.documentElement.dataset.kiosk = "true";
@@ -69,11 +86,119 @@ const { title, description } = Astro.props;
     </script>
     <title>{title} | Luotopia</title>
   </head>
-  <body class="min-h-screen flex flex-col">
+  <body class="min-h-screen flex flex-col relative">
+    <AuroraBackground />
     <Navbar />
-    <main class="flex-1">
+    <main class="flex-1 relative z-10">
       <slot />
     </main>
     <Footer />
   </body>
 </html>
+
+<script>
+  import Lenis from "lenis";
+  import { onPageSetup } from "../scripts/page-lifecycle";
+
+  type BeforeSwapEvent = Event & { newDocument?: Document };
+
+  /*
+   * Site-wide client runtime.
+   *
+   * Smooth scroll is not decoration here: with a page-fixed aurora behind
+   * glass, native jumpy scrolling makes the blur strobe against the field.
+   * Lenis interpolates instead, so the refraction reads as depth. The instance
+   * is exposed for modal code that must freeze the page — `body { overflow:
+   * hidden }` no longer does anything once Lenis owns the scroll position.
+   *
+   * Under Client Router the same bundled script is not re-executed on every
+   * navigation, so Lenis is created once and deliberately survives swaps. The
+   * router restores scroll natively; Lenis only has to resynchronize.
+   */
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  let lenis: Lenis | undefined;
+  if (!reduceMotion) {
+    lenis = new Lenis({
+      duration: 1.1,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      touchMultiplier: 1.5,
+      autoRaf: true,
+      anchors: true,
+      stopInertiaOnNavigate: true,
+    });
+  }
+  (window as unknown as { ltLenis?: Lenis }).ltLenis = lenis;
+
+  function preserveRootState(event: Event) {
+    const nextRoot = (event as BeforeSwapEvent).newDocument?.documentElement;
+    if (!nextRoot) return;
+
+    // Astro replaces <html> attributes from the fetched document. The theme and
+    // kiosk states are client-only, so copy them across before the swap rather
+    // than letting the new server-rendered root flash back to light/default.
+    nextRoot.classList.toggle("dark", document.documentElement.classList.contains("dark"));
+    const kiosk = document.documentElement.dataset.kiosk;
+    if (kiosk) nextRoot.dataset.kiosk = kiosk;
+    else nextRoot.removeAttribute("data-kiosk");
+  }
+
+  /* Scroll reveal. Unobserve after firing — a reveal that can retrigger on
+   * every scroll-up is a fidget toy, not a transition.
+   *
+   * The negative bottom root margin makes elements animate just after they
+   * enter rather than exactly at the edge, but it also carves 8% off the bottom
+   * of the root. On a page short enough to fit the viewport with no scroll, an
+   * element sitting in that band would never intersect and would stay at
+   * opacity 0 forever — invisible content. So the inset is only applied when
+   * the document can actually scroll.
+   */
+  let revealObserver: IntersectionObserver | undefined;
+
+  function teardownReveals() {
+    revealObserver?.disconnect();
+    revealObserver = undefined;
+  }
+
+  function initReveals() {
+    teardownReveals();
+
+    const revealables = document.querySelectorAll<HTMLElement>(".lt-reveal, .lt-reveal-lift");
+    if (reduceMotion || !("IntersectionObserver" in window)) {
+      revealables.forEach((el) => (el.dataset.revealed = "true"));
+      return;
+    }
+
+    const canScroll = document.documentElement.scrollHeight > window.innerHeight + 16;
+    revealObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          (entry.target as HTMLElement).dataset.revealed = "true";
+          revealObserver?.unobserve(entry.target);
+        }
+      },
+      { rootMargin: canScroll ? "0px 0px -8% 0px" : "0px", threshold: 0 },
+    );
+
+    revealables.forEach((el) => {
+      if (el.dataset.revealed === "true") return;
+      revealObserver?.observe(el);
+    });
+  }
+
+  document.addEventListener("astro:before-swap", (event) => {
+    preserveRootState(event);
+  });
+
+  document.addEventListener("astro:after-swap", () => {
+    lenis?.resize();
+    lenis?.start();
+  });
+
+  onPageSetup(() => {
+    lenis?.resize();
+    initReveals();
+    return teardownReveals;
+  });
+</script>

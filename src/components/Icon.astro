@@ -1,0 +1,15 @@
+---
+import { readMaterialIcon } from "../scripts/icon-source.server";
+import { normalizeIconSvg } from "../scripts/icon-svg";
+
+export interface Props {
+  name: string;
+  class?: string;
+  label?: string;
+}
+
+const { name, class: className, label } = Astro.props;
+const svg = normalizeIconSvg(readMaterialIcon(name), className, label);
+---
+
+<Fragment set:html={svg} />

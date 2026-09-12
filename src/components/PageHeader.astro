@@ -1,0 +1,45 @@
+---
+/**
+ * Shared interior-page header.
+ *
+ * Every route except the home page opened with the same four lines of
+ * display-small + title-large; this keeps the rhythm identical across them and
+ * gives one place to hang the hero wash. Interior pages get a shorter, dimmer
+ * wash than the home hero — they are documents, not landing pages, and a
+ * full-strength aurora behind dense body copy fights the text.
+ */
+export interface Props {
+  title: string;
+  subtitle?: string;
+  /** Narrows the measure for long-form routes (legal documents). */
+  narrow?: boolean;
+}
+
+const { title, subtitle, narrow = false } = Astro.props;
+---
+
+<header class="lt-page-head relative overflow-hidden pt-32 pb-12 px-4">
+  <div class="lt-page-head-wash" aria-hidden="true"></div>
+  <div class:list={["relative mx-auto", narrow ? "max-w-3xl" : "max-w-6xl"]}>
+    <h1 class="lt-reveal text-display-small text-on-surface tracking-tight mb-3">{title}</h1>
+    {
+      subtitle && (
+        <p class="lt-reveal text-title-large font-normal text-on-surface-variant max-w-2xl" style="--lt-reveal-delay: 70ms">
+          {subtitle}
+        </p>
+      )
+    }
+  </div>
+</header>
+
+<style>
+  .lt-page-head-wash {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(42rem 21rem at 24% 26%, var(--lt-hero-wash-from), var(--lt-hero-wash-to) 74%),
+      radial-gradient(30rem 18rem at 84% 14%, hsl(196 60% 78% / 0.34), transparent 70%);
+    mask-image: linear-gradient(#000 0%, rgba(0, 0, 0, 0.9) 12%, transparent 100%);
+    -webkit-mask-image: linear-gradient(#000 0%, rgba(0, 0, 0, 0.9) 12%, transparent 100%);
+  }
+</style>

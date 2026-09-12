@@ -1,0 +1,270 @@
+---
+/**
+ * Page-fixed aurora backdrop.
+ *
+ * Glass is only as good as what sits behind it: `backdrop-filter` over a flat
+ * fill resolves to a dirty translucent panel, which is the whole reason a
+ * hand-rolled "just add blur" version of this design looks bad. So the site
+ * paints one continuous, slowly drifting color field behind *every* route
+ * rather than decorating the hero alone, and every `glass*` utility has
+ * something worth refracting.
+ *
+ * The field is the `warp` shader from @paper-design/shaders — the same library
+ * and the same shader DeepSeek's homepage uses (they call it `pattern`; it was
+ * renamed in 0.0.80). Parameter names are identical, so the values below are
+ * theirs re-tuned with our palette: slower, lower-contrast and offset further
+ * down, because a full-page backdrop has to stay quiet under body copy.
+ *
+ * Degradation is layered, not conditional. The CSS mesh is always painted; the
+ * WebGL canvas is prepended on top of it by ShaderMount. If WebGL2 is missing
+ * the constructor throws, we swallow it, and the mesh simply remains visible —
+ * glass still has a gradient to refract, so nothing else on the page changes.
+ * `prefers-reduced-motion` mounts with speed 0, which stops the rAF loop
+ * entirely and leaves a single static frame.
+ */
+---
+
+<div class="lt-aurora" aria-hidden="true" transition:persist="lt-aurora">
+  <div class="lt-aurora-mesh"></div>
+  <div data-lt-aurora-field style="position:absolute;inset:0"></div>
+  <div class="lt-aurora-grid"></div>
+</div>
+
+<style>
+  .lt-aurora {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    /* `size` containment is deliberately excluded: this element is inset-sized,
+     * and strict containment on a fixed backdrop has a history of surprising
+     * compositor clipping. */
+    contain: layout paint;
+  }
+
+  /* Static fallback field. Same palette and roughly the same distribution as
+   * the shader, so a browser without WebGL2 gets a visually consistent page —
+   * and, critically, glass still has something worth refracting.
+   *
+   * Gradient centers are given as viewport percentages that land *inside* the
+   * viewport. This element is `position: fixed`, so `at 50% -8%` would park the
+   * whole bloom above the fold and leave the page flat.
+   *
+   * The last layer is a full-bleed base tint rather than transparent: blooms
+   * alone fade to the canvas between them, and a glass card landing in one of
+   * those gaps has nothing to blur. */
+  .lt-aurora-mesh {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(56rem 34rem at 14% 10%, hsl(212 56% 81% / 0.8), transparent 68%),
+      radial-gradient(44rem 30rem at 88% 6%, hsl(196 54% 83% / 0.58), transparent 66%),
+      radial-gradient(58rem 38rem at 54% 94%, hsl(224 48% 87% / 0.58), transparent 70%),
+      radial-gradient(40rem 28rem at 76% 62%, hsl(190 50% 85% / 0.45), transparent 68%),
+      linear-gradient(168deg, hsl(210 52% 89%) 0%, hsl(206 44% 93%) 46%, hsl(222 42% 91%) 100%);
+  }
+
+  :root.dark .lt-aurora-mesh {
+    background:
+      radial-gradient(56rem 34rem at 14% 10%, hsl(214 58% 32% / 0.8), transparent 68%),
+      radial-gradient(44rem 30rem at 88% 6%, hsl(196 52% 28% / 0.62), transparent 66%),
+      radial-gradient(58rem 38rem at 54% 94%, hsl(224 46% 26% / 0.62), transparent 70%),
+      radial-gradient(40rem 28rem at 76% 62%, hsl(190 46% 26% / 0.5), transparent 68%),
+      linear-gradient(168deg, hsl(216 42% 15%) 0%, hsl(220 38% 11%) 48%, hsl(224 40% 14%) 100%);
+  }
+
+  /* Blueprint lattice, in place of DeepSeek's second 2D canvas: same 90px cell,
+   * same hairline weight, but pure CSS so it costs no JS and no second
+   * compositor layer. Fine-pointer devices only — on touch it is clipped by the
+   * viewport anyway and just burns fill rate. */
+  .lt-aurora-grid {
+    position: absolute;
+    inset: 0;
+    display: none;
+    background-image:
+      radial-gradient(circle at center, var(--lt-grid-dot) 1.6px, transparent 1.7px),
+      linear-gradient(to right, var(--lt-grid-line) 0 1px, transparent 1px),
+      linear-gradient(to bottom, var(--lt-grid-line) 0 1px, transparent 1px);
+    background-size:
+      90px 90px,
+      90px 90px,
+      90px 90px;
+    mask-image: linear-gradient(#000 0%, rgba(0, 0, 0, 0.55) 26%, transparent 72%);
+    -webkit-mask-image: linear-gradient(#000 0%, rgba(0, 0, 0, 0.55) 26%, transparent 72%);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .lt-aurora-grid {
+      display: block;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lt-aurora-grid {
+      display: none;
+    }
+  }
+</style>
+
+<style is:global>
+  :root {
+    --lt-grid-line: hsl(215 45% 42% / 0.075);
+    --lt-grid-dot: hsl(215 45% 42% / 0.11);
+  }
+
+  :root.dark {
+    --lt-grid-line: hsl(215 60% 78% / 0.055);
+    --lt-grid-dot: hsl(215 60% 78% / 0.08);
+  }
+
+  /*
+   * The shader library injects its own <head> style for the canvas it mounts.
+   * Astro's client router swaps <head> and cannot know about that runtime-only
+   * element, so the persisted canvas would lose its positioning after the first
+   * navigation. This is the same rule, kept in a stylesheet the router does
+   * preserve.
+   */
+  .lt-aurora [data-lt-aurora-field] {
+    isolation: isolate;
+  }
+
+  .lt-aurora [data-lt-aurora-field] canvas {
+    contain: strict;
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+  }
+</style>
+
+<script>
+  // Bundled (no `is:inline` / `define:vars`) so Vite can resolve the bare
+  // specifier; the import is dynamic so the shader library lands in its own
+  // chunk and stays off the critical path.
+  const FIELD = {
+    light: ["#b2d0ec", "#cfe0f1", "#ecf1f7"],
+    dark: ["#15304d", "#1a3a52", "#0c1626"],
+  };
+
+  // DeepSeek's `pattern` values (the shader is `warp` in 0.0.80), re-tuned for
+  // a page-wide field. Their ratios are 0-100 in the React wrapper, which
+  // divides by 100 before handing them to the shader, so these are already in
+  // the documented 0..1 range.
+  //
+  // Two deliberate departures from their numbers, both because they were
+  // tuning a hero and this is a fixed full-viewport backdrop:
+  //   offsetY 0.65 -> 0   theirs pushes the field down out of a short hero;
+  //                       on a viewport-sized canvas it pushes it off-screen
+  //                       entirely and leaves flat white.
+  //   scale   0.5  -> 1   larger, softer cells; a dense pattern reads as noise
+  //                       behind body copy rather than as depth.
+  const WARP = {
+    u_shape: 0, // WarpPatterns.checks
+    u_shapeScale: 0.12,
+    u_proportion: 0.5,
+    u_softness: 0.8,
+    u_distortion: 0.25,
+    u_swirl: 0.15,
+    u_swirlIterations: 6,
+    u_scale: 1,
+    u_rotation: 355, // == -5deg, kept positive to stay in the documented 0..360
+    u_offsetX: 0,
+    u_offsetY: 0,
+  };
+
+  /** Hero-grade speed is 14; a field that sits under body copy must be calmer. */
+  const SPEED = 7;
+
+  const host = document.querySelector("[data-lt-aurora-field]");
+
+  if (host) {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isDark = () => document.documentElement.classList.contains("dark");
+    const toRgba = (hex) => {
+      const n = parseInt(hex.slice(1), 16);
+      return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255, 1];
+    };
+    const field = () => (isDark() ? FIELD.dark : FIELD.light).map(toRgba);
+
+    import("@paper-design/shaders")
+      .then(async ({ ShaderMount, warpFragmentShader, getShaderNoiseTexture, defaultPatternSizing, ShaderFitOptions }) => {
+        const sizing = defaultPatternSizing;
+
+        /*
+         * `getShaderNoiseTexture()` returns a `new Image()` whose `src` is a
+         * data: URL, and data URLs decode asynchronously — so `img.complete` is
+         * usually still false on the next line. `ShaderMount.setTextureUniform`
+         * throws in that case, and it throws *after* the constructor has already
+         * prepended its `<canvas>`. The result is an orphaned canvas: no
+         * `data-paper-shader` attribute, so it never receives the library's
+         * injected `position:absolute; inset:0` rule, so it renders at the
+         * default 300x150 in the top-left of the viewport — an unselectable
+         * black rectangle, because `.lt-aurora` is `pointer-events:none`.
+         * Waiting for the decode removes the race entirely.
+         */
+        const noiseTexture = getShaderNoiseTexture();
+        if (noiseTexture && !noiseTexture.complete) {
+          try {
+            await noiseTexture.decode();
+          } catch {
+            /* undecodable — the mount below will throw and we clean up */
+          }
+        }
+
+        let mount;
+        try {
+          mount = new ShaderMount(
+            host,
+            warpFragmentShader,
+            {
+              ...WARP,
+              u_colors: field(),
+              u_colorsCount: FIELD.light.length,
+              u_noiseTexture: noiseTexture,
+              u_fit: ShaderFitOptions[sizing.fit],
+              u_originX: sizing.originX,
+              u_originY: sizing.originY,
+              u_worldWidth: sizing.worldWidth,
+              u_worldHeight: sizing.worldHeight,
+            },
+            // `alpha` stays at its default (true) on purpose. With `alpha:false`
+            // the canvas clears to *opaque black*, so any frame that has not
+            // painted yet — first frame, lost context, failed mount — shows as
+            // a black rectangle. Transparent-until-painted lets the CSS mesh
+            // show through instead, which is the fallback we want anyway. The
+            // shader writes alpha 1, so the running field still fully covers it.
+            { antialias: false, depth: false, stencil: false, powerPreference: "low-power" },
+            // speed 0 stops the rAF loop outright — a static frame, matching
+            // the library's own "no recurring cost" path
+            reduceMotion ? 0 : SPEED,
+            reduceMotion ? 4200 : undefined,
+            // Soft gradients need no retina sampling; 1x capped at 1080p keeps
+            // the per-frame cost near a quarter of the library default.
+            1,
+            1920 * 1080,
+          );
+        } catch (err) {
+          // No WebGL2, or the mount threw part-way through. Either way the
+          // constructor may already have prepended a canvas, so clear the host
+          // before bailing — otherwise that orphan paints black over the mesh.
+          host.replaceChildren();
+          console.warn("[aurora] shader unavailable, using the CSS mesh fallback:", err);
+          return;
+        }
+
+        // Re-tint on theme flip; `.dark` on <html> is the only input.
+        let dark = isDark();
+        new MutationObserver(() => {
+          const now = isDark();
+          if (now === dark) return;
+          dark = now;
+          mount.setUniforms({ u_colors: field() });
+        }).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+      })
+      .catch(() => {
+        /* chunk failed to load — the CSS mesh already covers us */
+      });
+  }
+</script>
