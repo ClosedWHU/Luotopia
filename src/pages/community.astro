@@ -1,34 +1,51 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
 import FriendLinks from "../components/FriendLinks.astro";
+import Icon from "../components/Icon.astro";
 ---
 
 <BaseLayout title="社区">
-  <section class="pt-28 pb-16 px-4">
-    <div class="max-w-6xl mx-auto">
-      <h1 class="text-[length:var(--md-sys-typescale-display-small-size)] leading-[var(--md-sys-typescale-display-small-line)] font-[var(--md-sys-typescale-display-small-weight)] text-[var(--md-sys-color-on-surface)] mb-2">社区</h1>
-      <p class="text-[length:var(--md-sys-typescale-title-large-size)] leading-[var(--md-sys-typescale-title-large-line)] text-[var(--md-sys-color-on-surface-variant)] mb-12">加入我们，一起构建更好的校园数字生态</p>
+  <PageHeader title="社区" subtitle="加入我们，一起构建更好的校园数字生态" />
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
-        <div class="rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)] p-5">
-          <span class="material-symbols-outlined text-[var(--md-sys-color-primary)] text-2xl mb-2 block">forum</span>
-          <h3 class="text-[length:var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)] mb-1">QQ 群</h3>
-          <p class="text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)] mb-3">加入 Luotopia 用户交流群，获取最新动态和帮助。</p>
-          <p class="text-[length:var(--md-sys-typescale-body-small-size)] font-[var(--md-sys-typescale-label-large-weight)] text-[var(--md-sys-color-primary)]">群号：994642924</p>
+  <section class="relative pb-24 px-4">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <div class="lt-reveal-lift lt-lift glass rounded-card p-6 flex gap-4">
+          <span class="lt-icon-chip text-primary text-[22px]"><Icon name="forum" /></span>
+          <div class="min-w-0">
+            <h2 class="text-title-medium text-on-surface mb-1">QQ 群</h2>
+            <p class="text-body-medium text-on-surface-variant mb-3">加入 Luotopia 用户交流群，获取最新动态和帮助。</p>
+            <p class="text-body-small text-outline">
+              群号：<span class="font-medium text-primary">994642924</span>
+            </p>
+          </div>
         </div>
-        <div class="rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)] p-5">
-          <span class="material-symbols-outlined text-[var(--md-sys-color-primary)] text-2xl mb-2 block">code</span>
-          <h3 class="text-[length:var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)] mb-1">GitHub</h3>
-          <p class="text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)] mb-3">开放协作，欢迎反馈、Issue 与社区参与。</p>
-          <a href="https://github.com/ClosedWHU" target="_blank" class="inline-flex items-center gap-1 text-[length:var(--md-sys-typescale-body-medium-size)] font-[var(--md-sys-typescale-label-large-weight)] text-[var(--md-sys-color-primary)] hover:underline">
-            github.com/ClosedWHU
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
-          </a>
+
+        <div class="lt-reveal-lift lt-lift glass rounded-card p-6 flex gap-4" style="--lt-reveal-delay: 80ms">
+          <span class="lt-icon-chip text-primary text-[22px]"><Icon name="code" /></span>
+          <div class="min-w-0">
+            <h2 class="text-title-medium text-on-surface mb-1">GitHub</h2>
+            <p class="text-body-medium text-on-surface-variant mb-3">开放协作，欢迎反馈、Issue 与社区参与。</p>
+            <a href="https://github.com/ClosedWHU" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-body-medium font-medium text-primary hover:underline">
+              github.com/ClosedWHU
+              <Icon name="arrow_outward" class="text-[16px]" />
+            </a>
+          </div>
+        </div>
+
+        <div class="lt-reveal-lift lt-lift glass rounded-card p-6 flex gap-4" style="--lt-reveal-delay: 160ms">
+          <span class="lt-icon-chip text-primary text-[22px]"><Icon name="rate_review" /></span>
+          <div class="min-w-0">
+            <h2 class="text-title-medium text-on-surface mb-1">应用内社区</h2>
+            <p class="text-body-medium text-on-surface-variant mb-3">论坛「珞珈防空洞」与课程给分评价已内置在 App 中，论坛标签可在「设置 → 导航」开启。</p>
+            <p class="text-body-small text-outline">帖子、评论、附件、声望与排行榜</p>
+          </div>
         </div>
       </div>
 
-      <div class="rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)] p-6">
-        <h2 class="text-[length:var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)] mb-6">友情链接</h2>
+      <div class="lt-reveal-lift glass rounded-group p-6 sm:p-8" style="--lt-reveal-delay: 140ms">
+        <h2 class="text-title-large text-on-surface mb-6">友情链接</h2>
         <FriendLinks />
       </div>
     </div>

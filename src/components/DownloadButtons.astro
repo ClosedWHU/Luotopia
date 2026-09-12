@@ -1,23 +1,72 @@
 ---
+import Icon from "./Icon.astro";
+
 export interface Props {
   variant?: "hero" | "default";
 }
 
 const { variant = "default" } = Astro.props;
 
-const primaryClass = "state-layer inline-flex items-center gap-2 rounded-[var(--md-sys-shape-corner-full)] no-underline font-[var(--md-sys-typescale-label-large-weight)] transition-shadow bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] shadow-[var(--md-sys-elevation-level1)] hover:shadow-[var(--md-sys-elevation-level3)]" + (variant === "hero" ? " px-7 py-3 text-[17px]" : " px-6 py-2.5 text-[length:var(--md-sys-typescale-label-large-size)]");
-
-const outlinedClass = "state-layer inline-flex items-center gap-2 rounded-[var(--md-sys-shape-corner-full)] no-underline font-[var(--md-sys-typescale-label-large-weight)] transition-shadow bg-transparent text-[var(--md-sys-color-primary)] border border-[var(--md-sys-color-outline)] hover:border-[var(--md-sys-color-primary)]" + (variant === "hero" ? " px-7 py-3 text-[17px]" : " px-6 py-2.5 text-[length:var(--md-sys-typescale-label-large-size)]");
-
+const size = variant === "hero" ? "px-7 py-3 text-[17px]" : "px-6 py-2.5 text-label-large";
 const iconSize = variant === "hero" ? "text-xl" : "text-lg";
+
+/*
+ * Two kinds of button, matching the split the app makes in `app_glass.dart`:
+ * the filled/accent surface carries a brand tint and a fixed content colour,
+ * while secondary surfaces go translucent and let the aurora show through.
+ *
+ * `filled-glass` (not `bg-primary`) drives the fill so the dialog CTA in
+ * FriendLinks renders as the same object — and so dark mode can make it tinted
+ * glass instead of a flat pale pill. See the utility in global.css.
+ */
+const primaryClass = `lt-btn lt-btn-filled filled-glass state-layer inline-flex items-center gap-2 rounded-full no-underline font-medium ${size}`;
+const secondaryClass = `lt-btn glass-control state-layer inline-flex items-center gap-2 rounded-full no-underline font-medium text-on-surface ${size}`;
 ---
 
 <div class="flex flex-wrap justify-center gap-3">
   <a href="/download" class={primaryClass}>
-    <span class={`material-symbols-outlined ${iconSize}`}>download</span>
+    <Icon name="download" class={iconSize} />
     下载 App
   </a>
-  <a href="/features" class={outlinedClass}>
+  <a href="/features" class={secondaryClass}>
     了解功能
   </a>
 </div>
+
+<style>
+  .lt-btn {
+    transition:
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .lt-btn-filled:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--lt-btn-filled-shadow-hover);
+  }
+
+  /* Hairline ring, not Tailwind's `border`: a 1px border on a 44px-tall pill
+   * reads heavy, and the app's glass uses a 0.6px optical rim. */
+  .lt-btn:not(.lt-btn-filled) {
+    box-shadow:
+      inset 0 1px 0 0 var(--lt-glass-rim),
+      inset 0 0 0 0.6px var(--lt-glass-edge),
+      0 6px 18px -10px hsl(215 45% 18% / 0.28);
+  }
+
+  .lt-btn:not(.lt-btn-filled):hover {
+    transform: translateY(-2px);
+    box-shadow:
+      inset 0 1px 0 0 var(--lt-glass-rim),
+      inset 0 0 0 0.6px var(--lt-glass-edge),
+      0 12px 28px -12px hsl(215 45% 18% / 0.34);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lt-btn,
+    .lt-btn:hover {
+      transition: none;
+      transform: none;
+    }
+  }
+</style>
