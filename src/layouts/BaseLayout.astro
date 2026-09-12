@@ -50,7 +50,8 @@
       crossorigin
     />
     <script is:inline>
-      if (new URLSearchParams(window.location.search).get("kiosk") === "1") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("kiosk") === "1") {
         document.documentElement.dataset.kiosk = "true";
       }
     </script>
@@ -61,9 +62,42 @@
       }
     </style>
     <script is:inline>
-      const storedTheme = localStorage.getItem("theme");
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      document.documentElement.classList.toggle("dark", storedTheme === "dark" || (!storedTheme && prefersDark));
+      // Theme resolution.
+      //
+      // `?theme=dark|light` wins outright: in-app WebViews cannot be relied on
+      // to report the host app's appearance. Android WebView answers
+      // `prefers-color-scheme: light` unless the app opts into algorithmic
+      // darkening, and WKWebView/WebView2 follow their own host settings, so
+      // the app passes its effective brightness explicitly instead.
+      //
+      // localStorage can throw (restricted WebView storage, private mode),
+      // which used to kill this script before the media query was consulted.
+      (function () {
+        const requested = new URLSearchParams(window.location.search).get("theme");
+        let stored = null;
+        try {
+          stored = localStorage.getItem("theme");
+        } catch (e) {}
+        const dark =
+          requested === "dark" || requested === "light"
+            ? requested === "dark"
+            : stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.classList.toggle("dark", dark);
+      })();
+    </script>
+    <script is:inline>
+      // Reveal failsafe. Scroll reveals are driven by an external module
+      // script; `.lt-reveal` content starts at opacity 0 in the stylesheet.
+      // When that module never arrives — flaky networks, blocked or failed
+      // subresources in embedded WebViews — the page would strand its own
+      // headings invisible forever. If the module has not claimed ownership
+      // by the deadline, show everything immediately.
+      window.__ltRevealsFallback = setTimeout(function () {
+        if (window.__ltRevealsOwned) return;
+        document.querySelectorAll(".lt-reveal, .lt-reveal-lift").forEach(function (el) {
+          el.dataset.revealed = "true";
+        });
+      }, 2500);
     </script>
     <script is:inline>
       // Drop legacy Service Workers / caches from the previous site on this domain
@@ -162,6 +196,13 @@
 
   function initReveals() {
     teardownReveals();
+
+    // Claim ownership from the inline failsafe (see <head>): from here on the
+    // IntersectionObserver decides when content appears.
+    (window as unknown as { __ltRevealsOwned?: boolean }).__ltRevealsOwned = true;
+    clearTimeout(
+      (window as unknown as { __ltRevealsFallback?: number }).__ltRevealsFallback,
+    );
 
     const revealables = document.querySelectorAll<HTMLElement>(".lt-reveal, .lt-reveal-lift");
     if (reduceMotion || !("IntersectionObserver" in window)) {
