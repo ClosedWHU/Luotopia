@@ -1,28 +1,36 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import Icon from "../../components/Icon.astro";
 import { legalDocuments } from "../../config/legal";
+
+const ICONS: Record<string, string> = {
+  terms: "gavel",
+  privacy: "privacy_tip",
+  "cross-border": "public",
+};
 ---
 
 <BaseLayout title="法律信息" description="Luotopia 用户协议、隐私政策与跨境数据传输说明">
-  <section class="pt-28 pb-16 px-4">
-    <div class="max-w-6xl mx-auto">
-      <h1 class="text-[length:var(--md-sys-typescale-display-small-size)] leading-[var(--md-sys-typescale-display-small-line)] font-[var(--md-sys-typescale-display-small-weight)] text-[var(--md-sys-color-on-surface)] mb-2">法律信息</h1>
-      <p class="text-[length:var(--md-sys-typescale-title-large-size)] leading-[var(--md-sys-typescale-title-large-line)] text-[var(--md-sys-color-on-surface-variant)] mb-12">用户协议、隐私政策与数据合规相关说明</p>
+  <PageHeader title="法律信息" subtitle="用户协议、隐私政策与数据合规相关说明" />
 
+  <section class="relative pb-24 px-4">
+    <div class="max-w-6xl mx-auto">
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {legalDocuments.map((doc) => (
-          <a
-            href={`/legal/${doc.slug}/`}
-            class="rounded-[var(--md-sys-shape-corner-medium)] bg-[var(--md-sys-color-surface-container-low)] dark:bg-[var(--md-sys-color-surface-container-low-dark)] p-5 no-underline state-layer transition-shadow hover:shadow-[var(--md-sys-elevation-level1)]"
-          >
-            <span class="material-symbols-outlined text-[var(--md-sys-color-primary)] text-2xl mb-3 block">
-              {doc.slug === "terms" ? "gavel" : doc.slug === "privacy" ? "privacy_tip" : "public"}
-            </span>
-            <h2 class="text-[length:var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)] mb-2">{doc.title}</h2>
-            <p class="text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-on-surface-variant)] mb-4">{doc.description}</p>
-            <p class="text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">最后更新：{doc.lastUpdated}</p>
-          </a>
-        ))}
+        {
+          legalDocuments.map((doc, i) => (
+            <div class="lt-reveal-lift h-full" style={`--lt-reveal-delay: ${i * 80}ms`}>
+              <a href={`/legal/${doc.slug}/`} class="lt-lift state-layer glass rounded-card p-6 no-underline h-full flex flex-col">
+                <span class="lt-icon-chip text-primary text-[22px] mb-3.5">
+                  <Icon name={ICONS[doc.slug] ?? "description"} />
+                </span>
+                <h2 class="text-title-medium text-on-surface mb-2">{doc.title}</h2>
+                <p class="text-body-medium text-on-surface-variant mb-4 flex-1">{doc.description}</p>
+                <p class="text-body-small text-outline">最后更新：{doc.lastUpdated}</p>
+              </a>
+            </div>
+          ))
+        }
       </div>
     </div>
   </section>

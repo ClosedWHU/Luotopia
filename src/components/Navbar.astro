@@ -1,4 +1,6 @@
 ---
+import AppIcon from "./AppIcon.astro";
+
 const links = [
   { href: "/", label: "首页" },
   { href: "/features", label: "功能" },
@@ -6,65 +8,343 @@ const links = [
   { href: "/community", label: "社区" },
   { href: "/legal", label: "法律信息" },
 ];
+
+const path = Astro.url.pathname.replace(/\/+$/, "") || "/";
+const isActive = (href: string) => {
+  const base = href.replace(/\/+$/, "") || "/";
+  return base === "/" ? path === "/" : path === base || path.startsWith(`${base}/`);
+};
 ---
 
-<nav class="fixed top-0 left-0 right-0 z-50 bg-[var(--md-sys-color-surface)] dark:bg-[var(--md-sys-color-surface-dark)] shadow-[var(--md-sys-elevation-level1)] transition-shadow">
+<nav id="lt-navbar" class="lt-navbar fixed top-0 left-0 right-0 z-50" transition:persist="lt-navbar">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-    <a href="/" class="flex items-center gap-2 text-[length:var(--md-sys-typescale-title-large-size)] font-bold text-[var(--md-sys-color-primary)] no-underline state-layer rounded-[var(--md-sys-shape-corner-small)] px-2 py-1">
-      <img src="/img/app-icon.png" alt="Luotopia" class="w-6 h-6 rounded-[6px]" />
+    <a href="/" class="flex items-center gap-2 text-title-large font-bold text-on-surface no-underline state-layer rounded-control px-2 py-1">
+      <AppIcon class="w-8 h-8" size={32} plate />
       Luotopia
     </a>
 
-    <div class="hidden md:flex items-center gap-1">
+    <div class="hidden md:flex items-center gap-0.5">
       {
         links.map((link) => (
           <a
             href={link.href}
-            class="state-layer rounded-[var(--md-sys-shape-corner-small)] px-3 py-2 text-[length:var(--md-sys-typescale-body-large-size)] leading-[var(--md-sys-typescale-body-large-line)] text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] no-underline transition-colors"
+            aria-current={isActive(link.href) ? "page" : undefined}
+            class="lt-navlink state-layer rounded-control px-3.5 py-2 text-body-large text-on-surface-variant no-underline transition-colors"
           >
             {link.label}
           </a>
         ))
       }
-      <button id="theme-toggle" class="state-layer rounded-[var(--md-sys-shape-corner-small)] p-2 text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] transition-colors cursor-pointer" aria-label="切换深色模式">
+      <button id="theme-toggle" class="state-layer rounded-control p-2 ml-1 text-on-surface-variant transition-colors cursor-pointer" aria-label="切换深色模式">
         <svg class="dark:hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <svg class="hidden dark:block" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42"/></svg>
       </button>
     </div>
 
-    <button id="mobile-menu-btn" class="md:hidden state-layer rounded-[var(--md-sys-shape-corner-small)] p-2 text-[var(--md-sys-color-on-surface-variant)] cursor-pointer" aria-label="菜单">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+    <button id="mobile-menu-btn" class="lt-burger md:hidden state-layer rounded-control p-2 text-on-surface-variant cursor-pointer" aria-label="菜单" aria-expanded="false" aria-controls="mobile-menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path class="lt-burger-l" d="M3 6h18" />
+        <path class="lt-burger-m" d="M3 12h18" />
+        <path class="lt-burger-b" d="M3 18h18" />
+      </svg>
     </button>
   </div>
+</nav>
 
-  <div id="mobile-menu" class="hidden md:hidden border-t border-[var(--md-sys-color-outline-variant)] px-4 py-3">
+<!--
+  A sibling of the nav, not a child of it, for two reasons that are easy to miss:
+
+  1. Layout. The collapse below is clip-path + opacity + visibility, and all
+     three are paint-only — a closed sheet kept reserving its full ~270px inside
+     the fixed nav, so the nav's border box (background, blur, border-bottom,
+     shadow) hung a third of the way down the viewport whether or not the menu
+     was open. Out of flow, the nav is exactly the bar again.
+
+  2. Backdrop root. The nav carries `backdrop-filter`, which makes it the
+     containing block for fixed/absolute descendants *and* the backdrop root
+     their own filters sample from. It only paints that backdrop inside its own
+     4rem box, so a sheet hanging below it would have had nothing to refract and
+     would have rendered as a flat translucent tint.
+
+  `top-16` puts its first pixel under the nav's border-bottom; the nav is z-50
+  so that hairline paints on top and the two read as one surface.
+-->
+<div
+  id="mobile-menu"
+  class="lt-mobile-menu fixed top-16 left-0 right-0 z-40 max-h-[calc(100dvh-4rem)] overflow-y-auto md:hidden"
+  data-open="false"
+  transition:persist="lt-mobile-menu"
+>
+  <div class="px-4 py-3 flex flex-col gap-0.5">
     {
       links.map((link) => (
         <a
           href={link.href}
-          class="block state-layer rounded-[var(--md-sys-shape-corner-small)] px-3 py-2 text-[length:var(--md-sys-typescale-body-large-size)] text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-primary)] no-underline transition-colors"
+          aria-current={isActive(link.href) ? "page" : undefined}
+          class="lt-navlink state-layer rounded-control px-3 py-2.5 text-body-large text-on-surface-variant no-underline transition-colors"
         >
           {link.label}
         </a>
       ))
     }
+    <button id="theme-toggle-mobile" class="lt-navlink state-layer rounded-control px-3 py-2.5 text-body-large text-on-surface-variant cursor-pointer text-left bg-transparent border-none" aria-label="切换深色模式">
+      切换深色 / 浅色模式
+    </button>
   </div>
-</nav>
+</div>
+
+<style>
+  /*
+   * Transparent at rest, glass once there is something scrolling underneath.
+   * A permanently-blurred bar over a static hero just dims the artwork, which
+   * is why DeepSeek gates it the same way.
+   *
+   * `blur(0px)` rather than no `backdrop-filter` at all: the property is
+   * animatable, so the bar cross-fades into focus instead of snapping.
+   */
+  .lt-navbar {
+    border-bottom: 1px solid transparent;
+    backdrop-filter: blur(0px) saturate(100%);
+    -webkit-backdrop-filter: blur(0px) saturate(100%);
+    transition:
+      background-color 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      backdrop-filter 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      -webkit-backdrop-filter 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /*
+   * `data-menu-open` shares the scrolled treatment on purpose. At rest the bar
+   * is transparent, so an open sheet was compositing its own 0.8 tint over
+   * nothing but the hero — the page showed straight through both layers and the
+   * menu read as under-frosted. Forcing the bar's glass whenever the sheet is
+   * open stacks the two tints (~96% opaque) and the pair reads as one object.
+   */
+  .lt-navbar[data-scrolled="true"],
+  .lt-navbar[data-menu-open="true"] {
+    background-color: var(--lt-glass-navbar);
+    border-bottom-color: var(--lt-glass-edge);
+    backdrop-filter: blur(var(--lt-glass-blur-navbar)) saturate(var(--lt-glass-saturate));
+    -webkit-backdrop-filter: blur(var(--lt-glass-blur-navbar)) saturate(var(--lt-glass-saturate));
+    box-shadow: 0 10px 36px -18px hsl(215 45% 18% / 0.32);
+  }
+
+  :global(#lt-navbar .lt-app-plate) {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .lt-navlink {
+    color: var(--lt-color-on-surface-variant);
+  }
+
+  .lt-navlink:hover {
+    color: var(--lt-color-primary);
+  }
+
+  .lt-navlink[aria-current="page"] {
+    color: var(--lt-color-primary);
+    font-weight: 500;
+  }
+
+  /*
+   * Same glass tokens as the bar, so the two read as one continuous surface
+   * across the seam. It has to declare them itself now that it sits outside the
+   * nav — see the markup comment for why it moved.
+   *
+   * Collapse is clip-path + opacity + transform. It replaced, in order:
+   *
+   * - `hidden`, which is `display: none` and therefore not animatable at all —
+   *   the sheet snapped open in a single frame.
+   * - `grid-template-rows: 0fr -> 1fr`, which does animate but is a *layout*
+   *   animation: every frame re-laid-out the bar and changed the area the
+   *   backdrop-filter had to sample. Paired with a hard ease-out that is already
+   *   ~87% of the way there at the halfway mark, the back half of the duration
+   *   crawled through the final few pixels and then `visibility` snapped — the
+   *   hitch at the tail of the close.
+   *
+   * clip-path leaves the element's box alone, so nothing re-lays-out and the
+   * compositor can carry it. The close also gets a shorter, symmetric curve so
+   * it finishes decisively, and `opacity` runs faster than the clip: the links
+   * are already gone by the time the wipe reaches them, so there is no sliver
+   * left to blink out when `visibility` flips.
+   *
+   * The corollary is that none of these three take the sheet out of layout, so
+   * the element itself has to be out of flow — otherwise the closed sheet's
+   * reserved height shows up as a permanent empty panel behind the bar.
+   *
+   * `visibility` (not `display`) is what keeps the links out of the tab order
+   * while closed, and unlike `display: none` it does not fight Tailwind's
+   * layered `md:hidden` on desktop.
+   */
+  .lt-mobile-menu {
+    visibility: hidden;
+    opacity: 0;
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(-8px);
+    background-color: var(--lt-glass-navbar);
+    backdrop-filter: blur(var(--lt-glass-blur-navbar)) saturate(var(--lt-glass-saturate));
+    -webkit-backdrop-filter: blur(var(--lt-glass-blur-navbar)) saturate(var(--lt-glass-saturate));
+    transition:
+      clip-path 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.2s ease,
+      visibility 0s linear 0.32s;
+  }
+
+  .lt-mobile-menu[data-open="true"] {
+    visibility: visible;
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    transform: none;
+    transition:
+      clip-path 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.22s ease,
+      visibility 0s;
+  }
+
+  /* Items trail the sheet by a few frames each, so opening reads as one gesture
+   * rather than a block of links materialising. */
+  .lt-mobile-menu .lt-navlink {
+    opacity: 0;
+    transform: translateY(-8px);
+    transition:
+      opacity 0.26s ease,
+      transform 0.36s cubic-bezier(0.22, 1, 0.36, 1),
+      color 0.2s ease;
+  }
+
+  .lt-mobile-menu[data-open="true"] .lt-navlink {
+    opacity: 1;
+    transform: none;
+  }
+
+  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(1) { transition-delay: 0.07s; }
+  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(2) { transition-delay: 0.11s; }
+  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(3) { transition-delay: 0.15s; }
+  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(4) { transition-delay: 0.19s; }
+  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(5) { transition-delay: 0.23s; }
+  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(6) { transition-delay: 0.27s; }
+
+  /*
+   * Burger -> X. Each bar rotates about its own midpoint and then slides to the
+   * shared centre line, so the two strokes cross exactly at (12,12); rotating
+   * about the viewBox centre instead would throw the diagonals off-axis.
+   */
+  .lt-burger path {
+    transform-box: view-box;
+    transition:
+      transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.18s ease;
+  }
+
+  .lt-burger-l { transform-origin: 12px 6px; }
+  .lt-burger-m { transform-origin: 12px 12px; }
+  .lt-burger-b { transform-origin: 12px 18px; }
+
+  .lt-burger[aria-expanded="true"] .lt-burger-l { transform: translateY(6px) rotate(45deg); }
+  .lt-burger[aria-expanded="true"] .lt-burger-m { opacity: 0; transform: scaleX(0.3); }
+  .lt-burger[aria-expanded="true"] .lt-burger-b { transform: translateY(-6px) rotate(-45deg); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lt-navbar,
+    .lt-mobile-menu,
+    .lt-mobile-menu .lt-navlink,
+    .lt-burger path {
+      transition: none;
+    }
+
+    .lt-mobile-menu .lt-navlink {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
 
 <script>
-  const toggle = document.getElementById("theme-toggle");
-  if (toggle) {
-    toggle.addEventListener("click", () => {
-      const html = document.documentElement;
-      html.classList.toggle("dark");
-      localStorage.setItem("theme", html.classList.contains("dark") ? "dark" : "light");
-    });
-  }
+  const navbar = document.getElementById("lt-navbar");
   const menuBtn = document.getElementById("mobile-menu-btn");
   const mobileMenu = document.getElementById("mobile-menu");
-  if (menuBtn && mobileMenu) {
-    menuBtn.addEventListener("click", () => {
-      mobileMenu.classList.toggle("hidden");
+
+  const normalizePath = (value: string) => value.replace(/\/+$/, "") || "/";
+  const isActivePath = (href: string, path: string) => {
+    const base = normalizePath(new URL(href, location.href).pathname);
+    return base === "/" ? path === "/" : path === base || path.startsWith(`${base}/`);
+  };
+
+  function syncActiveLinks() {
+    const path = normalizePath(location.pathname);
+    document.querySelectorAll<HTMLAnchorElement>("a.lt-navlink[href]").forEach((link) => {
+      const href = link.getAttribute("href");
+      if (!href) return;
+      if (isActivePath(href, path)) link.setAttribute("aria-current", "page");
+      else link.removeAttribute("aria-current");
     });
   }
+
+  const syncTheme = () => {
+    const html = document.documentElement;
+    const dark = html.classList.toggle("dark");
+    localStorage.setItem("theme", dark ? "dark" : "light");
+  };
+  document.getElementById("theme-toggle")?.addEventListener("click", syncTheme);
+  document.getElementById("theme-toggle-mobile")?.addEventListener("click", syncTheme);
+
+  const isOpen = () => mobileMenu?.dataset.open === "true";
+  const setOpen = (open: boolean) => {
+    if (!mobileMenu || !menuBtn) return;
+    mobileMenu.dataset.open = String(open);
+    menuBtn.setAttribute("aria-expanded", String(open));
+    // Drives the bar's glass as well as the sheet's — see data-menu-open above.
+    navbar?.setAttribute("data-menu-open", String(open));
+    // Lenis owns the scroll position, so `body { overflow: hidden }` alone
+    // would not stop the page drifting behind an open sheet.
+    const lenis = (window as unknown as { ltLenis?: { stop(): void; start(): void } }).ltLenis;
+    if (open) lenis?.stop();
+    else lenis?.start();
+  };
+
+  const closeMenuForNavigation = () => {
+    if (!isOpen()) return;
+    // The sheet persists across client navigations. If focus is left on one of
+    // its links, Astro would restore focus to a control that is now hidden.
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && mobileMenu?.contains(active)) active.blur();
+    setOpen(false);
+  };
+
+  if (menuBtn && mobileMenu) {
+    menuBtn.addEventListener("click", () => setOpen(!isOpen()));
+    mobileMenu.addEventListener("click", (e) => {
+      if ((e.target as HTMLElement).closest("a")) setOpen(false);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && isOpen()) setOpen(false);
+    });
+    // Crossing into the desktop breakpoint hides the trigger, so the sheet would
+    // otherwise stay open with nothing on screen to close it.
+    window.matchMedia("(min-width: 768px)").addEventListener("change", (e) => {
+      if (e.matches && isOpen()) setOpen(false);
+    });
+  }
+
+  const threshold = 12;
+  const syncScrolled = () => navbar?.setAttribute("data-scrolled", String(window.scrollY > threshold));
+  if (navbar) {
+    syncScrolled();
+    window.addEventListener("scroll", syncScrolled, { passive: true });
+  }
+
+  // The navbar and sheet persist across client navigations, so their listeners
+  // are bound once. Their route-dependent state still has to be resynchronized,
+  // and an open sheet must not survive navigation.
+  document.addEventListener("astro:before-preparation", closeMenuForNavigation);
+
+  document.addEventListener("astro:page-load", () => {
+    closeMenuForNavigation();
+    syncActiveLinks();
+    syncScrolled();
+  });
 </script>

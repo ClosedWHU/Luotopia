@@ -1,0 +1,137 @@
+---
+/**
+ * Brand glyph, with the dark-mode variant the app ships.
+ *
+ * Two source files rather than one recoloured at runtime, because an SVG loaded
+ * through `<img>` cannot see our `.dark` class: an internal
+ * `@media (prefers-color-scheme: dark)` block only tracks the OS setting, so a
+ * visitor who forces light mode on a dark desktop would get the wrong glyph.
+ * Swapping two elements keyed off `.dark` is the same pattern Navbar uses for
+ * its theme-toggle icons.
+ *
+ * Both come from the vector master `app/assets/icon/icon_foreground.svg` (1024²,
+ * a single `#0E4675` fill). The dark one is that file with the fill set to
+ * white — the same artwork as Android's `ic_launcher_monochrome.png`, verified
+ * by diffing their alpha masks at 48² (0.2% apart), but taken from the vector
+ * rather than the 432px rasterized themed-icon layer. Note that the app's
+ * `ic_launcher_foreground_night.png` is *not* a dark variant: it is byte-identical
+ * to the light one. And `app/assets/icon/icon.png` is a flat opaque white square,
+ * not the rounded glass plate, so the plate here is built in CSS.
+ *
+ * ── Two constraints that shape the markup ──
+ *
+ * 1. Astro scoped styles are emitted **unlayered**, and unlayered CSS beats
+ *    every `@layer` — including Tailwind's `utilities` — regardless of
+ *    specificity. Tailwind emits `.dark\:hidden:where(.dark,.dark *)`, and
+ *    `:where()` contributes zero specificity. So any `display` declaration in
+ *    the `<style>` block below, applied to the same element as `dark:hidden`,
+ *    silently wins and both images render at once. Hence: **no `display` on the
+ *    glyphs.** Sizing and display live on the wrapper; the imgs only ever carry
+ *    `filter`, which cannot collide with a display utility.
+ *
+ * 2. The art is a glyph on transparency (17% alpha coverage), not a full-bleed
+ *    plate, so `box-shadow`/`border-radius` on the `<img>` box would draw a
+ *    visible rectangle around empty space. Bare-glyph shadow therefore has to be
+ *    a silhouette-following `drop-shadow()` filter.
+ */
+export interface Props {
+  /** Tailwind sizing classes for the outer element, e.g. `w-20 h-20`. */
+  class?: string;
+  /** Intrinsic px, for the width/height attributes that reserve layout. */
+  size?: number;
+  alt?: string;
+  /** Renders the rounded glass plate behind the glyph. */
+  plate?: boolean;
+  /** Silhouette drop-shadow for the bare glyph. Ignored when `plate` is set —
+   *  the plate carries its own shadow, and a `filter` on an ancestor of a
+   *  `backdrop-filter` element would make it a backdrop root and kill the
+   *  plate's refraction. */
+  lift?: boolean;
+}
+
+const { class: className = "w-7 h-7", size = 64, alt = "Luotopia", plate = false, lift = false } = Astro.props;
+---
+
+<span class:list={["lt-app-icon", className, plate && "lt-app-plate"]}>
+  <img src="/img/app-icon.svg" {alt} width={size} height={size} class:list={["lt-glyph", "dark:hidden", lift && !plate && "lt-glyph--lifted"]} />
+  <img src="/img/app-icon-dark.svg" {alt} width={size} height={size} class:list={["lt-glyph", "hidden dark:block", lift && !plate && "lt-glyph--lifted"]} />
+</span>
+
+<style>
+  .lt-app-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    vertical-align: middle;
+  }
+
+  /* The SVG viewBox is cropped to the artwork, so these percentages describe
+   * the visible glyph rather than the transparent master canvas. */
+  .lt-glyph {
+    width: 70%;
+    height: 70%;
+    transform: translateY(-4%);
+  }
+
+  .lt-app-plate > .lt-glyph {
+    width: 78%;
+    height: 78%;
+  }
+
+  .lt-app-plate {
+    border-radius: 28%;
+    background-color: transparent;
+    background-image:
+      radial-gradient(115% 115% at 18% 10%, hsl(0 0% 100% / 0.08), transparent 46%),
+      linear-gradient(165deg, hsl(0 0% 100% / 0.025), transparent 64%);
+    backdrop-filter: blur(4px) saturate(108%);
+    -webkit-backdrop-filter: blur(4px) saturate(108%);
+    box-shadow:
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.5),
+      inset 0 -1px 0 0 rgb(15 23 42 / 0.04),
+      inset 0 0 0 0.6px hsl(0 0% 100% / 0.28),
+      0 2px 8px -2px rgb(15 23 42 / 0.1),
+      0 18px 36px -20px rgb(15 23 42 / 0.18);
+  }
+
+  :global(.dark) .lt-app-plate {
+    background-image:
+      radial-gradient(115% 115% at 18% 10%, hsl(0 0% 100% / 0.06), transparent 48%),
+      linear-gradient(165deg, hsl(0 0% 100% / 0.018), transparent 66%);
+    box-shadow:
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.24),
+      inset 0 -1px 0 0 rgb(0 0 0 / 0.18),
+      inset 0 0 0 0.6px hsl(0 0% 100% / 0.12),
+      0 2px 8px -2px rgb(0 0 0 / 0.24),
+      0 18px 36px -20px rgb(0 0 0 / 0.42);
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .lt-app-plate {
+      background-image:
+        radial-gradient(115% 115% at 18% 10%, hsl(0 0% 100% / 0.34), transparent 46%),
+        linear-gradient(165deg, hsl(0 0% 100% / 0.22), hsl(0 0% 100% / 0.14) 68%);
+    }
+
+    :global(.dark) .lt-app-plate {
+      background-image:
+        radial-gradient(115% 115% at 18% 10%, hsl(0 0% 100% / 0.14), transparent 48%),
+        linear-gradient(165deg, hsl(220 14% 18% / 0.24), hsl(220 14% 12% / 0.18) 68%);
+    }
+  }
+
+  .lt-glyph--lifted {
+    filter:
+      drop-shadow(0 2px 5px hsl(215 45% 20% / 0.2))
+      drop-shadow(0 16px 30px -10px hsl(215 62% 30% / 0.38));
+  }
+
+  /* A white glyph on the dark aurora needs a much softer halo; the light-mode
+   * numbers read as a grey smudge behind it. */
+  :global(.dark) .lt-glyph--lifted {
+    filter:
+      drop-shadow(0 2px 8px rgb(0 0 0 / 0.45))
+      drop-shadow(0 14px 28px -12px rgb(0 0 0 / 0.6));
+  }
+</style>

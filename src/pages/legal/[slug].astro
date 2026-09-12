@@ -1,5 +1,7 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import Icon from "../../components/Icon.astro";
 import { legalDocuments, getLegalBySlug } from "../../config/legal";
 
 export function getStaticPaths() {
@@ -17,15 +19,18 @@ function escapeHtml(text: string) {
     .replaceAll('"', "&quot;");
 }
 
-/** Renders a subset of Markdown: `inline code` only. */
+/**
+ * Renders a subset of Markdown: `inline code` only.
+ *
+ * Emits a bare `<code>`; presentation lives in the `.lt-prose code` rule below
+ * so this string stays out of Tailwind's scan surface.
+ */
 function renderInlineMd(text: string) {
-  const codeClass =
-    "rounded-[var(--md-sys-shape-corner-extra-small)] bg-[var(--md-sys-color-surface-container)] dark:bg-[var(--md-sys-color-surface-container-dark)] px-1.5 py-0.5 font-mono text-[0.92em] text-[var(--md-sys-color-on-surface)]";
   return text
     .split(/(`[^`]+`)/g)
     .map((part) => {
       if (part.startsWith("`") && part.endsWith("`") && part.length >= 2) {
-        return `<code class="${codeClass}">${escapeHtml(part.slice(1, -1))}</code>`;
+        return `<code>${escapeHtml(part.slice(1, -1))}</code>`;
       }
       return escapeHtml(part);
     })
@@ -34,63 +39,125 @@ function renderInlineMd(text: string) {
 ---
 
 <BaseLayout title={doc.title} description={doc.description}>
-  <section class="pt-28 pb-16 px-4" data-legal-document>
-    <div class="max-w-3xl mx-auto">
-      <a href="/legal/" class="inline-flex items-center gap-1 text-[length:var(--md-sys-typescale-body-medium-size)] text-[var(--md-sys-color-primary)] no-underline mb-6 hover:underline">
-        <span class="material-symbols-outlined text-base">arrow_back</span>
-        返回法律信息
-      </a>
+  <div data-legal-document>
+    <PageHeader title={doc.title} subtitle={doc.description} narrow />
 
-      <h1 class="text-[length:var(--md-sys-typescale-display-small-size)] leading-[var(--md-sys-typescale-display-small-line)] font-[var(--md-sys-typescale-display-small-weight)] text-[var(--md-sys-color-on-surface)] mb-2">{doc.title}</h1>
-      <p class="text-[length:var(--md-sys-typescale-body-large-size)] text-[var(--md-sys-color-on-surface-variant)] mb-10">{doc.description}</p>
+    <section class="relative pb-20 px-4">
+      <div class="max-w-3xl mx-auto">
+        <a href="/legal/" class="lt-back lt-reveal inline-flex items-center gap-1.5 text-body-medium text-primary no-underline mb-6 rounded-full px-3.5 py-1.5 -ml-3.5 hover:underline">
+          <Icon name="arrow_back" class="text-[18px]" />
+          返回法律信息
+        </a>
 
-      <div class="space-y-8">
-        {doc.sections.map((section) => (
-          <section>
-            <h2 class="text-[length:var(--md-sys-typescale-title-large-size)] leading-[var(--md-sys-typescale-title-large-line)] font-[var(--md-sys-typescale-title-large-weight)] text-[var(--md-sys-color-on-surface)] mb-4">{section.heading}</h2>
-            {section.body && section.body.length > 0 && (
-              <div class="space-y-3">
-                {section.body.map((p) => (
-                  <p class="text-[length:var(--md-sys-typescale-body-medium-size)] leading-[var(--md-sys-typescale-body-medium-line)] text-[var(--md-sys-color-on-surface-variant)]" set:html={renderInlineMd(p)} />
-                ))}
-              </div>
-            )}
-            {section.subsections && section.subsections.length > 0 && (
-              <div class={`space-y-6 ${section.body && section.body.length > 0 ? "mt-6" : ""}`}>
-                {section.subsections.map((sub) => (
-                  <div>
-                    <h3 class="text-[length:var(--md-sys-typescale-title-medium-size)] leading-[var(--md-sys-typescale-title-medium-line)] font-[var(--md-sys-typescale-title-medium-weight)] text-[var(--md-sys-color-on-surface)] mb-2">{sub.heading}</h3>
-                    <div class="space-y-3">
-                      {sub.body.map((p) => (
-                        <p class="text-[length:var(--md-sys-typescale-body-medium-size)] leading-[var(--md-sys-typescale-body-medium-line)] text-[var(--md-sys-color-on-surface-variant)]" set:html={renderInlineMd(p)} />
-                      ))}
-                    </div>
+        <div class="lt-reveal-lift lt-legal-panel rounded-group px-5 py-8 sm:px-10 sm:py-11">
+          <div class="space-y-9">
+            {doc.sections.map((section) => (
+              <section>
+                <h2 class="text-title-large text-on-surface mb-4 flex items-baseline gap-3">
+                  <span class="lt-sec-rule" aria-hidden="true"></span>
+                  {section.heading}
+                </h2>
+                {section.body && section.body.length > 0 && (
+                  <div class="space-y-3.5">
+                    {section.body.map((p) => (
+                      <p class="lt-prose text-body-medium leading-relaxed text-on-surface-variant" set:html={renderInlineMd(p)} />
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
-          </section>
-        ))}
-      </div>
+                )}
+                {section.subsections && section.subsections.length > 0 && (
+                  <div class={`space-y-6 ${section.body && section.body.length > 0 ? "mt-6" : ""}`}>
+                    {section.subsections.map((sub) => (
+                      <div>
+                        <h3 class="text-title-medium text-on-surface mb-2">{sub.heading}</h3>
+                        <div class="space-y-3.5">
+                          {sub.body.map((p) => (
+                            <p class="lt-prose text-body-medium leading-relaxed text-on-surface-variant" set:html={renderInlineMd(p)} />
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            ))}
+          </div>
 
-      <footer class="mt-16 pt-6 border-t border-[var(--md-sys-color-outline-variant)] dark:border-[var(--md-sys-color-outline-variant-dark)]">
-        <p class="text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">
-          最后更新：{doc.lastUpdated}
-        </p>
-        <p class="mt-2 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">
-          ClosedWHU Team · Luotopia
-        </p>
-      </footer>
-    </div>
-  </section>
+          <footer class="mt-12 pt-6 border-t border-glass-divider">
+            <p class="text-body-small text-outline">
+              最后更新：{doc.lastUpdated}
+            </p>
+            <p class="mt-2 text-body-small text-outline">
+              ClosedWHU Team · Luotopia
+            </p>
+          </footer>
+        </div>
+      </div>
+    </section>
+  </div>
 </BaseLayout>
 
 <style>
-  :global(html[data-kiosk="true"] [data-legal-document]) {
-    padding-top: calc(var(--spacing) * 8);
+  /*
+   * Long-form legal copy is the one place the translucency ladder has to be
+   * overridden rather than followed. Dense body text over a drifting aurora
+   * loses contrast, so this panel sits far higher on the opacity scale than
+   * `glass` and keeps a light blur purely for edge softness. Legibility beats
+   * effect — the same tradeoff the app makes with `kAppGlassAlphaLight` 0.88.
+   */
+  .lt-legal-panel {
+    background-color: var(--lt-legal-panel-bg);
+    backdrop-filter: blur(var(--lt-glass-blur-control)) saturate(120%);
+    -webkit-backdrop-filter: blur(var(--lt-glass-blur-control)) saturate(120%);
+    box-shadow:
+      inset 0 1px 0 0 var(--lt-glass-rim),
+      inset 0 0 0 0.6px var(--lt-glass-edge),
+      var(--lt-shadow-glass);
   }
 
-  :global(html[data-kiosk="true"] [data-legal-document] > div > a[href="/legal/"]) {
+  :global(:root) {
+    --lt-legal-panel-bg: hsl(0 0% 100% / 0.84);
+  }
+
+  :global(:root.dark) {
+    --lt-legal-panel-bg: hsl(220 24% 14% / 0.82);
+  }
+
+  .lt-sec-rule {
+    display: inline-block;
+    width: 1.25rem;
+    height: 2px;
+    border-radius: 999px;
+    background-image: linear-gradient(to right, var(--lt-color-primary), transparent);
+    transform: translateY(-0.3em);
+  }
+
+  .lt-back {
+    transition: background-color 0.25s ease;
+  }
+
+  .lt-back:hover {
+    background-color: var(--lt-glass-subtle);
+    text-decoration: none;
+  }
+
+  /* `set:html` content is not scoped by Astro, so prose styling has to reach
+   * into it with a descendant selector. */
+  .lt-prose :global(code) {
+    border-radius: var(--lt-radius-xs);
+    background-color: var(--lt-glass-subtle);
+    box-shadow: inset 0 0 0 0.6px var(--lt-glass-edge);
+    padding: 0.1em 0.4em;
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+    color: var(--lt-color-on-surface);
+  }
+
+  :global(html[data-kiosk="true"] [data-legal-document] .lt-page-head) {
+    padding-top: calc(var(--spacing) * 10);
+  }
+
+  :global(html[data-kiosk="true"] [data-legal-document] .lt-back) {
     display: none;
   }
 </style>
+

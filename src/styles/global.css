@@ -1,233 +1,696 @@
-@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200");
 @import "tailwindcss";
 
-@theme {
-  --md-ref-palette-primary0: #000000;
-  --md-ref-palette-primary10: #001f33;
-  --md-ref-palette-primary20: #003660;
-  --md-ref-palette-primary30: #004d8c;
-  --md-ref-palette-primary40: #0068b4;
-  --md-ref-palette-primary50: #1a83d4;
-  --md-ref-palette-primary60: #3d9ef0;
-  --md-ref-palette-primary70: #66b8ff;
-  --md-ref-palette-primary80: #99d0ff;
-  --md-ref-palette-primary90: #cce6ff;
-  --md-ref-palette-primary95: #e6f3ff;
-  --md-ref-palette-primary99: #f7fbff;
-  --md-ref-palette-secondary0: #000000;
-  --md-ref-palette-secondary10: #141b2b;
-  --md-ref-palette-secondary20: #293041;
-  --md-ref-palette-secondary30: #3f4759;
-  --md-ref-palette-secondary40: #575f71;
-  --md-ref-palette-secondary50: #6f778b;
-  --md-ref-palette-secondary60: #8991a5;
-  --md-ref-palette-secondary70: #a3abc1;
-  --md-ref-palette-secondary80: #bfc6dd;
-  --md-ref-palette-secondary90: #dbe2f9;
-  --md-ref-palette-secondary95: #edf0ff;
-  --md-ref-palette-secondary99: #fefbff;
-  --md-ref-palette-tertiary0: #000000;
-  --md-ref-palette-tertiary10: #001f28;
-  --md-ref-palette-tertiary20: #003543;
-  --md-ref-palette-tertiary30: #004d5f;
-  --md-ref-palette-tertiary40: #00677d;
-  --md-ref-palette-tertiary50: #00829b;
-  --md-ref-palette-tertiary60: #009eba;
-  --md-ref-palette-tertiary70: #2abad6;
-  --md-ref-palette-tertiary80: #57d6f2;
-  --md-ref-palette-tertiary90: #9eeaff;
-  --md-ref-palette-tertiary95: #d2f4ff;
-  --md-ref-palette-tertiary99: #f6fcff;
-  --md-ref-palette-error0: #000000;
-  --md-ref-palette-error10: #410002;
-  --md-ref-palette-error20: #690005;
-  --md-ref-palette-error30: #93000a;
-  --md-ref-palette-error40: #ba1a1a;
-  --md-ref-palette-error50: #de3730;
-  --md-ref-palette-error60: #ff5449;
-  --md-ref-palette-error70: #ff897d;
-  --md-ref-palette-error80: #ffb4ab;
-  --md-ref-palette-error90: #ffdad6;
-  --md-ref-palette-error95: #ffede9;
-  --md-ref-palette-error99: #fffbff;
-  --md-ref-palette-neutral0: #000000;
-  --md-ref-palette-neutral10: #1b1b1f;
-  --md-ref-palette-neutral20: #303034;
-  --md-ref-palette-neutral30: #47474b;
-  --md-ref-palette-neutral40: #5f5f63;
-  --md-ref-palette-neutral50: #78787c;
-  --md-ref-palette-neutral60: #929296;
-  --md-ref-palette-neutral70: #adadb0;
-  --md-ref-palette-neutral80: #c8c8cc;
-  --md-ref-palette-neutral90: #e4e4e8;
-  --md-ref-palette-neutral95: #f3f2f6;
-  --md-ref-palette-neutral99: #fdfbff;
-  --md-ref-palette-neutral0: #000000;
-  --md-ref-palette-neutral10: #1b1b1f;
-  --md-ref-palette-neutral20: #303034;
-  --md-ref-palette-neutral30: #47474b;
+/* One-off codemods and build tooling live outside the template surface. Their
+ * regex sources and comments contain class-shaped literals that Tailwind would
+ * otherwise happily compile into garbage utilities. */
+@source not "../../scripts";
+@source not "../../tools";
+@source not "../../functions";
 
-  --md-sys-color-primary: #0068b4;
-  --md-sys-color-on-primary: #ffffff;
-  --md-sys-color-primary-container: #d0e8ff;
-  --md-sys-color-on-primary-container: #001f33;
-  --md-sys-color-secondary: #575f71;
-  --md-sys-color-on-secondary: #ffffff;
-  --md-sys-color-secondary-container: #dbe2f9;
-  --md-sys-color-on-secondary-container: #141b2b;
-  --md-sys-color-tertiary: #00677d;
-  --md-sys-color-on-tertiary: #ffffff;
-  --md-sys-color-tertiary-container: #9eeaff;
-  --md-sys-color-on-tertiary-container: #001f28;
-  --md-sys-color-error: #ba1a1a;
-  --md-sys-color-on-error: #ffffff;
-  --md-sys-color-error-container: #ffdad6;
-  --md-sys-color-on-error-container: #410002;
-  --md-sys-color-surface: #fdfbff;
-  --md-sys-color-on-surface: #1b1b1f;
-  --md-sys-color-surface-container-low: #f3f2f6;
-  --md-sys-color-surface-container: #e8e8ec;
-  --md-sys-color-surface-container-high: #dddce0;
-  --md-sys-color-on-surface-variant: #47474b;
-  --md-sys-color-outline: #78787c;
-  --md-sys-color-outline-variant: #c8c8cc;
-  --md-sys-color-inverse-surface: #303034;
-  --md-sys-color-inverse-on-surface: #f3f2f6;
-  --md-sys-color-inverse-primary: #9bc9ff;
-  --md-sys-color-scrim: #000000;
-  --md-sys-color-shadow: #000000;
-
-  --md-sys-color-surface-dark: #1b1b1f;
-  --md-sys-color-on-surface-dark: #e4e4e8;
-  --md-sys-color-surface-container-low-dark: #232327;
-  --md-sys-color-surface-container-dark: #28282c;
-  --md-sys-color-surface-container-high-dark: #323236;
-  --md-sys-color-on-surface-variant-dark: #c8c8cc;
-  --md-sys-color-outline-dark: #929296;
-  --md-sys-color-outline-variant-dark: #47474b;
-  --md-sys-color-inverse-surface-dark: #e4e4e8;
-  --md-sys-color-inverse-on-surface-dark: #303034;
-
-  --md-sys-typescale-display-large-size: 57px;
-  --md-sys-typescale-display-large-line: 64px;
-  --md-sys-typescale-display-large-weight: 400;
-  --md-sys-typescale-display-medium-size: 45px;
-  --md-sys-typescale-display-medium-line: 52px;
-  --md-sys-typescale-display-medium-weight: 400;
-  --md-sys-typescale-display-small-size: 36px;
-  --md-sys-typescale-display-small-line: 44px;
-  --md-sys-typescale-display-small-weight: 400;
-  --md-sys-typescale-headline-large-size: 32px;
-  --md-sys-typescale-headline-large-line: 40px;
-  --md-sys-typescale-headline-large-weight: 400;
-  --md-sys-typescale-headline-medium-size: 28px;
-  --md-sys-typescale-headline-medium-line: 36px;
-  --md-sys-typescale-headline-medium-weight: 400;
-  --md-sys-typescale-headline-small-size: 24px;
-  --md-sys-typescale-headline-small-line: 32px;
-  --md-sys-typescale-headline-small-weight: 500;
-  --md-sys-typescale-title-large-size: 22px;
-  --md-sys-typescale-title-large-line: 28px;
-  --md-sys-typescale-title-large-weight: 500;
-  --md-sys-typescale-title-medium-size: 16px;
-  --md-sys-typescale-title-medium-line: 24px;
-  --md-sys-typescale-title-medium-weight: 500;
-  --md-sys-typescale-title-small-size: 14px;
-  --md-sys-typescale-title-small-line: 20px;
-  --md-sys-typescale-title-small-weight: 500;
-  --md-sys-typescale-body-large-size: 16px;
-  --md-sys-typescale-body-large-line: 24px;
-  --md-sys-typescale-body-large-weight: 400;
-  --md-sys-typescale-body-medium-size: 14px;
-  --md-sys-typescale-body-medium-line: 20px;
-  --md-sys-typescale-body-medium-weight: 400;
-  --md-sys-typescale-body-small-size: 12px;
-  --md-sys-typescale-body-small-line: 16px;
-  --md-sys-typescale-body-small-weight: 400;
-  --md-sys-typescale-label-large-size: 14px;
-  --md-sys-typescale-label-large-line: 20px;
-  --md-sys-typescale-label-large-weight: 500;
-  --md-sys-typescale-label-medium-size: 12px;
-  --md-sys-typescale-label-medium-line: 16px;
-  --md-sys-typescale-label-medium-weight: 500;
-  --md-sys-typescale-label-small-size: 11px;
-  --md-sys-typescale-label-small-line: 16px;
-  --md-sys-typescale-label-small-weight: 500;
-
-  --md-sys-elevation-level0: 0 0 0 0 transparent;
-  --md-sys-elevation-level1: 0 1px 3px 0 rgb(0 0 0 / 0.12), 0 1px 2px 0 rgb(0 0 0 / 0.08);
-  --md-sys-elevation-level2: 0 1px 5px 0 rgb(0 0 0 / 0.12), 0 2px 4px 0 rgb(0 0 0 / 0.08);
-  --md-sys-elevation-level3: 0 4px 8px 0 rgb(0 0 0 / 0.14), 0 1px 3px 0 rgb(0 0 0 / 0.08);
-  --md-sys-elevation-level4: 0 6px 12px 0 rgb(0 0 0 / 0.14), 0 2px 4px 0 rgb(0 0 0 / 0.08);
-  --md-sys-elevation-level5: 0 8px 16px 0 rgb(0 0 0 / 0.14), 0 4px 8px 0 rgb(0 0 0 / 0.08);
-
-  --md-sys-shape-corner-none: 0;
-  --md-sys-shape-corner-extra-small: 4px;
-  --md-sys-shape-corner-small: 8px;
-  --md-sys-shape-corner-medium: 12px;
-  --md-sys-shape-corner-large: 16px;
-  --md-sys-shape-corner-extra-large: 28px;
-  --md-sys-shape-corner-full: 9999px;
-
-  --font-sans: "Noto Sans SC", "Noto Sans", system-ui, sans-serif;
-}
-
-@custom-variant dark (&:where(.dark, .dark *));
+/*
+ * Luotopia web design tokens.
+ *
+ * Two layers, mirroring the split the app already makes in
+ * `theme_settings.dart` (AppDesignLanguage): *which palette paints things* is
+ * still Material 3, *how surfaces are drawn* is glass. So MD3 survives here
+ * only as the color + type-scale source; its opaque tonal-surface elevation
+ * model is gone, replaced by a translucency ladder.
+ *
+ * Layer 1 — `--lt-*` raw values in plain `:root` / `:root.dark`. Always
+ * emitted, never tree-shaken, and the single place dark mode switches.
+ * Layer 2 — `@theme` aliases that teach Tailwind to generate utilities
+ * (`text-title-medium`, `bg-surface`, `rounded-card`, `backdrop-blur-glass`).
+ *
+ * Glass geometry is not invented here: radii come from the app's
+ * `AppDesignLayout.glass()` (control 14 / nested 18 / card 28 / group 32) and
+ * blur from `kAppGlassBlurSigma` (10) + `appGlassStyle(blur:)` (8), so the site
+ * and the app agree on what "Luotopia glass" measures.
+ */
 
 :root {
   color-scheme: light;
+
+  /* ── MD3 HCT reference palette (seed #005BAC "Luotopia Blue", same as app) ── */
+  --lt-palette-primary10: #001f33;
+  --lt-palette-primary20: #003660;
+  --lt-palette-primary30: #004d8c;
+  --lt-palette-primary40: #0068b4;
+  --lt-palette-primary50: #1a83d4;
+  --lt-palette-primary60: #3d9ef0;
+  --lt-palette-primary70: #66b8ff;
+  --lt-palette-primary80: #99d0ff;
+  --lt-palette-primary90: #cce6ff;
+  --lt-palette-primary95: #e6f3ff;
+  --lt-palette-secondary20: #293041;
+  --lt-palette-secondary30: #3f4759;
+  --lt-palette-secondary40: #575f71;
+  --lt-palette-secondary80: #bfc6dd;
+  --lt-palette-secondary90: #dbe2f9;
+  --lt-palette-tertiary30: #004d5f;
+  --lt-palette-tertiary40: #00677d;
+  --lt-palette-tertiary80: #57d6f2;
+  --lt-palette-tertiary90: #9eeaff;
+  --lt-palette-error30: #93000a;
+  --lt-palette-error40: #ba1a1a;
+  --lt-palette-error80: #ffb4ab;
+  --lt-palette-error90: #ffdad6;
+  --lt-palette-neutral10: #1b1b1f;
+  --lt-palette-neutral20: #303034;
+  --lt-palette-neutral30: #47474b;
+  --lt-palette-neutral60: #929296;
+  --lt-palette-neutral70: #adadb0;
+  --lt-palette-neutral80: #c8c8cc;
+  --lt-palette-neutral90: #e4e4e8;
+  --lt-palette-neutral95: #f3f2f6;
+  --lt-palette-neutral99: #fdfbff;
+
+  /* ── Semantic color ──
+   *
+   * Two values here deliberately break from the MD3 tone map, and both are
+   * contrast corrections forced by the aurora backdrop. MD3's `primary` (tone
+   * 40) and `outline` (tone 50) roles assume text sits on an opaque `surface`
+   * of #fdfbff; ours sits on a blue field measuring roughly #cfe0f1, which is
+   * ~14% darker. Left uncorrected, tone-40 primary drops to 3.9:1 and outline
+   * to 3.3:1 — both under the 4.5:1 that 14px body text needs.
+   *
+   * `primary` moves to #005bac, which is not an arbitrary darkening: it is the
+   * app's own `AppSeedColor.defaultBlue` seed, so the site's accent is now the
+   * seed itself rather than a tone derived from it. `outline` moves one step
+   * darker for the same reason.
+   */
+  --lt-color-canvas: #f2f5fa;
+  --lt-color-surface: #fbfcfe;
+  --lt-color-on-surface: #1b1b1f;
+  --lt-color-on-surface-variant: #47474b;
+  --lt-color-outline: #525a69;
+  --lt-color-outline-variant: #c3c8d4;
+
+  --lt-color-primary: #005bac;
+  --lt-color-on-primary: #ffffff;
+  --lt-color-primary-container: #d6e9ff;
+  --lt-color-on-primary-container: var(--lt-palette-primary10);
+  --lt-color-secondary: var(--lt-palette-secondary40);
+  --lt-color-secondary-container: var(--lt-palette-secondary90);
+  --lt-color-on-secondary-container: #141b2b;
+  --lt-color-tertiary: var(--lt-palette-tertiary40);
+  --lt-color-tertiary-container: var(--lt-palette-tertiary90);
+  --lt-color-on-tertiary-container: #001f28;
+  --lt-color-error: var(--lt-palette-error40);
+  --lt-color-error-container: var(--lt-palette-error90);
+  --lt-color-on-error-container: #410002;
+  --lt-color-inverse-surface: var(--lt-palette-neutral20);
+  --lt-color-inverse-on-surface: var(--lt-palette-neutral95);
+
+  /*
+   * ── Glass ladder ──
+   * The app keeps two recipes: a high-alpha *frosted* fill for content
+   * surfaces (`kAppGlassAlphaLight` 0.88, so an arbitrary wallpaper cannot
+   * undermine on-surface contrast) and a near-transparent *refractive lens*
+   * for controls (`appGlassStyle(tint: transparent)`). Same split here, with
+   * alphas lowered because our backdrop is a controlled soft gradient rather
+   * than an arbitrary photo — 0.88 would read as flat plastic on the web.
+   */
+  --lt-glass-content: hsl(0 0% 100% / 0.62);
+  --lt-glass-overlay: hsl(0 0% 100% / 0.72);
+  --lt-glass-control: hsl(0 0% 100% / 0.44);
+  --lt-glass-subtle: hsl(0 0% 100% / 0.26);
+
+  /*
+   * The navbar gets its own, stricter rung. It is the one surface with body
+   * copy scrolling directly underneath it, and "translucent enough to read the
+   * page through it" is a defect there rather than an effect.
+   *
+   * Sizing: a 14px glyph stroke spread by blur(24px) retains roughly 14/48 of
+   * its contrast; the 0.80 fill then removes 80% of what is left, so the ghost
+   * lands near 4% of full contrast — below the visibility threshold. The
+   * previous 16px/0.72 combination left ~9%, which reads as faint text behind
+   * the bar.
+   */
+  --lt-glass-navbar: hsl(0 0% 100% / 0.8);
+
+  /* Optical rim: a lit top edge plus a hairline all round (app borderWidth 0.6). */
+  --lt-glass-rim: hsl(0 0% 100% / 0.85);
+  --lt-glass-edge: hsl(215 40% 30% / 0.12);
+  --lt-glass-divider: hsl(215 40% 30% / 0.09);
+
+  --lt-glass-blur: 10px;
+  --lt-glass-blur-control: 8px;
+  --lt-glass-blur-overlay: 20px;
+  --lt-glass-blur-navbar: 24px;
+  --lt-glass-saturate: 160%;
+
+  /* ── Shape: AppDesignLayout.glass() (control 14 / nested 18 / card 28 / group 32) ── */
+  --lt-radius-xs: 4px;
+  --lt-radius-sm: 8px;
+  --lt-radius-control: 14px;
+  --lt-radius-nested: 18px;
+  --lt-radius-card: 28px;
+  --lt-radius-group: 32px;
+
+  --lt-shadow-glass:
+    inset 0 1px 0 0 var(--lt-glass-rim),
+    inset 0 0 0 0.6px var(--lt-glass-edge),
+    0 1px 2px 0 hsl(215 45% 20% / 0.05),
+    0 12px 32px -12px hsl(215 45% 20% / 0.18);
+  --lt-shadow-glass-control:
+    inset 0 1px 0 0 var(--lt-glass-rim),
+    inset 0 0 0 0.6px var(--lt-glass-edge),
+    0 1px 2px 0 hsl(215 45% 20% / 0.05),
+    0 6px 16px -8px hsl(215 45% 20% / 0.16);
+  --lt-shadow-glass-raised:
+    inset 0 1px 0 0 var(--lt-glass-rim),
+    inset 0 0 0 0.6px var(--lt-glass-edge),
+    0 2px 6px 0 hsl(215 45% 20% / 0.07),
+    0 24px 48px -16px hsl(215 45% 20% / 0.24);
+
+  /*
+   * ── Modal ──
+   * A dialog is not just another glass rung: the page behind it has to stop
+   * competing with foreground text. The scrim owns the blur, so the card can be
+   * a translucent fill without a second backdrop-filter pass sampling an
+   * already-blurred backdrop.
+   */
+  --lt-modal-scrim: hsl(220 45% 8% / 0.44);
+  --lt-modal-blur: 20px;
+  --lt-modal-surface: hsl(0 0% 100% / 0.86);
+  --lt-modal-shadow:
+    inset 0 1px 0 0 var(--lt-glass-rim),
+    inset 0 0 0 0.6px var(--lt-glass-edge),
+    0 32px 64px -24px hsl(220 45% 10% / 0.55);
+
+  /*
+   * Light CTA glass. The base is darkened toward primary20 before taking 12%
+   * transparency, so the aurora can refract without lifting the white label
+   * below AA. The sheen is concentrated away from the text baseline.
+   */
+  --lt-btn-filled-base: color-mix(in oklab, var(--lt-color-primary) 76%, var(--lt-palette-primary20));
+  --lt-btn-filled-bg: color-mix(in srgb, var(--lt-btn-filled-base) 93%, transparent);
+  --lt-btn-filled-fg: var(--lt-color-on-primary);
+  --lt-btn-filled-sheen:
+    radial-gradient(120% 140% at 10% -8%, hsl(0 0% 100% / 0.2), transparent 46%),
+    linear-gradient(
+      178deg,
+      hsl(0 0% 100% / 0.12),
+      hsl(0 0% 100% / 0.03) 42%,
+      hsl(211 80% 12% / 0.22)
+    );
+  --lt-btn-filled-blur: 12px;
+  --lt-btn-filled-shadow:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.44),
+    inset 0 -1px 0 0 hsl(211 80% 12% / 0.22),
+    inset 0 0 0 0.6px hsl(0 0% 100% / 0.28),
+    0 2px 10px -2px hsl(211 90% 32% / 0.26),
+    0 18px 34px -16px hsl(211 90% 32% / 0.42);
+  --lt-btn-filled-shadow-hover:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.54),
+    inset 0 -1px 0 0 hsl(211 80% 12% / 0.24),
+    inset 0 0 0 0.6px hsl(0 0% 100% / 0.36),
+    0 3px 14px -2px hsl(211 90% 38% / 0.32),
+    0 24px 44px -18px hsl(211 90% 34% / 0.48);
+
+  /* ── Hero aurora wash (sits over the shader, under the content) ── */
+  --lt-hero-wash-from: hsl(213 62% 76% / 0.75);
+  --lt-hero-wash-to: hsl(213 62% 76% / 0);
+
+  /*
+   * ── Hero title gradient ──
+   *
+   * primary -> tertiary alone does not read as a gradient. Those two tokens
+   * differ by ~18deg of hue at *constant* luminance (measured L 72.9 -> 74.4
+   * across the two glyphs), and the eye needs a lightness ramp to perceive a
+   * transition — a pure hue rotation over ~100px just looks like two flat
+   * colours meeting at a seam.
+   *
+   * NOTE: only tertiary30/40/80/90 exist in the generated palette. Referencing
+   * a nonexistent tone (e.g. tertiary50) makes the whole custom property invalid
+   * at computed-value time -> background-image resolves to none -> with
+   * color:transparent the glyphs vanish entirely.
+   */
+  --lt-title-gradient-from: var(--lt-palette-primary10);
+  --lt-title-gradient-via: var(--lt-palette-primary20);
+  --lt-title-gradient-to: var(--lt-palette-tertiary30);
 }
 
 :root.dark {
   color-scheme: dark;
-  --md-sys-color-primary: #99d0ff;
-  --md-sys-color-on-primary: #003660;
-  --md-sys-color-primary-container: #004d8c;
-  --md-sys-color-on-primary-container: #cce6ff;
-  --md-sys-color-secondary: #bfc6dd;
-  --md-sys-color-on-secondary: #293041;
-  --md-sys-color-secondary-container: #3f4759;
-  --md-sys-color-on-secondary-container: #dbe2f9;
-  --md-sys-color-tertiary: #57d6f2;
-  --md-sys-color-on-tertiary: #003543;
-  --md-sys-color-tertiary-container: #004d5f;
-  --md-sys-color-on-tertiary-container: #9eeaff;
-  --md-sys-color-error: #ffb4ab;
-  --md-sys-color-on-error: #690005;
-  --md-sys-color-error-container: #93000a;
-  --md-sys-color-on-error-container: #ffdad6;
-  --md-sys-color-surface: var(--md-sys-color-surface-dark);
-  --md-sys-color-on-surface: var(--md-sys-color-on-surface-dark);
-  --md-sys-color-surface-container-low: var(--md-sys-color-surface-container-low-dark);
-  --md-sys-color-surface-container: var(--md-sys-color-surface-container-dark);
-  --md-sys-color-surface-container-high: var(--md-sys-color-surface-container-high-dark);
-  --md-sys-color-on-surface-variant: var(--md-sys-color-on-surface-variant-dark);
-  --md-sys-color-outline: var(--md-sys-color-outline-dark);
-  --md-sys-color-outline-variant: var(--md-sys-color-outline-variant-dark);
-  --md-sys-color-inverse-surface: var(--md-sys-color-inverse-surface-dark);
-  --md-sys-color-inverse-on-surface: var(--md-sys-color-inverse-on-surface-dark);
-  --md-sys-color-inverse-primary: #0068b4;
+
+  --lt-color-canvas: #0a0d14;
+  --lt-color-surface: #12151d;
+  --lt-color-on-surface: #e4e4e8;
+  --lt-color-on-surface-variant: #c3c6cf;
+  --lt-color-outline: #b4bac4;
+  --lt-color-outline-variant: #3a3f4b;
+
+  --lt-color-primary: var(--lt-palette-primary80);
+  --lt-color-on-primary: var(--lt-palette-primary20);
+  --lt-color-primary-container: var(--lt-palette-primary30);
+  --lt-color-on-primary-container: var(--lt-palette-primary90);
+  --lt-color-secondary: var(--lt-palette-secondary80);
+  --lt-color-secondary-container: var(--lt-palette-secondary30);
+  --lt-color-on-secondary-container: var(--lt-palette-secondary90);
+  --lt-color-tertiary: var(--lt-palette-tertiary80);
+  --lt-color-tertiary-container: var(--lt-palette-tertiary30);
+  --lt-color-on-tertiary-container: var(--lt-palette-tertiary90);
+  --lt-color-error: var(--lt-palette-error80);
+  --lt-color-error-container: var(--lt-palette-error30);
+  --lt-color-on-error-container: var(--lt-palette-error90);
+  --lt-color-inverse-surface: var(--lt-palette-neutral90);
+  --lt-color-inverse-on-surface: var(--lt-palette-neutral20);
+
+  /* Dark glass: white at low alpha, not black. Black glass reads as soot. */
+  --lt-glass-content: hsl(220 24% 16% / 0.58);
+  --lt-glass-overlay: hsl(220 24% 12% / 0.72);
+  --lt-glass-control: hsl(0 0% 100% / 0.09);
+  --lt-glass-subtle: hsl(0 0% 100% / 0.05);
+  --lt-glass-navbar: hsl(220 26% 11% / 0.84);
+
+  --lt-glass-rim: hsl(0 0% 100% / 0.16);
+  --lt-glass-edge: hsl(0 0% 100% / 0.09);
+  --lt-glass-divider: hsl(0 0% 100% / 0.08);
+  --lt-glass-saturate: 150%;
+
+  --lt-shadow-glass:
+    inset 0 1px 0 0 var(--lt-glass-rim),
+    inset 0 0 0 0.6px var(--lt-glass-edge),
+    0 1px 2px 0 rgb(0 0 0 / 0.3),
+    0 12px 32px -12px rgb(0 0 0 / 0.6);
+  --lt-shadow-glass-control:
+    inset 0 1px 0 0 var(--lt-glass-rim),
+    inset 0 0 0 0.6px var(--lt-glass-edge),
+    0 1px 2px 0 rgb(0 0 0 / 0.25),
+    0 6px 16px -8px rgb(0 0 0 / 0.55);
+  --lt-shadow-glass-raised:
+    inset 0 1px 0 0 var(--lt-glass-rim),
+    inset 0 0 0 0.6px var(--lt-glass-edge),
+    0 2px 6px 0 rgb(0 0 0 / 0.35),
+    0 24px 48px -16px rgb(0 0 0 / 0.7);
+
+  --lt-modal-scrim: hsl(220 55% 3% / 0.64);
+  --lt-modal-surface: hsl(220 24% 12% / 0.86);
+  --lt-modal-shadow:
+    inset 0 1px 0 0 var(--lt-glass-rim),
+    inset 0 0 0 0.6px var(--lt-glass-edge),
+    0 32px 64px -24px rgb(0 0 0 / 0.72);
+
+  /*
+   * Dark inverts the CTA pairing so it can be glass: primary90 (#cce6ff) at 80%
+   * over the dark aurora measures ~L201, which puts the primary10 label at
+   * 7.1:1 — far more headroom than the solid primary80/primary20 it replaces
+   * (4.2:1, and flat pale blue reads as plastic next to frosted glass).
+   * The spare contrast is what pays for the sheen and the 20% of backdrop the
+   * blur gets to refract.
+   */
+  --lt-btn-filled-bg: color-mix(in oklab, var(--lt-palette-primary90) 80%, transparent);
+  --lt-btn-filled-fg: var(--lt-palette-primary10);
+  --lt-btn-filled-sheen: linear-gradient(
+    178deg,
+    hsl(0 0% 100% / 0.38),
+    hsl(0 0% 100% / 0.1) 42%,
+    hsl(211 70% 14% / 0.16)
+  );
+  --lt-btn-filled-blur: 12px;
+  --lt-btn-filled-shadow:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.6),
+    inset 0 -1px 0 0 hsl(211 60% 10% / 0.28),
+    inset 0 0 0 0.6px hsl(0 0% 100% / 0.34),
+    0 2px 10px -2px hsl(211 90% 62% / 0.26),
+    0 18px 34px -14px hsl(211 90% 42% / 0.5);
+  --lt-btn-filled-shadow-hover:
+    inset 0 1px 0 0 hsl(0 0% 100% / 0.7),
+    inset 0 -1px 0 0 hsl(211 60% 10% / 0.28),
+    inset 0 0 0 0.6px hsl(0 0% 100% / 0.42),
+    0 3px 14px -2px hsl(211 90% 66% / 0.34),
+    0 24px 44px -16px hsl(211 90% 46% / 0.6);
+
+  --lt-hero-wash-from: hsl(214 52% 26% / 0.45);
+  --lt-hero-wash-to: hsl(214 52% 26% / 0);
+
+  /* Same constant-luminance problem in dark: primary80 and tertiary80 measure
+   * L 197 and L 179 — close enough to read as two colours rather than a ramp.
+   * Starting from primary60 gives 138 -> 197 -> 179, and against the darkest
+   * measured dark backdrop all three clear large-text AA at 4.7 / 8.3 / 7.7. */
+  --lt-title-gradient-from: var(--lt-palette-primary60);
+  --lt-title-gradient-via: var(--lt-palette-primary80);
+  --lt-title-gradient-to: var(--lt-palette-tertiary80);
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* ── Color ── */
+  --color-canvas: var(--lt-color-canvas);
+  --color-surface: var(--lt-color-surface);
+  --color-on-surface: var(--lt-color-on-surface);
+  --color-on-surface-variant: var(--lt-color-on-surface-variant);
+  --color-outline: var(--lt-color-outline);
+  --color-outline-variant: var(--lt-color-outline-variant);
+  --color-primary: var(--lt-color-primary);
+  --color-on-primary: var(--lt-color-on-primary);
+  --color-primary-container: var(--lt-color-primary-container);
+  --color-on-primary-container: var(--lt-color-on-primary-container);
+  --color-secondary: var(--lt-color-secondary);
+  --color-secondary-container: var(--lt-color-secondary-container);
+  --color-on-secondary-container: var(--lt-color-on-secondary-container);
+  --color-tertiary: var(--lt-color-tertiary);
+  --color-tertiary-container: var(--lt-color-tertiary-container);
+  --color-on-tertiary-container: var(--lt-color-on-tertiary-container);
+  --color-error: var(--lt-color-error);
+  --color-error-container: var(--lt-color-error-container);
+  --color-on-error-container: var(--lt-color-on-error-container);
+  --color-inverse-surface: var(--lt-color-inverse-surface);
+  --color-inverse-on-surface: var(--lt-color-inverse-on-surface);
+
+  --color-glass-content: var(--lt-glass-content);
+  --color-glass-overlay: var(--lt-glass-overlay);
+  --color-glass-control: var(--lt-glass-control);
+  --color-glass-subtle: var(--lt-glass-subtle);
+  --color-glass-navbar: var(--lt-glass-navbar);
+  --color-glass-rim: var(--lt-glass-rim);
+  --color-glass-edge: var(--lt-glass-edge);
+  --color-glass-divider: var(--lt-glass-divider);
+
+  /* ── MD3 type scale ── */
+  --text-display-large: 57px;
+  --text-display-large--line-height: 64px;
+  --text-display-large--font-weight: 400;
+  --text-display-medium: 45px;
+  --text-display-medium--line-height: 52px;
+  --text-display-medium--font-weight: 400;
+  --text-display-small: 36px;
+  --text-display-small--line-height: 44px;
+  --text-display-small--font-weight: 400;
+  --text-headline-large: 32px;
+  --text-headline-large--line-height: 40px;
+  --text-headline-large--font-weight: 400;
+  --text-headline-medium: 28px;
+  --text-headline-medium--line-height: 36px;
+  --text-headline-medium--font-weight: 400;
+  --text-headline-small: 24px;
+  --text-headline-small--line-height: 32px;
+  --text-headline-small--font-weight: 500;
+  --text-title-large: 22px;
+  --text-title-large--line-height: 28px;
+  --text-title-large--font-weight: 500;
+  --text-title-medium: 16px;
+  --text-title-medium--line-height: 24px;
+  --text-title-medium--font-weight: 500;
+  --text-title-small: 14px;
+  --text-title-small--line-height: 20px;
+  --text-title-small--font-weight: 500;
+  --text-body-large: 16px;
+  --text-body-large--line-height: 24px;
+  --text-body-large--font-weight: 400;
+  --text-body-medium: 14px;
+  --text-body-medium--line-height: 20px;
+  --text-body-medium--font-weight: 400;
+  --text-body-small: 12px;
+  --text-body-small--line-height: 16px;
+  --text-body-small--font-weight: 400;
+  --text-label-large: 14px;
+  --text-label-large--line-height: 20px;
+  --text-label-large--font-weight: 500;
+  --text-label-medium: 12px;
+  --text-label-medium--line-height: 16px;
+  --text-label-medium--font-weight: 500;
+  --text-label-small: 11px;
+  --text-label-small--line-height: 16px;
+  --text-label-small--font-weight: 500;
+
+  /* ── Shape: aliases onto the raw ladder above ── */
+  --radius-xs: var(--lt-radius-xs);
+  --radius-sm: var(--lt-radius-sm);
+  --radius-control: var(--lt-radius-control);
+  --radius-nested: var(--lt-radius-nested);
+  --radius-card: var(--lt-radius-card);
+  --radius-group: var(--lt-radius-group);
+
+  /* ── Blur: kAppGlassBlurSigma / appGlassStyle(blur:) ── */
+  --blur-glass: var(--lt-glass-blur);
+  --blur-glass-control: var(--lt-glass-blur-control);
+  --blur-glass-overlay: var(--lt-glass-blur-overlay);
+  --blur-glass-navbar: var(--lt-glass-blur-navbar);
+
+  /* ── Elevation ── */
+  --shadow-0: 0 0 0 0 transparent;
+  --shadow-1: 0 1px 3px 0 rgb(0 0 0 / 0.12), 0 1px 2px 0 rgb(0 0 0 / 0.08);
+  --shadow-2: 0 1px 5px 0 rgb(0 0 0 / 0.12), 0 2px 4px 0 rgb(0 0 0 / 0.08);
+  --shadow-3: 0 4px 8px 0 rgb(0 0 0 / 0.14), 0 1px 3px 0 rgb(0 0 0 / 0.08);
+  --shadow-4: 0 6px 12px 0 rgb(0 0 0 / 0.14), 0 2px 4px 0 rgb(0 0 0 / 0.08);
+  --shadow-5: 0 8px 16px 0 rgb(0 0 0 / 0.14), 0 4px 8px 0 rgb(0 0 0 / 0.08);
+  --shadow-glass: var(--lt-shadow-glass);
+  --shadow-glass-control: var(--lt-shadow-glass-control);
+  --shadow-glass-raised: var(--lt-shadow-glass-raised);
+
+  /*
+   * Two faces, split by script. Plus Jakarta Sans is a geometric humanist with
+   * no CJK coverage, so Latin stops there and Chinese falls through to MiSans.
+   * The stack this replaces led with Noto Sans SC, which *does* cover Latin —
+   * so every Western letter on the site was being drawn by Noto's Latin, the
+   * generic half of the pairing. Order is most of the fix.
+   *
+   * The trailing system faces catch glyphs MiSans has not loaded yet, or ones
+   * outside its subsets: PingFang SC on Apple platforms, YaHei on Windows.
+   * system-ui alone is not enough — it resolves to SF Pro and Segoe UI, neither
+   * of which has CJK, so without them a missed glyph drops to the browser's
+   * default rather than a face that matches.
+   */
+  --font-sans: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", "MiSans", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", monospace;
+}
+
+/*
+ * Glass surfaces.
+ *
+ * `backdrop-filter` is the whole effect: without live content behind the
+ * element it resolves to a flat translucent fill and reads as dirty plastic.
+ * That is why BaseLayout paints a page-fixed aurora behind everything rather
+ * than only decorating the hero — every glass element on every route needs a
+ * backdrop worth refracting.
+ *
+ * The @supports fallbacks raise fill opacity when backdrop-filter is missing,
+ * so an unsupported browser gets a legible solid card instead of a see-through
+ * one. Same philosophy as `app_glass.dart` degrading to frosted on Skia/OHOS:
+ * lose the refraction, never lose the content.
+ */
+@utility glass {
+  background-color: var(--lt-glass-content);
+  backdrop-filter: blur(var(--lt-glass-blur)) saturate(var(--lt-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--lt-glass-blur)) saturate(var(--lt-glass-saturate));
+  box-shadow: var(--lt-shadow-glass);
+}
+
+@utility glass-overlay {
+  background-color: var(--lt-glass-overlay);
+  backdrop-filter: blur(var(--lt-glass-blur-overlay)) saturate(var(--lt-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--lt-glass-blur-overlay)) saturate(var(--lt-glass-saturate));
+  box-shadow: var(--lt-shadow-glass-control);
+}
+
+@utility glass-control {
+  background-color: var(--lt-glass-control);
+  backdrop-filter: blur(var(--lt-glass-blur-control)) saturate(var(--lt-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--lt-glass-blur-control)) saturate(var(--lt-glass-saturate));
+  box-shadow: var(--lt-shadow-glass-control);
+}
+
+@utility glass-subtle {
+  background-color: var(--lt-glass-subtle);
+  backdrop-filter: blur(var(--lt-glass-blur-control)) saturate(var(--lt-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--lt-glass-blur-control)) saturate(var(--lt-glass-saturate));
+}
+
+/*
+ * The filled CTA. Kept as a utility rather than per-component CSS because both
+ * DownloadButtons and the FriendLinks dialog render one, and the whole point is
+ * that they read as the same object.
+ *
+ * Both themes are tinted glass now. Light mode keeps a high-alpha, darkened
+ * primary base so the white label stays above AA while the blur, rim and sheen
+ * give the pill the same refractive family as the surrounding surfaces.
+ */
+@utility filled-glass {
+  background-color: var(--lt-btn-filled-bg);
+  background-image: var(--lt-btn-filled-sheen);
+  color: var(--lt-btn-filled-fg);
+  backdrop-filter: blur(var(--lt-btn-filled-blur)) saturate(var(--lt-glass-saturate));
+  -webkit-backdrop-filter: blur(var(--lt-btn-filled-blur)) saturate(var(--lt-glass-saturate));
+  box-shadow: var(--lt-btn-filled-shadow);
+}
+
+/*
+ * Inset surface: the rung *below* a glass panel, for the code blocks, badges
+ * and list rows that live inside one.
+ *
+ * No `backdrop-filter` here, and that is load-bearing. The parent panel already
+ * blurred the aurora; blurring an already-blurred backdrop a second time
+ * changes nothing visually and costs a compositor layer per element — which on
+ * a page like /download, with a dozen `<pre>` blocks, is a dozen layers bought
+ * for nothing. It also sidesteps the backdrop-root trap: a panel with
+ * `backdrop-filter` becomes the backdrop root for its descendants, so a nested
+ * blur would sample the panel's own fill rather than the page.
+ */
+.lt-inset {
+  background-color: var(--lt-glass-subtle);
+  box-shadow: inset 0 0 0 0.6px var(--lt-glass-edge);
+}
+
+.lt-inset-raised {
+  background-color: var(--lt-glass-control);
+  box-shadow:
+    inset 0 1px 0 0 var(--lt-glass-rim),
+    inset 0 0 0 0.6px var(--lt-glass-edge);
+}
+
+/*
+ * Card hover: lift the shadow and the position, never the fill. Raising
+ * `background-color` opacity on hover flattens glass into a solid panel — the
+ * exact failure mode this design exists to avoid.
+ */
+.lt-lift {
+  transition:
+    box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lt-lift:hover {
+  box-shadow: var(--lt-shadow-glass-raised);
+  transform: translateY(-3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lt-lift,
+  .lt-lift:hover {
+    transition: none;
+    transform: none;
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --lt-glass-content: hsl(0 0% 100% / 0.92);
+    --lt-glass-overlay: hsl(0 0% 100% / 0.96);
+    --lt-glass-control: hsl(0 0% 100% / 0.8);
+    --lt-glass-subtle: hsl(0 0% 100% / 0.6);
+    --lt-modal-scrim: hsl(220 45% 8% / 0.56);
+    --lt-modal-surface: hsl(0 0% 100% / 0.98);
+  }
+
+  :root.dark {
+    --lt-glass-content: hsl(220 20% 17% / 0.96);
+    --lt-glass-overlay: hsl(220 20% 13% / 0.98);
+    --lt-glass-control: hsl(220 16% 22% / 0.9);
+    --lt-glass-subtle: hsl(220 16% 22% / 0.7);
+    --lt-modal-scrim: hsl(220 55% 3% / 0.72);
+    --lt-modal-surface: hsl(220 20% 13% / 0.98);
+  }
+}
+
+/* The page base lives on <html>; <body> stays transparent so the fixed aurora
+ * layer can sit between them. */
+html {
+  background-color: var(--lt-color-canvas);
+  transition: background-color 0.3s ease;
+  scroll-behavior: smooth;
+
+  /*
+   * Reserve the scrollbar's width permanently.
+   *
+   * Everything that locks scroll drops the viewport scrollbar and with it ~15px
+   * of width, so the page jumped sideways: the mobile menu's `lenis.stop()`,
+   * the friend-link dialog, and `.lenis-stopped { overflow: hidden }` below all
+   * do it. With the gutter reserved the width never changes regardless of scroll
+   * state.
+   *
+   * Chosen over the alternatives. Hiding the scrollbar outright removes the
+   * scroll-position affordance and middle-click-drag. `overflow-y: scroll`
+   * reserves the same space but paints an empty track on pages that do not
+   * scroll. Measuring the scrollbar in JS — what the dialog used to do — runs
+   * after paint so you still see a frame of movement, has to be undone on close,
+   * mis-measures under zoom or an OS scrollbar-width change, and only protects
+   * the one feature that remembered to do it, which is exactly why the dialog
+   * held still and the menu did not.
+   *
+   * A no-op where scrollbars overlay (macOS, mobile) — which is precisely where
+   * there was no shift to fix.
+   */
+  scrollbar-gutter: stable;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--md-sys-color-surface);
-  color: var(--md-sys-color-on-surface);
-  transition: background-color 0.3s, color 0.3s;
+  background-color: transparent;
+  color: var(--lt-color-on-surface);
+  transition: color 0.3s ease;
+  -webkit-font-smoothing: antialiased;
 }
 
-.dark body {
-  background-color: var(--md-sys-color-surface);
-  color: var(--md-sys-color-on-surface);
+/* ── Scroll reveal ──
+ *
+ * Two variants, and the split is not stylistic — it is forced by the spec.
+ * An element with `opacity < 1` becomes a *backdrop root*: `backdrop-filter`
+ * inside it stops sampling the page and starts sampling nothing, so glass
+ * renders as a flat translucent fill until opacity lands exactly on 1 and
+ * then visibly snaps. `transform` is not a backdrop-root trigger, so anything
+ * that is or contains glass must animate with `.lt-reveal-lift` instead.
+ */
+.lt-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--lt-reveal-delay, 0ms);
 }
 
-.material-symbols-outlined {
-  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
-  line-height: 1;
+.lt-reveal-lift {
+  transform: translateY(28px);
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--lt-reveal-delay, 0ms);
 }
 
-.material-symbols-outlined.fill {
-  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+.lt-reveal[data-revealed="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+.lt-reveal-lift[data-revealed="true"] {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lt-reveal,
+  .lt-reveal-lift {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+.lt-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+  vertical-align: -0.125em;
+  flex-shrink: 0;
+}
+
+.lt-icon-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  border-radius: var(--lt-radius-control);
+  background-color: var(--lt-glass-subtle);
+  box-shadow:
+    inset 0 1px 0 0 var(--lt-glass-rim),
+    inset 0 0 0 0.6px var(--lt-glass-edge);
 }
 
 .state-layer {
@@ -243,6 +706,7 @@ body {
   background-color: currentColor;
   opacity: 0;
   transition: opacity 0.15s;
+  pointer-events: none;
 }
 
 .state-layer:hover::before {
@@ -255,4 +719,64 @@ body {
 
 .state-layer:active::before {
   opacity: 0.12;
+}
+
+/* Lenis: required so its transform-driven scroll does not fight `position:
+ * fixed` on the navbar and the aurora layer. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/*
+ * Client Router, phase 1: swap without the default root crossfade.
+ *
+ * The browser View Transition snapshot freezes the live WebGL aurora and can
+ * sample `backdrop-filter` glass incorrectly, so the default animation is
+ * disabled while the router provides prefetch, history, scroll restoration and
+ * no-refresh DOM swaps. A content-only transition can be layered back on after
+ * the persistent chrome has been verified.
+ */
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-group(root) {
+  animation: none !important;
+  mix-blend-mode: normal !important;
+}
+
+/* Tailwind's compiled `@utility` output currently keeps only the `-webkit-`
+ * alias for these backdrop filters, so the standard property is restated here
+ * for engines that do not treat the alias as canonical. */
+@supports (backdrop-filter: blur(1px)) {
+  .glass {
+    backdrop-filter: blur(var(--lt-glass-blur)) saturate(var(--lt-glass-saturate));
+  }
+
+  .glass-overlay {
+    backdrop-filter: blur(var(--lt-glass-blur-overlay)) saturate(var(--lt-glass-saturate));
+  }
+
+  .glass-control {
+    backdrop-filter: blur(var(--lt-glass-blur-control)) saturate(var(--lt-glass-saturate));
+  }
+
+  .glass-subtle {
+    backdrop-filter: blur(var(--lt-glass-blur-control)) saturate(var(--lt-glass-saturate));
+  }
+
+  .filled-glass {
+    backdrop-filter: blur(var(--lt-btn-filled-blur)) saturate(var(--lt-glass-saturate));
+  }
 }

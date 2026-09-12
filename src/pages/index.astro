@@ -1,62 +1,346 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import AppIcon from "../components/AppIcon.astro";
 import FeatureCard from "../components/FeatureCard.astro";
+import Icon from "../components/Icon.astro";
 import ScreenshotCarousel from "../components/ScreenshotCarousel.astro";
 import DownloadButtons from "../components/DownloadButtons.astro";
+import { highlightedFeatures } from "../config/features";
 
-const features = [
-  { icon: "calendar_month", title: "课程表", description: "多源导入（教务/WakeUp/本地），多课表管理，周月视图随心切换。" },
-  { icon: "school", title: "空闲教室", description: "按日期、校区、楼栋、节次查询空闲教室，一键生成日程事项。" },
-  { icon: "library_books", title: "图书馆座位预约", description: "空间/日期/时段/座位灵活查询，创建与取消预约一站式管理。" },
-  { icon: "sports_tennis", title: "运动场馆预约", description: "场馆、项目、时段自由选择，预约/取消/订单管理尽在掌握。" },
-  { icon: "credit_card", title: "珞珈E卡", description: "校园卡余额、流水查询与付款码，WebView 无缝对接。" },
-  { icon: "partly_cloudy_day", title: "天气", description: "直连多数据源，逐小时预报、AQI、预警信息，稳定可靠。" },
-  { icon: "directions_bus", title: "校车", description: "实时校车位置追踪，线路查询，出行不再久等。" },
-  { icon: "map", title: "校园地图", description: "快速查找校园地点与服务入口，校园出行更从容。" },
-  { icon: "local_hospital", title: "医疗服务", description: "就医相关记录与流程集中管理，重要信息随时可查。" },
-  { icon: "smart_toy", title: "AI 助手", description: "智能会话管理，事项查询与创建，让校园生活更高效。" },
-];
+/**
+ * Rotating hero adjectives. All two characters on purpose: the rotator is a
+ * grid stack sized to its widest child, so equal-length words mean the
+ * "· 珞家" tail never shifts as the word changes. Add a longer word and the
+ * whole line re-centres on every cycle.
+ */
+const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
 ---
 
 <BaseLayout title="首页">
-  <section class="pt-32 pb-20 px-4 text-center">
-    <div class="max-w-6xl mx-auto">
-      <img src="/img/app-icon.png" alt="Luotopia" class="w-20 h-20 mx-auto mb-6 rounded-[var(--md-sys-shape-corner-large)] shadow-[var(--md-sys-elevation-level1)]" />
-      <h1 class="text-[length:var(--md-sys-typescale-display-small-size)] sm:text-[length:var(--md-sys-typescale-display-medium-size)] lg:text-[length:var(--md-sys-typescale-display-large-size)] leading-[var(--md-sys-typescale-display-small-line)] sm:leading-[var(--md-sys-typescale-display-medium-line)] lg:leading-[var(--md-sys-typescale-display-large-line)] font-[var(--md-sys-typescale-display-large-weight)] text-[var(--md-sys-color-on-surface)]">
-        Luotopia
-        <span class="block text-[var(--md-sys-color-primary)] mt-2">珞家</span>
+  <section class="lt-hero relative overflow-hidden pt-[120px] pb-24 px-4">
+    <div class="lt-hero-wash" aria-hidden="true"></div>
+
+    <div class="relative max-w-6xl mx-auto flex flex-col items-center text-center">
+
+      <div class="lt-reveal-lift" style="--lt-reveal-delay: 60ms">
+        <AppIcon class="w-[120px] h-[120px]" size={120} plate />
+      </div>
+
+      <h1 class="lt-reveal lt-hero-title mt-6 text-display-small sm:text-display-medium lg:text-display-large text-on-surface tracking-tight" style="--lt-reveal-delay: 120ms">
+        <span class="sr-only">Luotopia </span>
+        <span class="lt-rotator" data-lt-rotator>
+          {
+            HERO_WORDS.map((word, i) => (
+              <span class="lt-word" data-active={i === 0 ? "true" : undefined} aria-hidden={i === 0 ? undefined : "true"}>
+                {word}
+              </span>
+            ))
+          }
+        </span>
+        <span class="lt-sep" aria-hidden="true">·</span>
+        <span class="lt-hero-accent">珞家</span>
       </h1>
-      <p class="mt-6 text-[length:var(--md-sys-typescale-title-large-size)] sm:text-[length:var(--md-sys-typescale-headline-small-size)] leading-[var(--md-sys-typescale-title-large-line)] sm:leading-[var(--md-sys-typescale-headline-small-line)] text-[var(--md-sys-color-on-surface-variant)] max-w-2xl mx-auto">
-        整合校园服务，构建开放生态。武汉大学一站式数字校园平台。
+
+      <p class="lt-reveal mt-6 text-title-large sm:text-headline-small font-normal text-on-surface-variant max-w-2xl" style="--lt-reveal-delay: 180ms">
+        整合校园服务，构建开放生态。<br class="hidden sm:block" />武汉大学一站式数字校园平台。
       </p>
-      <div class="mt-10">
+
+      <div class="lt-reveal-lift w-full max-w-2xl mt-12" style="--lt-reveal-delay: 240ms">
+        <DownloadButtons variant="hero" />
+        <p class="mt-5 text-body-small text-outline">支持 Android / iOS / macOS / Windows / Linux；HarmonyOS 随部分版本发布</p>
+      </div>
+
+      <a href="#features" class="lt-scroll-hint lt-reveal" aria-label="向下滚动" style="--lt-reveal-delay: 420ms">
+        <Icon name="keyboard_arrow_down" />
+      </a>
+    </div>
+  </section>
+
+  <section id="features" class="relative py-24 px-4 scroll-mt-20">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="lt-reveal text-headline-small text-center text-on-surface mb-3">核心功能</h2>
+      <p class="lt-reveal text-body-large text-center text-on-surface-variant max-w-xl mx-auto mb-12" style="--lt-reveal-delay: 60ms">
+        课表、日程、预约、E 卡、校车、地图、论坛与 AI —— 校园生活所需，尽在一处。
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {
+          highlightedFeatures.map((feature, i) => (
+            <div class="lt-reveal-lift h-full" style={`--lt-reveal-delay: ${(i % 4) * 70}ms`}>
+              <FeatureCard
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.summary}
+              />
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="relative py-24 px-4">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="lt-reveal text-headline-small text-center text-on-surface mb-3">应用预览</h2>
+      <p class="lt-reveal text-body-large text-center text-on-surface-variant max-w-xl mx-auto mb-10" style="--lt-reveal-delay: 60ms">
+        真实界面，非渲染图。
+      </p>
+      <div class="lt-reveal-lift">
+        <ScreenshotCarousel />
+      </div>
+    </div>
+  </section>
+
+  <section class="relative py-24 px-4">
+    <div class="max-w-4xl mx-auto">
+      <div class="lt-cta lt-reveal-lift glass rounded-group px-6 py-14 sm:px-12 text-center">
+        <h2 class="text-headline-small sm:text-headline-medium text-on-surface mb-4">立即体验</h2>
+        <p class="text-body-large text-on-surface-variant mb-9 max-w-md mx-auto">免费、开放、纯净，让校园生活更简单。</p>
         <DownloadButtons variant="hero" />
       </div>
-      <p class="mt-4 text-[length:var(--md-sys-typescale-body-small-size)] text-[var(--md-sys-color-outline)]">支持 Android / iOS / HarmonyOS / Windows / macOS / Linux / Web</p>
-    </div>
-  </section>
-
-  <section class="py-20 px-4 bg-[var(--md-sys-color-surface-container)] dark:bg-[var(--md-sys-color-surface-container-dark)]">
-    <div class="max-w-6xl mx-auto">
-      <h2 class="text-[length:var(--md-sys-typescale-headline-small-size)] leading-[var(--md-sys-typescale-headline-small-line)] font-[var(--md-sys-typescale-headline-small-weight)] text-center text-[var(--md-sys-color-on-surface)] mb-12">核心功能</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {features.map((f) => <FeatureCard {...f} />)}
-      </div>
-    </div>
-  </section>
-
-  <section class="py-20 px-4">
-    <div class="max-w-6xl mx-auto">
-      <h2 class="text-[length:var(--md-sys-typescale-headline-small-size)] leading-[var(--md-sys-typescale-headline-small-line)] font-[var(--md-sys-typescale-headline-small-weight)] text-center text-[var(--md-sys-color-on-surface)] mb-8">应用预览</h2>
-      <ScreenshotCarousel />
-    </div>
-  </section>
-
-  <section class="py-20 px-4 bg-[var(--md-sys-color-surface-container-high)] dark:bg-[var(--md-sys-color-surface-container-high-dark)] text-center">
-    <div class="max-w-6xl mx-auto">
-      <h2 class="text-[length:var(--md-sys-typescale-headline-small-size)] leading-[var(--md-sys-typescale-headline-small-line)] font-[var(--md-sys-typescale-headline-small-weight)] text-[var(--md-sys-color-on-surface)] mb-4">立即体验</h2>
-      <p class="text-[length:var(--md-sys-typescale-body-large-size)] text-[var(--md-sys-color-on-surface-variant)] mb-8">免费、开放、纯净，让校园生活更简单。</p>
-      <DownloadButtons variant="hero" />
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  /* A local wash over the page-wide aurora, so the hero carries more chroma
+   * than the body copy below it — the same top-down gradient DeepSeek's hero
+   * section layers over its shader, built from our own primary/tertiary tones.
+   *
+   * Centers are positive viewport fractions on purpose: the hero box is ~1100px
+   * tall, so `at 50% -6%` parks the bloom above the fold and the wash reads as
+   * nothing at all. */
+  .lt-hero-wash {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(48rem 27rem at 50% 13%, var(--lt-hero-wash-from), var(--lt-hero-wash-to) 74%),
+      radial-gradient(34rem 22rem at 12% 34%, hsl(196 62% 76% / 0.42), transparent 70%),
+      radial-gradient(34rem 22rem at 88% 26%, hsl(224 56% 80% / 0.42), transparent 70%);
+    mask-image: linear-gradient(#000 0%, rgba(0, 0, 0, 0.92) 9%, transparent 100%);
+    -webkit-mask-image: linear-gradient(#000 0%, rgba(0, 0, 0, 0.92) 9%, transparent 100%);
+  }
+
+  .lt-badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background-color: var(--lt-color-primary);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--lt-color-primary) 22%, transparent);
+    animation: lt-pulse 2.6s ease-in-out infinite;
+  }
+
+  @keyframes lt-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.45;
+    }
+  }
+
+  /*
+   * Rotating hero word.
+   *
+   * The candidates are stacked in a single grid cell rather than absolutely
+   * positioned, so the rotator is always as wide as the widest one and the
+   * "· 珞家" tail never shifts mid-cycle. Every candidate being two characters
+   * is what makes that invisible; a longer word would re-centre the line.
+   *
+   * `overflow: hidden` supplies the slot-roll clip. The padding exists only to
+   * give the blur somewhere to happen — overflow clips at the *padding* box, so
+   * without it a blur(10px) glyph gets sliced flat at its own edge. The
+   * matching negative margin cancels the padding's layout footprint, so the
+   * flex gap still reads as designed.
+   */
+  .lt-hero-title {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.3em;
+    /*
+     * The `mt-6` on this element is load-bearing, not cosmetic. The heading
+     * used to read "Luotopia", whose Latin cap-height fills ~70% of the em box;
+     * it now leads with CJK, which fills ~88%. In the same line box that moves
+     * the ink top up by roughly 10px, which collapsed the gap under the icon
+     * plate and read as the two touching. Reverting to a Latin first word means
+     * this margin can go back down.
+     */
+  }
+
+  .lt-rotator {
+    display: grid;
+    /*
+     * `clip-path`, not `overflow: hidden`. Both clip identically here, but per
+     * spec an element whose `overflow` is not `visible` has its baseline at its
+     * *bottom margin edge* instead of its first line's baseline. The h1 is
+     * `align-items: baseline`, so that silently lifted the whole rotator by
+     * roughly a line-height and drove the word into the logo above it.
+     * `clip-path` leaves the baseline alone.
+     *
+     * The negative inset expands the clipping rectangle beyond the text box so
+     * the 8–10px blur can dissipate instead of accumulating against a hard
+     * square. It is still bounded: the slot travel is 0.72em, so the departing
+     * and entering words remain clipped before they collide with the logo or
+     * subtitle, and the smaller horizontal inset keeps them from smearing far
+     * into the separator and accent tail.
+     */
+    clip-path: inset(-0.5em -0.2em);
+    padding: 0.18em 0.24em;
+    margin: -0.18em -0.24em;
+  }
+
+  .lt-rotator > .lt-word {
+    grid-area: 1 / 1;
+    justify-self: center;
+    opacity: 0;
+    transform: translateY(0.72em) scale(0.94);
+    filter: blur(10px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+      filter 0.5s ease;
+  }
+
+  .lt-rotator > .lt-word[data-active="true"] {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+
+  /* Must come after the [data-active] rule: both selectors are (0,2,0), and a
+   * leaving word carries both attributes for the duration of the swap. */
+  .lt-rotator > .lt-word[data-leaving="true"] {
+    opacity: 0;
+    transform: translateY(-0.72em) scale(0.96);
+    filter: blur(8px);
+  }
+
+  /* Keeps select-all / copy on the heading from yielding all five candidates
+   * concatenated. */
+  .lt-rotator > .lt-word:not([data-active="true"]) {
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .lt-sep {
+    opacity: 0.42;
+  }
+
+  /*
+   * Stops run 0% -> 100% rather than the previous 8% -> 96%. Insetting them
+   * clamped both ends, so over a box only ~114px wide the outer 16% of each
+   * glyph sat on a flat colour and the visible ramp was even shorter than the
+   * token range implies.
+   */
+  .lt-hero-accent {
+    background-image: linear-gradient(
+      100deg,
+      var(--lt-title-gradient-from) 0%,
+      var(--lt-title-gradient-via) 46%,
+      var(--lt-title-gradient-to) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .lt-scroll-hint {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin-top: 3.5rem;
+    border-radius: 999px;
+    color: var(--lt-color-outline);
+    text-decoration: none;
+    animation: lt-bob 2.4s ease-in-out infinite;
+  }
+
+  @keyframes lt-bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(5px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lt-badge-dot,
+    .lt-scroll-hint {
+      animation: none;
+    }
+
+    /* The script never starts the cycle under reduced motion, so the first
+     * candidate stays active and the heading reads as a stable
+     * "智慧 · 珞家" — the other four are still stacked in the same cell at
+     * opacity 0, which is why no display juggling is needed here. */
+    .lt-rotator > .lt-word {
+      transition: none;
+      filter: none;
+    }
+  }
+</style>
+
+<script>
+  import { onPageSetup } from "../scripts/page-lifecycle";
+
+  onPageSetup((signal) => {
+    const rotator = document.querySelector("[data-lt-rotator]");
+    if (!rotator) return;
+
+    const words = Array.from(rotator.querySelectorAll<HTMLElement>(".lt-word"));
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (words.length <= 1 || reduceMotion) return;
+
+    const HOLD = 2600;
+    /** Must outlast the longest transition in `.lt-word` (0.72s transform). */
+    const SWAP = 780;
+    const leavingTimers = new Set<number>();
+    let index = 0;
+    let timer = 0;
+
+    const show = (next: HTMLElement) => {
+      const current = words[index];
+      if (current === next) return;
+      current.removeAttribute("data-active");
+      current.setAttribute("data-leaving", "true");
+      current.setAttribute("aria-hidden", "true");
+      next.setAttribute("data-active", "true");
+      next.removeAttribute("aria-hidden");
+
+      // Clear `data-leaving` only after it has finished leaving, otherwise
+      // the next cycle would find it mid-transition and snap.
+      const timeout = window.setTimeout(() => {
+        current.removeAttribute("data-leaving");
+        leavingTimers.delete(timeout);
+      }, SWAP);
+      leavingTimers.add(timeout);
+      index = words.indexOf(next);
+    };
+
+    const start = () => {
+      if (timer) return;
+      timer = window.setInterval(() => show(words[(index + 1) % words.length]), HOLD);
+    };
+    const stop = () => {
+      window.clearInterval(timer);
+      timer = 0;
+    };
+
+    start();
+    // A background tab would otherwise pile up intervals and fire every
+    // queued swap at once on return.
+    document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()), { signal });
+
+    signal.addEventListener("abort", () => {
+      stop();
+      for (const timeout of leavingTimers) window.clearTimeout(timeout);
+      leavingTimers.clear();
+    });
+  });
+</script>
