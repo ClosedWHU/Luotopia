@@ -99,6 +99,19 @@
         });
       }, 2500);
     </script>
+    <noscript>
+      <!-- The inline failsafe above still needs JS. With scripting off entirely,
+           `.lt-reveal` content would stay at opacity 0 forever, so reveal it
+           unconditionally. The `html` prefix outranks the base rules regardless
+           of stylesheet order. `.lt-reveal-lift` needs no help: it only offsets,
+           never hides. -->
+      <style>
+        html .lt-reveal {
+          opacity: 1;
+          transform: none;
+        }
+      </style>
+    </noscript>
     <script is:inline>
       // Drop legacy Service Workers / caches from the previous site on this domain
       (function () {
@@ -153,10 +166,26 @@
 
   let lenis: Lenis | undefined;
   if (!reduceMotion) {
+    /*
+     * `lerp` mode, not `duration`. Duration+easing runs every wheel tick as a
+     * full timed animation that the next tick retargets — at 1.1s with an
+     * expo-out tail (the last 2% of the distance took over half a second) the
+     * page kept gliding long after the input stopped, which read as scrolling
+     * through syrup. Lerp instead follows the input exponentially per frame:
+     * it converges within ~20 frames of the wheel stopping, so the page stays
+     * smooth but tracks the hand.
+     *
+     * `touchMultiplier` was dropped along with the old config: it only scales
+     * the deltas Lenis *emits*, and with `syncTouch` off (the default) touch
+     * scrolling is native, so it never had an effect.
+     *
+     * The manual reduced-motion gate stays even though Lenis 1.3.x has
+     * `respectReducedMotion` (default true): that only forces lerp to 1, which
+     * still keeps scrolling on the main thread. Not mounting at all hands
+     * reduced-motion users the compositor-driven native scroll instead.
+     */
     lenis = new Lenis({
-      duration: 1.1,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      touchMultiplier: 1.5,
+      lerp: 0.11,
       autoRaf: true,
       anchors: true,
       stopInertiaOnNavigate: true,

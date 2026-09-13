@@ -50,10 +50,19 @@ const slides = [
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
   </button>
 
-  <div class="absolute bottom-3.5 left-1/2 -translate-x-1/2 flex gap-1.5">
+  <div class="absolute bottom-3.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
     {slides.map((_, i) => (
       <button class="lt-dot" data-index={i} aria-label={`第 ${i + 1} 张截图`}></button>
     ))}
+    <!--
+      WCAG 2.2.2: auto-advancing content needs a user-reachable pause, and
+      hover-only pause fails keyboard and touch users outright. Hidden under
+      reduced motion, where autoplay never starts (see script).
+    -->
+    <button id="carousel-pause" class="lt-pause" type="button" aria-label="暂停自动轮播">
+      <svg data-glyph="pause" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+      <svg data-glyph="play" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l10.5-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z"/></svg>
+    </button>
   </div>
 </div>
 
@@ -73,10 +82,13 @@ const slides = [
     transition: box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .lt-shot:hover {
-    box-shadow:
-      inset 0 0 0 0.6px var(--lt-glass-edge),
-      0 18px 40px -18px hsl(215 55% 18% / 0.52);
+  /* Pointer-gated: hover styles stick after taps on touch devices. */
+  @media (hover: hover) {
+    .lt-shot:hover {
+      box-shadow:
+        inset 0 0 0 0.6px var(--lt-glass-edge),
+        0 18px 40px -18px hsl(215 55% 18% / 0.52);
+    }
   }
 
   .lt-shot-caption {
@@ -95,24 +107,25 @@ const slides = [
       inset 0 1px 0 0 var(--lt-glass-rim),
       inset 0 0 0 0.6px var(--lt-glass-edge),
       0 6px 18px -8px hsl(215 45% 18% / 0.36);
+    /* `scale` is its own property — `transition: transform` never covered it,
+     * so the hover/press scaling below used to snap instead of easing. */
     transition:
       color 0.25s ease,
-      transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+      scale 0.25s cubic-bezier(0.22, 1, 0.36, 1),
       box-shadow 0.25s ease;
   }
 
-  .lt-arrow:hover {
-    color: var(--lt-color-primary);
-    box-shadow:
-      inset 0 1px 0 0 var(--lt-glass-rim),
-      inset 0 0 0 0.6px var(--lt-glass-edge),
-      0 10px 26px -10px hsl(215 45% 18% / 0.44);
-  }
-
-  /* `-translate-y-1/2` owns the resting transform, so hover scales via the
-   * individual `scale` property rather than a competing `transform`. */
-  .lt-arrow:hover {
-    scale: 1.08;
+  @media (hover: hover) {
+    /* `-translate-y-1/2` owns the resting transform, so hover scales via the
+     * individual `scale` property rather than a competing `transform`. */
+    .lt-arrow:hover {
+      color: var(--lt-color-primary);
+      box-shadow:
+        inset 0 1px 0 0 var(--lt-glass-rim),
+        inset 0 0 0 0.6px var(--lt-glass-edge),
+        0 10px 26px -10px hsl(215 45% 18% / 0.44);
+      scale: 1.08;
+    }
   }
 
   .lt-arrow:active {
@@ -120,6 +133,7 @@ const slides = [
   }
 
   .lt-dot {
+    position: relative;
     width: 0.4rem;
     height: 0.4rem;
     padding: 0;
@@ -134,10 +148,40 @@ const slides = [
       background-color 0.35s ease;
   }
 
+  /* A 6.4px dot is untappable; expand the hit area without moving layout.
+   * Horizontal expansion stays under half the 6px gap so neighbours' zones
+   * never overlap. */
+  .lt-dot::before {
+    content: "";
+    position: absolute;
+    inset: -10px -3px;
+  }
+
   .lt-dot[data-active="true"] {
     width: 1.15rem;
     opacity: 1;
     background-color: var(--lt-color-primary);
+  }
+
+  .lt-pause {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0.35rem;
+    padding: 0.4rem;
+    color: var(--lt-color-on-surface-variant);
+    background-color: var(--lt-glass-overlay);
+    border: none;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 0.6px var(--lt-glass-edge);
+    cursor: pointer;
+    transition: color 0.25s ease;
+  }
+
+  @media (hover: hover) {
+    .lt-pause:hover {
+      color: var(--lt-color-primary);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -145,6 +189,16 @@ const slides = [
     .lt-arrow,
     .lt-dot {
       transition: none;
+    }
+
+    /* Manual navigation still works; it just cuts instead of sliding. */
+    #carousel-track {
+      transition: none;
+    }
+
+    /* Autoplay never starts under reduced motion, so there is nothing to pause. */
+    .lt-pause {
+      display: none;
     }
   }
 </style>
@@ -156,14 +210,27 @@ const slides = [
     const track = document.getElementById("carousel-track");
     const prev = document.getElementById("carousel-prev");
     const next = document.getElementById("carousel-next");
+    const pauseBtn = document.getElementById("carousel-pause");
     const dots = Array.from(document.querySelectorAll<HTMLElement>(".lt-dot"));
     if (!track || !prev || !next) return;
 
     const total = dots.length;
     const container = track.parentElement;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let current = 0;
     let resizeTimer = 0;
     let autoplay = 0;
+
+    /*
+     * Autoplay runs only when every gate is open. Each input (hover, focus,
+     * visibility, viewport intersection, the pause button) flips its own flag
+     * and then asks for a (re)start, so re-entering from any side can never
+     * resume over a pause the user asked for.
+     */
+    let hovered = false;
+    let focused = false;
+    let userPaused = false;
+    let inView = false;
 
     function getCols() {
       if (window.innerWidth < 640) return 1;
@@ -178,8 +245,19 @@ const slides = [
       const pct = 100 / cols;
       track.style.transform = `translateX(-${current * pct}%)`;
       dots.forEach((dot, i) => {
-        dot.dataset.active = String(i >= current && i < current + cols);
+        const active = i >= current && i < current + cols;
+        dot.dataset.active = String(active);
+        if (i === current) dot.setAttribute("aria-current", "true");
+        else dot.removeAttribute("aria-current");
       });
+
+      // The slide after the visible window is the next one autoplay will show;
+      // its `loading="lazy"` image may not have been near the viewport yet,
+      // which used to slide in as a white frame. Promote it to eager.
+      const upcoming = track.children[Math.min(current + cols, total - 1)]?.querySelector("img");
+      if (upcoming instanceof HTMLImageElement && upcoming.loading === "lazy") {
+        upcoming.loading = "eager";
+      }
     }
 
     function advance() {
@@ -190,6 +268,7 @@ const slides = [
 
     function startAutoplay() {
       stopAutoplay();
+      if (reduceMotion || userPaused || hovered || focused || !inView || document.hidden) return;
       autoplay = window.setInterval(advance, 5000);
     }
 
@@ -198,28 +277,89 @@ const slides = [
       autoplay = 0;
     }
 
-    prev.addEventListener("click", () => { current = Math.max(0, current - 1); update(); }, { signal });
-    next.addEventListener("click", () => {
+    function setPaused(paused: boolean) {
+      userPaused = paused;
+      if (paused) stopAutoplay();
+      else startAutoplay();
+      if (pauseBtn) {
+        pauseBtn.setAttribute("aria-label", paused ? "继续自动轮播" : "暂停自动轮播");
+        const play = pauseBtn.querySelector<SVGElement>('[data-glyph="play"]');
+        const pause = pauseBtn.querySelector<SVGElement>('[data-glyph="pause"]');
+        if (play) play.hidden = !paused;
+        if (pause) pause.hidden = paused;
+      }
+    }
+
+    // A manual control should also restart the 5s clock, otherwise the next
+    // auto-advance can land a beat after the user's own click.
+    function manual(go: () => void) {
+      go();
+      startAutoplay();
+    }
+
+    prev.addEventListener("click", () => manual(() => { current = Math.max(0, current - 1); update(); }), { signal });
+    next.addEventListener("click", () => manual(() => {
       const max = Math.max(0, total - getCols());
       current = Math.min(current + 1, max);
       update();
-    }, { signal });
+    }), { signal });
     dots.forEach((dot) => {
-      dot.addEventListener("click", () => {
+      dot.addEventListener("click", () => manual(() => {
         current = Math.min(parseInt(dot.dataset.index ?? "0"), Math.max(0, total - getCols()));
         update();
-      }, { signal });
+      }), { signal });
     });
+    pauseBtn?.addEventListener("click", () => setPaused(!userPaused), { signal });
 
     window.addEventListener("resize", () => {
       window.clearTimeout(resizeTimer);
       resizeTimer = window.setTimeout(update, 100);
     }, { signal });
 
-    container?.addEventListener("mouseenter", stopAutoplay, { signal });
-    container?.addEventListener("mouseleave", startAutoplay, { signal });
+    // Pointer-gated hover: on touch, `pointerenter` also fires ahead of a tap,
+    // which used to freeze autoplay until the user tapped somewhere else.
+    container?.addEventListener("pointerenter", (e) => {
+      if ((e as PointerEvent).pointerType !== "mouse") return;
+      hovered = true;
+      stopAutoplay();
+    }, { signal });
+    container?.addEventListener("pointerleave", (e) => {
+      if ((e as PointerEvent).pointerType !== "mouse") return;
+      hovered = false;
+      startAutoplay();
+    }, { signal });
 
-    startAutoplay();
+    // Keyboard users get the same pause hover provides (WCAG 2.2.2).
+    container?.addEventListener("focusin", () => { focused = true; stopAutoplay(); }, { signal });
+    container?.addEventListener("focusout", () => { focused = false; startAutoplay(); }, { signal });
+
+    // A background tab would otherwise keep advancing (and transitioning the
+    // track) for nobody — same treatment the hero rotator gets.
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stopAutoplay();
+      else startAutoplay();
+    }, { signal });
+
+    // Scrolled past the carousel, there is nothing to animate. Also what makes
+    // the `lazy` images safe: a slide only auto-advances while on screen.
+    if (!("IntersectionObserver" in window)) {
+      inView = true;
+      startAutoplay();
+    } else {
+      const viewObserver = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            inView = entry.isIntersecting;
+            if (inView) startAutoplay();
+            else stopAutoplay();
+          }
+        },
+        { threshold: 0 },
+      );
+      if (container) viewObserver.observe(container);
+      signal.addEventListener("abort", () => viewObserver.disconnect());
+    }
+
     update();
 
     signal.addEventListener("abort", () => {

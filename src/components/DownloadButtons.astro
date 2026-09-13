@@ -40,9 +40,13 @@ const secondaryClass = `lt-btn glass-control state-layer inline-flex items-cente
       box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .lt-btn-filled:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--lt-btn-filled-shadow-hover);
+  /* Pointer-gated: on touch, `:hover` sticks after a tap and the button would
+   * stay lifted until something else is tapped. */
+  @media (hover: hover) {
+    .lt-btn-filled:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--lt-btn-filled-shadow-hover);
+    }
   }
 
   /* Hairline ring, not Tailwind's `border`: a 1px border on a 44px-tall pill
@@ -54,12 +58,14 @@ const secondaryClass = `lt-btn glass-control state-layer inline-flex items-cente
       0 6px 18px -10px hsl(215 45% 18% / 0.28);
   }
 
-  .lt-btn:not(.lt-btn-filled):hover {
-    transform: translateY(-2px);
-    box-shadow:
-      inset 0 1px 0 0 var(--lt-glass-rim),
-      inset 0 0 0 0.6px var(--lt-glass-edge),
-      0 12px 28px -12px hsl(215 45% 18% / 0.34);
+  @media (hover: hover) {
+    .lt-btn:not(.lt-btn-filled):hover {
+      transform: translateY(-2px);
+      box-shadow:
+        inset 0 1px 0 0 var(--lt-glass-rim),
+        inset 0 0 0 0.6px var(--lt-glass-edge),
+        0 12px 28px -12px hsl(215 45% 18% / 0.34);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
