@@ -22,11 +22,11 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
 
     <div class="relative max-w-6xl mx-auto flex flex-col items-center text-center">
 
-      <div class="lt-reveal-lift" style="--lt-reveal-delay: 60ms">
+      <div class="lt-hero-rise" style="--lt-reveal-delay: 60ms">
         <AppIcon class="w-[120px] h-[120px]" size={120} plate />
       </div>
 
-      <h1 class="lt-reveal lt-hero-title mt-6 text-display-small sm:text-display-medium lg:text-display-large text-on-surface tracking-tight" style="--lt-reveal-delay: 120ms">
+      <h1 class="lt-hero-fade lt-hero-title mt-6 text-display-small sm:text-display-medium lg:text-display-large text-on-surface tracking-tight" style="--lt-reveal-delay: 120ms">
         <span class="sr-only">Luotopia </span>
         <span class="lt-rotator" data-lt-rotator>
           {
@@ -41,16 +41,16 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
         <span class="lt-hero-accent">珞家</span>
       </h1>
 
-      <p class="lt-reveal mt-6 text-title-large sm:text-headline-small font-normal text-on-surface-variant max-w-2xl" style="--lt-reveal-delay: 180ms">
+      <p class="lt-hero-fade mt-6 text-title-large sm:text-headline-small font-normal text-on-surface-variant max-w-2xl" style="--lt-reveal-delay: 180ms">
         整合校园服务，构建开放生态。<br class="hidden sm:block" />武汉大学一站式数字校园平台。
       </p>
 
-      <div class="lt-reveal-lift w-full max-w-2xl mt-12" style="--lt-reveal-delay: 240ms">
+      <div class="lt-hero-rise w-full max-w-2xl mt-12" style="--lt-reveal-delay: 240ms">
         <DownloadButtons variant="hero" />
         <p class="mt-5 text-body-small text-outline">支持 Android / iOS / macOS / Windows / Linux；HarmonyOS 随部分版本发布</p>
       </div>
 
-      <a href="#features" class="lt-scroll-hint lt-reveal" aria-label="向下滚动" style="--lt-reveal-delay: 420ms">
+      <a href="#features" class="lt-scroll-hint" aria-label="向下滚动" style="--lt-reveal-delay: 420ms">
         <Icon name="keyboard_arrow_down" />
       </a>
     </div>
@@ -127,6 +127,57 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
     background-color: var(--lt-color-primary);
     box-shadow: 0 0 0 3px color-mix(in oklab, var(--lt-color-primary) 22%, transparent);
     animation: lt-pulse 2.6s ease-in-out infinite;
+  }
+
+  /*
+   * Above-the-fold entrance, on CSS animations rather than the observer-driven
+   * `.lt-reveal*` system the rest of the page uses.
+   *
+   * The split is forced by a timing mismatch, not taste. `.lt-reveal` starts at
+   * opacity 0, but `.lt-reveal-lift` *cannot* — opacity < 1 turns an element
+   * into a backdrop root and kills the glass inside it — so lift elements paint
+   * fully visible at first frame, merely offset 28px. The observer that flips
+   * `data-revealed` only runs once the deferred module chunk arrives, so on a
+   * cold load the icon and buttons sat there "already done" while the title and
+   * subtitle waited invisible, then faded in after them. Backwards.
+   *
+   * Animations start at first paint with no JS in the loop, so the whole hero
+   * choreographs top-down (60 → 420ms) deterministically — and identically
+   * after a client-side swap, where the new DOM restarts them just as the
+   * observer would have. `both` fill holds the hidden state through the delay
+   * and the visible state after, which supersedes the class's base styling;
+   * nothing here ever sets `data-revealed`, so the two systems stay decoupled.
+   *
+   * Same glass rule as `.lt-reveal-lift`: the rise variant animates `transform`
+   * only. The fade variant is used on pure-text elements (title, subtitle,
+   * scroll hint), where an opacity transition is safe.
+   */
+  @keyframes lt-hero-fade {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes lt-hero-rise {
+    from {
+      transform: translateY(28px);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  .lt-hero-fade {
+    animation: lt-hero-fade 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms) both;
+  }
+
+  .lt-hero-rise {
+    animation: lt-hero-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms) both;
   }
 
   @keyframes lt-pulse {
@@ -256,22 +307,31 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
     border-radius: 999px;
     color: var(--lt-color-outline);
     text-decoration: none;
-    animation: lt-bob 2.4s ease-in-out infinite;
+    /* The entrance rides alongside the bob rather than via `.lt-hero-fade`:
+     * one element, one `animation` shorthand — two rules setting it would
+     * cascade down to a single winner. The bob animates `translate`, not
+     * `transform`, so the two compositions never fight over the same property
+     * (and the entrance's transform transition is no longer overridden). */
+    animation:
+      lt-hero-fade 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms) both,
+      lt-bob 2.4s ease-in-out infinite;
   }
 
   @keyframes lt-bob {
     0%,
     100% {
-      transform: translateY(0);
+      translate: 0 0;
     }
     50% {
-      transform: translateY(5px);
+      translate: 0 5px;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .lt-badge-dot,
-    .lt-scroll-hint {
+    .lt-scroll-hint,
+    .lt-hero-fade,
+    .lt-hero-rise {
       animation: none;
     }
 
