@@ -68,10 +68,16 @@ const isActive = (href: string) => {
 
   `top-16` puts its first pixel under the nav's border-bottom; the nav is z-50
   so that hairline paints on top and the two read as one surface.
+
+  Full viewport height, not content height: while the sheet is open Lenis is
+  stopped, so with a content-sized sheet the strip of page below it sat in the
+  worst possible state — clickable, but not scrollable. The glass now runs to
+  the bottom edge and swallows those clicks; the clip-path collapse hides the
+  tall sheet just the same when closed.
 -->
 <div
   id="mobile-menu"
-  class="lt-mobile-menu fixed top-16 left-0 right-0 z-40 max-h-[calc(100dvh-4rem)] overflow-y-auto md:hidden"
+  class="lt-mobile-menu fixed top-16 left-0 right-0 z-40 h-[calc(100dvh-4rem)] overflow-y-auto md:hidden"
   data-open="false"
   transition:persist="lt-mobile-menu"
 >
@@ -139,8 +145,12 @@ const isActive = (href: string) => {
     color: var(--lt-color-on-surface-variant);
   }
 
-  .lt-navlink:hover {
-    color: var(--lt-color-primary);
+  /* Pointer-gated: on touch, `:hover` would stick to the last tapped link
+   * until something else is tapped — a permanent wrong "active" tint. */
+  @media (hover: hover) {
+    .lt-navlink:hover {
+      color: var(--lt-color-primary);
+    }
   }
 
   .lt-navlink[aria-current="page"] {
@@ -206,13 +216,19 @@ const isActive = (href: string) => {
   }
 
   /* Items trail the sheet by a few frames each, so opening reads as one gesture
-   * rather than a block of links materialising. */
+   * rather than a block of links materialising.
+   *
+   * The stagger is a custom property consumed by the opacity/transform entries
+   * only — deliberately *not* a blanket `transition-delay`. The delay would
+   * also sit on the `color` transition, and then a theme flip with the sheet
+   * open recoloured the links one by one down the list (each waiting out its
+   * opening stagger), with the theme button — the last child — lagging worst. */
   .lt-mobile-menu .lt-navlink {
     opacity: 0;
     transform: translateY(-8px);
     transition:
-      opacity 0.26s ease,
-      transform 0.36s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.26s ease var(--lt-nav-stagger, 0s),
+      transform 0.36s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-nav-stagger, 0s),
       color 0.2s ease;
   }
 
@@ -221,12 +237,12 @@ const isActive = (href: string) => {
     transform: none;
   }
 
-  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(1) { transition-delay: 0.07s; }
-  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(2) { transition-delay: 0.11s; }
-  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(3) { transition-delay: 0.15s; }
-  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(4) { transition-delay: 0.19s; }
-  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(5) { transition-delay: 0.23s; }
-  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(6) { transition-delay: 0.27s; }
+  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(1) { --lt-nav-stagger: 0.07s; }
+  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(2) { --lt-nav-stagger: 0.11s; }
+  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(3) { --lt-nav-stagger: 0.15s; }
+  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(4) { --lt-nav-stagger: 0.19s; }
+  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(5) { --lt-nav-stagger: 0.23s; }
+  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(6) { --lt-nav-stagger: 0.27s; }
 
   /*
    * Burger -> X. Each bar rotates about its own midpoint and then slides to the
@@ -287,7 +303,11 @@ const isActive = (href: string) => {
   const syncTheme = () => {
     const html = document.documentElement;
     const dark = html.classList.toggle("dark");
-    localStorage.setItem("theme", dark ? "dark" : "light");
+    // Storage can throw in the same restricted WebViews / private modes the
+    // head script defends against; a click handler is the wrong place to crash.
+    try {
+      localStorage.setItem("theme", dark ? "dark" : "light");
+    } catch (e) {}
   };
   document.getElementById("theme-toggle")?.addEventListener("click", syncTheme);
   document.getElementById("theme-toggle-mobile")?.addEventListener("click", syncTheme);
@@ -331,7 +351,18 @@ const isActive = (href: string) => {
   }
 
   const threshold = 12;
-  const syncScrolled = () => navbar?.setAttribute("data-scrolled", String(window.scrollY > threshold));
+  // Write the attribute only when the state actually flips. Under Lenis the
+  // scroll event fires every frame; an unconditional setAttribute pushed a
+  // mutation (and a potential style-invalidation check) through the navbar on
+  // each one — right when the bar is also transitioning its backdrop blur.
+  let lastScrolled: boolean | null = null;
+  const syncScrolled = () => {
+    if (!navbar) return;
+    const scrolled = window.scrollY > threshold;
+    if (scrolled === lastScrolled) return;
+    lastScrolled = scrolled;
+    navbar.setAttribute("data-scrolled", String(scrolled));
+  };
   if (navbar) {
     syncScrolled();
     window.addEventListener("scroll", syncScrolled, { passive: true });
@@ -345,6 +376,9 @@ const isActive = (href: string) => {
   document.addEventListener("astro:page-load", () => {
     closeMenuForNavigation();
     syncActiveLinks();
+    // Force one unconditional write: cheap insurance in case the persisted
+    // element and the memo ever disagree (e.g. a failed persist).
+    lastScrolled = null;
     syncScrolled();
   });
 </script>

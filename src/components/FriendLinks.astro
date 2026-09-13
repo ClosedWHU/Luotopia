@@ -139,12 +139,15 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
       transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .lt-flink:hover {
-    background-color: var(--lt-glass-control);
-    box-shadow:
-      inset 0 1px 0 0 var(--lt-glass-rim),
-      inset 0 0 0 0.6px var(--lt-glass-edge);
-    transform: translateY(-1px);
+  /* Pointer-gated: hover styles stick after taps on touch devices. */
+  @media (hover: hover) {
+    .lt-flink:hover {
+      background-color: var(--lt-glass-control);
+      box-shadow:
+        inset 0 1px 0 0 var(--lt-glass-rim),
+        inset 0 0 0 0.6px var(--lt-glass-edge);
+      transform: translateY(-1px);
+    }
   }
 
   /* Deliberately not `opacity`: a translucent element that is also a backdrop
@@ -287,9 +290,15 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
     }
   }
 
+  /* The card entrance animates `transform` only. An opacity fade here made the
+   * whole card — including the `filled-glass` CTA inside it — a backdrop root
+   * for the length of the animation: the button's blur sampled nothing,
+   * rendered flat, then snapped into refraction on the final frame. The fade
+   * belongs to the scrim alone; the card rides in on the motion. The *exit*
+   * keeps its opacity because the card is about to be removed — a mid-flight
+   * flatten has nowhere to be noticed. */
   @keyframes lt-modal-card-in {
     from {
-      opacity: 0;
       transform: translateY(12px) scale(0.97);
     }
   }
@@ -314,14 +323,22 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
       box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .lt-dialog-cta:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--lt-btn-filled-shadow-hover);
+  @media (hover: hover) {
+    .lt-dialog-cta:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--lt-btn-filled-shadow-hover);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .lt-flink {
       transition: none;
+    }
+
+    /* The lift is a position change, which reduced motion covers too —
+     * `transition: none` alone would leave an instant jump on hover. */
+    .lt-flink:hover {
+      transform: none;
     }
 
     .lt-dialog[open]::backdrop,
@@ -368,11 +385,16 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
     }),
   ) as Record<string, DialogContent>;
 
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const closeDuration = reduceMotion ? 0 : 200;
+  // Read at close time, not at module load. The CSS side (`animation: none`)
+  // reacts live to an OS setting change; a stale JS snapshot would keep waiting
+  // out a 200ms exit animation the stylesheet no longer renders — the dialog
+  // freezing for a beat, then blinking out.
+  const closeDuration = () =>
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 200;
   let currentDialog: HTMLDialogElement | null = null;
   let closeTimer = 0;
   let scrollLocked = false;
+  let downOnScrim = false;
 
   function lenis() {
     return (window as unknown as { ltLenis?: { start(): void; stop(): void } }).ltLenis;
@@ -412,13 +434,14 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
   function requestClose() {
     const dialog = currentDialog;
     if (!dialog?.open || dialog.dataset.closing === "true") return;
-    if (!closeDuration) {
+    const wait = closeDuration();
+    if (!wait) {
       dialog.close();
       return;
     }
     dialog.dataset.closing = "true";
     clearTimeout(closeTimer);
-    closeTimer = setTimeout(() => dialog.close(), closeDuration);
+    closeTimer = setTimeout(() => dialog.close(), wait);
   }
 
   function onCancel(event: Event) {
@@ -426,8 +449,17 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
     requestClose();
   }
 
+  function onDialogPointerDown(event: PointerEvent) {
+    downOnScrim = event.target === currentDialog;
+  }
+
   function onDialogClick(event: MouseEvent) {
-    if (event.target === currentDialog) requestClose();
+    // Only close when the *press* also started on the scrim. The dialog body is
+    // `select-text`; without this, starting a selection inside the card and
+    // releasing over the scrim fires a click on the dialog and dismisses it
+    // mid-selection.
+    if (downOnScrim && event.target === currentDialog) requestClose();
+    downOnScrim = false;
   }
 
   function teardownDialog() {
@@ -497,6 +529,7 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
 
     dialog.addEventListener("cancel", onCancel);
     dialog.addEventListener("close", onClose);
+    dialog.addEventListener("pointerdown", onDialogPointerDown);
     dialog.addEventListener("click", onDialogClick);
     closeEl.addEventListener("click", requestClose);
     actionEl.addEventListener("click", requestClose);

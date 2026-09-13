@@ -545,16 +545,41 @@
  * Card hover: lift the shadow and the position, never the fill. Raising
  * `background-color` opacity on hover flattens glass into a solid panel — the
  * exact failure mode this design exists to avoid.
+ *
+ * The lift rides the independent `translate` property, not `transform`. This
+ * class is stacked on the same element as `.lt-reveal-lift` (download platform
+ * cards, community cards), and there `transform` is a losing game: the reveal's
+ * `[data-revealed="true"] { transform: none }` has the same specificity as
+ * `:hover` but comes later in source order, so it silently cancelled the hover
+ * lift for good. `translate` composes with `transform` instead of competing,
+ * and the merged transition list below keeps both animations smooth.
  */
 .lt-lift {
   transition:
     box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    translate 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.lt-lift:hover {
-  box-shadow: var(--lt-shadow-glass-raised);
-  transform: translateY(-3px);
+/*
+ * Stacked case. Neither base rule's `transition` shorthand can win outright —
+ * the reveal's would drop the hover properties (shadow snaps), the hover's
+ * would drop the reveal's transform and delay (entrance snaps and loses its
+ * stagger). Higher specificity than both, so the merged list takes over.
+ */
+.lt-reveal-lift.lt-lift {
+  transition:
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms),
+    translate 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Hover effects are gated on real pointers site-wide: on touch, `:hover`
+ * sticks after a tap and leaves surfaces in a state the user cannot undo. */
+@media (hover: hover) {
+  .lt-lift:hover {
+    box-shadow: var(--lt-shadow-glass-raised);
+    translate: 0 -3px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -562,6 +587,7 @@
   .lt-lift:hover {
     transition: none;
     transform: none;
+    translate: none;
   }
 }
 
@@ -719,6 +745,19 @@ body {
 
 .state-layer:active::before {
   opacity: 0.12;
+}
+
+/* The tint is a hover affordance; `:active` already covers the touch press. */
+@media (hover: none) {
+  .state-layer:hover::before {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .state-layer::before {
+    transition: none;
+  }
 }
 
 /* Lenis: required so its transform-driven scroll does not fight `position:
