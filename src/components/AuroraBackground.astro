@@ -26,17 +26,40 @@
 
 <div class="lt-aurora" aria-hidden="true" transition:persist="lt-aurora">
   <div class="lt-aurora-mesh"></div>
-  <div data-lt-aurora-field style="position:absolute;inset:0"></div>
+  <div data-lt-aurora-field style="position:absolute;top:0;right:0;bottom:0;left:0"></div>
   <div class="lt-aurora-grid"></div>
 </div>
 
 <style>
   .lt-aurora {
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    /*
+     * Sized to the LARGE viewport, not `inset: 0`.
+     *
+     * A fixed element is laid out against the layout viewport, and on mobile
+     * the layout viewport only grows *after* the browser chrome (address bar,
+     * bottom toolbar) finishes collapsing — the visual viewport is extended by
+     * the compositor immediately, while the resize + relayout that would grow
+     * this layer lands on the main thread later. With `inset: 0` that gap is
+     * visible: a strip of bare `html` canvas color shows under the field while
+     * scrolling, then the aurora snaps down to cover it.
+     *
+     * `100lvh` is constant through the chrome transition (it is the viewport
+     * with chrome fully retracted), so the layer is already tall enough in
+     * both states, needs no relayout mid-scroll, and the strip never exists.
+     * The extra bottom is simply behind the toolbar when chrome is expanded.
+     * `100vh` first as the fallback for engines without viewport units — on
+     * every mobile browser that has this problem, legacy `100vh` already
+     * resolves to the large viewport, so the fallback is equally correct.
+     */
+    height: 100vh;
+    height: 100lvh;
     z-index: 0;
     pointer-events: none;
-    /* `size` containment is deliberately excluded: this element is inset-sized,
+    /* `size` containment is deliberately excluded: this element is viewport-sized,
      * and strict containment on a fixed backdrop has a history of surprising
      * compositor clipping. */
     contain: layout paint;
@@ -55,7 +78,13 @@
    * those gaps has nothing to blur. */
   .lt-aurora-mesh {
     position: absolute;
-    inset: 0;
+    /* Four sides, not the `inset` shorthand (Chrome 87+). This layer is the
+     * no-WebGL2 fallback, which old kernels are exactly the ones that need —
+     * a shorthand it cannot parse would kill the fallback too. */
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     background:
       radial-gradient(56rem 34rem at 14% 10%, hsl(212 56% 81% / 0.8), transparent 68%),
       radial-gradient(44rem 30rem at 88% 6%, hsl(196 54% 83% / 0.58), transparent 66%),
@@ -79,7 +108,10 @@
    * viewport anyway and just burns fill rate. */
   .lt-aurora-grid {
     position: absolute;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     display: none;
     background-image:
       radial-gradient(circle at center, var(--lt-grid-dot) 1.6px, transparent 1.7px),
@@ -132,7 +164,10 @@
     contain: strict;
     display: block;
     position: absolute;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     z-index: -1;
     width: 100%;
     height: 100%;
@@ -249,7 +284,8 @@
           // No WebGL2, or the mount threw part-way through. Either way the
           // constructor may already have prepended a canvas, so clear the host
           // before bailing — otherwise that orphan paints black over the mesh.
-          host.replaceChildren();
+          // (`innerHTML`, not `replaceChildren` — Chrome 86+.)
+          host.innerHTML = "";
           console.warn("[aurora] shader unavailable, using the CSS mesh fallback:", err);
           return;
         }

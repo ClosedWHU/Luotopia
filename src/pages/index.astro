@@ -111,7 +111,11 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
    * nothing at all. */
   .lt-hero-wash {
     position: absolute;
-    inset: 0;
+    /* Four sides, not the `inset` shorthand (Chrome 87+): legacy-WebView floor. */
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     background:
       radial-gradient(48rem 27rem at 50% 13%, var(--lt-hero-wash-from), var(--lt-hero-wash-to) 74%),
       radial-gradient(34rem 22rem at 12% 34%, hsl(196 62% 76% / 0.42), transparent 70%),
@@ -125,6 +129,10 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
     height: 7px;
     border-radius: 999px;
     background-color: var(--lt-color-primary);
+    /* Static fallback first: `color-mix()` is Chrome 111+, and an invalid
+     * declaration would drop the whole shadow on old kernels. The tint is a
+     * 22% primary mix, approximated at its light/dark reference values. */
+    box-shadow: 0 0 0 3px hsl(211 100% 34% / 0.22);
     box-shadow: 0 0 0 3px color-mix(in oklab, var(--lt-color-primary) 22%, transparent);
     animation: lt-pulse 2.6s ease-in-out infinite;
   }

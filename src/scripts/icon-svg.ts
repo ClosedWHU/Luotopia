@@ -9,7 +9,9 @@ export function assertIconName(name: string): string {
 
 export function normalizeIconSvg(raw: string, className = "", label?: string): string {
   const accessibility = label
-    ? `role="img" aria-label="${label.replaceAll('"', "&quot;")}"`
+    // `replace(/g)`, not `replaceAll`: this runs in the client bundle
+    // (download.astro), whose floor is Chrome 66 — `replaceAll` is 85+.
+    ? `role="img" aria-label="${label.replace(/"/g, "&quot;")}"`
     : 'aria-hidden="true" focusable="false"';
 
   return raw

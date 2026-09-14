@@ -211,11 +211,13 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
     }
 
     function escapeHtml(s) {
+      // `replace(/g)`, not `replaceAll` (Chrome 85+): this bundle must parse
+      // and run on WebView kernels back to ~66.
       return String(s)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;");
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
     }
 
     /** Inline markdown after HTML escape: **bold**, `code`, [text](url) */
@@ -330,12 +332,29 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
       }
     }
 
+    /**
+     * The navigation signal plus a timeout, combined by hand: `AbortSignal.any`
+     * is Chrome 116+ and `AbortSignal.timeout` 103+, far above this bundle's
+     * ~66 floor. Without a timeout a hung API would keep "加载中…" forever.
+     */
+    function fetchWithTimeout(url: string, ms: number) {
+      const ctrl = new AbortController();
+      const timer = window.setTimeout(() => ctrl.abort(), ms);
+      const onNavAbort = () => ctrl.abort();
+      if (signal.aborted) onNavAbort();
+      else signal.addEventListener("abort", onNavAbort, { once: true });
+      return fetch(url, { signal: ctrl.signal }).finally(() => {
+        window.clearTimeout(timer);
+        signal.removeEventListener("abort", onNavAbort);
+      });
+    }
+
     async function loadLatest() {
       if (signal.aborted) return;
       // Prefer newest including prerelease so testers see pre builds; badge will mark it
       let release = null;
       try {
-        const r = await fetch("/api/releases/latest?prerelease=1", { signal });
+        const r = await fetchWithTimeout("/api/releases/latest?prerelease=1", 15000);
         if (r.ok) release = await r.json();
       } catch { /* ignore */ }
       if (signal.aborted) return;
@@ -447,11 +466,7 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
       listEl.innerHTML = `<p class="text-body-medium text-outline">加载中…</p>`;
       if (focusWasInList) listEl.focus({ preventScroll: true });
       try {
-        const r = await fetch(`/api/releases?page=${p}&per_page=${PER_PAGE}`, {
-          // The navigation signal alone cannot save a hung API — without a
-          // timeout, "加载中…" stays forever.
-          signal: AbortSignal.any([signal, AbortSignal.timeout(15000)]),
-        });
+        const r = await fetchWithTimeout(`/api/releases?page=${p}&per_page=${PER_PAGE}`, 15000);
         if (!r.ok) throw new Error("HTTP " + r.status);
         const data = await r.json();
         if (signal.aborted || requestId !== changelogRequestId) return;

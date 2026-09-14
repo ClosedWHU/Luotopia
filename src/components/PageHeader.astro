@@ -35,7 +35,12 @@ const { title, subtitle, narrow = false } = Astro.props;
 <style>
   .lt-page-head-wash {
     position: absolute;
-    inset: 0;
+    /* Four sides, not the `inset` shorthand: the shorthand is Chrome 87+,
+     * and the legacy-WebView floor is far below that. */
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     background:
       radial-gradient(42rem 21rem at 24% 26%, var(--lt-hero-wash-from), var(--lt-hero-wash-to) 74%),
       radial-gradient(30rem 18rem at 84% 14%, hsl(196 60% 78% / 0.34), transparent 70%);
