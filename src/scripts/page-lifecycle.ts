@@ -1,5 +1,63 @@
 type SetupFn = (signal: AbortSignal) => void | (() => void);
 
+/*
+ * `addEventListener(..., { signal })` is Chrome 90+ / Safari 15+. Below that
+ * the key is silently ignored — and the cleanup contract this module offers
+ * quietly stops working: every client navigation would pile duplicate
+ * intervals and listeners onto the still-live window/document. Every page
+ * script imports this module before binding anything, so a one-time patch
+ * here restores the contract on old kernels (the site has to run in Android
+ * WebViews that never left the factory Chromium).
+ */
+let signalOptionReady = false;
+
+function supportsListenerSignalOption(): boolean {
+  try {
+    const probe = document.createElement("div");
+    const controller = new AbortController();
+    let fired = false;
+    probe.addEventListener("lt-signal-probe", () => { fired = true; }, { signal: controller.signal });
+    controller.abort();
+    probe.dispatchEvent(new Event("lt-signal-probe"));
+    return !fired;
+  } catch {
+    return false;
+  }
+}
+
+function ensureListenerSignalOption(): void {
+  if (signalOptionReady) return;
+  signalOptionReady = true;
+  if (typeof AbortController !== "function") return;
+  if (supportsListenerSignalOption()) return;
+
+  const native = EventTarget.prototype.addEventListener;
+  EventTarget.prototype.addEventListener = function (
+    type: string,
+    listener: EventListenerOrEventListenerObject | null,
+    options?: boolean | AddEventListenerOptions,
+  ) {
+    const signal =
+      options && typeof options === "object"
+        ? (options as AddEventListenerOptions).signal
+        : undefined;
+    if (!signal || typeof listener !== "function") {
+      return native.call(this, type, listener, options);
+    }
+    if (signal.aborted) return;
+    native.call(this, type, listener, options);
+    // The engine ignores the `signal` key, so a plain remove with the same
+    // (type, listener, capture) unbinds it; `once` is Chrome 55+.
+    signal.addEventListener(
+      "abort",
+      () => this.removeEventListener(type, listener, options),
+      { once: true },
+    );
+  };
+}
+
+ensureListenerSignalOption();
+
 /**
  * Run page-owned setup after every Astro Client Router navigation.
  *

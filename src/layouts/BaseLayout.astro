@@ -92,12 +92,23 @@
       // subresources in embedded WebViews — the page would strand its own
       // headings invisible forever. If the module has not claimed ownership
       // by the deadline, show everything immediately.
+      //
+      // The deadline is only 2.5s for kernels that *could* run the module.
+      // Below the bundle's floor — ES modules are Chrome 61, and
+      // page-lifecycle needs AbortController (66) — no network condition
+      // will ever deliver it, so waiting the full grace period just shows
+      // old-WebView users (the app's legal pages run in exactly those) a
+      // blank page for 2.5 seconds. ES5 only: this script is the last line
+      // of defense on engines where nothing else runs.
+      var ltModulesCanRun =
+        "noModule" in document.createElement("script") &&
+        typeof AbortController === "function";
       window.__ltRevealsFallback = setTimeout(function () {
         if (window.__ltRevealsOwned) return;
         document.querySelectorAll(".lt-reveal, .lt-reveal-lift").forEach(function (el) {
           el.dataset.revealed = "true";
         });
-      }, 2500);
+      }, ltModulesCanRun ? 2500 : 300);
     </script>
     <noscript>
       <!-- The inline failsafe above still needs JS. With scripting off entirely,

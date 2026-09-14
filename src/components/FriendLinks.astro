@@ -174,7 +174,11 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
    */
   .lt-dialog {
     position: fixed;
-    inset: 0;
+    /* Four sides, not the `inset` shorthand (Chrome 87+): legacy-WebView floor. */
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     max-width: 100%;
@@ -367,23 +371,19 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
     button: { label: string; url: string } | null;
   }
 
-  const dialogData = Object.fromEntries(
-    friendLinkCatalog.items.flatMap((item) => {
-      const action = item.action;
-      if (action.type !== "dialog") return [];
-      return [
-        [
-          item.id,
-          {
-            title: action.title ?? item.title,
-            body: action.body ?? "",
-            image: action.image?.url ?? null,
-            button: action.button ? { label: action.button.label, url: action.button.url } : null,
-          },
-        ],
-      ];
-    }),
-  ) as Record<string, DialogContent>;
+  // Plain loops, not `flatMap`/`Object.fromEntries` (Chrome 69/73 — above this
+  // bundle's ~66 floor; `?.`/`??` are fine, esbuild lowers those to the target).
+  const dialogData: Record<string, DialogContent> = {};
+  for (const item of friendLinkCatalog.items) {
+    const action = item.action;
+    if (action.type !== "dialog") continue;
+    dialogData[item.id] = {
+      title: action.title ?? item.title,
+      body: action.body ?? "",
+      image: action.image?.url ?? null,
+      button: action.button ? { label: action.button.label, url: action.button.url } : null,
+    };
+  }
 
   // Read at close time, not at module load. The CSS side (`animation: none`)
   // reacts live to an OS setting change; a stale JS snapshot would keep waiting
