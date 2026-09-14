@@ -640,6 +640,17 @@ html {
    * there was no shift to fix.
    */
   scrollbar-gutter: stable;
+
+  /*
+   * Kill horizontal overscroll rubber-banding on the root scroller. The page
+   * never overflows horizontally, so on Android this is a no-op (its edge
+   * effect does not displace content anyway), but iOS Safari — and DevTools'
+   * device emulation, which mimics iOS-style elastic overscroll — would
+   * otherwise let the whole document be dragged sideways and snap back.
+   * Y stays native: the vertical bounce is expected feel, and pull-to-refresh
+   * must keep working.
+   */
+  overscroll-behavior-x: none;
 }
 
 body {
@@ -727,7 +738,11 @@ body {
 .state-layer::before {
   content: "";
   position: absolute;
-  inset: 0;
+  /* Four sides, not the `inset` shorthand (Chrome 87+): legacy-WebView floor. */
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   border-radius: inherit;
   background-color: currentColor;
   opacity: 0;

@@ -154,7 +154,11 @@ const slides = [
   .lt-dot::before {
     content: "";
     position: absolute;
-    inset: -10px -3px;
+    /* Four sides, not the `inset` shorthand (Chrome 87+). */
+    top: -10px;
+    right: -3px;
+    bottom: -10px;
+    left: -3px;
   }
 
   .lt-dot[data-active="true"] {
