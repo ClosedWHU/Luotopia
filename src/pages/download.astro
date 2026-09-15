@@ -349,6 +349,24 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
       });
     }
 
+    async function loadTestFlightVersion() {
+      if (signal.aborted) return;
+
+      try {
+        // TestFlight builds are not GitHub Release assets. Ask the Pages
+        // Function directly so the Apple card shows the actual beta build.
+        const r = await fetchWithTimeout("/api/appstore/latest?connect=1", 15000);
+        if (!r.ok || signal.aborted) return;
+
+        const info = await r.json();
+        if (info?.error || info?.channel !== "testflight" || !info.version) return;
+
+        const card = document.querySelector('.platform-card[data-platform="apple"]');
+        const status = card?.querySelector(".platform-status");
+        if (status) status.textContent = `TestFlight ${info.version}`;
+      } catch { /* Keep the static TestFlight label when Connect is unavailable. */ }
+    }
+
     async function loadLatest() {
       if (signal.aborted) return;
       // Prefer newest including prerelease so testers see pre builds; badge will mark it
@@ -364,6 +382,7 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
         document.querySelectorAll(".platform-card").forEach((card) => {
           applyExternalLink(card, "暂无数据");
         });
+        void loadTestFlightVersion();
         return;
       }
 
@@ -447,6 +466,8 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
           })
           .join("");
       });
+
+      void loadTestFlightVersion();
     }
 
     // Rapid clicks put several loadChangelog calls in flight at once; a stale
