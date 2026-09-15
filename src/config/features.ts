@@ -195,19 +195,11 @@ export const featureCategories: FeatureCategory[] = [
         highlight: true,
       },
       {
-        icon: "electric_scooter",
-        title: "共享电动车",
-        summary: "知音/芒果扫码、蓝牙与远程解锁。",
-        description:
-          "接入知音出行与芒果电单车：扫码、蓝牙与远程解锁，骑行实况、iOS 实时活动、骑行卡、钱包充值、押金退款和订单管理。",
-        status: "upcoming",
-      },
-      {
         icon: "layers",
         title: "地图实时图层",
-        summary: "地图上显示校车与共享电动车位置。",
+        summary: "地图上显示校车位置。",
         description:
-          "在校园地图叠加校车实时位置，以及知音/芒果共享电动车分布，便于就近取车与等车。",
+          "在校园地图叠加校车实时位置，便于就近等车。",
         status: "upcoming",
       },
     ],
