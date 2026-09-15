@@ -9,6 +9,27 @@ export interface FriendLinkButton {
   url: string;
 }
 
+/**
+ * Native "join QQ group" handoff, consumed by the Flutter app.
+ *
+ * QQ issues a *separate* key per platform, so `androidKey` (from the official
+ * `joinQQGroup(key)` snippet) and `iosAuthSig` (from the official
+ * `joinGroup:key:` snippet) are distinct values and are not interchangeable.
+ * The app rejects an entry missing either one rather than rendering a button
+ * that only works on one OS.
+ *
+ * Only Android and iOS render the button; on every other platform the app hides
+ * it and the dialog body's group number / QR code remains the way in.
+ */
+export interface FriendLinkQqGroup {
+  /** Button caption shown inside the dialog. */
+  label: string;
+  /** Group number; the iOS card URI needs it directly. */
+  groupUin: string;
+  androidKey: string;
+  iosAuthSig: string;
+}
+
 export interface FriendLinkAction {
   type: "openUrl" | "dialog" | "none";
   url?: string;
@@ -16,6 +37,7 @@ export interface FriendLinkAction {
   body?: string;
   image?: FriendLinkImage;
   button?: FriendLinkButton;
+  qqGroup?: FriendLinkQqGroup;
 }
 
 export interface FriendLinkItem {
@@ -52,6 +74,13 @@ const links: FriendLinkItem[] = [
       body: "群号：994642924（长按选择复制）",
       image: { type: "network", url: "/img/links/closedwhu_qrcode.png" },
       button: { label: "访问 GitHub", url: "https://github.com/ClosedWHU" },
+      qqGroup: {
+        label: "加入QQ群",
+        groupUin: "994642924",
+        androidKey: "c3uMC_SPhGmesKBDFAnGHHSEaUBglEKX",
+        iosAuthSig:
+          "beN1nfk+NZaqVkjcuxUvDRYnChuCzuz89wqmkWigD6+k4ZYQ5QmRSz80tMibvDq5",
+      },
     },
   },
   {
@@ -65,6 +94,17 @@ const links: FriendLinkItem[] = [
       title: "WHU-EMO",
       body: "一群：389414112（已满）\n二群：1032919287（长按文本选择复制）",
       image: { type: "network", url: "/img/links/whuemo_qrcode.png" },
+      // NOTE: these credentials are for 一群 (389414112), which the body above
+      // already marks as full. The native handoff will open QQ on that group,
+      // so QQ itself reports "群已满". Swap in the 二群 (1032919287) key from the
+      // QQ console once one is generated if the button should target it.
+      qqGroup: {
+        label: "加入QQ群",
+        groupUin: "389414112",
+        androidKey: "az9Wa_D94E8c9SFVjnsFEtKqbj-wDWbT",
+        iosAuthSig:
+          "6OjuCm09gCFIuU8Vnodq35XZJ4WniomXyJd8vqLQ6GncIYz/z4N9VKIqXqtHjPVP",
+      },
     },
   },
   {
@@ -110,6 +150,6 @@ const links: FriendLinkItem[] = [
 ];
 
 export const friendLinkCatalog: FriendLinkCatalog = {
-  version: 2,
+  version: 3,
   items: links,
 };
