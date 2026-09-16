@@ -28,7 +28,7 @@ export const featureCategories: FeatureCategory[] = [
         title: "课程表",
         summary: "多源导入、多课表管理，周月视图与课程提醒。",
         description:
-          "支持本科教务、WakeUp 文件/分享码、第三方课表与手动编辑；多课表分组管理、周月视图、课程提醒与桌面小组件联动。",
+          "支持本科教务、研究生 newyjs、WakeUp 文件/分享码、第三方课表与手动编辑；多课表分组管理、周月视图、课程提醒与桌面小组件联动。",
         highlight: true,
       },
       {
@@ -99,20 +99,11 @@ export const featureCategories: FeatureCategory[] = [
           "按课程查看给分分布与评价，支持匿名提交；小样本聚合保护隐私，延续 WHU.sb / WHUCourses.cn 的数据脉络。",
       },
       {
-        icon: "calendar_add_on",
-        title: "研究生课表导入",
-        summary: "研究生 newyjs 课表导入与校历对齐。",
-        description:
-          "对接研究生 newyjs 系统，读取学期、课表与研究生校历，自动对齐周次与上课日期。",
-        status: "upcoming",
-      },
-      {
         icon: "cast_for_education",
         title: "学习通账号",
         summary: "绑定学习通账号，凭据本机安全存储。",
         description:
-          "支持学习通（超星）密码或短信登录绑定，凭据按武大账号隔离存储，为后续课程与签到能力打基础。",
-        status: "upcoming",
+          "支持学习通（超星）密码或短信登录绑定，凭据保存在本设备安全存储并按武大账号隔离，为后续课程与签到能力打基础。",
       },
     ],
   },
@@ -132,7 +123,7 @@ export const featureCategories: FeatureCategory[] = [
         title: "校车",
         summary: "实时位置、线路查询与到站提醒。",
         description:
-          "查询校车线路与实时位置，后台到站提醒，iOS 实况活动与手表快照同步。",
+          "查询校车线路与实时位置，校园地图叠加车辆实时图层，后台到站提醒，iOS 实况活动与手表快照同步。",
         highlight: true,
       },
       {
@@ -194,14 +185,6 @@ export const featureCategories: FeatureCategory[] = [
           "社区论坛支持帖子、评论、版块、附件、搜索、声望、排行榜与公开管理日志；标签默认隐藏，可在设置→导航中开启。",
         highlight: true,
       },
-      {
-        icon: "layers",
-        title: "地图实时图层",
-        summary: "地图上显示校车位置。",
-        description:
-          "在校园地图叠加校车实时位置，便于就近等车。",
-        status: "upcoming",
-      },
     ],
   },
   {
@@ -212,7 +195,7 @@ export const featureCategories: FeatureCategory[] = [
         title: "AI 助手",
         summary: "多模型 Agent，可操作校园服务。",
         description:
-          "支持内置与自定义多模型、多模态附件、语音输入/朗读、图像生成、联网搜索、MCP、技能与助手；确认桥提供手动/半自动/全自动三档，工具可查询和管理课表、成绩、校园服务等数据。",
+          "支持内置与自定义多模型、多模态附件、语音输入/朗读、图像生成、联网搜索、MCP、技能与助手；确认桥提供手动/半自动/全自动三档，工具可查询和管理课表、成绩、邮箱与校园服务数据，并可在用户确认下发起水电费、网费缴费。",
         highlight: true,
       },
       {
@@ -220,22 +203,22 @@ export const featureCategories: FeatureCategory[] = [
         title: "天气",
         summary: "多数据源预报、AQI、降水与预警。",
         description:
-          "小米天气 / Open-Meteo / AccuWeather 分能力直连，提供逐小时预报、空气质量、降水、预警、缓存与重试。",
+          "小米天气 / Open-Meteo / AccuWeather 分能力直连，提供逐小时预报、空气质量、花粉浓度与官方周报、降水、预警、缓存与重试；数据源替换/回退全程溯源可见，支持严格模式。",
         highlight: true,
       },
       {
         icon: "mail",
         title: "Coremail 邮箱",
-        summary: "校园邮件收件、详情与未读角标。",
+        summary: "校园邮件收发、详情与未读角标。",
         description:
-          "原生 Coremail 客户端支持 SSO 登录、客户端专用密码、收件箱、邮件详情安全渲染与未读角标。",
+          "原生 Coremail 客户端支持 SSO 登录、客户端专用密码、收件箱、邮件撰写与发送、详情安全渲染与未读角标；邮箱同时开放给 AI Agent 用于检索、整理与草拟发送。",
       },
       {
         icon: "palette",
         title: "壁纸中心",
-        summary: "本地、Bing 每日与分页壁纸配置。",
+        summary: "本地、网络 URL、Bing 每日与分页壁纸配置。",
         description:
-          "支持无壁纸、本地图片与 Bing 每日随机；课程表、校园、设置、任务列表、论坛、AI 页面可独立配置，深色蒙版可调。",
+          "支持无壁纸、本地图片、网络图片 URL 与 Bing 每日随机；课程表、校园、设置、任务列表、论坛、AI 页面可独立配置，深色蒙版可调。",
       },
       {
         icon: "terminal",
@@ -252,44 +235,11 @@ export const featureCategories: FeatureCategory[] = [
           "从 GitHub Releases 检查更新，Android 提供 ABI 升级建议与安装引导，桌面平台提示下载新版本。",
       },
       {
-        icon: "outgoing_mail",
-        title: "邮件撰写与 AI 邮箱工具",
-        summary: "应用内写邮件，AI 可检索邮箱。",
-        description:
-          "增加邮件撰写与发送流程，并将校园邮箱开放给 AI Agent，用于检索、整理、移动和草拟发送。",
-        status: "upcoming",
-      },
-      {
-        icon: "eco",
-        title: "花粉与天气数据源控制",
-        summary: "花粉浓度、周报与数据源回退透明化。",
-        description:
-          "增加花粉浓度与官方花粉周报，显示数据源替换/回退情况，并支持严格模式，避免静默换源。",
-        status: "upcoming",
-      },
-      {
-        icon: "payments",
-        title: "AI 缴费协助",
-        summary: "在用户确认下发起水电费与网费缴费。",
-        description:
-          "AI 可发起水电费与校园网费缴费流程，实际支付仍由用户在收银台确认。",
-        status: "upcoming",
-      },
-      {
         icon: "laptop_mac",
         title: "Apple 快捷指令",
         summary: "快捷指令调用经审核的 App 工具。",
         description:
           "macOS 快捷指令可调用校历、课程表、成绩、空闲教室等经审核工具，写操作需要确认。",
-        status: "upcoming",
-      },
-      {
-        icon: "tune",
-        title: "壁纸链接与 Theme Lab",
-        summary: "网络壁纸链接与实验设计语言预览。",
-        description:
-          "壁纸中心支持网络图片 URL；开发者 Theme Lab 可预览不同设计语言，属实验功能。",
-        status: "upcoming",
       },
     ],
   },
@@ -333,10 +283,17 @@ export const featureCategories: FeatureCategory[] = [
       },
       {
         icon: "switch_account",
-        title: "多账号与第三方绑定",
+        title: "多账号切换",
         summary: "按武大账号隔离凭据并支持切换。",
         description:
-          "多个武大账号切换时，VPN、邮箱、学习通等凭据按账号隔离；支持 Ham 等第三方账号授权绑定。",
+          "设备可记住多个武大账号并快速切换；VPN、邮箱、学习通等凭据按账号隔离，互不串用。",
+      },
+      {
+        icon: "link",
+        title: "第三方账号绑定",
+        summary: "Ham 等第三方账号授权绑定。",
+        description:
+          "在「其他账号」中集中管理外部账号；Ham 等第三方授权绑定仍在完善中。",
         status: "upcoming",
       },
     ],

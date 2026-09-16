@@ -22,9 +22,9 @@ export const platforms: PlatformDownload[] = [
   {
     id: "apple",
     name: "Apple",
-    icon: "ios",
-    desc: "iOS / iPadOS / macOS TestFlight",
-    note: "iOS 16+ · macOS 13.5+（Apple 芯片） 需 TestFlight",
+    icon: "apple",
+    desc: "iOS / iPadOS / macOS 统一 TestFlight 分发",
+    note: "iOS 16+ · iPadOS · macOS 13.5+（Apple 芯片）",
     externalUrl: testFlightUrl,
     externalLabel: "加入 TestFlight 以下载",
   },
