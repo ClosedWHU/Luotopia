@@ -56,13 +56,10 @@ import { platforms, testFlightUrl } from "../config/downloads";
           </div>
           <div>
             <h4 class="text-title-small text-on-surface mb-1">Apple</h4>
-            <p><strong class="text-on-surface">iOS / iPadOS：</strong>通过同一 TestFlight 链接分发。打开
+            <p><strong class="text-on-surface">iOS / iPadOS / macOS：</strong>统一通过 TestFlight 分发。打开
               <a href={testFlightUrl} target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">TestFlight 加入链接</a>
-              即可在 iPhone 或 iPad 上申请内测。由于 Apple 政策限制，非越狱设备需通过 TestFlight 安装。</p>
-            <p class="mt-3"><strong class="text-on-surface">macOS：</strong>下载 Release 中的 <strong class="text-on-surface">arm64 DMG</strong>，打开后将 <code class="text-on-surface">Luotopia.app</code> 拖入「应用程序」文件夹。当前版本支持 Apple 芯片 Mac，需要 macOS 13.5 或更高版本；如果系统首次运行时拦截，请先在 Finder 中右键应用并选择「打开」。</p>
-            <p class="mt-2">如果系统提示「应用已损坏」「无法验证开发者」，或应用仍然无法打开，请先确认 DMG 来自 Luotopia 官网或 ClosedWHU 官方 GitHub Release，然后在「终端」中运行：</p>
-            <pre class="mt-2 overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>xattr -cr /Applications/Luotopia.app</code></pre>
-            <p class="mt-2 text-body-small text-outline">该命令只清除 Luotopia.app 的下载隔离扩展属性。不要对来源不明的应用执行此命令。</p>
+              即可在 iPhone、iPad 或 Apple 芯片 Mac（macOS 13.5+）上申请内测。由于 Apple 政策限制，非越狱设备需通过 TestFlight 安装；TestFlight 构建有效期为 90 天，保持应用更新即可。</p>
+            <p class="mt-2 text-body-small text-outline">早期版本的 macOS arm64 DMG 仍可在对应历史 Release 的资产中找到，新版本不再随 Release 发布 DMG。</p>
           </div>
           <div>
             <h4 class="text-title-small text-on-surface mb-1">Linux</h4>
@@ -408,7 +405,9 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
         const id = card.getAttribute("data-platform");
         const badges = card.querySelector(".platform-badges");
         const assetsEl = card.querySelector(".platform-assets");
-        const assets = id === "apple" ? byPlatform.macos || [] : byPlatform[id] || [];
+        // The Apple card has no GitHub assets (iOS/iPadOS/macOS all ship via
+        // TestFlight), so `assets` stays empty and it keeps the external link.
+        const assets = byPlatform[id] || [];
 
         if (!badges || !assetsEl) return;
 
@@ -429,17 +428,12 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
         const externalUrl = card.getAttribute("data-external-url") || "";
         const externalLabel = card.getAttribute("data-external-label") || "外部安装";
         const externalLink = externalUrl
-          ? `${id === "apple" ? '<p class="text-label-medium text-on-surface-variant">iOS / iPadOS</p>' : ""}
-            <a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-body-small text-primary hover:underline no-underline">
+          ? `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-body-small text-primary hover:underline no-underline">
               ${openInNewIcon}
               <span>${escapeHtml(externalLabel)}</span>
             </a>`
           : "";
-        const macosLabel =
-          id === "apple" && installers.length > 0
-            ? '<p class="pt-1 text-label-medium text-on-surface-variant">macOS</p>'
-            : "";
-        assetsEl.innerHTML = externalLink + macosLabel + installers
+        assetsEl.innerHTML = externalLink + installers
           .map((a) => {
             const title =
               a.label ||
