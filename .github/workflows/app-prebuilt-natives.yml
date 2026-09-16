@@ -1,0 +1,404 @@
+# Rebuilds the key_obfuscator native prebuilts of the PRIVATE app repo from
+# this public repo and publishes them back to it.
+#
+# Why here: GitHub-hosted runners are unmetered for public repositories. The
+# same workflow inside ClosedWHU/Luotopia-app bills private minutes, and its
+# macos-latest job counts 10x (~40 min wall = ~400 min against the 2000 min
+# monthly quota). This is the single most expensive workflow in the pipeline,
+# so it moves first.
+#
+# The app repo keeps a cheap `prebuilt-natives-trigger.yml` job that runs on the
+# self-hosted runner (zero billable minutes) and dispatches here whenever the
+# crate changes.
+#
+# Nothing secret crosses back into this public repo: the compiled binaries are
+# uploaded straight from each build job to the private app-repo release, and only
+# sha256 checksums pass through this repo's Actions artifacts. Those binaries
+# ship inside the distributed app anyway; the checksums do not.
+name: App prebuilt natives
+
+on:
+  repository_dispatch:
+    types: [build_prebuilt_natives]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (default: auto-compute key-obfuscator-<content hash>)"
+        required: false
+        type: string
+        default: ""
+      force:
+        description: Rebuild and re-upload even if the release already looks complete
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-prebuilt-natives-${{ github.event.client_payload.tag || inputs.tag || github.run_id }}
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  APP_REPO: ClosedWHU/Luotopia-app
+  CRATE_DIR: native/key_obfuscator
+  ANDROID_NDK_VERSION: 28.2.13676358
+  # Every asset the lock file expects from a rebuild (SHA256SUMS is added last
+  # and doubles as the "this generation is complete" marker).
+  EXPECTED_ASSETS: key_obfuscator-ios.a key_obfuscator-ios-simulator.a key_obfuscator-macos.a key_obfuscator-android-arm64-v8a.so key_obfuscator-android-armeabi-v7a.so key_obfuscator-android-x86_64.so key_obfuscator-linux.so key_obfuscator-windows.dll
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      APP_TOKEN: ${{ secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN }}
+    outputs:
+      tag: ${{ steps.hash.outputs.tag }}
+      skip: ${{ steps.exists.outputs.skip }}
+    steps:
+      - name: Require app repo token
+        run: |
+          if [ -z "$APP_TOKEN" ]; then
+            echo "::error::Missing APP_REPO_TOKEN (or CROSS_REPO_TOKEN) with contents:read+write on ${APP_REPO}."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.APP_REPO }}
+          token: ${{ env.APP_TOKEN }}
+          persist-credentials: false
+
+      - name: Compute crate content hash
+        id: hash
+        env:
+          TAG_OVERRIDE: ${{ github.event.client_payload.tag || inputs.tag }}
+        run: |
+          set -euo pipefail
+          if [ -n "${TAG_OVERRIDE:-}" ]; then
+            echo "Using tag from the trigger: $TAG_OVERRIDE"
+            echo "tag=$TAG_OVERRIDE" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          h=$( { git ls-files -z \
+                   native/key_obfuscator/src \
+                   native/key_obfuscator/.cargo \
+                   native/key_obfuscator/Cargo.toml \
+                   native/key_obfuscator/Cargo.lock \
+                   tool/build_key_obfuscator.sh \
+                   tool/build_key_obfuscator.ps1 \
+                 | sort -z | xargs -0 cat; } | sha256sum | cut -c1-12)
+          echo "content hash: $h"
+          echo "tag=key-obfuscator-$h" >> "$GITHUB_OUTPUT"
+
+      # SHA256SUMS is uploaded last, so its presence means the generation is
+      # complete; a half-published release (a build job died) is rebuilt.
+      - name: Ensure the private release exists
+        id: exists
+        env:
+          GH_TOKEN: ${{ env.APP_TOKEN }}
+          TAG: ${{ steps.hash.outputs.tag }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          set -euo pipefail
+          assets="$(gh release view "$TAG" --repo "$APP_REPO" --json assets --jq '.assets[].name' 2>/dev/null || true)"
+          if [ "${FORCE:-false}" != "true" ] && printf '%s\n' "$assets" | grep -qx 'SHA256SUMS'; then
+            echo "release $TAG already complete on $APP_REPO"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          if [ -z "$assets" ]; then
+            gh release create "$TAG" --repo "$APP_REPO" \
+              --target "$(git rev-parse HEAD)" \
+              --title "key_obfuscator prebuilts ${TAG#key-obfuscator-}" \
+              --notes "Rebuilt by the public homepage repo's App prebuilt natives workflow. Verified via SHA256SUMS."
+            echo "created release $TAG on $APP_REPO"
+          else
+            echo "release $TAG exists but is incomplete; re-uploading assets"
+          fi
+
+  darwin:
+    needs: plan
+    if: needs.plan.outputs.skip != 'true'
+    runs-on: macos-latest
+    timeout-minutes: 40
+    env:
+      APP_TOKEN: ${{ secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.APP_REPO }}
+          token: ${{ env.APP_TOKEN }}
+          persist-credentials: false
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: native/key_obfuscator
+          cache-on-failure: 'true'
+
+      - name: Install Apple Rust targets
+        run: >-
+          rustup target add aarch64-apple-ios aarch64-apple-ios-sim
+          x86_64-apple-ios aarch64-apple-darwin x86_64-apple-darwin
+
+      - name: Build Apple static libraries
+        run: bash tool/build_key_obfuscator.sh
+
+      - name: Publish darwin prebuilts to the private release
+        env:
+          GH_TOKEN: ${{ env.APP_TOKEN }}
+          TAG: ${{ needs.plan.outputs.tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p stage
+          # darwin artifact keeps the prebuilt/<dir> layout from the build script
+          cp native/key_obfuscator/prebuilt/ios/libkey_obfuscator.a stage/key_obfuscator-ios.a
+          cp native/key_obfuscator/prebuilt/ios-simulator/libkey_obfuscator.a stage/key_obfuscator-ios-simulator.a
+          cp native/key_obfuscator/prebuilt/macos/libkey_obfuscator.a stage/key_obfuscator-macos.a
+          (cd stage && shasum -a 256 * > ../checksums.txt)
+          cat checksums.txt
+          gh release upload "$TAG" stage/* --repo "$APP_REPO" --clobber
+
+      - name: Upload checksums (hashes only, no binaries)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: checksums-darwin
+          path: checksums.txt
+          if-no-files-found: error
+          retention-days: 7
+
+  android-linux:
+    needs: plan
+    if: needs.plan.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      APP_TOKEN: ${{ secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.APP_REPO }}
+          token: ${{ env.APP_TOKEN }}
+          persist-credentials: false
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: native/key_obfuscator
+          cache-on-failure: 'true'
+
+      - name: Cache cargo-ndk binary
+        id: cargo-ndk-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cargo/bin/cargo-ndk
+          key: cargo-ndk-3.5.4-${{ runner.os }}
+
+      - name: Install cargo-ndk
+        if: steps.cargo-ndk-cache.outputs.cache-hit != 'true'
+        run: cargo install cargo-ndk --version 3.5.4 --locked
+
+      - name: Resolve Android SDK location
+        id: android-sdk
+        run: echo "path=$ANDROID_HOME" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Android NDK
+        id: ndk-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.android-sdk.outputs.path }}/ndk/${{ env.ANDROID_NDK_VERSION }}
+          key: android-ndk-${{ env.ANDROID_NDK_VERSION }}-${{ runner.os }}
+
+      - name: Install pinned Android NDK
+        if: steps.ndk-cache.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          SDKMANAGER="${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" --licenses || true
+          "$SDKMANAGER" --install "ndk;${ANDROID_NDK_VERSION}"
+          test -d "${ANDROID_HOME}/ndk/${ANDROID_NDK_VERSION}"
+
+      - name: Install Android Rust targets
+        run: >-
+          rustup target add aarch64-linux-android armv7-linux-androideabi
+          x86_64-linux-android
+
+      - name: Build Android and Linux shared libraries
+        run: |
+          set -euo pipefail
+          cd "$CRATE_DIR"
+          export ANDROID_NDK_HOME="${ANDROID_HOME}/ndk/${ANDROID_NDK_VERSION}"
+          cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 build --release
+          cargo build --release --target x86_64-unknown-linux-gnu
+
+      - name: Publish android + linux prebuilts to the private release
+        env:
+          GH_TOKEN: ${{ env.APP_TOKEN }}
+          TAG: ${{ needs.plan.outputs.tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p stage
+          cp "$CRATE_DIR/target/aarch64-linux-android/release/libkey_obfuscator.so" stage/key_obfuscator-android-arm64-v8a.so
+          cp "$CRATE_DIR/target/armv7-linux-androideabi/release/libkey_obfuscator.so" stage/key_obfuscator-android-armeabi-v7a.so
+          cp "$CRATE_DIR/target/x86_64-linux-android/release/libkey_obfuscator.so" stage/key_obfuscator-android-x86_64.so
+          cp "$CRATE_DIR/target/x86_64-unknown-linux-gnu/release/libkey_obfuscator.so" stage/key_obfuscator-linux.so
+          (cd stage && sha256sum * > ../checksums.txt)
+          cat checksums.txt
+          gh release upload "$TAG" stage/* --repo "$APP_REPO" --clobber
+
+      - name: Upload checksums (hashes only, no binaries)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: checksums-android-linux
+          path: checksums.txt
+          if-no-files-found: error
+          retention-days: 7
+
+  windows:
+    needs: plan
+    if: needs.plan.outputs.skip != 'true'
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      APP_TOKEN: ${{ secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.APP_REPO }}
+          token: ${{ env.APP_TOKEN }}
+          persist-credentials: false
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: native/key_obfuscator
+          cache-on-failure: 'true'
+
+      - name: Build Windows DLL
+        run: cargo build --release --manifest-path "$env:CRATE_DIR\Cargo.toml" --target x86_64-pc-windows-msvc
+
+      - name: Publish windows prebuilt to the private release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ env.APP_TOKEN }}
+          TAG: ${{ needs.plan.outputs.tag }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force stage | Out-Null
+          Copy-Item "$env:CRATE_DIR\target\x86_64-pc-windows-msvc\release\key_obfuscator.dll" stage\key_obfuscator-windows.dll
+          # `<lowercase hex>  <name>` — byte-identical to `sha256sum` output, so
+          # SHA256SUMS stays comparable across the three platforms.
+          $lines = Get-ChildItem stage -File | ForEach-Object {
+            '{0}  {1}' -f (Get-FileHash -Algorithm SHA256 $_.FullName).Hash.ToLower(), $_.Name
+          }
+          Set-Content -Path checksums.txt -Value $lines -Encoding ascii
+          Get-Content checksums.txt
+          gh release upload $env:TAG @(Get-ChildItem stage -File).FullName --repo $env:APP_REPO --clobber
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload checksums (hashes only, no binaries)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: checksums-windows
+          path: checksums.txt
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: [plan, darwin, android-linux, windows]
+    if: needs.plan.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      APP_TOKEN: ${{ secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN }}
+    steps:
+      # persist-credentials stays ON here: the lock-file update is pushed back to
+      # the app repo's main with the same token.
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.APP_REPO }}
+          token: ${{ env.APP_TOKEN }}
+          fetch-depth: 0
+
+      - name: Download checksums
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          path: checksums
+
+      - name: Assemble SHA256SUMS and verify completeness
+        env:
+          TAG: ${{ needs.plan.outputs.tag }}
+        run: |
+          set -euo pipefail
+          ls -R checksums
+          # tr -d '\r': the Windows job writes its checksums with CRLF, which
+          # would otherwise stick to the asset name and fail the grep below.
+          cat checksums/*/*.txt | tr -d '\r' | sed '/^$/d' | sort -k2 > SHA256SUMS
+          cat SHA256SUMS
+          missing=0
+          for asset in $EXPECTED_ASSETS; do
+            if ! awk '{print $2}' SHA256SUMS | grep -qx "$asset"; then
+              echo "::error::missing asset: $asset"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "::error::Refusing to publish an incomplete generation ($TAG)."
+            exit 1
+          fi
+
+      - name: Upload SHA256SUMS (completion marker)
+        env:
+          GH_TOKEN: ${{ env.APP_TOKEN }}
+          TAG: ${{ needs.plan.outputs.tag }}
+        run: |
+          set -euo pipefail
+          gh release upload "$TAG" SHA256SUMS --repo "$APP_REPO" --clobber
+
+      - name: Update the lock file
+        env:
+          TAG: ${{ needs.plan.outputs.tag }}
+        run: |
+          set -euo pipefail
+          python3 - "$TAG" <<'PY'
+          import json, sys, pathlib
+          tag = sys.argv[1]
+          sums = {}
+          for line in pathlib.Path('SHA256SUMS').read_text().splitlines():
+              parts = line.split()
+              if len(parts) >= 2:
+                  sums[parts[1]] = parts[0]
+          lock_path = pathlib.Path('native/key_obfuscator/prebuilts.lock.json')
+          lock = json.loads(lock_path.read_text())
+          for artifact in lock['artifacts']:
+              sha = sums.get(artifact['asset'])
+              if sha is None:
+                  continue  # har / ohos stay pinned to their existing release
+              artifact['release'] = tag
+              artifact['sha256'] = sha
+          lock_path.write_text(json.dumps(lock, indent=2) + '\n')
+          print('lock updated for', tag)
+          PY
+
+      - name: Commit the lock update
+        env:
+          TAG: ${{ needs.plan.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- native/key_obfuscator/prebuilts.lock.json; then
+            echo "lock unchanged"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add native/key_obfuscator/prebuilts.lock.json
+          git commit -m "chore(native): pin key_obfuscator prebuilts to $TAG"
+          git pull --rebase origin main
+          git push origin HEAD:main

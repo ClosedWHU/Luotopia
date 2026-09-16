@@ -1,0 +1,1879 @@
+# Build signed/release artifacts for a Release/Pre-release published on THIS repo.
+#
+# This workflow lives in the public homepage repo on purpose: GitHub-hosted
+# runners are unmetered for public repositories, while the app repo is private
+# (2000 min/month, and macOS counts 10x). The private source is fetched into the
+# ephemeral runner with APP_REPO_TOKEN and never pushed anywhere public.
+#
+# Uploads ONLY release artifacts to the homepage release.
+# Never uploads debug binaries. Dart obfuscation symbols (`--split-debug-info`)
+# reverse the obfuscation, so they are NOT uploaded as Actions artifacts of this
+# public repo (world-downloadable) and NOT attached to public release assets;
+# they go to a private `symbols-<tag>` release on the app repo instead.
+#
+# SECURITY: this workflow holds production signing material (Android keystore,
+# Windows PFX, AUR SSH key, OHOS certs) in a PUBLIC repo's secret store. That is
+# only acceptable because the triggers below are `release` and
+# `workflow_dispatch`, so no fork-supplied code ever runs with these secrets.
+# Do NOT add a `pull_request`/`pull_request_target` trigger here, and do not add
+# any other workflow to this repo that reads these secrets from a PR-triggered
+# job. Build logs of this public repo are world-readable: keep `--verbose` off.
+name: App release build
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Homepage release tag (e.g. v1.0.0+2)
+        required: true
+        type: string
+      prerelease:
+        description: Mark context as prerelease (informational only)
+        required: false
+        type: boolean
+        default: true
+      ref:
+        description: "Git ref to build (default: auto-resolve the commit whose pubspec version matches the tag)"
+        required: false
+        type: string
+        default: ""
+      build_android:
+        description: Build Android signed split APKs
+        required: false
+        type: boolean
+        default: true
+      build_windows:
+        description: Build Windows x64 portable zip + MSIX
+        required: false
+        type: boolean
+        default: true
+      build_macos:
+        description: Build macOS release DMG (opt-in; macOS normally ships via TestFlight)
+        required: false
+        type: boolean
+        default: false
+      build_linux:
+        description: Build Linux packages (tar.gz/AppImage/deb/flatpak)
+        required: false
+        type: boolean
+        default: true
+      build_ohos:
+        description: "Build HarmonyOS HAP on the self-hosted Linux runner (setup-ohos + OH Flutter)"
+        required: false
+        type: boolean
+        default: false
+      linux_arch:
+        description: Linux arch (x64, arm64, or both)
+        required: false
+        type: choice
+        options:
+          - both
+          - x64
+          - arm64
+        default: both
+      linux_formats:
+        description: "Linux formats (comma list: tar,appimage,deb,flatpak or all)"
+        required: false
+        type: string
+        default: all
+
+# Same tag may be re-dispatched (e.g. Linux-only retry). Do NOT cancel in-progress
+# full builds — that aborts Android/Windows uploads mid-flight.
+concurrency:
+  group: app-release-${{ github.event.release.tag_name || inputs.tag }}-${{ github.run_id }}
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  # Private repo the app source is fetched from. APP_TOKEN is resolved per job as
+  # `secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN` (contents: read/write on
+  # the app repo). Keep it job-scoped so unrelated steps never see the token.
+  APP_REPO: ClosedWHU/Luotopia-app
+
+jobs:
+  context:
+    name: Resolve release context
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      APP_TOKEN: ${{ secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN }}
+    outputs:
+      tag: ${{ steps.ctx.outputs.tag }}
+      prerelease: ${{ steps.ctx.outputs.prerelease }}
+      target_repo: ${{ steps.ctx.outputs.target_repo }}
+      build_name: ${{ steps.ctx.outputs.build_name }}
+      build_number: ${{ steps.ctx.outputs.build_number }}
+      build_android: ${{ steps.ctx.outputs.build_android }}
+      build_windows: ${{ steps.ctx.outputs.build_windows }}
+      build_macos: ${{ steps.ctx.outputs.build_macos }}
+      build_linux: ${{ steps.ctx.outputs.build_linux }}
+      build_ohos: ${{ steps.ctx.outputs.build_ohos }}
+      linux_arch: ${{ steps.ctx.outputs.linux_arch }}
+      linux_formats: ${{ steps.ctx.outputs.linux_formats }}
+      ref: ${{ steps.buildref.outputs.ref }}
+      app_sha: ${{ steps.buildref.outputs.app_sha }}
+      symbols_tag: ${{ steps.symbols.outputs.tag }}
+    steps:
+      - name: Require app repo token
+        run: |
+          if [ -z "$APP_TOKEN" ]; then
+            echo "::error::Missing APP_REPO_TOKEN (or CROSS_REPO_TOKEN) with contents:read+write on ${APP_REPO}."
+            exit 1
+          fi
+
+      - name: Resolve
+        id: ctx
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "release" ]; then
+            TAG='${{ github.event.release.tag_name }}'
+            PRE='${{ github.event.release.prerelease }}'
+            TARGET='${{ github.repository }}'
+            BUILD_ANDROID=true
+            BUILD_WINDOWS=true
+            BUILD_LINUX=true
+            # macOS ships through TestFlight like iOS/iPadOS; the DMG job is
+            # opt-in by editing the release workflow inputs (manual dispatch).
+            BUILD_MACOS=false
+            # HAP needs self-hosted DevEco/OH Flutter; opt-in via manual dispatch.
+            BUILD_OHOS=false
+            # Temporarily x64-only: the pinned fjs precompiled generation has
+            # no aarch64-unknown-linux-gnu asset, and CargoKit (mode auto, per
+            # cargokit_options.yaml) rejects targets outside the signed recipe
+            # before any local fallback. Restore to "both" once ClosedHarmony/
+            # fjs publishes a generation that includes the arm64 linux target.
+            LINUX_ARCH=x64
+            LINUX_FORMATS=all
+          else
+            TAG='${{ inputs.tag }}'
+            PRE='${{ inputs.prerelease }}'
+            TARGET='${{ github.repository }}'
+            BUILD_ANDROID='${{ inputs.build_android }}'
+            BUILD_WINDOWS='${{ inputs.build_windows }}'
+            BUILD_MACOS='${{ inputs.build_macos }}'
+            BUILD_LINUX='${{ inputs.build_linux }}'
+            BUILD_OHOS='${{ inputs.build_ohos }}'
+            LINUX_ARCH='${{ inputs.linux_arch }}'
+            LINUX_FORMATS='${{ inputs.linux_formats }}'
+          fi
+          if [ -z "$TAG" ]; then
+            echo "::error::Missing release tag"
+            exit 1
+          fi
+          LINUX_ARCH="${LINUX_ARCH:-both}"
+          LINUX_FORMATS="${LINUX_FORMATS:-all}"
+          BUILD_OHOS="${BUILD_OHOS:-false}"
+          STRIPPED="${TAG#v}"
+          if [[ "$STRIPPED" =~ ^([0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.]+)?)\+([0-9A-Za-z._-]+)$ ]]; then
+            BUILD_NAME="${BASH_REMATCH[1]}"
+            BUILD_NUMBER="${BASH_REMATCH[3]}"
+          elif [[ "$STRIPPED" =~ ^([0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.]+)?)$ ]]; then
+            BUILD_NAME="${BASH_REMATCH[1]}"
+            BUILD_NUMBER=""
+          else
+            BUILD_NAME=""
+            BUILD_NUMBER=""
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "prerelease=$PRE" >> "$GITHUB_OUTPUT"
+          echo "target_repo=$TARGET" >> "$GITHUB_OUTPUT"
+          echo "build_name=$BUILD_NAME" >> "$GITHUB_OUTPUT"
+          echo "build_number=$BUILD_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "build_android=$BUILD_ANDROID" >> "$GITHUB_OUTPUT"
+          echo "build_windows=$BUILD_WINDOWS" >> "$GITHUB_OUTPUT"
+          echo "build_macos=$BUILD_MACOS" >> "$GITHUB_OUTPUT"
+          echo "build_linux=$BUILD_LINUX" >> "$GITHUB_OUTPUT"
+          echo "build_ohos=$BUILD_OHOS" >> "$GITHUB_OUTPUT"
+          echo "linux_arch=$LINUX_ARCH" >> "$GITHUB_OUTPUT"
+          echo "linux_formats=$LINUX_FORMATS" >> "$GITHUB_OUTPUT"
+          echo "Resolved tag=$TAG android=$BUILD_ANDROID windows=$BUILD_WINDOWS macos=$BUILD_MACOS linux=$BUILD_LINUX ohos=$BUILD_OHOS arch=$LINUX_ARCH formats=$LINUX_FORMATS"
+
+      # Resolve which commit of the PRIVATE app repo to build. Normally its
+      # default branch HEAD whose pubspec version matches the tag. For
+      # back-filling an older build (e.g. releasing v1.0.1+9 after main already
+      # moved to 1.0.1+10), fall back to the commit that bumped pubspec to the
+      # tag version. An explicit ref input always wins.
+      #
+      # persist-credentials stays ON here (unlike the build jobs): the blob:none
+      # partial clone lazily fetches pubspec.yaml blobs during `git show`, which
+      # needs credentials for a private repo. This job runs no third-party
+      # actions after the checkout.
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.APP_REPO }}
+          token: ${{ env.APP_TOKEN }}
+          fetch-depth: 0
+          filter: blob:none
+
+      - name: Resolve build ref
+        id: buildref
+        env:
+          TAG: ${{ steps.ctx.outputs.tag }}
+          REF_OVERRIDE: ${{ inputs.ref }}
+        run: |
+          set -euo pipefail
+          STRIPPED="${TAG#v}"
+          RESOLVED=""
+          if [ -n "${REF_OVERRIDE:-}" ]; then
+            # Normalize to a full SHA: actions/checkout cannot fetch short SHAs
+            # ("upload-pack: not our ref"), and branch names would float. The
+            # full-history clone only has remote-tracking refs, so a bare
+            # branch name needs the origin/ prefix.
+            RESOLVED="$(git rev-parse --verify "${REF_OVERRIDE}^{commit}" 2>/dev/null \
+              || git rev-parse --verify "origin/${REF_OVERRIDE}^{commit}")"
+            echo "Using explicit ref override: $REF_OVERRIDE -> $RESOLVED"
+          else
+            ver_at() { git show "$1:pubspec.yaml" | sed -n 's/^version:[[:space:]]*//p' | tr -d '[:space:]'; }
+            HEAD_VER="$(ver_at HEAD)"
+            if [ "$HEAD_VER" = "$STRIPPED" ]; then
+              echo "HEAD pubspec version ($HEAD_VER) matches tag; building default branch HEAD"
+            else
+              echo "HEAD pubspec version ($HEAD_VER) != tag version ($STRIPPED); searching history for the bump commit"
+              FOUND=""
+              while read -r c; do
+                v="$(ver_at "$c")"
+                if [ "$v" != "$STRIPPED" ]; then
+                  continue
+                fi
+                # The bump commit is where the version was introduced: no parent
+                # may already carry it (skips merges that merely propagate it).
+                is_intro=true
+                for p in $(git rev-list --parents -n1 "$c" | cut -d' ' -f2-); do
+                  pv="$(ver_at "$p" 2>/dev/null || true)"
+                  if [ "$pv" = "$STRIPPED" ]; then
+                    is_intro=false
+                    break
+                  fi
+                done
+                if $is_intro; then
+                  FOUND="$c"
+                  break
+                fi
+              done < <(git rev-list HEAD -- pubspec.yaml)
+              if [ -z "$FOUND" ]; then
+                echo "::error::No commit found whose pubspec version is $STRIPPED (HEAD is $HEAD_VER). Refusing to build a mismatched binary."
+                exit 1
+              fi
+              echo "Resolved bump commit for $STRIPPED: $FOUND"
+              RESOLVED="$FOUND"
+            fi
+          fi
+          APP_SHA="${RESOLVED:-$(git rev-parse HEAD)}"
+          if [ -n "$RESOLVED" ]; then
+            echo "ref=$RESOLVED" >> "$GITHUB_OUTPUT"
+          else
+            echo "ref=" >> "$GITHUB_OUTPUT"
+          fi
+          echo "app_sha=$APP_SHA" >> "$GITHUB_OUTPUT"
+          echo "Building $APP_SHA"
+
+      # Obfuscation symbols cannot live on this public repo: Actions artifacts
+      # of a public repo are downloadable by anyone, and these files reverse the
+      # Dart obfuscation. Park them in a private release on the app repo instead;
+      # each build job uploads into the same tag with --clobber.
+      - name: Prepare private symbols release
+        id: symbols
+        env:
+          GH_TOKEN: ${{ env.APP_TOKEN }}
+          TAG: ${{ steps.ctx.outputs.tag }}
+          APP_SHA: ${{ steps.buildref.outputs.app_sha }}
+        run: |
+          set -euo pipefail
+          SAFE_TAG="${TAG#v}"
+          SAFE_TAG="${SAFE_TAG//+/-}"
+          SYM_TAG="symbols-${SAFE_TAG}"
+          echo "tag=$SYM_TAG" >> "$GITHUB_OUTPUT"
+          if gh release view "$SYM_TAG" --repo "$APP_REPO" >/dev/null 2>&1; then
+            echo "Private symbols release $SYM_TAG already exists on $APP_REPO"
+            exit 0
+          fi
+          gh release create "$SYM_TAG" --repo "$APP_REPO" \
+            --target "$APP_SHA" \
+            --title "Dart symbols ${TAG}" \
+            --notes "Private. Dart obfuscation symbols for ${TAG} (built from ${APP_SHA}). Reverse the obfuscation: never publish these."
+          echo "Created private symbols release $SYM_TAG on $APP_REPO"
+
+  android:
+    name: Android signed split APKs
+    needs: context
+    if: needs.context.outputs.build_android == 'true'
+    runs-on: ubuntu-24.04
+    permissions:
+      # contents: write — uploads the APKs to this repo's release with GITHUB_TOKEN.
+      contents: write
+    env:
+      APP_TOKEN: ${{ secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN }}
+    steps:
+      - name: Require secrets
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in APP_TOKEN ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing secret: $name"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "Android release requires production signing secrets. No debug signing fallback."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.APP_REPO }}
+          token: ${{ env.APP_TOKEN }}
+          persist-credentials: false
+          ref: ${{ needs.context.outputs.ref }}
+
+      # Caches the CargoKit precompiled-generation store that
+      # tool/fetch_prebuilt_natives.sh warms below, so re-runs skip the
+      # downloads. fjs ships precompiled for every release target; no Rust
+      # toolchain is installed (same contract as build-release.bat).
+      - name: Cache fjs precompiled artifacts
+        uses: actions/cache@v4
+        with:
+          path: .cargo-target
+          key: Linux-fjs-precompiled-${{ hashFiles('pubspec.lock', 'android/build.gradle.kts') }}
+          restore-keys: |
+            Linux-fjs-precompiled-
+
+      - name: Free disk space for Android build
+        run: bash scripts/free_android_runner_space.sh
+
+      - name: Init app submodules (l10n only)
+        run: git submodule update --init --depth 1 lib/core/l10n/arb
+
+      - name: Set up Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install Android SDK packages
+        run: |
+          set -euo pipefail
+          export ANDROID_HOME="${ANDROID_HOME:-/opt/android-sdk}"
+          MIRROR="https://mirrors.cloud.tencent.com/AndroidSDK"
+          install_zip() {
+            local url="$1" dest="$2"
+            if [ -d "$dest" ]; then echo "skip $dest (exists)"; return; fi
+            echo "Downloading $url..."
+            mkdir -p "$dest"
+            curl -fsSL -o /tmp/sdk.zip "$url"
+            unzip -q /tmp/sdk.zip -d /tmp/sdk-extract
+            mv /tmp/sdk-extract/* "$dest"/ 2>/dev/null || true
+            rm -rf /tmp/sdk.zip /tmp/sdk-extract
+          }
+          install_zip "$MIRROR/platform-35_r01.zip" "$ANDROID_HOME/platforms/android-35"
+          install_zip "$MIRROR/build-tools_r35_linux.zip" "$ANDROID_HOME/build-tools/35.0.0"
+          install_zip "$MIRROR/platform-tools_r35.0.2-linux.zip" "$ANDROID_HOME/platform-tools"
+          echo "SDK contents:"
+          ls "$ANDROID_HOME/platforms/" "$ANDROID_HOME/build-tools/" "$ANDROID_HOME/platform-tools/" 2>/dev/null
+          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Fetch native prebuilts
+        env:
+          GITHUB_TOKEN: ${{ env.APP_TOKEN }}
+        run: bash tool/fetch_prebuilt_natives.sh
+
+      - name: Refresh model metadata catalog
+        run: bash tool/sync_model_metadata.sh --strict
+
+      - name: Regenerate OSS licenses
+        run: dart run flutter_oss_licenses:generate
+
+      - name: Write Android release keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          mkdir -p android/app
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/luotopia-key.jks
+          printf '%s\n' \
+            "storePassword=${ANDROID_KEYSTORE_PASSWORD}" \
+            "keyPassword=${ANDROID_KEY_PASSWORD}" \
+            "keyAlias=${ANDROID_KEY_ALIAS}" \
+            "storeFile=luotopia-key.jks" \
+            > android/key.properties
+          test -s android/app/luotopia-key.jks
+          test -s android/key.properties
+          if [ "${ANDROID_KEY_ALIAS}" = "androiddebugkey" ]; then
+            echo "::error::Refusing androiddebugkey alias for release builds"
+            exit 1
+          fi
+
+      - name: Patch freerasp for AGP 9 built-in Kotlin
+        shell: pwsh
+        # freerasp 8.2.2's android/build.gradle still applies the legacy
+        # kotlin-android plugin, which AGP 9 rejects outright. Fresh CI caches
+        # always carry the pristine sources, so this must run on every build.
+        run: ./scripts/patch_freerasp_kotlin.ps1
+
+      - name: Build release split APKs (signed, obfuscated)
+        env:
+          # Opt back into the Crashlytics mapping upload that build.gradle.kts
+          # disables by default (unreachable upload endpoint on some networks).
+          ORG_GRADLE_PROJECT_uploadCrashlyticsMapping: "true"
+        run: |
+          set -euo pipefail
+          EXTRA=()
+          if [ -n "${{ needs.context.outputs.build_name }}" ]; then
+            EXTRA+=(--build-name="${{ needs.context.outputs.build_name }}")
+          fi
+          if [ -n "${{ needs.context.outputs.build_number }}" ]; then
+            EXTRA+=(--build-number="${{ needs.context.outputs.build_number }}")
+          fi
+          # No --no-pub: release builds must regenerate the Android plugin
+          # registrant without dev-only plugins (integration_test), which Gradle
+          # excludes from the release compile classpath.
+          flutter build apk --release \
+            --split-per-abi \
+            --obfuscate \
+            --split-debug-info=build/debug-info \
+            --extra-gen-snapshot-options=--strip \
+            "${EXTRA[@]}"
+
+      - name: Record symbol manifest (Crashlytics buildVersion -> symbols)
+        env:
+          TAG: ${{ needs.context.outputs.tag }}
+          BUILD_NAME: ${{ needs.context.outputs.build_name }}
+          BUILD_NUMBER: ${{ needs.context.outputs.build_number }}
+        run: |
+          set -euo pipefail
+          test -d build/debug-info
+          MANIFEST=build/debug-info/symbols-manifest.txt
+          {
+            echo "tag=$TAG"
+            echo "build_name=$BUILD_NAME"
+            echo "build_number=$BUILD_NUMBER"
+            echo "commit=$GITHUB_SHA"
+            echo "built_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "# Crashlytics reports versionCode as abiCode*1e8 + yyMMddHH (UTC);"
+            echo "# abiCode 1=armeabi-v7a 2=arm64-v8a 3=x86_64 (android/app/build.gradle.kts)."
+            echo "# force-version-code-ignoring-abi=true keeps Flutter from adding its own"
+            echo "# abiVersionCode*1000 offset, which used to corrupt the yyMMddHH day digits."
+          } > "$MANIFEST"
+          python3 - >> "$MANIFEST" <<'PY'
+          import json, pathlib
+          debug_info = pathlib.Path("build/debug-info")
+          present = sorted(p.name for p in debug_info.glob("app.android-*.symbols"))
+          # Flutter names armeabi-v7a symbols app.android-arm.symbols on some
+          # versions and app.android-armv7.symbols on others; match what exists
+          # instead of hardcoding one spelling.
+          candidates = {
+              "armeabi-v7a": ("app.android-arm.symbols", "app.android-armv7.symbols"),
+              "arm64-v8a": ("app.android-arm64.symbols",),
+              "x86_64": ("app.android-x64.symbols",),
+          }
+          meta = pathlib.Path("build/app/outputs/apk/release/output-metadata.json")
+          if not meta.exists():
+              print("# output-metadata.json missing; symbols present: "
+                    + (", ".join(present) or "none"))
+              raise SystemExit(0)
+          for element in json.loads(meta.read_text()).get("elements", []):
+              abis = [f["value"] for f in element.get("filters", [])
+                      if f.get("filterType") == "ABI"]
+              abi = abis[0] if abis else "universal"
+              match = next((n for n in candidates.get(abi, ()) if n in present), None)
+              if match is None and abi == "universal":
+                  match = "<universal APK keeps flutter.versionCode>"
+              elif match is None:
+                  match = "MISSING (present: " + (", ".join(present) or "none") + ")"
+              print(f"versionCode={element.get('versionCode')} abi={abi} symbols={match}")
+          PY
+          echo "# archived files" >> "$MANIFEST"
+          ls -1 build/debug-info >> "$MANIFEST"
+          cat "$MANIFEST"
+
+      # Dart obfuscation symbols are the only way to read an obfuscated
+      # Crashlytics stack (`flutter symbolize -i stack.txt -d app.android-arm64.symbols`),
+      # and they reverse the obfuscation. This repo is public, so its Actions
+      # artifacts are world-downloadable and its release assets are public:
+      # push the symbols to the private symbols release on the app repo instead.
+      - name: Publish Dart obfuscation symbols (private app release)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ env.APP_TOKEN }}
+          SYM_TAG: ${{ needs.context.outputs.symbols_tag }}
+          APP_SHA: ${{ needs.context.outputs.app_sha }}
+          TAG: ${{ needs.context.outputs.tag }}
+        run: |
+          set -euo pipefail
+          test -d build/debug-info
+          OUT="$RUNNER_TEMP/dart-symbols-android.tar.gz"
+          tar -czf "$OUT" -C build debug-info
+          # The context job normally creates this release; re-check here so a
+          # hiccup there cannot silently drop the only copy of the symbols — an
+          # obfuscated build without them has unreadable crash stacks forever.
+          gh release view "$SYM_TAG" --repo "$APP_REPO" >/dev/null 2>&1 \
+            || gh release create "$SYM_TAG" --repo "$APP_REPO" \
+                 --target "$APP_SHA" --title "Dart symbols ${TAG}" \
+                 --notes "Private. Dart obfuscation symbols for ${TAG}. They reverse the obfuscation: never publish these." \
+            || echo "::warning::cannot ensure symbols release ${SYM_TAG} on ${APP_REPO}"
+          if gh release upload "$SYM_TAG" "$OUT" --repo "$APP_REPO" --clobber; then
+            echo "Published Dart symbols to ${APP_REPO}@${SYM_TAG}"
+          else
+            echo "::warning::Dart symbol upload to ${SYM_TAG} failed; the release still ships, but its obfuscated crash stacks stay unreadable."
+          fi
+          rm -f "$OUT"
+
+      - name: Stage release APKs only
+        run: |
+          set -euo pipefail
+          OUT=build/app/outputs/flutter-apk
+          ls -la "$OUT"
+          if compgen -G "$OUT/*debug*.apk" > /dev/null; then
+            echo "::error::Debug APKs present; refusing upload"
+            exit 1
+          fi
+          mapfile -t APKS < <(find "$OUT" -maxdepth 1 -type f -name '*-release.apk' | sort)
+          if [ "${#APKS[@]}" -eq 0 ]; then
+            echo "::error::No *-release.apk found"
+            exit 1
+          fi
+          mkdir -p dist
+          for f in "${APKS[@]}"; do
+            cp -v "$f" "dist/$(basename "$f")"
+          done
+          rm -rf build/debug-info
+          ls -la dist
+
+      - name: Upload APKs to homepage release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.context.outputs.tag }}
+          TARGET_REPO: ${{ needs.context.outputs.target_repo }}
+        run: |
+          set -euo pipefail
+          gh release view "$TAG" --repo "$TARGET_REPO" >/dev/null
+          shopt -s nullglob
+          files=(dist/*-release.apk)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "::error::Nothing to upload"
+            exit 1
+          fi
+          for f in "${files[@]}"; do
+            case "$f" in
+              *debug*)
+                echo "::error::Refusing to upload debug path: $f"
+                exit 1
+                ;;
+            esac
+          done
+          gh release upload "$TAG" "${files[@]}" \
+            --repo "$TARGET_REPO" \
+            --clobber
+          echo "Uploaded ${#files[@]} APK(s) to $TARGET_REPO@$TAG"
+
+      - name: Scrub signing material
+        if: always()
+        run: |
+          rm -f android/key.properties android/app/luotopia-key.jks
+          rm -rf build/debug-info dist
+
+  macos:
+    name: macOS release DMG
+    needs: context
+    if: needs.context.outputs.build_macos == 'true'
+    # Xcode 27 on macos-latest currently crashes inside SwiftPM while extracting
+    # some binary artifacts. Keep release builds on the stable Xcode 16 image.
+    runs-on: macos-15
+    permissions:
+      contents: write
+    env:
+      APP_TOKEN: ${{ secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN }}
+    steps:
+      - name: Require app repo token
+        run: |
+          if [ -z "$APP_TOKEN" ]; then
+            echo "::error::Missing APP_REPO_TOKEN (or CROSS_REPO_TOKEN) with access to ${APP_REPO}"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.APP_REPO }}
+          token: ${{ env.APP_TOKEN }}
+          persist-credentials: false
+          ref: ${{ needs.context.outputs.ref }}
+
+      - name: Init app submodules (l10n only)
+        run: git submodule update --init --depth 1 lib/core/l10n/arb
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Select stable Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
+          xcodebuild -version | grep -F 'Xcode 16.4'
+
+      - name: Enable macOS desktop
+        run: flutter config --enable-macos-desktop --enable-macos-arm64-only
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Fetch native prebuilts
+        env:
+          GITHUB_TOKEN: ${{ env.APP_TOKEN }}
+        run: bash tool/fetch_prebuilt_natives.sh
+
+      # Same precompiled XCFramework build-ios.sh fetches; the ios/macos Podfile
+      # hooks re-run (and re-verify) it during pod install. Replaces the old
+      # ~20-minute cargo source build — the pinned generation publishes the
+      # signed fjs.xcframework.zip, so no Rust toolchain is needed here.
+      - name: Fetch precompiled fjs XCFramework
+        shell: bash
+        run: bash tool/fetch_fjs_xcframework.sh
+
+      - name: Refresh model metadata catalog
+        run: bash tool/sync_model_metadata.sh --strict
+
+      - name: Regenerate OSS licenses
+        run: dart run flutter_oss_licenses:generate
+
+      # Obfuscated like every other distributed platform: an unobfuscated DMG
+      # ships the whole Dart symbol table of the same codebase that Android,
+      # Windows and Linux deliberately hide, so anyone unpacking App.framework
+      # could read it back. Symbols go to the private app-repo symbols release,
+      # never to this public repo's artifacts or release assets.
+      - name: Build macOS release (obfuscated)
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXTRA=()
+          if [ -n "${{ needs.context.outputs.build_name }}" ]; then
+            EXTRA+=(--build-name="${{ needs.context.outputs.build_name }}")
+          fi
+          if [ -n "${{ needs.context.outputs.build_number }}" ]; then
+            EXTRA+=(--build-number="${{ needs.context.outputs.build_number }}")
+          fi
+          for attempt in 1 2; do
+            if env \
+              CODE_SIGNING_ALLOWED=NO \
+              CODE_SIGNING_REQUIRED=NO \
+              CODE_SIGN_IDENTITY= \
+              DEVELOPMENT_TEAM= \
+              flutter build macos --release \
+              --obfuscate \
+              --split-debug-info=build/debug-info \
+              --no-pub \
+              "${EXTRA[@]}"; then
+              break
+            fi
+            if [ "$attempt" -eq 2 ]; then
+              exit 1
+            fi
+            echo "::warning::macOS release build failed; retrying once"
+            sleep 15
+          done
+
+      - name: Publish Dart obfuscation symbols (private app release)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ env.APP_TOKEN }}
+          SYM_TAG: ${{ needs.context.outputs.symbols_tag }}
+          APP_SHA: ${{ needs.context.outputs.app_sha }}
+          TAG: ${{ needs.context.outputs.tag }}
+        run: |
+          set -euo pipefail
+          test -d build/debug-info
+          OUT="$RUNNER_TEMP/dart-symbols-macos.tar.gz"
+          tar -czf "$OUT" -C build debug-info
+          # The context job normally creates this release; re-check here so a
+          # hiccup there cannot silently drop the only copy of the symbols — an
+          # obfuscated build without them has unreadable crash stacks forever.
+          gh release view "$SYM_TAG" --repo "$APP_REPO" >/dev/null 2>&1 \
+            || gh release create "$SYM_TAG" --repo "$APP_REPO" \
+                 --target "$APP_SHA" --title "Dart symbols ${TAG}" \
+                 --notes "Private. Dart obfuscation symbols for ${TAG}. They reverse the obfuscation: never publish these." \
+            || echo "::warning::cannot ensure symbols release ${SYM_TAG} on ${APP_REPO}"
+          if gh release upload "$SYM_TAG" "$OUT" --repo "$APP_REPO" --clobber; then
+            echo "Published Dart symbols to ${APP_REPO}@${SYM_TAG}"
+          else
+            echo "::warning::Dart symbol upload to ${SYM_TAG} failed; the release still ships, but its obfuscated crash stacks stay unreadable."
+          fi
+          rm -f "$OUT"
+
+      - name: Package macOS DMG
+        id: package
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG='${{ needs.context.outputs.tag }}'
+          SAFE_TAG="${TAG#v}"
+          SAFE_TAG="${SAFE_TAG//+/-}"
+          APP_PATH="build/macos/Build/Products/Release/Luotopia.app"
+          STAGE="dist/macos-dmg-stage"
+          DMG_PATH="dist/luotopia-${SAFE_TAG}-macos-arm64.dmg"
+
+          if [ ! -d "$APP_PATH" ]; then
+            echo "::error::macOS release app not found at $APP_PATH"
+            find build/macos -type d -name '*.app' -print 2>/dev/null || true
+            exit 1
+          fi
+
+          rm -rf "$STAGE" "$DMG_PATH"
+          mkdir -p "$STAGE" dist
+          ditto "$APP_PATH" "$STAGE/Luotopia.app"
+          ln -s /Applications "$STAGE/Applications"
+          cat > "$STAGE/安装说明.txt" <<'EOF'
+          Luotopia macOS 安装说明
+          ======================
+
+          1. 将 Luotopia.app 拖入“应用程序”文件夹。
+          2. 如果系统提示“应用已损坏”“无法验证开发者”，或应用无法打开，
+             请先确认 DMG 来自 Luotopia 官网或 ClosedWHU 官方 GitHub Release，
+             然后打开“终端”并运行：
+
+             xattr -cr /Applications/Luotopia.app
+
+          3. 命令执行完成后，重新打开 Luotopia。
+
+          该命令仅清除 Luotopia.app 的下载隔离扩展属性。
+          不要对来源不明的应用执行此命令。
+          EOF
+          hdiutil create \
+            -volname "Luotopia ${SAFE_TAG}" \
+            -srcfolder "$STAGE" \
+            -ov \
+            -format UDZO \
+            "$DMG_PATH"
+          test -s "$DMG_PATH"
+          hdiutil imageinfo "$DMG_PATH" >/dev/null
+          echo "dmg_path=$DMG_PATH" >> "$GITHUB_OUTPUT"
+          echo "Created $DMG_PATH"
+          ls -lh "$DMG_PATH"
+
+      - name: Upload macOS DMG to homepage release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.context.outputs.tag }}
+          TARGET_REPO: ${{ needs.context.outputs.target_repo }}
+        run: |
+          set -euo pipefail
+          DMG='${{ steps.package.outputs.dmg_path }}'
+          test -f "$DMG"
+          gh release view "$TAG" --repo "$TARGET_REPO" >/dev/null
+          gh release upload "$TAG" "$DMG" \
+            --repo "$TARGET_REPO" \
+            --clobber
+          echo "Uploaded $DMG to $TARGET_REPO@$TAG"
+
+      - name: Cleanup
+        if: always()
+        shell: bash
+        run: rm -rf build/debug-info dist
+
+  windows:
+    name: Windows x64 zip + MSIX + package manifests
+    needs: context
+    if: needs.context.outputs.build_windows == 'true'
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    env:
+      APP_TOKEN: ${{ secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN }}
+    steps:
+      # The `runner` context is not available in job-level `env:` (step-level
+      # only), which made the workflow fail to parse. Export the job-scoped
+      # PUB_CACHE from the runtime RUNNER_TEMP variable instead; GITHUB_ENV
+      # propagates it to every later step in this job, across shells.
+      - name: Point PUB_CACHE at the job temp directory
+        shell: bash
+        run: echo "PUB_CACHE=$RUNNER_TEMP/pub-cache" >> "$GITHUB_ENV"
+
+      - name: Require app repo token
+        shell: bash
+        run: |
+          if [ -z "$APP_TOKEN" ]; then
+            echo "::error::Missing APP_REPO_TOKEN (or CROSS_REPO_TOKEN) with access to ${APP_REPO}"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.APP_REPO }}
+          token: ${{ env.APP_TOKEN }}
+          persist-credentials: false
+          ref: ${{ needs.context.outputs.ref }}
+
+      - name: Init app submodules (l10n only)
+        run: git submodule update --init --depth 1 lib/core/l10n/arb
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Configure short dependency paths
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path $env:PUB_CACHE | Out-Null
+          git config --global core.longpaths true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Fetch native prebuilts
+        env:
+          GITHUB_TOKEN: ${{ env.APP_TOKEN }}
+        run: pwsh -NoProfile -File tool/fetch_prebuilt_natives.ps1
+
+      - name: Patch Windows plugin source encoding
+        shell: pwsh
+        run: ./scripts/patch_whisper_utf8.ps1; ./scripts/patch_no_screenshot_utf8.ps1; ./scripts/patch_windows_deps.ps1
+
+      - name: Refresh model metadata catalog
+        shell: bash
+        run: bash tool/sync_model_metadata.sh --strict
+
+      - name: Regenerate OSS licenses
+        shell: bash
+        run: dart run flutter_oss_licenses:generate
+
+      - name: Build Windows application
+        shell: pwsh
+        env:
+          # pdfx/pdfium vendor CMake uses ancient cmake_minimum_required; new CMake rejects < 3.5
+          CMAKE_POLICY_VERSION_MINIMUM: "3.5"
+        run: |
+          # No --verbose here: this repo is public, so every build log is
+          # world-readable and verbose Flutter/CMake output would leak private
+          # source paths and compiler error snippets. Re-add temporarily (in a
+          # fork/private branch) when debugging INSTALL.vcxproj failures.
+          $arguments = @(
+            'build', 'windows', '--release', '--obfuscate',
+            '--split-debug-info=build/debug-info', '--no-pub'
+          )
+          if ('${{ needs.context.outputs.build_name }}') {
+            $arguments += '--build-name=${{ needs.context.outputs.build_name }}'
+          }
+          if ('${{ needs.context.outputs.build_number }}') {
+            $arguments += '--build-number=${{ needs.context.outputs.build_number }}'
+          }
+          & flutter @arguments
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./scripts/stage_wintun.ps1
+
+      - name: Publish Dart obfuscation symbols (private app release)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ env.APP_TOKEN }}
+          SYM_TAG: ${{ needs.context.outputs.symbols_tag }}
+          APP_SHA: ${{ needs.context.outputs.app_sha }}
+          TAG: ${{ needs.context.outputs.tag }}
+        run: |
+          set -euo pipefail
+          test -d build/debug-info
+          OUT="$RUNNER_TEMP/dart-symbols-windows.tar.gz"
+          tar -czf "$OUT" -C build debug-info
+          # The context job normally creates this release; re-check here so a
+          # hiccup there cannot silently drop the only copy of the symbols — an
+          # obfuscated build without them has unreadable crash stacks forever.
+          gh release view "$SYM_TAG" --repo "$APP_REPO" >/dev/null 2>&1 \
+            || gh release create "$SYM_TAG" --repo "$APP_REPO" \
+                 --target "$APP_SHA" --title "Dart symbols ${TAG}" \
+                 --notes "Private. Dart obfuscation symbols for ${TAG}. They reverse the obfuscation: never publish these." \
+            || echo "::warning::cannot ensure symbols release ${SYM_TAG} on ${APP_REPO}"
+          if gh release upload "$SYM_TAG" "$OUT" --repo "$APP_REPO" --clobber; then
+            echo "Published Dart symbols to ${APP_REPO}@${SYM_TAG}"
+          else
+            echo "::warning::Dart symbol upload to ${SYM_TAG} failed; the release still ships, but its obfuscated crash stacks stay unreadable."
+          fi
+          rm -f "$OUT"
+
+      - name: Stage Windows release
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+          REL_DIR="build/windows/x64/runner/Release"
+          if [ ! -d "$REL_DIR" ]; then
+            REL_DIR="$(find build/windows -type d -path '*/runner/Release' | head -n1 || true)"
+          fi
+          if [ -z "${REL_DIR:-}" ] || [ ! -d "$REL_DIR" ]; then
+            echo "::error::Windows Release output not found"
+            find build/windows -maxdepth 5 -type d 2>/dev/null || true
+            exit 1
+          fi
+          if [ ! -f "$REL_DIR/luotopia.exe" ]; then
+            echo "::error::luotopia.exe missing in $REL_DIR"
+            ls -la "$REL_DIR"
+            exit 1
+          fi
+          case "$REL_DIR" in
+            */Debug|*/debug)
+              echo "::error::Refusing Debug output path: $REL_DIR"
+              exit 1
+              ;;
+          esac
+          echo "rel_dir=$REL_DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Package portable zip (x64)
+        id: zip
+        shell: bash
+        run: |
+          set -euo pipefail
+          REL_DIR='${{ steps.build.outputs.rel_dir }}'
+          TAG='${{ needs.context.outputs.tag }}'
+          SAFE_TAG="${TAG#v}"
+          SAFE_TAG="${SAFE_TAG//+/-}"
+          mkdir -p dist
+          ZIP_NAME="luotopia-${SAFE_TAG}-windows-x64.zip"
+          STAGE="dist/stage"
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE/luotopia"
+          cp -a "$REL_DIR"/. "$STAGE/luotopia/"
+          find "$STAGE" -type f \( -iname '*.pdb' -o -iname '*debug*' \) -delete || true
+          (
+            cd "$STAGE"
+            powershell.exe -NoProfile -Command \
+              "Compress-Archive -Path 'luotopia' -DestinationPath '../${ZIP_NAME}' -Force"
+          )
+          test -f "dist/${ZIP_NAME}"
+          rm -rf "$STAGE"
+          # SHA256 for Scoop / winget (lowercase hex for Scoop; winget wants uppercase)
+          HASH_LOWER=$(powershell.exe -NoProfile -Command \
+            "(Get-FileHash -Algorithm SHA256 'dist/${ZIP_NAME}').Hash.ToLower()")
+          HASH_LOWER=$(echo "$HASH_LOWER" | tr -d '\r\n')
+          HASH_UPPER=$(echo "$HASH_LOWER" | tr '[:lower:]' '[:upper:]')
+          echo "zip_name=${ZIP_NAME}" >> "$GITHUB_OUTPUT"
+          echo "hash_lower=${HASH_LOWER}" >> "$GITHUB_OUTPUT"
+          echo "hash_upper=${HASH_UPPER}" >> "$GITHUB_OUTPUT"
+          ls -la dist
+
+      - name: Build MSIX (unsigned unless PFX secrets present)
+        id: msix
+        shell: bash
+        env:
+          WINDOWS_PFX_BASE64: ${{ secrets.WINDOWS_PFX_BASE64 }}
+          WINDOWS_PFX_PASSWORD: ${{ secrets.WINDOWS_PFX_PASSWORD }}
+        run: |
+          set -euo pipefail
+          TAG='${{ needs.context.outputs.tag }}'
+          SAFE_TAG="${TAG#v}"
+          SAFE_TAG="${SAFE_TAG//+/-}"
+          BN='${{ needs.context.outputs.build_name }}'
+          BC='${{ needs.context.outputs.build_number }}'
+          # MSIX requires four-part version A.B.C.D
+          if [ -n "$BN" ] && [[ "$BN" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+            MAJ="${BASH_REMATCH[1]}"; MIN="${BASH_REMATCH[2]}"; PAT="${BASH_REMATCH[3]}"
+            REV="${BC:-0}"
+            # build-number may be non-numeric; keep digits only
+            REV=$(echo "$REV" | tr -cd '0-9')
+            [ -z "$REV" ] && REV=0
+            MSIX_VER="${MAJ}.${MIN}.${PAT}.${REV}"
+          else
+            MSIX_VER="1.0.0.0"
+          fi
+
+          # msix CLI: --store is a flag (never --store=false); install-certificate is an option
+          MSIX_ARGS=(
+            --build-windows=false
+            --install-certificate=false
+            --architecture=x64
+            --version="$MSIX_VER"
+          )
+          if [ -n "${WINDOWS_PFX_BASE64:-}" ] && [ -n "${WINDOWS_PFX_PASSWORD:-}" ]; then
+            echo "$WINDOWS_PFX_BASE64" | base64 -d > windows/codesign.pfx
+            MSIX_ARGS+=(--certificate-path=windows/codesign.pfx --certificate-password="$WINDOWS_PFX_PASSWORD")
+            echo "MSIX: using provided code-signing certificate"
+          else
+            echo "MSIX: building unsigned package (sideload / Developer Mode)"
+          fi
+
+          dart run msix:create "${MSIX_ARGS[@]}"
+
+          # msix package writes to build/windows/x64/runner/Release/*.msix (depth > 3)
+          MSIX_SRC=""
+          for candidate in \
+            "build/windows/x64/runner/Release/luotopia.msix" \
+            "build/windows/x64/runner/Release/"*.msix
+          do
+            if [ -f "$candidate" ]; then
+              MSIX_SRC="$candidate"
+              break
+            fi
+          done
+          if [ -z "${MSIX_SRC:-}" ]; then
+            MSIX_SRC="$(find ./build -type f -name '*.msix' 2>/dev/null | head -n1 || true)"
+          fi
+          if [ -z "${MSIX_SRC:-}" ]; then
+            echo "::error::MSIX output not found under build/"
+            find . -name '*.msix' 2>/dev/null || true
+            exit 1
+          fi
+          echo "MSIX source: ${MSIX_SRC}"
+          MSIX_NAME="luotopia-${SAFE_TAG}-windows-x64.msix"
+          mkdir -p dist
+          cp -v "$MSIX_SRC" "dist/${MSIX_NAME}"
+          rm -f windows/codesign.pfx
+          echo "msix_name=${MSIX_NAME}" >> "$GITHUB_OUTPUT"
+          ls -la dist
+
+      - name: Generate Scoop + winget manifests
+        shell: bash
+        env:
+          TAG: ${{ needs.context.outputs.tag }}
+          TARGET_REPO: ${{ needs.context.outputs.target_repo }}
+          ZIP_NAME: ${{ steps.zip.outputs.zip_name }}
+          HASH_LOWER: ${{ steps.zip.outputs.hash_lower }}
+          HASH_UPPER: ${{ steps.zip.outputs.hash_upper }}
+          BUILD_NAME: ${{ needs.context.outputs.build_name }}
+        run: |
+          set -euo pipefail
+          ZIP_URL="https://github.com/${TARGET_REPO}/releases/download/${TAG}/${ZIP_NAME}"
+          HTML_URL="https://github.com/${TARGET_REPO}/releases/tag/${TAG}"
+          # Scoop version: strip leading v; keep + if present (Scoop accepts it in version field)
+          VERSION="${TAG#v}"
+          # winget prefers pure semver without build metadata
+          if [ -n "${BUILD_NAME}" ]; then
+            WINGET_VERSION="$BUILD_NAME"
+          else
+            WINGET_VERSION="${VERSION%%+*}"
+          fi
+          RELEASE_DATE="$(date -u +%Y-%m-%d)"
+
+          render() {
+            local src="$1" dst="$2"
+            sed \
+              -e "s|{{VERSION}}|${VERSION}|g" \
+              -e "s|{{WINGET_VERSION}}|${WINGET_VERSION}|g" \
+              -e "s|{{ZIP_URL}}|${ZIP_URL}|g" \
+              -e "s|{{ZIP_HASH}}|${HASH_LOWER}|g" \
+              -e "s|{{ZIP_HASH_UPPER}}|${HASH_UPPER}|g" \
+              -e "s|{{HTML_URL}}|${HTML_URL}|g" \
+              -e "s|{{RELEASE_DATE}}|${RELEASE_DATE}|g" \
+              "$src" > "$dst"
+          }
+
+          render packaging/scoop/luotopia.json.template dist/scoop-luotopia.json
+          render packaging/winget/ClosedWHU.Luotopia.yaml.template dist/winget-ClosedWHU.Luotopia.yaml
+          render packaging/winget/ClosedWHU.Luotopia.installer.yaml.template dist/winget-ClosedWHU.Luotopia.installer.yaml
+          render packaging/winget/ClosedWHU.Luotopia.locale.zh-CN.yaml.template dist/winget-ClosedWHU.Luotopia.locale.zh-CN.yaml
+          ls -la dist
+
+      - name: Upload Windows packages to homepage release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.context.outputs.tag }}
+          TARGET_REPO: ${{ needs.context.outputs.target_repo }}
+        run: |
+          set -euo pipefail
+          gh release view "$TAG" --repo "$TARGET_REPO" >/dev/null
+          shopt -s nullglob
+          files=(
+            dist/*-windows-x64.zip
+            dist/*-windows-x64.msix
+            dist/scoop-luotopia.json
+            dist/winget-ClosedWHU.Luotopia.yaml
+            dist/winget-ClosedWHU.Luotopia.installer.yaml
+            dist/winget-ClosedWHU.Luotopia.locale.zh-CN.yaml
+          )
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "::error::No Windows artifacts to upload"
+            exit 1
+          fi
+          for f in "${files[@]}"; do
+            case "$f" in
+              *debug*|*Debug*)
+                echo "::error::Refusing debug path: $f"
+                exit 1
+                ;;
+            esac
+          done
+          gh release upload "$TAG" "${files[@]}" \
+            --repo "$TARGET_REPO" \
+            --clobber
+          echo "Uploaded Windows artifacts to $TARGET_REPO@$TAG"
+          gh release view "$TAG" --repo "$TARGET_REPO"
+
+      - name: Cleanup
+        if: always()
+        shell: bash
+        run: |
+          rm -rf build/debug-info dist windows/codesign.pfx
+
+  linux:
+    name: Linux ${{ matrix.arch }} packages (release)
+    needs: context
+    if: needs.context.outputs.build_linux == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            os: ubuntu-24.04
+          - arch: arm64
+            os: ubuntu-24.04-arm
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+    env:
+      APP_TOKEN: ${{ secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN }}
+    steps:
+      - name: Check arch selection
+        id: sel
+        run: |
+          set -euo pipefail
+          WANT='${{ needs.context.outputs.linux_arch }}'
+          ARCH='${{ matrix.arch }}'
+          case "$WANT" in
+            both|"") RUN=true ;;
+            x64|amd64) RUN=$([ "$ARCH" = "x64" ] && echo true || echo false) ;;
+            arm64|aarch64) RUN=$([ "$ARCH" = "arm64" ] && echo true || echo false) ;;
+            *)
+              echo "::warning::Unknown linux_arch=$WANT, building both"
+              RUN=true
+              ;;
+          esac
+          echo "run=$RUN" >> "$GITHUB_OUTPUT"
+          echo "Arch filter want=$WANT matrix=$ARCH run=$RUN"
+
+      - name: Require app repo token
+        if: steps.sel.outputs.run == 'true'
+        run: |
+          if [ -z "$APP_TOKEN" ]; then
+            echo "::error::Missing APP_REPO_TOKEN (or CROSS_REPO_TOKEN) with access to ${APP_REPO}"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.sel.outputs.run == 'true'
+        with:
+          repository: ${{ env.APP_REPO }}
+          token: ${{ env.APP_TOKEN }}
+          persist-credentials: false
+          ref: ${{ needs.context.outputs.ref }}
+
+      - name: Init app submodules (l10n only)
+        if: steps.sel.outputs.run == 'true'
+        run: git submodule update --init --depth 1 lib/core/l10n/arb
+
+      - name: Install Linux desktop + packaging tools
+        if: steps.sel.outputs.run == 'true'
+        run: |
+          set -euo pipefail
+          # ARM runners often fail apt over broken IPv6 to ports.ubuntu.com
+          echo 'Acquire::ForceIPv4 "true";' | sudo tee /etc/apt/apt.conf.d/99force-ipv4 >/dev/null
+          echo 'Acquire::Retries "5";' | sudo tee /etc/apt/apt.conf.d/80-retries >/dev/null
+
+          apt_retry() {
+            local n=0
+            local max=5
+            until "$@"; do
+              n=$((n + 1))
+              if [ "$n" -ge "$max" ]; then
+                return 1
+              fi
+              echo "apt failed (attempt $n/$max), retrying in $((n * 15))s..."
+              sleep $((n * 15))
+              sudo apt-get update -y || true
+            done
+          }
+
+          apt_retry sudo apt-get update -y
+          # Core build deps (required)
+          apt_retry sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev \
+            libsecret-1-dev libjsoncpp-dev \
+            libwebkit2gtk-4.1-dev \
+            dpkg-dev fakeroot desktop-file-utils elfutils
+          # Flatpak tools (optional — packaging script already skips if missing)
+          if ! apt_retry sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            flatpak flatpak-builder; then
+            echo "::warning::flatpak tools install failed; Flatpak package will be skipped"
+          fi
+
+          # appimagetool (continuous build)
+          ARCH_U=$(uname -m)
+          case "$ARCH_U" in
+            x86_64) AI_ARCH=x86_64 ;;
+            aarch64|arm64) AI_ARCH=aarch64 ;;
+            *) AI_ARCH=x86_64 ;;
+          esac
+          curl -fsSL --retry 5 --retry-delay 5 -o /tmp/appimagetool.AppImage \
+            "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${AI_ARCH}.AppImage"
+          chmod +x /tmp/appimagetool.AppImage
+          # --appimage-extract always writes ./squashfs-root in CWD (not a path arg)
+          (
+            cd /tmp
+            rm -rf squashfs-root
+            if ./appimagetool.AppImage --appimage-extract; then
+              sudo rm -rf /opt/appimagetool
+              sudo mv /tmp/squashfs-root /opt/appimagetool
+              sudo ln -sfn /opt/appimagetool/AppRun /usr/local/bin/appimagetool
+            else
+              # Fallback: try running AppImage directly (needs FUSE)
+              sudo cp /tmp/appimagetool.AppImage /usr/local/bin/appimagetool
+            fi
+          )
+          command -v appimagetool
+          appimagetool --version || true
+
+      # The pinned fjs precompiled generation ships no aarch64-unknown-linux-gnu
+      # artifact, and CargoKit only falls back to a local cargo build when
+      # rustup is present (its default mode disables precompiled lookups once
+      # rustup exists, and errors out with no toolchain otherwise). The ARM
+      # runner image has neither, so provide one. x64 keeps using the warmed
+      # precompiled store and must NOT get rustup — that would flip CargoKit
+      # into always-build-locally mode there too.
+      - name: Set up Rust for fjs (arm64 local build)
+        if: steps.sel.outputs.run == 'true' && matrix.arch == 'arm64'
+        run: |
+          set -euo pipefail
+          if ! command -v rustup >/dev/null 2>&1; then
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+              | sh -s -- -y --default-toolchain stable --profile minimal
+          fi
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.cargo/bin:$PATH"
+          rustup --version
+          rustc --version
+          cargo --version
+
+      - name: Cache fjs cargo build (arm64)
+        if: steps.sel.outputs.run == 'true' && matrix.arch == 'arm64'
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cargo-target
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: Linux-arm64-fjs-cargo-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            Linux-arm64-fjs-cargo-
+
+      # flutter-action cannot always resolve "stable/any" for linux arm64
+      - name: Set up Flutter (x64)
+        if: steps.sel.outputs.run == 'true' && matrix.arch == 'x64'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Set up Flutter (arm64 via git)
+        if: steps.sel.outputs.run == 'true' && matrix.arch == 'arm64'
+        run: |
+          set -euo pipefail
+          git clone https://github.com/flutter/flutter.git -b stable --depth 1 "$HOME/flutter"
+          echo "$HOME/flutter/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/flutter/bin:$PATH"
+          flutter --version
+          # A git clone lacks the `version` stamp file the hosted toolcache
+          # ships; flutter_oss_licenses reads it for the SDK's own pubspec.lock
+          # entry. Materialize it from the JSON the tool writes on first run.
+          if [ ! -f "$HOME/flutter/version" ] && [ -f "$HOME/flutter/bin/cache/flutter.version.json" ]; then
+            python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["frameworkVersion"])' \
+              "$HOME/flutter/bin/cache/flutter.version.json" > "$HOME/flutter/version"
+          fi
+          flutter config --no-analytics
+          flutter precache --linux
+
+      - name: Enable Linux desktop
+        if: steps.sel.outputs.run == 'true'
+        run: |
+          export PATH="$HOME/flutter/bin:$PATH"
+          flutter config --enable-linux-desktop
+
+      - name: Install dependencies
+        if: steps.sel.outputs.run == 'true'
+        run: |
+          export PATH="$HOME/flutter/bin:$PATH"
+          flutter pub get
+
+      - name: Fetch native prebuilts
+        if: steps.sel.outputs.run == 'true'
+        env:
+          GITHUB_TOKEN: ${{ env.APP_TOKEN }}
+        run: bash tool/fetch_prebuilt_natives.sh
+
+      - name: Refresh model metadata catalog
+        if: steps.sel.outputs.run == 'true'
+        run: |
+          export PATH="$HOME/flutter/bin:$PATH"
+          bash tool/sync_model_metadata.sh --strict
+
+      - name: Regenerate OSS licenses
+        if: steps.sel.outputs.run == 'true'
+        run: |
+          export PATH="$HOME/flutter/bin:$PATH"
+          dart run flutter_oss_licenses:generate
+
+      - name: Build Linux release
+        if: steps.sel.outputs.run == 'true'
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/flutter/bin:$PATH"
+          EXTRA=()
+          if [ -n "${{ needs.context.outputs.build_name }}" ]; then
+            EXTRA+=(--build-name="${{ needs.context.outputs.build_name }}")
+          fi
+          if [ -n "${{ needs.context.outputs.build_number }}" ]; then
+            EXTRA+=(--build-number="${{ needs.context.outputs.build_number }}")
+          fi
+          # Release only — no debug. Symbols from --split-debug-info go to the
+          # private symbols release on the app repo, never to this public repo.
+          # No --verbose (not even for arm64): public repo, public logs.
+          flutter build linux --release \
+            --obfuscate \
+            --split-debug-info=build/debug-info \
+            --no-pub \
+            "${EXTRA[@]}"
+
+      - name: Publish Dart obfuscation symbols (private app release)
+        if: steps.sel.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ env.APP_TOKEN }}
+          SYM_TAG: ${{ needs.context.outputs.symbols_tag }}
+          APP_SHA: ${{ needs.context.outputs.app_sha }}
+          TAG: ${{ needs.context.outputs.tag }}
+          ARCH: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+          test -d build/debug-info
+          OUT="$RUNNER_TEMP/dart-symbols-linux-${ARCH}.tar.gz"
+          tar -czf "$OUT" -C build debug-info
+          # The context job normally creates this release; re-check here so a
+          # hiccup there cannot silently drop the only copy of the symbols — an
+          # obfuscated build without them has unreadable crash stacks forever.
+          gh release view "$SYM_TAG" --repo "$APP_REPO" >/dev/null 2>&1 \
+            || gh release create "$SYM_TAG" --repo "$APP_REPO" \
+                 --target "$APP_SHA" --title "Dart symbols ${TAG}" \
+                 --notes "Private. Dart obfuscation symbols for ${TAG}. They reverse the obfuscation: never publish these." \
+            || echo "::warning::cannot ensure symbols release ${SYM_TAG} on ${APP_REPO}"
+          if gh release upload "$SYM_TAG" "$OUT" --repo "$APP_REPO" --clobber; then
+            echo "Published Dart symbols to ${APP_REPO}@${SYM_TAG}"
+          else
+            echo "::warning::Dart symbol upload to ${SYM_TAG} failed; the release still ships, but its obfuscated crash stacks stay unreadable."
+          fi
+          rm -f "$OUT"
+
+      - name: Package formats (tar.gz / deb / AppImage / flatpak)
+        if: steps.sel.outputs.run == 'true'
+        env:
+          LINUX_FORMATS: ${{ needs.context.outputs.linux_formats }}
+        run: |
+          set -euo pipefail
+          ARCH='${{ matrix.arch }}'
+          BUNDLE=""
+          for candidate in \
+            "build/linux/${ARCH}/release/bundle" \
+            build/linux/x64/release/bundle \
+            build/linux/arm64/release/bundle
+          do
+            if [ -d "$candidate" ]; then
+              BUNDLE="$candidate"
+              break
+            fi
+          done
+          if [ -z "$BUNDLE" ]; then
+            BUNDLE="$(find build/linux -type d -path '*/release/bundle' | head -n1 || true)"
+          fi
+          if [ -z "${BUNDLE:-}" ] || [ ! -d "$BUNDLE" ]; then
+            echo "::error::Linux release bundle not found"
+            find build/linux -maxdepth 6 -type d 2>/dev/null || true
+            exit 1
+          fi
+          case "$BUNDLE" in
+            */debug/*|*/Debug/*)
+              echo "::error::Refusing debug bundle path: $BUNDLE"
+              exit 1
+              ;;
+          esac
+
+          TAG='${{ needs.context.outputs.tag }}'
+          SAFE_TAG="${TAG#v}"
+          SAFE_TAG="${SAFE_TAG//+/-}"
+          mkdir -p dist
+          chmod +x packaging/linux/package-from-bundle.sh
+          packaging/linux/package-from-bundle.sh "$BUNDLE" "$SAFE_TAG" "$ARCH" "$(pwd)/dist"
+
+          # Filter formats if not "all"
+          FORMATS="${LINUX_FORMATS:-all}"
+          FORMATS="$(echo "$FORMATS" | tr '[:upper:]' '[:lower:]' | tr ',' ' ')"
+          if [ "$FORMATS" != "all" ]; then
+            shopt -s nullglob
+            for f in dist/*; do
+              base=$(basename "$f")
+              keep=false
+              for fmt in $FORMATS; do
+                case "$fmt" in
+                  tar|targz|tar.gz) [[ "$base" == *.tar.gz ]] && keep=true ;;
+                  deb) [[ "$base" == *.deb ]] && keep=true ;;
+                  appimage) [[ "$base" == *.AppImage ]] && keep=true ;;
+                  flatpak) [[ "$base" == *.flatpak ]] && keep=true ;;
+                esac
+              done
+              if [ "$keep" != true ]; then
+                echo "Dropping (format filter): $base"
+                rm -f "$f"
+              fi
+            done
+          fi
+
+          rm -rf build/debug-info
+          # Must keep at least tar.gz for homepage
+          if ! compgen -G "dist/*-linux-*.tar.gz" > /dev/null; then
+            echo "::error::tar.gz missing after packaging"
+            ls -la dist || true
+            exit 1
+          fi
+          ls -la dist
+
+      - name: Upload Linux packages to homepage release
+        if: steps.sel.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.context.outputs.tag }}
+          TARGET_REPO: ${{ needs.context.outputs.target_repo }}
+        run: |
+          set -euo pipefail
+          gh release view "$TAG" --repo "$TARGET_REPO" >/dev/null
+          shopt -s nullglob
+          files=(
+            dist/*-linux-*.tar.gz
+            dist/*-linux-*.deb
+            dist/*-linux-*.AppImage
+            dist/*-linux-*.flatpak
+          )
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "::error::No Linux artifacts to upload"
+            exit 1
+          fi
+          for f in "${files[@]}"; do
+            case "$f" in
+              *debug*|*Debug*)
+                echo "::error::Refusing debug path: $f"
+                exit 1
+                ;;
+            esac
+          done
+          gh release upload "$TAG" "${files[@]}" \
+            --repo "$TARGET_REPO" \
+            --clobber
+          echo "Uploaded ${#files[@]} Linux artifact(s) to $TARGET_REPO@$TAG"
+          gh release view "$TAG" --repo "$TARGET_REPO"
+
+      - name: Cleanup
+        if: always() && steps.sel.outputs.run == 'true'
+        run: rm -rf build/debug-info dist
+
+  aur:
+    name: Publish luotopia-bin to AUR
+    needs: [context, linux]
+    if: needs.context.outputs.build_linux == 'true' && needs.context.outputs.linux_arch == 'both'
+    runs-on: ubuntu-24.04
+    container: archlinux:base-devel
+    permissions:
+      contents: read
+    env:
+      APP_TOKEN: ${{ secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN }}
+    steps:
+      - name: Check AUR key
+        id: aur
+        env:
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        run: |
+          if [ -z "$AUR_SSH_PRIVATE_KEY" ]; then
+            echo "::warning::AUR_SSH_PRIVATE_KEY is not configured; skipping AUR publish"
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install AUR publishing tools
+        if: steps.aur.outputs.enabled == 'true'
+        run: pacman -Syu --noconfirm --needed git github-cli openssh
+
+      - uses: actions/checkout@v7
+        if: steps.aur.outputs.enabled == 'true'
+        with:
+          repository: ${{ env.APP_REPO }}
+          token: ${{ env.APP_TOKEN }}
+          persist-credentials: false
+          ref: ${{ needs.context.outputs.ref }}
+
+      - name: Download Linux release archives
+        if: steps.aur.outputs.enabled == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.context.outputs.tag }}
+          TARGET_REPO: ${{ needs.context.outputs.target_repo }}
+        run: |
+          set -euo pipefail
+          SAFE_TAG="${TAG#v}"
+          SAFE_TAG="${SAFE_TAG//+/-}"
+          mkdir -p aur-dist
+          gh release download "$TAG" \
+            --repo "$TARGET_REPO" \
+            --dir aur-dist \
+            --pattern "luotopia-${SAFE_TAG}-linux-x64.tar.gz" \
+            --pattern "luotopia-${SAFE_TAG}-linux-arm64.tar.gz"
+          test -s "aur-dist/luotopia-${SAFE_TAG}-linux-x64.tar.gz"
+          test -s "aur-dist/luotopia-${SAFE_TAG}-linux-arm64.tar.gz"
+
+      - name: Render and push AUR package
+        if: steps.aur.outputs.enabled == 'true'
+        env:
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          AUR_GIT_NAME: ${{ vars.AUR_GIT_NAME }}
+          AUR_GIT_EMAIL: ${{ vars.AUR_GIT_EMAIL }}
+          TAG: ${{ needs.context.outputs.tag }}
+          TARGET_REPO: ${{ needs.context.outputs.target_repo }}
+        run: |
+          set -euo pipefail
+          SAFE_TAG="${TAG#v}"
+          SAFE_TAG="${SAFE_TAG//+/-}"
+          BUILDER_HOME=/home/aurbuilder
+          AUR_DIR="$RUNNER_TEMP/luotopia-bin-aur"
+
+          useradd --create-home --home-dir "$BUILDER_HOME" aurbuilder
+          install -d -m700 -o aurbuilder -g aurbuilder "$AUR_DIR"
+          install -d -m700 -o aurbuilder -g aurbuilder "$BUILDER_HOME/.ssh"
+          printf '%s\n' "$AUR_SSH_PRIVATE_KEY" > "$BUILDER_HOME/.ssh/id_ed25519"
+          chmod 600 "$BUILDER_HOME/.ssh/id_ed25519"
+          chown aurbuilder:aurbuilder "$BUILDER_HOME/.ssh/id_ed25519"
+          ssh-keyscan -H aur.archlinux.org > "$BUILDER_HOME/.ssh/known_hosts"
+          chown aurbuilder:aurbuilder "$BUILDER_HOME/.ssh/known_hosts"
+
+          chown -R aurbuilder:aurbuilder "$GITHUB_WORKSPACE"
+          runuser -u aurbuilder -- env HOME="$BUILDER_HOME" \
+            git clone ssh://aur@aur.archlinux.org/luotopia-bin.git "$AUR_DIR"
+          runuser -u aurbuilder -- env HOME="$BUILDER_HOME" \
+            "$GITHUB_WORKSPACE/packaging/aur/render.sh" \
+            "$TAG" \
+            "$TARGET_REPO" \
+            "$GITHUB_WORKSPACE/aur-dist/luotopia-${SAFE_TAG}-linux-x64.tar.gz" \
+            "$GITHUB_WORKSPACE/aur-dist/luotopia-${SAFE_TAG}-linux-arm64.tar.gz" \
+            "$AUR_DIR"
+
+          GIT_NAME="${AUR_GIT_NAME:-ClosedWHU Release Bot}"
+          GIT_EMAIL="${AUR_GIT_EMAIL:-noreply@whu.sb}"
+          runuser -u aurbuilder -- env HOME="$BUILDER_HOME" \
+            git -C "$AUR_DIR" config user.name "$GIT_NAME"
+          runuser -u aurbuilder -- env HOME="$BUILDER_HOME" \
+            git -C "$AUR_DIR" config user.email "$GIT_EMAIL"
+          runuser -u aurbuilder -- env HOME="$BUILDER_HOME" \
+            git -C "$AUR_DIR" add PKGBUILD .SRCINFO luotopia.desktop
+          if runuser -u aurbuilder -- env HOME="$BUILDER_HOME" \
+            git -C "$AUR_DIR" diff --cached --quiet; then
+            echo "AUR package is already current"
+            exit 0
+          fi
+          runuser -u aurbuilder -- env HOME="$BUILDER_HOME" \
+            git -C "$AUR_DIR" commit -m "luotopia-bin ${TAG#v}"
+          runuser -u aurbuilder -- env HOME="$BUILDER_HOME" \
+            git -C "$AUR_DIR" push origin master
+
+      - name: Scrub AUR key
+        if: always() && steps.aur.outputs.enabled == 'true'
+        run: rm -f /home/aurbuilder/.ssh/id_ed25519
+
+  # HarmonyOS HAP for user sideload (hdc install).
+  # Self-hosted Ubuntu + ErBWs/setup-ohos (CLI/SDK mirror) + OH Flutter clone.
+  # Optional: set secrets OHOS_* for signing. Pin CLI via OHOS_CLI_VERSION if needed.
+  ohos:
+    name: HarmonyOS HAP (sideload)
+    needs: context
+    if: needs.context.outputs.build_ohos == 'true'
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 360
+    permissions:
+      contents: write
+    env:
+      APP_TOKEN: ${{ secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN }}
+      # Pin CLI tools release on ErBWs/ohos-sdk (change intentionally + clear cache).
+      OHOS_CLI_VERSION: "6.1.1.280"
+      # OpenHarmony Flutter (CPF / openharmony-sig). Override via repo variable if needed.
+      # Prefer CPF-Flutter 3.44 canary (matches the local OHOS Flutter toolchain; Dart 3.12).
+      # NOTE: canary — switch back to the latest stable tag once CPF publishes 3.44+ stable.
+      OH_FLUTTER_REPO: https://gitcode.com/CPF-Flutter/flutter_flutter.git
+      # Tag on CPF-Flutter (local branch name may differ).
+      OH_FLUTTER_REF: 3.44.9+ohos-0.0.1-canary1
+    steps:
+      - name: Require app repo token
+        shell: bash
+        run: |
+          if [ -z "$APP_TOKEN" ]; then
+            echo "::error::Missing APP_REPO_TOKEN (or CROSS_REPO_TOKEN) with access to ${APP_REPO}"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.APP_REPO }}
+          token: ${{ env.APP_TOKEN }}
+          persist-credentials: false
+          ref: ${{ needs.context.outputs.ref }}
+
+      - name: Init app submodules (l10n only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git submodule update --init --depth 1 lib/core/l10n/arb
+
+      - name: Install system deps
+        run: |
+          dpkg -l | grep -q libgl1-mesa-dev || sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev || echo "libgl1-mesa-dev not available, continuing"
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Detect persistent HarmonyOS CLI tools
+        id: ohos-cli
+        shell: bash
+        run: |
+          if [ -x "$HOME/ohos-sdk/command-line-tools/bin/ohpm" ] && \
+             [ -d "$HOME/ohos-sdk/command-line-tools/sdk/default/openharmony" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "HOS_SDK_HOME=$HOME/ohos-sdk/command-line-tools/sdk" >> "$GITHUB_ENV"
+            echo "DEVECO_SDK_HOME=$HOME/ohos-sdk/command-line-tools/sdk" >> "$GITHUB_ENV"
+            echo "OHOS_SDK_HOME=$HOME/ohos-sdk/command-line-tools/sdk/default/openharmony" >> "$GITHUB_ENV"
+            echo "$HOME/ohos-sdk/command-line-tools/bin" >> "$GITHUB_PATH"
+            echo "$HOME/ohos-sdk/command-line-tools/tool/node/bin" >> "$GITHUB_PATH"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup HarmonyOS CLI tools
+        if: steps.ohos-cli.outputs.ready != 'true'
+        uses: ErBWs/setup-ohos@v2
+        with:
+          version: ${{ env.OHOS_CLI_VERSION }}
+          cache: false
+
+      - name: Bootstrap OH Flutter
+        shell: bash
+        run: |
+          set -euo pipefail
+          export FLUTTER_GIT_URL="${OH_FLUTTER_REPO}"
+          export PUB_HOSTED_URL="${PUB_HOSTED_URL:-https://pub.dev}"
+          export FLUTTER_STORAGE_BASE_URL="${FLUTTER_STORAGE_BASE_URL:-https://storage.flutter-io.cn}"
+
+          need_clone=1
+          if [ -x "$HOME/oh-flutter/bin/flutter" ]; then
+            ver="$("$HOME/oh-flutter/bin/flutter" --version 2>/dev/null | head -n1 || true)"
+            echo "Cached flutter: $ver"
+            # Accept only OH 3.35.x (Dart 3.9+)
+            if echo "$ver" | grep -qE '3\.35\.|3\.9\.'; then
+              need_clone=0
+            else
+              echo "Cached Flutter is not OH 3.35; recloning"
+              rm -rf "$HOME/oh-flutter"
+            fi
+          fi
+
+          if [ "$need_clone" = "1" ]; then
+            rm -rf "$HOME/oh-flutter"
+            # Tag or branch: --branch works for both when depth=1
+            set +e
+            git clone --filter=blob:none --depth 1 --branch "$OH_FLUTTER_REF" \
+              "$OH_FLUTTER_REPO" "$HOME/oh-flutter"
+            clone_rc=$?
+            set -e
+            if [ $clone_rc -ne 0 ]; then
+              echo "Shallow clone of $OH_FLUTTER_REF failed; trying unshallow fetch"
+              git clone --filter=blob:none "$OH_FLUTTER_REPO" "$HOME/oh-flutter"
+              git -C "$HOME/oh-flutter" fetch --tags --depth 1 origin "$OH_FLUTTER_REF"
+              git -C "$HOME/oh-flutter" checkout "$OH_FLUTTER_REF" \
+                || git -C "$HOME/oh-flutter" checkout "tags/$OH_FLUTTER_REF"
+            fi
+          fi
+
+          git -C "$HOME/oh-flutter" rev-parse --abbrev-ref HEAD || true
+          git -C "$HOME/oh-flutter" log -1 --oneline || true
+          test -x "$HOME/oh-flutter/bin/flutter"
+          echo "FLUTTER_ROOT=$HOME/oh-flutter" >> "$GITHUB_ENV"
+          echo "$HOME/oh-flutter/bin" >> "$GITHUB_PATH"
+
+          if [ -n "${HOS_SDK_HOME:-}" ]; then
+            echo "DEVECO_SDK_HOME=${HOS_SDK_HOME}" >> "$GITHUB_ENV"
+            if [ -d "${HOS_SDK_HOME}/default/openharmony" ]; then
+              echo "OHOS_SDK_HOME=${HOS_SDK_HOME}/default/openharmony" >> "$GITHUB_ENV"
+            fi
+          fi
+
+          # CLI tools often ship hvigor under command-line-tools/hvigor.
+          # NODE_PATH is set later by tool/ohos/build.sh (~/.hvigor-node-path).
+          if [ -d "$HOME/ohos-sdk/command-line-tools/hvigor" ]; then
+            echo "HVIGOR_CLI_HOME=$HOME/ohos-sdk/command-line-tools/hvigor" >> "$GITHUB_ENV"
+          fi
+          ls -la "$HOME/ohos-sdk/command-line-tools" || true
+          ls -la "$HOME/ohos-sdk/command-line-tools/hvigor" || true
+
+          "$HOME/oh-flutter/bin/flutter" config --no-analytics || true
+          if [ -n "${HOS_SDK_HOME:-}" ]; then
+            "$HOME/oh-flutter/bin/flutter" config --ohos-sdk="$HOS_SDK_HOME" || true
+          fi
+          "$HOME/oh-flutter/bin/flutter" --version
+          # Fail early if Dart is too old for pubspec
+          dart_line="$("$HOME/oh-flutter/bin/flutter" --version | grep -i dart || true)"
+          echo "Dart line: $dart_line"
+          "$HOME/oh-flutter/bin/flutter" doctor -v || true
+
+      - name: Fetch native prebuilts
+        env:
+          GITHUB_TOKEN: ${{ env.APP_TOKEN }}
+        run: bash tool/fetch_prebuilt_natives.sh
+
+      - name: npmrc for @ohos packages
+        shell: bash
+        run: |
+          printf '%s\n' \
+            'registry=https://registry.npmmirror.com/' \
+            '@ohos:registry=https://repo.harmonyos.com/npm/' \
+            > "$HOME/.npmrc"
+
+      - name: Prepare optional signing materials from secrets
+        shell: bash
+        env:
+          OHOS_P12_BASE64: ${{ secrets.OHOS_P12_BASE64 }}
+          OHOS_P12_PASSWORD: ${{ secrets.OHOS_P12_PASSWORD }}
+          OHOS_P12_ALIAS: ${{ secrets.OHOS_P12_ALIAS }}
+          OHOS_APP_CERT_BASE64: ${{ secrets.OHOS_APP_CERT_BASE64 }}
+          OHOS_PROFILE_P7B_BASE64: ${{ secrets.OHOS_PROFILE_P7B_BASE64 }}
+        run: |
+          set -euo pipefail
+          SIGN_DIR="$PWD/tool/ohos/signing-ci"
+          mkdir -p "$SIGN_DIR"
+          if [ -n "${OHOS_P12_BASE64:-}" ] && [ -n "${OHOS_APP_CERT_BASE64:-}" ] && [ -n "${OHOS_PROFILE_P7B_BASE64:-}" ]; then
+            echo "$OHOS_P12_BASE64" | base64 -d > "$SIGN_DIR/app.p12"
+            echo "$OHOS_APP_CERT_BASE64" | base64 -d > "$SIGN_DIR/app-debug-cert.cer"
+            echo "$OHOS_PROFILE_P7B_BASE64" | base64 -d > "$SIGN_DIR/signed-profile.p7b"
+            echo "LUOTOPIA_OHOS_SIGN_DIR=$SIGN_DIR" >> "$GITHUB_ENV"
+            echo "LUOTOPIA_OHOS_P12=$SIGN_DIR/app.p12" >> "$GITHUB_ENV"
+            if [ -n "${OHOS_P12_PASSWORD:-}" ]; then
+              echo "LUOTOPIA_P12_PASSWORD=$OHOS_P12_PASSWORD" >> "$GITHUB_ENV"
+            fi
+            if [ -n "${OHOS_P12_ALIAS:-}" ]; then
+              echo "LUOTOPIA_P12_ALIAS=$OHOS_P12_ALIAS" >> "$GITHUB_ENV"
+            fi
+            echo "OHOS signing materials restored from secrets"
+          else
+            echo "No OHOS_* signing secrets — may produce unsigned HAP"
+          fi
+
+      - name: Build HAP (release) + sign
+        shell: bash
+        run: |
+          set -euo pipefail
+          export FLUTTER_ROOT="${FLUTTER_ROOT:-$HOME/oh-flutter}"
+          export HOS_SDK_HOME="${HOS_SDK_HOME:?HOS_SDK_HOME missing after setup-ohos}"
+          export DEVECO_SDK_HOME="${DEVECO_SDK_HOME:-$HOS_SDK_HOME}"
+          export OHOS_SDK_HOME="${OHOS_SDK_HOME:-$HOS_SDK_HOME/default/openharmony}"
+          export PATH="$FLUTTER_ROOT/bin:$HOME/ohos-sdk/command-line-tools/bin:$PATH"
+          bash tool/sync_model_metadata.sh --strict
+          chmod +x tool/ohos/build.sh tool/ohos/sign.sh
+          if [ -d "$HOME/ohos-sdk/command-line-tools/tool/node/bin" ]; then
+            export NODE_HOME="$HOME/ohos-sdk/command-line-tools/tool/node"
+            export PATH="$NODE_HOME/bin:$PATH"
+          fi
+          export CI=false
+          export CONTINUOUS_INTEGRATION=false
+          rm -rf "$HOME/.hvigor/project_caches" || true
+          # Expose CLI plugin paths for hvigorfile createRequire
+          if [ -d "$HOME/ohos-sdk/command-line-tools/hvigor/hvigor-ohos-plugin" ]; then
+            export OHOS_HVIGOR_OHOS_PLUGIN="$HOME/ohos-sdk/command-line-tools/hvigor/hvigor-ohos-plugin"
+          fi
+          bash tool/ohos/build.sh release
+
+      - name: Stage HAP for release
+        id: stage
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG='${{ needs.context.outputs.tag }}'
+          SAFE_TAG="${TAG#v}"
+          SAFE_TAG="${SAFE_TAG//+/-}"
+          mkdir -p dist
+          UNSIGNED="ohos/entry/build/default/outputs/default/entry-default-unsigned.hap"
+          SIGNED="ohos/entry/build/default/outputs/default/entry-default-signed.hap"
+          if [ -f "$SIGNED" ]; then
+            SRC="$SIGNED"
+            KIND=signed
+          elif [ -f "$UNSIGNED" ]; then
+            SRC="$UNSIGNED"
+            KIND=unsigned
+            echo "::warning::Only unsigned HAP available; many devices reject unsigned packages."
+          else
+            echo "::error::No HAP under ohos/entry/build/..."
+            find ohos -name '*.hap' 2>/dev/null || true
+            exit 1
+          fi
+          OUT="dist/luotopia-${SAFE_TAG}-harmonyos-arm64-${KIND}.hap"
+          cp -f "$SRC" "$OUT"
+          ls -la dist
+          echo "hap_name=$(basename "$OUT")" >> "$GITHUB_OUTPUT"
+          echo "hap_path=$OUT" >> "$GITHUB_OUTPUT"
+
+      - name: Upload HAP to homepage release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.context.outputs.tag }}
+          TARGET_REPO: ${{ needs.context.outputs.target_repo }}
+        run: |
+          set -euo pipefail
+          HAP='${{ steps.stage.outputs.hap_path }}'
+          test -f "$HAP"
+          gh release view "$TAG" --repo "$TARGET_REPO" >/dev/null
+          gh release upload "$TAG" "$HAP" --repo "$TARGET_REPO" --clobber
+          echo "Uploaded $HAP to $TARGET_REPO@$TAG"
+          cat > dist/HARMONYOS-SIDELOAD.txt <<'EOF'
+          HarmonyOS HAP (sideload)
+          ------------------------
+          1. Enable developer mode / USB debugging on the device.
+          2. Install with hdc (DevEco / command-line tools):
+               hdc install luotopia-*-harmonyos-arm64-*.hap
+          3. Unsigned HAPs only work on emulators / devices that trust debug certs.
+             Prefer AGC debug/release signing for real devices.
+          Built on GitHub-hosted Ubuntu with ErBWs/setup-ohos + OH Flutter.
+          EOF
+          gh release upload "$TAG" dist/HARMONYOS-SIDELOAD.txt \
+            --repo "$TARGET_REPO" --clobber || true
+
+      - name: Scrub signing materials
+        if: always()
+        shell: bash
+        run: |
+          rm -rf tool/ohos/signing-ci dist
