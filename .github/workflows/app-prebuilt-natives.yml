@@ -47,7 +47,7 @@ env:
   ANDROID_NDK_VERSION: 28.2.13676358
   # Every asset the lock file expects from a rebuild (SHA256SUMS is added last
   # and doubles as the "this generation is complete" marker).
-  EXPECTED_ASSETS: key_obfuscator-ios.a key_obfuscator-ios-simulator.a key_obfuscator-macos.a key_obfuscator-android-arm64-v8a.so key_obfuscator-android-armeabi-v7a.so key_obfuscator-android-x86_64.so key_obfuscator-linux.so key_obfuscator-windows.dll
+  EXPECTED_ASSETS: key_obfuscator-ios.a key_obfuscator-ios-simulator.a key_obfuscator-macos.a key_obfuscator-android-arm64-v8a.so key_obfuscator-android-armeabi-v7a.so key_obfuscator-android-x86_64.so key_obfuscator-linux.so key_obfuscator-linux-arm64.so key_obfuscator-windows.dll
 
 jobs:
   plan:
@@ -226,7 +226,14 @@ jobs:
       - name: Install Android Rust targets
         run: >-
           rustup target add aarch64-linux-android armv7-linux-androideabi
-          x86_64-linux-android
+          x86_64-linux-android aarch64-unknown-linux-gnu
+
+      # Cross linker for the aarch64-unknown-linux-gnu target: the arm64 Linux
+      # desktop build ships this .so and it must match the host arch.
+      - name: Install aarch64 Linux cross toolchain
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y gcc-aarch64-linux-gnu
 
       - name: Build Android and Linux shared libraries
         run: |
@@ -235,6 +242,8 @@ jobs:
           export ANDROID_NDK_HOME="${ANDROID_HOME}/ndk/${ANDROID_NDK_VERSION}"
           cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 build --release
           cargo build --release --target x86_64-unknown-linux-gnu
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
+            cargo build --release --target aarch64-unknown-linux-gnu
 
       - name: Publish android + linux prebuilts to the private release
         env:
@@ -247,6 +256,7 @@ jobs:
           cp "$CRATE_DIR/target/armv7-linux-androideabi/release/libkey_obfuscator.so" stage/key_obfuscator-android-armeabi-v7a.so
           cp "$CRATE_DIR/target/x86_64-linux-android/release/libkey_obfuscator.so" stage/key_obfuscator-android-x86_64.so
           cp "$CRATE_DIR/target/x86_64-unknown-linux-gnu/release/libkey_obfuscator.so" stage/key_obfuscator-linux.so
+          cp "$CRATE_DIR/target/aarch64-unknown-linux-gnu/release/libkey_obfuscator.so" stage/key_obfuscator-linux-arm64.so
           (cd stage && sha256sum * > ../checksums.txt)
           cat checksums.txt
           gh release upload "$TAG" stage/* --repo "$APP_REPO" --clobber
