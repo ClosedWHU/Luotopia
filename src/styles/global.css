@@ -110,10 +110,14 @@
    * alphas lowered because our backdrop is a controlled soft gradient rather
    * than an arbitrary photo — 0.88 would read as flat plastic on the web.
    */
-  --lt-glass-content: hsl(0 0% 100% / 0.62);
-  --lt-glass-overlay: hsl(0 0% 100% / 0.72);
-  --lt-glass-control: hsl(0 0% 100% / 0.44);
-  --lt-glass-subtle: hsl(0 0% 100% / 0.26);
+  --lt-glass-content: hsl(0 0% 100% / 0.46);
+  --lt-glass-overlay: hsl(0 0% 100% / 0.68);
+  --lt-glass-control: hsl(0 0% 100% / 0.28);
+  --lt-glass-subtle: hsl(0 0% 100% / 0.18);
+  --lt-glass-sheen: linear-gradient(135deg, hsl(0 0% 100% / 0.56), hsl(0 0% 100% / 0.06) 38%, transparent 58%, hsl(194 90% 92% / 0.3));
+  --lt-glass-glint: hsl(0 0% 100% / 0.42);
+  --lt-glass-caustic: hsl(195 85% 72% / 0.28);
+  --lt-glass-optics: inset 1px 1px 1px hsl(0 0% 100% / 0.48), inset -1px -1px 1px var(--lt-glass-caustic), inset 0 -8px 16px -16px var(--lt-glass-rim);
 
   /*
    * The navbar gets its own, stricter rung. It is the one surface with body
@@ -148,16 +152,19 @@
   --lt-radius-group: 32px;
 
   --lt-shadow-glass:
+    var(--lt-glass-optics),
     inset 0 1px 0 0 var(--lt-glass-rim),
     inset 0 0 0 0.6px var(--lt-glass-edge),
     0 1px 2px 0 hsl(215 45% 20% / 0.05),
     0 12px 32px -12px hsl(215 45% 20% / 0.18);
   --lt-shadow-glass-control:
+    var(--lt-glass-optics),
     inset 0 1px 0 0 var(--lt-glass-rim),
     inset 0 0 0 0.6px var(--lt-glass-edge),
     0 1px 2px 0 hsl(215 45% 20% / 0.05),
     0 6px 16px -8px hsl(215 45% 20% / 0.16);
   --lt-shadow-glass-raised:
+    var(--lt-glass-optics),
     inset 0 1px 0 0 var(--lt-glass-rim),
     inset 0 0 0 0.6px var(--lt-glass-edge),
     0 2px 6px 0 hsl(215 45% 20% / 0.07),
@@ -258,10 +265,14 @@
   --lt-color-inverse-on-surface: var(--lt-palette-neutral20);
 
   /* Dark glass: white at low alpha, not black. Black glass reads as soot. */
-  --lt-glass-content: hsl(220 24% 16% / 0.58);
+  --lt-glass-content: hsl(220 24% 16% / 0.48);
   --lt-glass-overlay: hsl(220 24% 12% / 0.72);
-  --lt-glass-control: hsl(0 0% 100% / 0.09);
-  --lt-glass-subtle: hsl(0 0% 100% / 0.05);
+  --lt-glass-control: hsl(0 0% 100% / 0.07);
+  --lt-glass-subtle: hsl(0 0% 100% / 0.04);
+  --lt-glass-sheen: linear-gradient(135deg, hsl(210 65% 88% / 0.16), hsl(0 0% 100% / 0.02) 38%, transparent 58%, hsl(195 85% 68% / 0.08));
+  --lt-glass-glint: hsl(205 90% 90% / 0.12);
+  --lt-glass-caustic: hsl(195 85% 72% / 0.16);
+  --lt-glass-optics: inset 1px 1px 1px hsl(0 0% 100% / 0.2), inset -1px -1px 1px var(--lt-glass-caustic), inset 0 -8px 16px -16px var(--lt-glass-rim);
   --lt-glass-navbar: hsl(220 26% 11% / 0.84);
 
   --lt-glass-rim: hsl(0 0% 100% / 0.16);
@@ -270,16 +281,19 @@
   --lt-glass-saturate: 150%;
 
   --lt-shadow-glass:
+    var(--lt-glass-optics),
     inset 0 1px 0 0 var(--lt-glass-rim),
     inset 0 0 0 0.6px var(--lt-glass-edge),
     0 1px 2px 0 rgb(0 0 0 / 0.3),
     0 12px 32px -12px rgb(0 0 0 / 0.6);
   --lt-shadow-glass-control:
+    var(--lt-glass-optics),
     inset 0 1px 0 0 var(--lt-glass-rim),
     inset 0 0 0 0.6px var(--lt-glass-edge),
     0 1px 2px 0 rgb(0 0 0 / 0.25),
     0 6px 16px -8px rgb(0 0 0 / 0.55);
   --lt-shadow-glass-raised:
+    var(--lt-glass-optics),
     inset 0 1px 0 0 var(--lt-glass-rim),
     inset 0 0 0 0.6px var(--lt-glass-edge),
     0 2px 6px 0 rgb(0 0 0 / 0.35),
@@ -473,6 +487,7 @@
  * lose the refraction, never lose the content.
  */
 @utility glass {
+  background-image: radial-gradient(480px circle at var(--lt-light-x, 18%) var(--lt-light-y, 0%), var(--lt-glass-glint), transparent 65%), var(--lt-glass-sheen);
   background-color: var(--lt-glass-content);
   backdrop-filter: blur(var(--lt-glass-blur)) saturate(var(--lt-glass-saturate));
   -webkit-backdrop-filter: blur(var(--lt-glass-blur)) saturate(var(--lt-glass-saturate));
@@ -480,6 +495,7 @@
 }
 
 @utility glass-overlay {
+  background-image: var(--lt-glass-sheen);
   background-color: var(--lt-glass-overlay);
   backdrop-filter: blur(var(--lt-glass-blur-overlay)) saturate(var(--lt-glass-saturate));
   -webkit-backdrop-filter: blur(var(--lt-glass-blur-overlay)) saturate(var(--lt-glass-saturate));
@@ -487,6 +503,7 @@
 }
 
 @utility glass-control {
+  background-image: var(--lt-glass-sheen);
   background-color: var(--lt-glass-control);
   backdrop-filter: blur(var(--lt-glass-blur-control)) saturate(var(--lt-glass-saturate));
   -webkit-backdrop-filter: blur(var(--lt-glass-blur-control)) saturate(var(--lt-glass-saturate));
@@ -591,8 +608,30 @@
   }
 }
 
+@media (prefers-reduced-transparency: reduce) {
+  :root,
+  :root.dark {
+    --lt-glass-content: var(--lt-color-surface);
+    --lt-glass-overlay: var(--lt-color-surface);
+    --lt-glass-control: var(--lt-color-surface);
+    --lt-glass-navbar: var(--lt-color-surface);
+    --lt-glass-sheen: none;
+    --lt-glass-glint: transparent;
+    --lt-modal-surface: var(--lt-color-surface);
+  }
+}
+
+@media (forced-colors: active) {
+  :is(.glass, .glass-control, .glass-overlay, .filled-glass, .lt-navbar, .lt-mobile-menu) {
+    border: 1px solid CanvasText;
+    background-image: none;
+    box-shadow: none;
+  }
+}
+
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   :root {
+    --lt-glass-navbar: hsl(0 0% 100% / 0.98);
     --lt-glass-content: hsl(0 0% 100% / 0.92);
     --lt-glass-overlay: hsl(0 0% 100% / 0.96);
     --lt-glass-control: hsl(0 0% 100% / 0.8);
@@ -602,6 +641,7 @@
   }
 
   :root.dark {
+    --lt-glass-navbar: hsl(220 20% 13% / 0.98);
     --lt-glass-content: hsl(220 20% 17% / 0.96);
     --lt-glass-overlay: hsl(220 20% 13% / 0.98);
     --lt-glass-control: hsl(220 16% 22% / 0.9);
