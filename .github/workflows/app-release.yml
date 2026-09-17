@@ -1692,13 +1692,13 @@ jobs:
 
           need_clone=1
           if [ -x "$HOME/oh-flutter/bin/flutter" ]; then
-            ver="$("$HOME/oh-flutter/bin/flutter" --version 2>/dev/null | head -n1 || true)"
-            echo "Cached flutter: $ver"
-            # Accept only OH 3.35.x (Dart 3.9+)
-            if echo "$ver" | grep -qE '3\.35\.|3\.9\.'; then
+            cached_revision="$(git -C "$HOME/oh-flutter" rev-parse --verify HEAD 2>/dev/null || true)"
+            expected_revision="$(git -C "$HOME/oh-flutter" rev-parse --verify "${OH_FLUTTER_REF}^{commit}" 2>/dev/null || true)"
+            cached_remote="$(git -C "$HOME/oh-flutter" remote get-url origin 2>/dev/null || true)"
+            if [ -n "$expected_revision" ] && [ "$cached_revision" = "$expected_revision" ] && [ "$cached_remote" = "$OH_FLUTTER_REPO" ]; then
               need_clone=0
             else
-              echo "Cached Flutter is not OH 3.35; recloning"
+              echo "Cached Flutter does not match $OH_FLUTTER_REPO at $OH_FLUTTER_REF; recloning"
               rm -rf "$HOME/oh-flutter"
             fi
           fi
