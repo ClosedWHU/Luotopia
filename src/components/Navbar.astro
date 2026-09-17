@@ -100,18 +100,19 @@ const isActive = (href: string) => {
 </div>
 
 <style>
-  /*
-   * Transparent at rest, glass once there is something scrolling underneath.
-   * A permanently-blurred bar over a static hero just dims the artwork, which
-   * is why DeepSeek gates it the same way.
-   *
-   * `blur(0px)` rather than no `backdrop-filter` at all: the property is
-   * animatable, so the bar cross-fades into focus instead of snapping.
-   */
   .lt-navbar {
-    border-bottom: 1px solid transparent;
-    backdrop-filter: blur(0px) saturate(100%);
-    -webkit-backdrop-filter: blur(0px) saturate(100%);
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    max-width: 1152px;
+    margin-inline: auto;
+    border-radius: 24px;
+    border: 1px solid var(--lt-glass-edge);
+    background-color: var(--lt-glass-control);
+    background-image: var(--lt-glass-sheen);
+    box-shadow: var(--lt-shadow-glass);
+    backdrop-filter: blur(var(--lt-glass-blur-navbar)) saturate(var(--lt-glass-saturate));
+    -webkit-backdrop-filter: blur(var(--lt-glass-blur-navbar)) saturate(var(--lt-glass-saturate));
     transition:
       background-color 0.4s cubic-bezier(0.22, 1, 0.36, 1),
       border-color 0.4s cubic-bezier(0.22, 1, 0.36, 1),
@@ -133,7 +134,7 @@ const isActive = (href: string) => {
     border-bottom-color: var(--lt-glass-edge);
     backdrop-filter: blur(var(--lt-glass-blur-navbar)) saturate(var(--lt-glass-saturate));
     -webkit-backdrop-filter: blur(var(--lt-glass-blur-navbar)) saturate(var(--lt-glass-saturate));
-    box-shadow: 0 10px 36px -18px hsl(215 45% 18% / 0.32);
+    box-shadow: var(--lt-shadow-glass-raised);
   }
 
   :global(#lt-navbar .lt-app-plate) {
@@ -156,6 +157,15 @@ const isActive = (href: string) => {
   .lt-navlink[aria-current="page"] {
     color: var(--lt-color-primary);
     font-weight: 500;
+    background-color: var(--lt-glass-control);
+    background-image: var(--lt-glass-sheen);
+    box-shadow: var(--lt-glass-optics), inset 0 0 0 1px var(--lt-glass-edge);
+  }
+
+  .lt-navbar :is(a, button):focus-visible,
+  .lt-mobile-menu :is(a, button):focus-visible {
+    outline: 2px solid var(--lt-color-primary);
+    outline-offset: 3px;
   }
 
   /*
@@ -189,6 +199,15 @@ const isActive = (href: string) => {
    * layered `md:hidden` on desktop.
    */
   .lt-mobile-menu {
+    top: 88px;
+    left: 12px;
+    right: 12px;
+    height: calc(100vh - 100px);
+    height: calc(100dvh - 100px);
+    max-height: calc(100vh - 100px);
+    border-radius: 24px;
+    background-image: var(--lt-glass-sheen);
+    box-shadow: var(--lt-shadow-glass);
     visibility: hidden;
     opacity: 0;
     clip-path: inset(0 0 100% 0);
