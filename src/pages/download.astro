@@ -227,7 +227,7 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
         .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-medium text-on-surface">$1</strong>');
     }
 
-    /** Release notes markdown: headings, lists, hr, paragraphs */
+    /** Release notes markdown: headings, lists, quotes, hr, paragraphs */
     function formatBody(body) {
       if (!body) return '<p class="text-outline">暂无说明</p>';
       const lines = escapeHtml(body).split(/\r?\n/);
@@ -239,8 +239,53 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
           inList = false;
         }
       };
+      let inQuote = false;
+      let quoteLines = [];
+      const closeQuote = () => {
+        if (!inQuote) return;
+        const paras = [];
+        let cur = [];
+        for (const l of quoteLines) {
+          if (l.trim() === "") {
+            if (cur.length) {
+              paras.push(cur);
+              cur = [];
+            }
+          } else {
+            cur.push(l);
+          }
+        }
+        if (cur.length) paras.push(cur);
+        const inner = paras.length
+          ? paras
+              .map(
+                (p) =>
+                  `<p class="my-1 text-body-medium text-on-surface-variant">${p
+                    .map(formatInline)
+                    .join("<br>")}</p>`,
+              )
+              .join("")
+          : '<p class="my-1">&nbsp;</p>';
+        html.push(
+          `<blockquote class="my-2 border-l-2 border-outline-variant pl-3">${inner}</blockquote>`,
+        );
+        inQuote = false;
+        quoteLines = [];
+      };
       for (const raw of lines) {
         const line = raw.replace(/\s+$/, "");
+        // `>` is HTML-escaped to `&gt;` before parsing, so match the entity.
+        const quote = line.match(/^\s*&gt;\s?(.*)$/);
+        if (quote) {
+          if (!inQuote) {
+            closeList();
+            inQuote = true;
+            quoteLines = [];
+          }
+          quoteLines.push(quote[1].replace(/\s+$/, ""));
+          continue;
+        }
+        closeQuote();
         if (line.trim() === "") {
           closeList();
           html.push('<div class="h-2"></div>');
@@ -288,6 +333,7 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
         );
       }
       closeList();
+      closeQuote();
       return html.join("");
     }
 
