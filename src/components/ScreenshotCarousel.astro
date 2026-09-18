@@ -188,6 +188,13 @@ const slides = [
     }
   }
 
+  /* Applied for exactly one frame at the autoplay loop point — see advance().
+   * Id + class beats the Tailwind `transition-transform` utility in both the
+   * layered dev cascade and the flattened build. */
+  #carousel-track.lt-cut {
+    transition: none;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .lt-shot,
     .lt-arrow,
@@ -220,7 +227,10 @@ const slides = [
 
     const total = dots.length;
     const container = track.parentElement;
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Live read, not a snapshot: an OS reduced-motion flip mid-session has to
+    // stop (or restart) autoplay — same contract as the hero rotator and the
+    // dialog close timing.
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     let current = 0;
     let resizeTimer = 0;
     let autoplay = 0;
@@ -266,13 +276,24 @@ const slides = [
 
     function advance() {
       const max = Math.max(0, total - getCols());
-      current = current >= max ? 0 : current + 1;
-      update();
+      if (current >= max) {
+        // Loop point: cut, do not rewind. Sliding back through every panel in
+        // 500ms reads as a fast-forward accident; suppressing the transition
+        // for one (forced) frame restarts the cycle in place instead.
+        current = 0;
+        track.classList.add("lt-cut");
+        update();
+        void track.offsetWidth; // flush the jump with the transition off
+        track.classList.remove("lt-cut");
+      } else {
+        current += 1;
+        update();
+      }
     }
 
     function startAutoplay() {
       stopAutoplay();
-      if (reduceMotion || userPaused || hovered || focused || !inView || document.hidden) return;
+      if (motionQuery.matches || userPaused || hovered || focused || !inView || document.hidden) return;
       autoplay = window.setInterval(advance, 5000);
     }
 
@@ -343,6 +364,15 @@ const slides = [
       if (document.hidden) stopAutoplay();
       else startAutoplay();
     }, { signal });
+
+    // Guarded for engines whose MediaQueryList is not an EventTarget; there
+    // the live read inside startAutoplay still applies on every (re)start.
+    if (typeof motionQuery.addEventListener === "function") {
+      motionQuery.addEventListener("change", () => {
+        if (motionQuery.matches) stopAutoplay();
+        else startAutoplay();
+      }, { signal });
+    }
 
     // Scrolled past the carousel, there is nothing to animate. Also what makes
     // the `lazy` images safe: a slide only auto-advances while on screen.

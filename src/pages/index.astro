@@ -17,7 +17,7 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
 ---
 
 <BaseLayout title="首页">
-  <section class="lt-hero relative overflow-hidden pt-[120px] pb-24 px-4">
+  <section class="relative overflow-hidden pt-[120px] pb-24 px-4">
     <div class="lt-hero-wash" aria-hidden="true"></div>
 
     <div class="relative max-w-6xl mx-auto flex flex-col items-center text-center">
@@ -92,7 +92,7 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
 
   <section class="relative py-24 px-4">
     <div class="max-w-4xl mx-auto">
-      <div class="lt-cta lt-reveal-lift glass rounded-group px-6 py-14 sm:px-12 text-center">
+      <div class="lt-reveal-lift glass rounded-group px-6 py-14 sm:px-12 text-center">
         <h2 class="text-headline-small sm:text-headline-medium text-on-surface mb-4">立即体验</h2>
         <p class="text-body-large text-on-surface-variant mb-9 max-w-md mx-auto">免费、开放、纯净，让校园生活更简单。</p>
         <DownloadButtons variant="hero" />
@@ -122,19 +122,6 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
       radial-gradient(34rem 22rem at 88% 26%, hsl(224 56% 80% / 0.42), transparent 70%);
     mask-image: linear-gradient(#000 0%, rgba(0, 0, 0, 0.92) 9%, transparent 100%);
     -webkit-mask-image: linear-gradient(#000 0%, rgba(0, 0, 0, 0.92) 9%, transparent 100%);
-  }
-
-  .lt-badge-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 999px;
-    background-color: var(--lt-color-primary);
-    /* Static fallback first: `color-mix()` is Chrome 111+, and an invalid
-     * declaration would drop the whole shadow on old kernels. The tint is a
-     * 22% primary mix, approximated at its light/dark reference values. */
-    box-shadow: 0 0 0 3px hsl(211 100% 34% / 0.22);
-    box-shadow: 0 0 0 3px color-mix(in oklab, var(--lt-color-primary) 22%, transparent);
-    animation: lt-pulse 2.6s ease-in-out infinite;
   }
 
   /*
@@ -186,16 +173,6 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
 
   .lt-hero-rise {
     animation: lt-hero-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms) both;
-  }
-
-  @keyframes lt-pulse {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.45;
-    }
   }
 
   /*
@@ -336,7 +313,6 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .lt-badge-dot,
     .lt-scroll-hint,
     .lt-hero-fade,
     .lt-hero-rise {
@@ -362,8 +338,13 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
     if (!rotator) return;
 
     const words = Array.from(rotator.querySelectorAll<HTMLElement>(".lt-word"));
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (words.length <= 1 || reduceMotion) return;
+    if (words.length <= 1) return;
+
+    // Read live, not snapshotted: an OS reduced-motion flip mid-session has to
+    // stop (or restart) the cycle — the same contract the friend-link dialog's
+    // close timing keeps. The typeof guard covers engines whose MediaQueryList
+    // is not an EventTarget; there the old snapshot behaviour remains.
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     const HOLD = 2600;
     /** Must outlast the longest transition in `.lt-word` (0.72s transform). */
@@ -400,10 +381,19 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
       timer = 0;
     };
 
-    start();
-    // A background tab would otherwise pile up intervals and fire every
-    // queued swap at once on return.
-    document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()), { signal });
+    // Single gate for every "should the cycle run" input. A background tab
+    // would otherwise pile up intervals and fire every queued swap at once on
+    // return; a mid-session reduced-motion flip would otherwise keep rolling.
+    const refresh = () => {
+      if (document.hidden || motion.matches) stop();
+      else start();
+    };
+
+    refresh();
+    document.addEventListener("visibilitychange", refresh, { signal });
+    if (typeof motion.addEventListener === "function") {
+      motion.addEventListener("change", refresh, { signal });
+    }
 
     signal.addEventListener("abort", () => {
       stop();
