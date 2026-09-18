@@ -16,7 +16,10 @@ const isActive = (href: string) => {
 };
 ---
 
-<nav id="lt-navbar" class="lt-navbar fixed top-0 left-0 right-0 z-50" transition:persist="lt-navbar">
+<!-- Geometry (top/left/right insets, radius, glass) lives entirely in the
+     scoped `.lt-navbar` rule below; no positioning utilities here so markup
+     and CSS can never disagree about where the bar sits. -->
+<nav id="lt-navbar" class="lt-navbar fixed z-50" transition:persist="lt-navbar">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
     <a href="/" class="flex items-center gap-2 text-title-large font-bold text-on-surface no-underline state-layer rounded-control px-2 py-1">
       <AppIcon class="w-8 h-8" size={32} plate />
@@ -35,7 +38,7 @@ const isActive = (href: string) => {
           </a>
         ))
       }
-      <button id="theme-toggle" class="state-layer rounded-control p-2 ml-1 text-on-surface-variant transition-colors cursor-pointer" aria-label="切换深色模式">
+      <button id="theme-toggle" class="state-layer rounded-control p-2 ml-1 text-on-surface-variant transition-colors cursor-pointer" aria-label="切换深色模式" aria-pressed="false">
         <svg class="dark:hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <svg class="hidden dark:block" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42"/></svg>
       </button>
@@ -66,8 +69,11 @@ const isActive = (href: string) => {
      4rem box, so a sheet hanging below it would have had nothing to refract and
      would have rendered as a flat translucent tint.
 
-  `top-16` puts its first pixel under the nav's border-bottom; the nav is z-50
-  so that hairline paints on top and the two read as one surface.
+  Geometry comes from the scoped `.lt-mobile-menu` rule, same as the bar's:
+  both float 12px in from the viewport edges, and the sheet's top (88px)
+  clears the bar's rounded bottom (12 + 64 + 1px border) by the same 12px
+  gap, so the pair reads as one floating composition rather than one
+  surface bleeding into the next.
 
   Full viewport height, not content height: while the sheet is open Lenis is
   stopped, so with a content-sized sheet the strip of page below it sat in the
@@ -77,7 +83,7 @@ const isActive = (href: string) => {
 -->
 <div
   id="mobile-menu"
-  class="lt-mobile-menu fixed top-16 left-0 right-0 z-40 max-h-[calc(100vh-4rem)] h-[calc(100dvh-4rem)] overflow-y-auto md:hidden"
+  class="lt-mobile-menu fixed z-40 overflow-y-auto md:hidden"
   data-open="false"
   transition:persist="lt-mobile-menu"
 >
@@ -87,13 +93,13 @@ const isActive = (href: string) => {
         <a
           href={link.href}
           aria-current={isActive(link.href) ? "page" : undefined}
-          class="lt-navlink state-layer rounded-control px-3 py-2.5 text-body-large text-on-surface-variant no-underline transition-colors"
+            class="lt-navlink state-layer rounded-control px-3 py-2.5 text-body-large text-on-surface-variant no-underline"
         >
           {link.label}
         </a>
       ))
     }
-    <button id="theme-toggle-mobile" class="lt-navlink state-layer rounded-control px-3 py-2.5 text-body-large text-on-surface-variant cursor-pointer text-left bg-transparent border-none" aria-label="切换深色模式">
+    <button id="theme-toggle-mobile" class="lt-navlink state-layer rounded-control px-3 py-2.5 text-body-large text-on-surface-variant cursor-pointer text-left bg-transparent border-none" aria-label="切换深色模式" aria-pressed="false">
       切换深色 / 浅色模式
     </button>
   </div>
@@ -130,10 +136,12 @@ const isActive = (href: string) => {
    */
   .lt-navbar[data-scrolled="true"],
   .lt-navbar[data-menu-open="true"] {
+    /* Only the fill and the elevation actually differ from the resting bar.
+     * The border color and backdrop-filter this rule used to restate were
+     * byte-identical to the base declarations — dead weight. (The base
+     * `transition` still lists backdrop-filter, and that entry is not dead:
+     * it carries the saturate token change across a theme flip.) */
     background-color: var(--lt-glass-navbar);
-    border-bottom-color: var(--lt-glass-edge);
-    backdrop-filter: blur(var(--lt-glass-blur-navbar)) saturate(var(--lt-glass-saturate));
-    -webkit-backdrop-filter: blur(var(--lt-glass-blur-navbar)) saturate(var(--lt-glass-saturate));
     box-shadow: var(--lt-shadow-glass-raised);
   }
 
@@ -319,6 +327,19 @@ const isActive = (href: string) => {
     });
   }
 
+  const themeToggles = [
+    document.getElementById("theme-toggle"),
+    document.getElementById("theme-toggle-mobile"),
+  ];
+
+  // `aria-pressed` mirrors the resolved theme so assistive tech hears the
+  // state, not just the action. Seeded at module execution — the <head>
+  // inline resolver has already run by then — and on every flip.
+  const syncThemePressed = () => {
+    const dark = document.documentElement.classList.contains("dark");
+    for (const btn of themeToggles) btn?.setAttribute("aria-pressed", String(dark));
+  };
+
   const syncTheme = () => {
     const html = document.documentElement;
     const dark = html.classList.toggle("dark");
@@ -327,9 +348,11 @@ const isActive = (href: string) => {
     try {
       localStorage.setItem("theme", dark ? "dark" : "light");
     } catch (e) {}
+    syncThemePressed();
   };
-  document.getElementById("theme-toggle")?.addEventListener("click", syncTheme);
-  document.getElementById("theme-toggle-mobile")?.addEventListener("click", syncTheme);
+  themeToggles[0]?.addEventListener("click", syncTheme);
+  themeToggles[1]?.addEventListener("click", syncTheme);
+  syncThemePressed();
 
   const isOpen = () => mobileMenu?.dataset.open === "true";
   const setOpen = (open: boolean) => {

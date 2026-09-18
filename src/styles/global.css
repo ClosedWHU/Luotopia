@@ -473,6 +473,30 @@
 }
 
 /*
+ * Registered so the pointer-tracking glint (BaseLayout writes these on
+ * `.glass.lt-lift` surfaces) can interpolate: unregistered custom properties
+ * flip discretely, so the highlight used to jump from the cursor's last
+ * position to the resting corner in a single frame on pointerleave.
+ *
+ * Chrome 85+ / Safari 16.4+; engines that ignore @property keep the old snap —
+ * acceptable degradation, the transition entries below are simply inert there.
+ * BaseLayout writes *percentage* values so the pair always interpolates:
+ * <length> and <percentage> cannot tween into each other, and mixing units
+ * would silently downgrade the transition to a discrete flip.
+ */
+@property --lt-light-x {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 18%;
+}
+
+@property --lt-light-y {
+  syntax: "<length-percentage>";
+  inherits: false;
+  initial-value: 0%;
+}
+
+/*
  * Glass surfaces.
  *
  * `backdrop-filter` is the whole effect: without live content behind the
@@ -492,6 +516,11 @@
   backdrop-filter: blur(var(--lt-glass-blur)) saturate(var(--lt-glass-saturate));
   -webkit-backdrop-filter: blur(var(--lt-glass-blur)) saturate(var(--lt-glass-saturate));
   box-shadow: var(--lt-shadow-glass);
+  /* The glint trail. Overridden (and restated) wherever a hand-written rule
+   * also sets `transition` on the same element — see `.lt-lift` below. */
+  transition:
+    --lt-light-x 0.35s ease-out,
+    --lt-light-y 0.35s ease-out;
 }
 
 @utility glass-overlay {
@@ -574,7 +603,9 @@
 .lt-lift {
   transition:
     box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    translate 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    translate 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    --lt-light-x 0.35s ease-out,
+    --lt-light-y 0.35s ease-out;
 }
 
 /*
@@ -587,7 +618,9 @@
   transition:
     transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms),
     translate 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    --lt-light-x 0.35s ease-out,
+    --lt-light-y 0.35s ease-out;
 }
 
 /* Hover effects are gated on real pointers site-wide: on touch, `:hover`
@@ -652,10 +685,16 @@
 }
 
 /* The page base lives on <html>; <body> stays transparent so the fixed aurora
- * layer can sit between them. */
+ * layer can sit between them.
+ *
+ * No theme-flip transition here, deliberately. The canvas color is hidden
+ * behind the fixed aurora anyway, and every surface that *is* visible — glass
+ * tokens, the shader retint, text utilities — swaps in one frame because CSS
+ * variables are not interpolable without @property registration (Chrome 85+,
+ * above this site's floor). A 0.3s fade on the two properties nobody sees just
+ * made the flip feel half-broken; the honest snap is the consistent one. */
 html {
   background-color: var(--lt-color-canvas);
-  transition: background-color 0.3s ease;
   scroll-behavior: smooth;
 
   /*
@@ -697,7 +736,6 @@ body {
   font-family: var(--font-sans);
   background-color: transparent;
   color: var(--lt-color-on-surface);
-  transition: color 0.3s ease;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -732,6 +770,47 @@ body {
 
 .lt-reveal-lift[data-revealed="true"] {
   transform: none;
+}
+
+/*
+ * Narrow screens: single-column card streams.
+ *
+ * Below `sm` every grid on the site collapses to one column, and the reveal
+ * choreography was tuned for the multi-column case:
+ *
+ * - The per-card `--lt-reveal-delay` stagger (`(i % 3) * 70 + ci * 40` on
+ *   /features) is a *row* effect — same-row cards rising left-to-right. In a
+ *   single column the same values desync vertically adjacent cards (0, 70,
+ *   140ms cycling), so while scrolling each card crosses the trigger line
+ *   alone and lunges at its own moment; the gaps between neighbours keep
+ *   expanding and contracting and the column reads as bobbing up and down
+ *   until the last transition drains.
+ * - `.lt-reveal-lift` cannot fade (opacity < 1 would make the card a backdrop
+ *   root and flatten its glass — see above), so an unrevealed card is already
+ *   fully visible at +28px. The long 0.8s expo-out travel then reads as an
+ *   in-place jump of an on-screen card rather than an entrance, which fast
+ *   flings make worse: IO delivery is frame-throttled, so the trigger can land
+ *   when the card is already well inside the viewport.
+ *
+ * Compress the entrance to a short, delay-free settle: one uniform quick rise
+ * per card, small enough travel that a late trigger is not read as a jump.
+ *
+ * `!important` on the custom property is load-bearing: the stagger arrives as
+ * an inline `style="--lt-reveal-delay: …"`, and only an important author
+ * declaration outranks a normal inline one. Duration goes important for the
+ * same reason the merged `.lt-reveal-lift.lt-lift` rule exists — its
+ * `transition` shorthand would otherwise win the duration back.
+ *
+ * Placed *before* the reduced-motion block so its `transform: none` still
+ * overrides the shortened offset there.
+ */
+@media (max-width: 639.98px) {
+  .lt-reveal,
+  .lt-reveal-lift {
+    --lt-reveal-delay: 0ms !important;
+    transform: translateY(12px);
+    transition-duration: 0.45s !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -809,6 +888,18 @@ body {
   }
 }
 
+/*
+ * Site-wide keyboard focus ring. The navbar carries its own variant (3px
+ * offset, higher specificity, wins over this); everything else — carousel
+ * controls, the changelog pager, dialog buttons, cards, footer links — used to
+ * fall back to the UA default ring, whose weight and colour vary over glass
+ * surfaces and in dark mode. One rule, one token.
+ */
+:focus-visible {
+  outline: 2px solid var(--lt-color-primary);
+  outline-offset: 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .state-layer::before {
     transition: none;
@@ -828,6 +919,15 @@ html.lenis body {
 
 .lenis.lenis-smooth [data-lenis-prevent] {
   overscroll-behavior: contain;
+}
+
+/* Horizontal variant, for the overflow-x code blocks: Lenis only releases
+ * wheel gestures it recognizes as native-scrollable, and `preventDefault`s the
+ * rest — which swallowed horizontal trackpad swipes on the `<pre>` elements.
+ * `contain` on x stops the gesture chaining back to the page once the block
+ * reaches its scroll edge. */
+.lenis.lenis-smooth [data-lenis-prevent-horizontal] {
+  overscroll-behavior-x: contain;
 }
 
 .lenis.lenis-stopped {
