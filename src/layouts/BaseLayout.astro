@@ -18,9 +18,15 @@
   export interface Props {
     title: string;
     description?: string;
+    /** Drop the Navbar/Footer chrome — for utility pages like the app-launch
+     *  landing, where site navigation would compete with the single CTA. */
+    bare?: boolean;
+    /** Emit `<meta name="robots" content="noindex">` — for pages that are
+     *  launch/redirect utilities rather than content. */
+    noindex?: boolean;
   }
 
-  const { title, description } = Astro.props;
+  const { title, description, bare = false, noindex = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -31,6 +37,7 @@
     <meta name="color-scheme" content="light dark" />
     <ClientRouter fallback="swap" />
     <meta name="description" content={description ?? "Luotopia —— 整合校园服务，构建开放生态"} />
+    {noindex && <meta name="robots" content="noindex" />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description ?? "校园服务一站式平台，开放社区驱动"} />
     <meta property="og:image" content="/img/app-icon.png" />
@@ -146,11 +153,11 @@
   </head>
   <body class="min-h-screen flex flex-col relative">
     <AuroraBackground />
-    <Navbar />
+    {!bare && <Navbar />}
     <main class="flex-1 relative z-10">
       <slot />
     </main>
-    <Footer />
+    {!bare && <Footer />}
   </body>
 </html>
 
