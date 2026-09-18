@@ -15,7 +15,7 @@ export const platforms: PlatformDownload[] = [
   {
     id: "android",
     name: "Android",
-    icon: "mobile",
+    icon: "android",
     desc: "APK 直接安装（arm64-v8a / armeabi-v7a / x86_64）",
     note: "Android 8+ 兼容",
   },
@@ -31,14 +31,14 @@ export const platforms: PlatformDownload[] = [
   {
     id: "windows",
     name: "Windows",
-    icon: "desktop_windows",
+    icon: "windows",
     desc: "zip / MSIX / Scoop 清单",
     note: "Windows 10+ 兼容",
   },
   {
     id: "linux",
     name: "Linux",
-    icon: "terminal",
+    icon: "linux",
     desc: "x64 / arm64 多格式",
     note: "tar.gz · AppImage · deb · AUR",
   },
