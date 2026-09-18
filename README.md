@@ -60,6 +60,26 @@ npm run hot-update:verify
 3. 可选：添加环境变量 `PUBLIC_SITE_URL` 为你的自定义域名
 4. 部署后可在 Pages 设置中绑定自定义域名
 
+### 深链域名（luotopia.whu.sb）
+
+App 将 `https://luotopia.whu.sb/*` 注册为 Android App Links（autoVerify）与
+iOS Universal Links（applinks），链接与 App 内路由一一对应（GoRouter 按 path
+匹配）。已安装且验证通过时由系统直接唤起 App；否则由
+`functions/_middleware.ts` 将该域名上的 HTML 导航重写到 `/open` 落地页
+（保留原始 URL），由页面脚本映射回 `luotopia://app/<path>` 并提供
+「打开 App / 下载」引导。
+
+维护要点：
+
+- `public/.well-known/assetlinks.json` 中的 `sha256_cert_fingerprints` 必须与
+  **实际分发的签名证书**一致（当前包含 release 证书与仓库共享 debug 证书）。
+  更换签名密钥后需同步更新，否则 Android 侧验证失效。指纹可用
+  `apksigner verify --print-certs app.apk` 查看。
+- `public/.well-known/apple-app-site-association` 对应 Team ID `ZW372988NV`，
+  经 `public/_headers` 以 `application/json` 提供；该文件必须无重定向直达。
+- 需在 Cloudflare Pages 的自定义域名中绑定 `luotopia.whu.sb`（DNS CNAME 指向
+  Pages 项目）。域名必须**先于** App 发版上线，两端才会在安装时完成验证。
+
 ### Cloudflare Workers (通过 `@astrojs/cloudflare`)
 
 若需 SSR / Workers 部署模式：
