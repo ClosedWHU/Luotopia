@@ -1,0 +1,19 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["ZW372988NV.sb.whu.luotopia", "ZW372988NV.sb.whu.luotopia.debug"],
+        "components": [
+          { "/": "/_astro/*", "exclude": true },
+          { "/": "/img/*", "exclude": true },
+          { "/": "/api/*", "exclude": true },
+          { "/": "/hot-update/*", "exclude": true },
+          { "/": "/open", "exclude": true },
+          { "/": "/open/*", "exclude": true },
+          { "/": "/data/*", "exclude": true },
+          { "/": "/*" }
+        ]
+      }
+    ]
+  }
+}

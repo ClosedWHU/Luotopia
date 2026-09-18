@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "sb.whu.luotopia",
+      "sha256_cert_fingerprints": [
+        "D4:0B:9B:1F:01:50:22:1A:59:36:84:83:72:8E:A4:B1:3D:12:22:59:34:75:5E:7A:15:35:40:6F:1B:74:46:A7",
+        "3E:2E:EC:6D:AF:3B:EE:56:21:A8:41:9F:41:33:FB:74:FF:5B:4C:EA:81:9A:AE:08:18:19:C4:A0:FA:49:F9:75"
+      ]
+    }
+  }
+]

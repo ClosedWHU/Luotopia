@@ -1,0 +1,243 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import AppIcon from "../components/AppIcon.astro";
+import Icon from "../components/Icon.astro";
+
+/*
+ * App-launch landing page for the deep-link domain (luotopia.whu.sb).
+ *
+ * How the whole flow fits together:
+ *
+ * - The app registers https://luotopia.whu.sb/* as Android App Links
+ *   (autoVerify + /.well-known/assetlinks.json) and iOS Universal Links
+ *   (applinks: entitlement + /.well-known/apple-app-site-association). When
+ *   the app is installed and verified, the OS opens it directly and this page
+ *   is never even fetched.
+ * - When it is not (missing install, failed verification, in-app browsers,
+ *   address-bar entry), the middleware in functions/_middleware.ts serves
+ *   this page for *any* HTML navigation on that host while preserving the
+ *   original URL. The script below then maps `location.pathname + search`
+ *   onto `luotopia://app<path>?<query>&source=web` — the same routes the
+ *   widgets and live updates already emit, and GoRouter matches on path only.
+ * - The URL is deliberately never rewritten client-side: it is the deep link.
+ *
+ * All site links here are absolute https://www.whu.sb URLs: relative links
+ * would stay on the deep-link host, where the middleware would only serve
+ * this launch page again.
+ */
+const SITE = "https://www.whu.sb";
+---
+
+<BaseLayout title="正在打开 珞家" bare noindex>
+  <section class="lt-open-stage flex flex-col items-center justify-center px-6 py-16 text-center">
+    <AppIcon class="w-24 h-24" size={96} plate />
+    <h1 class="mt-6 text-headline-small text-on-surface">珞家</h1>
+    <p class="mt-1 text-body-medium text-on-surface-variant">武汉大学一站式数字校园平台</p>
+
+    <div class="mt-8 flex items-center justify-center gap-2 text-body-medium text-on-surface-variant">
+      <span id="launch-spinner" class="lt-open-spinner" aria-hidden="true"></span>
+      <span id="launch-status">正在打开 App…</span>
+    </div>
+
+    <div id="launch-fallback" data-shown="false" class="mt-8 w-full max-w-xs flex-col items-stretch gap-3">
+      <button
+        id="open-app-btn"
+        type="button"
+        class="filled-glass state-layer inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 text-[17px] font-medium cursor-pointer border-none"
+      >
+        <Icon name="open_in_new" class="text-lg" />
+        打开 App
+      </button>
+      <a
+        href={`${SITE}/download`}
+        class="glass-control state-layer inline-flex items-center justify-center gap-2 rounded-full px-6 py-2.5 text-label-large text-on-surface no-underline font-medium"
+      >
+        <Icon name="download" class="text-lg" />
+        下载 珞家
+      </a>
+      <p class="mt-1 text-body-small text-outline leading-relaxed">
+        如果没有反应，可能是尚未安装 App，或系统 / 浏览器拦截了跳转。安装后再次打开本链接，即可直接进入对应页面。
+      </p>
+    </div>
+
+    <p class="mt-12 text-body-small text-outline">
+      <a href={SITE} class="text-primary hover:underline no-underline">前往官网 www.whu.sb</a>
+    </p>
+  </section>
+
+  <!--
+    In-app browsers (WeChat/QQ/Weibo/DingTalk) block custom-scheme jumps
+    outright — the standard domestic remedy is a mask telling the user to
+    continue in the system browser, instead of a launch attempt that can
+    never succeed.
+  -->
+  <div id="wechat-mask" data-shown="false" class="lt-open-mask" role="dialog" aria-label="请在浏览器中打开">
+    <div class="lt-open-mask-card glass rounded-card p-6 text-center">
+      <Icon name="north_east" class="text-[40px] text-primary" />
+      <p class="mt-3 text-title-medium text-on-surface">请点击右上角「···」</p>
+      <p class="mt-1 text-body-medium text-on-surface-variant">选择「在浏览器中打开」，即可唤起或下载 珞家</p>
+      <button
+        id="wechat-mask-close"
+        type="button"
+        class="mt-5 glass-control state-layer inline-flex items-center justify-center rounded-full px-6 py-2 text-label-large text-on-surface cursor-pointer border-none"
+      >
+        我知道了
+      </button>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .lt-open-stage {
+    /* dvh so the mobile URL bar cannot push the CTA below the fold; vh first
+     * as the fallback for engines without dynamic viewport units. */
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .lt-open-spinner {
+    width: 1.15em;
+    height: 1.15em;
+    flex-shrink: 0;
+    border-radius: 999px;
+    border: 2px solid var(--lt-color-outline-variant);
+    border-top-color: var(--lt-color-primary);
+    animation: lt-open-spin 0.9s linear infinite;
+  }
+
+  @keyframes lt-open-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* `hidden` utility vs `flex` would be an order-dependent duel in the
+   * flattened build; the toggle lives here instead, driven by data-shown. */
+  #launch-fallback {
+    display: none;
+  }
+
+  #launch-fallback[data-shown="true"] {
+    display: flex;
+  }
+
+  .lt-open-mask {
+    position: fixed;
+    /* Four sides, not the `inset` shorthand (Chrome 87+): in-app WebViews are
+     * exactly the old-kernel audience this mask serves. */
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    display: none;
+    background-color: var(--lt-modal-scrim);
+  }
+
+  .lt-open-mask[data-shown="true"] {
+    display: block;
+  }
+
+  .lt-open-mask-card {
+    position: absolute;
+    top: 15%;
+    right: 1.25rem;
+    left: 1.25rem;
+    margin-inline: auto;
+    max-width: 22rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lt-open-spinner {
+      animation-duration: 2.4s;
+    }
+  }
+</style>
+
+<script is:inline>
+  // Deliberately inline (not a bundled module): the launch attempt must run
+  // on first parse, before any module chunk downloads, and this page is
+  // regularly opened in ancient in-app WebViews — ES5 only, same contract as
+  // the head scripts in BaseLayout.
+  (function () {
+    var ua = navigator.userAgent || "";
+    var isAndroid = /Android/i.test(ua);
+    var needsBrowserHint = /MicroMessenger|QQ\/[0-9]|Weibo|DingTalk/i.test(ua);
+    // Real Chrome (not a Chrome-UA in-app browser): understands intent://,
+    // which buys the native confirmation dialog and a fallback-url reload.
+    var isChromeAndroid =
+      isAndroid &&
+      /Chrome\//.test(ua) &&
+      !/MicroMessenger|QQ\/|QQBrowser|Weibo|DingTalk|EdgA|OPR|CriOS|SamsungBrowser|UCBrowser|Quark/i.test(ua);
+
+    // `/open` reached directly (not through the middleware rewrite) still
+    // means "open the app root".
+    var path = /^\/open\/?$/.test(location.pathname) ? "/" : location.pathname;
+    var query = location.search ? location.search + "&source=web" : "?source=web";
+    var schemeUrl = "luotopia://app" + path + query;
+    var intentUrl =
+      "intent://app" +
+      path +
+      query +
+      "#Intent;scheme=luotopia;package=sb.whu.luotopia;S.browser_fallback_url=" +
+      encodeURIComponent(location.href) +
+      ";end";
+
+    var statusEl = document.getElementById("launch-status");
+    var spinnerEl = document.getElementById("launch-spinner");
+    var fallbackEl = document.getElementById("launch-fallback");
+    var maskEl = document.getElementById("wechat-mask");
+
+    var opened = false;
+    var attempted = false;
+    // Storage can throw in restricted in-app browsers; a missed flag only
+    // costs one extra automatic attempt.
+    try {
+      attempted = sessionStorage.getItem("lt-launch-attempted") === "1";
+    } catch (e) {}
+
+    function markOpened() {
+      if (opened) return;
+      opened = true;
+      if (spinnerEl) spinnerEl.style.display = "none";
+      if (statusEl) statusEl.textContent = "已打开 珞家";
+      if (fallbackEl) fallbackEl.setAttribute("data-shown", "false");
+    }
+    // The page going to the background is the only reliable "the app took
+    // over" signal a browser gives us.
+    window.addEventListener("pagehide", markOpened);
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) markOpened();
+    });
+
+    function launch() {
+      try {
+        sessionStorage.setItem("lt-launch-attempted", "1");
+      } catch (e) {}
+      window.location.href = isChromeAndroid ? intentUrl : schemeUrl;
+    }
+
+    function showFallback() {
+      if (opened) return;
+      if (spinnerEl) spinnerEl.style.display = "none";
+      if (statusEl) statusEl.textContent = needsBrowserHint ? "当前内置浏览器可能拦截了跳转" : "没有自动打开？";
+      if (fallbackEl) fallbackEl.setAttribute("data-shown", "true");
+    }
+
+    var openBtn = document.getElementById("open-app-btn");
+    if (openBtn) openBtn.addEventListener("click", launch);
+    var maskClose = document.getElementById("wechat-mask-close");
+    if (maskClose) maskClose.addEventListener("click", function () { maskEl.setAttribute("data-shown", "false"); });
+
+    if (needsBrowserHint) {
+      // Scheme jumps are dead on arrival here; skip the attempt and explain.
+      if (maskEl) maskEl.setAttribute("data-shown", "true");
+      showFallback();
+    } else {
+      if (!attempted) setTimeout(launch, 400);
+      // Still on the page after the window in which the OS would have
+      // switched to the app: surface the manual controls.
+      setTimeout(showFallback, attempted ? 300 : 2500);
+    }
+  })();
+</script>
