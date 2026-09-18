@@ -44,7 +44,7 @@ function renderInlineMd(text: string) {
 
     <section class="relative pb-20 px-4">
       <div class="max-w-3xl mx-auto">
-        <a href="/legal/" class="lt-back lt-reveal inline-flex items-center gap-1.5 text-body-medium text-primary no-underline mb-6 rounded-full px-3.5 py-1.5 -ml-3.5 hover:underline">
+        <a href="/legal/" class="lt-back lt-reveal inline-flex items-center gap-1.5 text-body-medium text-primary no-underline mb-6 rounded-full px-3.5 py-1.5 -ml-3.5">
           <Icon name="arrow_back" class="text-[18px]" />
           返回法律信息
         </a>
@@ -135,9 +135,13 @@ function renderInlineMd(text: string) {
     transition: background-color 0.25s ease;
   }
 
-  .lt-back:hover {
-    background-color: var(--lt-glass-subtle);
-    text-decoration: none;
+  /* Pointer-gated per the site-wide rule: on touch, `:hover` sticks after a
+   * tap. This was the one hand-written hover that had missed the convention
+   * (Tailwind's own `hover:` variants are gated automatically in v4). */
+  @media (hover: hover) {
+    .lt-back:hover {
+      background-color: var(--lt-glass-subtle);
+    }
   }
 
   /* `set:html` content is not scoped by Astro, so prose styling has to reach
