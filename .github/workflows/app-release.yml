@@ -208,6 +208,43 @@ jobs:
           fetch-depth: 0
           filter: blob:none
 
+      # Auto-generate changelog if the release body is empty or too short.
+      # Pulls commit history from the PRIVATE app repo (already checked out)
+      # and compares against the previous release tag on the PUBLIC homepage repo.
+      - name: Auto-generate changelog if needed
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.ctx.outputs.tag }}
+          TARGET_REPO: ${{ steps.ctx.outputs.target_repo }}
+        run: |
+          set -euo pipefail
+          # Get current release body
+          BODY=$(gh release view "$TAG" --repo "$TARGET_REPO" --json body -q .body 2>/dev/null || echo "")
+          # Check if body is empty or just whitespace
+          if [ -n "$BODY" ] && [ "$(echo "$BODY" | tr -d '[:space:]')" != "" ]; then
+            echo "Release already has notes; skipping auto-generation"
+            exit 0
+          fi
+          echo "Release body is empty; generating changelog from app repo commits..."
+          # Find the previous release tag on the homepage repo
+          PREV_TAG=$(gh release list --repo "$TARGET_REPO" --limit 10 --json tagName,isLatest --jq '.[] | select(.tagName != "'"$TAG"'") | .tagName' | head -1 || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            echo "No previous release found; generating from all commits"
+            COMMITS=$(git log --pretty=format:"- %s" -20)
+          else
+            echo "Previous release: $PREV_TAG"
+            # Convert homepage tag (v1.0.1+10) to app tag format for comparison
+            APP_PREV_TAG="${PREV_TAG}"
+            # Get commits from app repo between versions
+            COMMITS=$(git log --pretty=format:"- %s" "${APP_PREV_TAG}..HEAD" 2>/dev/null || git log --pretty=format:"- %s" -20)
+          fi
+          # Generate changelog
+          CHANGELOG="## What's Changed"$'\n\n'"$COMMITS"$'\n\n'"---"$'\n'"*Auto-generated from commit history*"
+          # Update release body
+          gh release edit "$TAG" --repo "$TARGET_REPO" --notes "$CHANGELOG"
+          echo "Updated release notes for $TAG"
+
       - name: Resolve build ref
         id: buildref
         env:
@@ -438,6 +475,10 @@ jobs:
           # Opt back into the Crashlytics mapping upload that build.gradle.kts
           # disables by default (unreachable upload endpoint on some networks).
           ORG_GRADLE_PROJECT_uploadCrashlyticsMapping: "true"
+          # R8 minification (minifyReleaseWithR8) needs headroom; default 1536m
+          # is too tight for a 3-ABI obfuscated build on the 7 GB runner.
+          JAVA_OPTS: "-Xmx4g -XX:+HeapDumpOnOutOfMemoryError"
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -XX:+HeapDumpOnOutOfMemoryError"
         run: |
           set -euo pipefail
           EXTRA=()
@@ -890,31 +931,34 @@ jobs:
           ./scripts/stage_wintun.ps1
 
       - name: Publish Dart obfuscation symbols (private app release)
-        shell: bash
+        shell: pwsh
         env:
           GH_TOKEN: ${{ env.APP_TOKEN }}
           SYM_TAG: ${{ needs.context.outputs.symbols_tag }}
           APP_SHA: ${{ needs.context.outputs.app_sha }}
           TAG: ${{ needs.context.outputs.tag }}
         run: |
-          set -euo pipefail
-          test -d build/debug-info
-          OUT="$RUNNER_TEMP/dart-symbols-windows.tar.gz"
-          tar -czf "$OUT" -C build debug-info
+          $ErrorActionPreference = "Stop"
+          if (-not (Test-Path "build/debug-info")) {
+            throw "build/debug-info directory not found"
+          }
+          $OUT = "$env:RUNNER_TEMP/dart-symbols-windows.tar.gz"
+          Compress-Archive -Path "build/debug-info/*" -DestinationPath $OUT -Force
           # The context job normally creates this release; re-check here so a
           # hiccup there cannot silently drop the only copy of the symbols — an
           # obfuscated build without them has unreadable crash stacks forever.
-          gh release view "$SYM_TAG" --repo "$APP_REPO" >/dev/null 2>&1 \
-            || gh release create "$SYM_TAG" --repo "$APP_REPO" \
-                 --target "$APP_SHA" --title "Dart symbols ${TAG}" \
-                 --notes "Private. Dart obfuscation symbols for ${TAG}. They reverse the obfuscation: never publish these." \
-            || echo "::warning::cannot ensure symbols release ${SYM_TAG} on ${APP_REPO}"
-          if gh release upload "$SYM_TAG" "$OUT" --repo "$APP_REPO" --clobber; then
-            echo "Published Dart symbols to ${APP_REPO}@${SYM_TAG}"
-          else
-            echo "::warning::Dart symbol upload to ${SYM_TAG} failed; the release still ships, but its obfuscated crash stacks stay unreadable."
-          fi
-          rm -f "$OUT"
+          $exists = gh release view "$env:SYM_TAG" --repo "$env:APP_REPO" 2>$null
+          if (-not $?) {
+            gh release create "$env:SYM_TAG" --repo "$env:APP_REPO" `
+              --target "$env:APP_SHA" --title "Dart symbols $env:TAG" `
+              --notes "Private. Dart obfuscation symbols for $env:TAG. They reverse the obfuscation: never publish these."
+          }
+          if (gh release upload "$env:SYM_TAG" "$OUT" --repo "$env:APP_REPO" --clobber) {
+            Write-Host "Published Dart symbols to $($env:APP_REPO)@$($env:SYM_TAG)"
+          } else {
+            Write-Warning "Dart symbol upload to $($env:SYM_TAG) failed; the release still ships, but its obfuscated crash stacks stay unreadable."
+          }
+          Remove-Item -Force $OUT -ErrorAction SilentlyContinue
 
       - name: Stage Windows release
         id: build
