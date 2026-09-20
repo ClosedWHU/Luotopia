@@ -406,6 +406,36 @@ export function getLegalCatalog() {
       description: d.description,
       lastUpdated: d.lastUpdated,
       path: `/legal/${d.slug}/`,
+      mdPath: `/legal/${d.slug}.md`,
     })),
   };
+}
+
+/**
+ * Renders a legal document as Markdown for native in-app viewing.
+ *
+ * The client fetches this alongside the catalog (versioned by `lastUpdated`)
+ * and renders it with its own Markdown widget, so a legal page opens instantly
+ * from cache instead of spinning up a WebView. Body copy already uses backtick
+ * inline code, which is native Markdown, so paragraphs are emitted verbatim.
+ */
+export function renderLegalMarkdown(doc: LegalDocument): string {
+  const out: string[] = [`# ${doc.title}`, ""];
+  if (doc.description) {
+    out.push(`> ${doc.description}`, "");
+  }
+  for (const section of doc.sections) {
+    out.push(`## ${section.heading}`, "");
+    for (const p of section.body ?? []) {
+      out.push(p, "");
+    }
+    for (const sub of section.subsections ?? []) {
+      out.push(`### ${sub.heading}`, "");
+      for (const p of sub.body) {
+        out.push(p, "");
+      }
+    }
+  }
+  out.push("---", "", `最后更新：${doc.lastUpdated}`, "", "ClosedWHU Team · Luotopia", "");
+  return out.join("\n");
 }

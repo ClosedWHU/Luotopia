@@ -3,12 +3,19 @@
 
 # On-demand MiSans weights fetched by the mobile client. Immutable + the
 # client's own versioned cache keep these ~7.5 MB faces off the wire on
-# repeat launches.
+# repeat launches. /fonts/gstatic/* is the google_fonts mirror (a Pages
+# Function, content-addressed, so equally immutable).
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable
 
 /img/*
   Cache-Control: public, max-age=604800
+
+# Markdown legal docs fetched and cached by the mobile client (versioned by
+# lastUpdated). Short max-age + Pages' automatic ETag let the client revalidate
+# cheaply while still opening instantly from its local cache.
+/legal/*.md
+  Cache-Control: public, max-age=300
 
 /hot-update/*
   Cache-Control: no-cache
