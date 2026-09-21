@@ -376,7 +376,7 @@ jobs:
       # downloads. fjs ships precompiled for every release target; no Rust
       # toolchain is installed (same contract as build-release.bat).
       - name: Cache fjs precompiled artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .cargo-target
           key: Linux-fjs-precompiled-${{ hashFiles('pubspec.lock', 'android/build.gradle.kts') }}
@@ -1314,7 +1314,7 @@ jobs:
 
       - name: Cache fjs cargo build (arm64)
         if: steps.sel.outputs.run == 'true' && matrix.arch == 'arm64'
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             .cargo-target
