@@ -135,6 +135,14 @@ const links: FriendLinkItem[] = [
     action: { type: "openUrl", url: "https://milthm.com/" },
   },
   {
+    id: "nike232",
+    title: "Tomfng",
+    subtitle: "热爱 AI 工具与 Agents、系统与 KVCache，擅长 TypeScript / Go / Rust / C++",
+    category: "partnerApp",
+    image: { type: "network", url: "/img/links/nike232.jpg" },
+    action: { type: "openUrl", url: "https://github.com/Nike232" },
+  },
+  {
     id: "soruxgpt",
     title: "SoruxGPT",
     subtitle: "一站式访问全球领先的人工智能模型",
@@ -150,6 +158,6 @@ const links: FriendLinkItem[] = [
 ];
 
 export const friendLinkCatalog: FriendLinkCatalog = {
-  version: 3,
+  version: 4,
   items: links,
 };
