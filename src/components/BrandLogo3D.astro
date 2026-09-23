@@ -1,0 +1,203 @@
+---
+/**
+ * Interactive 3D logo viewer.
+ *
+ * The three.js scene is code-split and mounted lazily — only when the card
+ * scrolls near the viewport — so `three` never lands in the main bundle and
+ * other pages pay nothing. A static SVG poster shows immediately and cross-
+ * fades out once WebGL is live; if WebGL is unavailable or the mount throws,
+ * the poster simply stays (progressive enhancement, no broken box).
+ */
+export interface Props {
+  kind: "wu" | "luo";
+  title: string;
+  subtitle?: string;
+  poster: string;
+  aspect?: string;
+  delay?: string;
+}
+
+const { kind, title, subtitle, poster, aspect = "4 / 3", delay = "0ms" } = Astro.props;
+---
+
+<figure class="lt-reveal-lift glass rounded-group overflow-hidden brand3d" data-brand3d={kind} style={`--lt-reveal-delay:${delay}`}>
+  <div class="viewer" style={`aspect-ratio:${aspect}`}>
+    <img class="poster" src={poster} alt="" width="256" height="256" />
+    <canvas data-logo3d={kind} data-lenis-prevent aria-label={`${title} 3D 展示`}></canvas>
+    <span class="tag">3D · 拖拽旋转 / 甩动 · 滚轮缩放</span>
+  </div>
+  <figcaption class="p-5 sm:p-6">
+    <h3 class="text-title-medium text-on-surface">{title}</h3>
+    {subtitle && <p class="text-body-medium text-on-surface-variant mt-1.5">{subtitle}</p>}
+    <div class="controls mt-4 flex flex-wrap items-center gap-2">
+      <button type="button" data-act="pause" aria-pressed="false" aria-label="暂停或继续播放" class="lt-btn glass-control state-layer inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-label-large text-on-surface cursor-pointer">
+        <svg class="ico-pause" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"></rect><rect x="14" y="5" width="4" height="14" rx="1.2"></rect></svg>
+        <svg class="ico-play" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><path d="M8 5.14v13.72c0 .8.87 1.3 1.56.88l10.2-6.86a1.05 1.05 0 0 0 0-1.76L9.56 4.26A1.05 1.05 0 0 0 8 5.14z"></path></svg>
+        <span class="lbl">暂停</span>
+      </button>
+      <button type="button" data-act="replay" class="lt-btn glass-control state-layer inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-label-large text-on-surface cursor-pointer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+        重播
+      </button>
+    </div>
+  </figcaption>
+</figure>
+
+<style>
+  .viewer {
+    position: relative;
+    width: 100%;
+    background:
+      radial-gradient(120% 100% at 50% 0%, #16283c, #080e17 70%);
+    overflow: hidden;
+  }
+
+  .viewer canvas {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    touch-action: pan-y;
+  }
+
+  .viewer .poster {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 46%;
+    height: 46%;
+    object-fit: contain;
+    transform: translate(-50%, -50%);
+    opacity: 0.9;
+    transition: opacity 0.5s ease;
+    filter: drop-shadow(0 8px 24px rgb(0 0 0 / 0.4));
+  }
+
+  .brand3d.is-live .viewer canvas { opacity: 1; }
+  .brand3d.is-live .viewer .poster { opacity: 0; }
+
+  .tag {
+    position: absolute;
+    bottom: 10px;
+    right: 12px;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: rgb(255 255 255 / 0.6);
+    background: rgb(0 0 0 / 0.28);
+    border: 1px solid rgb(255 255 255 / 0.14);
+    border-radius: 999px;
+    padding: 3px 10px;
+    backdrop-filter: blur(6px);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .brand3d.is-live .tag { opacity: 1; }
+
+  .lt-btn {
+    border: none;
+    font: inherit;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @media (hover: hover) {
+    .lt-btn:hover { transform: translateY(-1px); }
+  }
+</style>
+
+<script>
+  import { onPageSetup } from "../scripts/page-lifecycle";
+  import {
+    reset as resetBrandClock,
+    toggle as toggleBrandClock,
+    isPaused as brandPaused,
+  } from "../lib/logo3d/conductor.js";
+
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  onPageSetup((signal) => {
+    // Playback controls drive the shared clock, so either card's button acts on
+    // both viewers at once — pause/resume and replay always stay in sync.
+    const pauseButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-act="pause"]'));
+    const replayButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-act="replay"]'));
+
+    function syncPauseButtons() {
+      const paused = brandPaused();
+      for (const btn of pauseButtons) {
+        btn.setAttribute("aria-pressed", String(paused));
+        btn.querySelector(".ico-pause")?.toggleAttribute("hidden", paused);
+        btn.querySelector(".ico-play")?.toggleAttribute("hidden", !paused);
+        const lbl = btn.querySelector(".lbl");
+        if (lbl) lbl.textContent = paused ? "继续" : "暂停";
+      }
+    }
+    for (const btn of pauseButtons) {
+      btn.addEventListener("click", () => { toggleBrandClock(); syncPauseButtons(); }, { signal });
+    }
+    for (const btn of replayButtons) {
+      btn.addEventListener("click", () => { resetBrandClock(); syncPauseButtons(); }, { signal });
+    }
+    syncPauseButtons();
+
+    // Lazily mount the WebGL viewers when they near the viewport.
+    const figs = Array.from(document.querySelectorAll<HTMLElement>(".brand3d[data-brand3d]"));
+    if (!figs.length) return;
+
+    const instances: Array<{ dispose?: () => void }> = [];
+    let cancelled = false;
+    let mountedCount = 0;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const fig = entry.target as HTMLElement;
+          io.unobserve(fig);
+          void mount(fig);
+        }
+      },
+      { rootMargin: "300px" },
+    );
+
+    async function mount(fig: HTMLElement) {
+      const kind = fig.dataset.brand3d;
+      const canvas = fig.querySelector<HTMLCanvasElement>("canvas[data-logo3d]");
+      if (!canvas) return;
+      try {
+        const mod = kind === "wu"
+          ? await import("../lib/logo3d/wu.js")
+          : await import("../lib/logo3d/luo.js");
+        const mountFn = kind === "wu" ? mod.mountWu : mod.mountLuo;
+        if (cancelled) return;
+        const inst = await mountFn(canvas, { reduced: reduceMotion });
+        if (cancelled) { inst.dispose?.(); return; }
+        instances.push(inst);
+        fig.classList.add("is-live");
+      } catch (err) {
+        console.warn("[brand3d] mount failed:", err);
+        fig.classList.add("is-failed");
+      } finally {
+        if (!cancelled) {
+          mountedCount++;
+          // Once the last viewer finishes its async build, align the shared
+          // clock so both scenes begin their loop together (and stay in step).
+          if (mountedCount >= figs.length) resetBrandClock();
+        }
+      }
+    }
+
+    figs.forEach((f) => io.observe(f));
+
+    return () => {
+      cancelled = true;
+      io.disconnect();
+      instances.forEach((i) => i.dispose?.());
+      instances.length = 0;
+    };
+  });
+</script>
