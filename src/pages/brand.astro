@@ -1,0 +1,345 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import BrandLogo3D from "../components/BrandLogo3D.astro";
+import Icon from "../components/Icon.astro";
+
+const logos = [
+  {
+    key: "wu",
+    name: "武",
+    role: "默认标志",
+    roleEn: "Primary mark",
+    color: "#0E4675",
+    svg: "/brand/logo-wu.svg",
+    svgWhite: "/brand/logo-wu-white.svg",
+    png: "/brand/logo-wu.png",
+    icon: "/brand/app-icon-wu.png",
+    iconChip: "edit_note",
+    meaning:
+      "武汉大学「武」字的几何变形，横画层叠，呼应珞珈山峦，也是应用的默认图标。",
+  },
+  {
+    key: "luo",
+    name: "珞",
+    role: "备选标志",
+    roleEn: "Alternate mark",
+    color: "#0B674E",
+    svg: "/brand/logo-luo.svg",
+    svgWhite: "/brand/logo-luo-white.svg",
+    png: "/brand/logo-luo.png",
+    icon: "/brand/app-icon-luo.png",
+    iconChip: "spa",
+    meaning:
+      "「珞」取自珞珈。左侧几何「王」旁，右侧一笔草书，用作备选图标与品牌延展。",
+  },
+];
+
+const colors = [
+  { name: "Luotopia Blue", role: "主色 / Primary", hex: "#005BAC", onDark: false },
+  { name: "武 · 山蓝", role: "默认标志色", hex: "#0E4675", onDark: true },
+  { name: "珞 · 墨绿", role: "备选标志色", hex: "#0B674E", onDark: true },
+];
+
+const btn = "lt-btn glass-control state-layer inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-label-large text-on-surface no-underline cursor-pointer";
+---
+
+<BaseLayout title="品牌" description="Luotopia 品牌资源：3D 标志、矢量与位图 logo 下载、品牌色与使用规范。">
+  <PageHeader title="品牌" subtitle="Luotopia 的标志、色彩与使用规范，供媒体、开发者与校园伙伴取用。" />
+
+  <!-- ── 3D 标志 ─────────────────────────────────────────── -->
+  <section class="relative px-4 pb-16">
+    <div class="max-w-6xl mx-auto">
+      <div class="lt-reveal flex items-start gap-3 mb-6">
+        <span class="lt-icon-chip text-primary text-[22px]"><Icon name="3d_rotation" /></span>
+        <div>
+          <h2 class="text-title-large text-on-surface">3D 标志</h2>
+          <p class="text-body-medium text-on-surface-variant mt-1 max-w-2xl">
+            两个 logo 的立体版本，可拖拽旋转、滚轮缩放。
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <BrandLogo3D
+          kind="wu"
+          title="武 · 层积切片"
+          subtitle="「武」字切成十四层石板，逐层错开、依次落位。取意珞珈山层叠的山岩，转动视角能看到层次与厚度。"
+          poster="/brand/logo-wu-white.svg"
+        />
+        <BrandLogo3D
+          kind="luo"
+          title="珞 · 生长"
+          subtitle="「珞」以书法笔触写成：半透明玉质笔画按笔顺一道道生长，笔尖带一点新芽的微光，写完后随风轻摆。"
+          poster="/brand/logo-luo-white.svg"
+          delay="90ms"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 平面标志 ────────────────────────────────────────── -->
+  <section class="relative px-4 pb-16">
+    <div class="max-w-6xl mx-auto">
+      <div class="lt-reveal flex items-start gap-3 mb-6">
+        <span class="lt-icon-chip text-primary text-[22px]"><Icon name="image" /></span>
+        <div>
+          <h2 class="text-title-large text-on-surface">平面标志</h2>
+          <p class="text-body-medium text-on-surface-variant mt-1 max-w-2xl">
+            矢量（SVG）适合网页与印刷无损缩放；位图（PNG，1024×1024 透明底）适合应用图标与位图场景。均提供彩色与单色白版。
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {
+          logos.map((logo, i) => (
+            <div class="lt-reveal-lift glass rounded-group p-6" style={`--lt-reveal-delay:${i * 90}ms`}>
+              <div class="flex items-center gap-3 mb-5">
+                <span class="lt-icon-chip text-primary text-[22px]">
+                  <Icon name={logo.iconChip} />
+                </span>
+                <div>
+                  <h3 class="text-title-medium text-on-surface">
+                    {logo.name} · {logo.role}
+                  </h3>
+                  <p class="text-body-small text-outline">{logo.roleEn}</p>
+                </div>
+              </div>
+
+              <div class="plates grid grid-cols-2 gap-3 mb-4">
+                <div class="plate light">
+                  <img src={logo.svg} alt={`${logo.name} 标志（浅色底）`} width="160" height="160" loading="lazy" />
+                </div>
+                <div class="plate dark">
+                  <img src={logo.svgWhite} alt={`${logo.name} 标志（深色底）`} width="160" height="160" loading="lazy" />
+                </div>
+              </div>
+
+              <div class="alpha-preview mb-4">
+                <img src={logo.png} alt={`${logo.name} PNG 透明底预览`} width="72" height="72" loading="lazy" />
+                <span class="text-body-small text-outline">PNG · 透明底 1024²</span>
+              </div>
+
+              <p class="text-body-medium text-on-surface-variant mb-5">{logo.meaning}</p>
+
+              <div class="flex flex-wrap gap-2">
+                <a href={logo.svg} download class={btn}><Icon name="download" class="text-lg" />SVG</a>
+                <a href={logo.svgWhite} download class={btn}><Icon name="download" class="text-lg" />单色 SVG</a>
+                <a href={logo.png} download class={btn}><Icon name="download" class="text-lg" />PNG 字形</a>
+                <a href={logo.icon} download class={btn}><Icon name="download" class="text-lg" />应用图标</a>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 品牌色 ──────────────────────────────────────────── -->
+  <section class="relative px-4 pb-16">
+    <div class="max-w-6xl mx-auto">
+      <div class="lt-reveal flex items-start gap-3 mb-6">
+        <span class="lt-icon-chip text-primary text-[22px]"><Icon name="palette" /></span>
+        <div>
+          <h2 class="text-title-large text-on-surface">品牌色</h2>
+          <p class="text-body-medium text-on-surface-variant mt-1">点击色卡复制 HEX。</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {
+          colors.map((c, i) => (
+            <button
+              type="button"
+              class="lt-reveal-lift swatch glass rounded-card overflow-hidden text-left cursor-pointer"
+              data-hex={c.hex}
+              style={`--lt-reveal-delay:${i * 70}ms`}
+            >
+              <span class="chip" style={`background:${c.hex}`}>
+                <span class="copy-hint">
+                  <Icon name="content_copy" />
+                </span>
+              </span>
+              <span class="meta p-4 block">
+                <span class="text-title-small text-on-surface block">{c.name}</span>
+                <span class="text-body-small text-on-surface-variant block">{c.role}</span>
+                <span class="hex text-body-medium block mt-1" style="font-variant-numeric:tabular-nums">{c.hex}</span>
+              </span>
+            </button>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 使用规范 ────────────────────────────────────────── -->
+  <section class="relative px-4 pb-24">
+    <div class="max-w-6xl mx-auto">
+      <div class="lt-reveal flex items-start gap-3 mb-6">
+        <span class="lt-icon-chip text-primary text-[22px]"><Icon name="checklist" /></span>
+        <div>
+          <h2 class="text-title-large text-on-surface">使用规范</h2>
+          <p class="text-body-medium text-on-surface-variant mt-1 max-w-2xl">
+            以下约定帮助标志在各种场景下保持一致。
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div class="lt-reveal-lift glass rounded-group p-6">
+          <h3 class="text-title-medium text-on-surface mb-4 flex items-center gap-2">
+            <Icon name="straighten" class="text-primary" /> 尺寸与留白
+          </h3>
+          <ul class="spec-list text-body-medium text-on-surface-variant">
+            <li>数字场景最小高度 <strong class="text-on-surface">24px</strong>；印刷最小高度 <strong class="text-on-surface">8mm</strong>。</li>
+            <li>四周保留不小于标志高度 <strong class="text-on-surface">1/4</strong> 的安全间距，避免与其他元素拥挤。</li>
+            <li>优先使用矢量 SVG；位图 PNG 请按需导出 2× / 3× 以适配高分屏。</li>
+            <li>深色底使用单色白版，浅色底使用彩色版，确保对比度充足。</li>
+          </ul>
+        </div>
+
+        <div class="lt-reveal-lift glass rounded-group p-6" style="--lt-reveal-delay:80ms">
+          <h3 class="text-title-medium text-on-surface mb-4 flex items-center gap-2">
+            <Icon name="info" class="text-primary" /> 授权与署名
+          </h3>
+          <ul class="spec-list text-body-medium text-on-surface-variant">
+            <li>标志版权归 <strong class="text-on-surface">ClosedWHU Team</strong> 所有，用于标识 Luotopia 应用与其官方内容。</li>
+            <li>媒体评测、校园伙伴非商业引用欢迎使用，请保持标志完整、不改色变形。</li>
+            <li>商业合作、二次创作或大规模分发，请先通过 <a href="/community" class="text-primary hover:underline">社区渠道</a>联系我们取得授权。</li>
+            <li>本页的 3D 版本仅作展示，正式场合请使用上方的平面标志。</li>
+          </ul>
+        </div>
+
+        <div class="lt-reveal-lift glass rounded-group p-6 lg:col-span-2" style="--lt-reveal-delay:140ms">
+          <h3 class="text-title-medium text-on-surface mb-5">请勿这样使用</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
+            {
+              [
+                "拉伸、压扁或改变长宽比",
+                "重新配色（单色白版除外）",
+                "添加描边、阴影、渐变等额外效果",
+                "旋转或镜像标志",
+                "在杂乱或低对比背景上直接使用",
+                "用低分辨率位图替代矢量源文件",
+              ].map((t) => (
+                <div class="dont flex items-start gap-2 text-body-medium text-on-surface-variant">
+                  <Icon name="cancel" class="text-[18px] mt-0.5 shrink-0 dont-icon" />
+                  <span>{t}</span>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .plate {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--lt-radius-nested, 18px);
+    padding: 12%;
+    box-shadow: inset 0 0 0 1px rgb(120 140 160 / 0.18);
+  }
+  .plate img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .plate.light { background: linear-gradient(160deg, #ffffff, #eef2f7); }
+  .plate.dark { background: linear-gradient(160deg, #16202c, #0a1017); }
+
+  /* Transparency checkerboard for the PNG preview. */
+  .alpha-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--lt-radius-nested, 18px);
+    background-color: var(--lt-glass-subtle);
+    box-shadow: inset 0 0 0 1px rgb(120 140 160 / 0.16);
+  }
+  .alpha-preview img {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    border-radius: 8px;
+    background-image:
+      linear-gradient(45deg, #c9d2dc 25%, transparent 25%),
+      linear-gradient(-45deg, #c9d2dc 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #c9d2dc 75%),
+      linear-gradient(-45deg, transparent 75%, #c9d2dc 75%);
+    background-size: 12px 12px;
+    background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
+    background-color: #fff;
+  }
+
+  .lt-btn { border: none; font: inherit; transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+  @media (hover: hover) { .lt-btn:hover { transform: translateY(-1px); } }
+
+  .swatch { border: none; font: inherit; padding: 0; display: block; width: 100%; }
+  .swatch .chip {
+    position: relative;
+    display: block;
+    height: 96px;
+  }
+  .swatch .copy-hint {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: inline-flex;
+    color: #fff;
+    background: rgb(0 0 0 / 0.22);
+    border-radius: 999px;
+    padding: 6px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  @media (hover: hover) { .swatch:hover .copy-hint { opacity: 1; } }
+  .swatch.copied .copy-hint { opacity: 1; }
+
+  .spec-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .spec-list li { position: relative; padding-left: 22px; line-height: 1.6; }
+  .spec-list li::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 0.62em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--lt-color-primary);
+  }
+
+  .dont { line-height: 1.5; }
+  .dont-icon { color: var(--lt-color-error, #d9534f); }
+</style>
+
+<script>
+  import { onPageSetup } from "../scripts/page-lifecycle";
+
+  onPageSetup((signal) => {
+    document.querySelectorAll<HTMLButtonElement>(".swatch[data-hex]").forEach((sw) => {
+      sw.addEventListener(
+        "click",
+        async () => {
+          const hex = sw.dataset.hex || "";
+          try {
+            await navigator.clipboard.writeText(hex);
+          } catch {
+            /* clipboard may be blocked; the HEX is still visible/selectable */
+          }
+          sw.classList.add("copied");
+          const hexEl = sw.querySelector<HTMLElement>(".hex");
+          const prev = hexEl?.textContent;
+          if (hexEl) hexEl.textContent = "已复制 " + hex;
+          window.setTimeout(() => {
+            sw.classList.remove("copied");
+            if (hexEl && prev) hexEl.textContent = prev;
+          }, 1200);
+        },
+        { signal },
+      );
+    });
+  });
+</script>
