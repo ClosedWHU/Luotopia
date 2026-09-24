@@ -15,5 +15,11 @@
         ]
       }
     ]
+  },
+  "webcredentials": {
+    "apps": [
+      "ZW372988NV.sb.whu.luotopia",
+      "ZW372988NV.sb.whu.luotopia.debug"
+    ]
   }
 }
