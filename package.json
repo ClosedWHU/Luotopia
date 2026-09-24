@@ -10,10 +10,11 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "check:aasa": "node tools/verify-aasa.mjs",
     "hot-update:init-key": "node tools/generate-hot-update-manifest.mjs --init-key",
     "hot-update:generate": "node tools/generate-hot-update-manifest.mjs",
     "hot-update:verify": "node tools/generate-hot-update-manifest.mjs --verify",
-    "prebuild": "npm run hot-update:generate"
+    "prebuild": "npm run check:aasa && npm run hot-update:generate"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
