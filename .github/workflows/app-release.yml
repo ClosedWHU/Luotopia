@@ -87,6 +87,13 @@ concurrency:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  # Pin the toolchain instead of floating `channel: stable`. Release artifacts
+  # must be built with the Flutter the app repo's CI actually validates
+  # (FLUTTER_VERSION in app/.github/workflows/flutter-ci.yml); a floating stable
+  # moves to the next patch release between two runs of the same tag, and the
+  # linux arm64 leg clones Flutter from git where "stable" drifts too. Bump this
+  # together with the app repo.
+  FLUTTER_VERSION: "3.47.0"
   # Private repo the app source is fetched from. APP_TOKEN is resolved per job as
   # `secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN` (contents: read/write on
   # the app repo). Keep it job-scoped so unrelated steps never see the token.
@@ -419,6 +426,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Install dependencies
@@ -664,6 +672,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Select stable Xcode
@@ -870,6 +879,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Enable Windows desktop
@@ -1254,9 +1264,12 @@ jobs:
             libsecret-1-dev libjsoncpp-dev \
             libwebkit2gtk-4.1-dev \
             dpkg-dev fakeroot desktop-file-utils elfutils
-          # Flatpak tools (optional — packaging script already skips if missing)
+          # Flatpak packaging deps (optional — the packaging script skips what is
+          # missing). imagemagick downscales the 1024px app icon for the
+          # hicolor/256x256 slot; without a resizer flatpak-builder's export step
+          # rejects the icon and no .flatpak asset is produced.
           if ! apt_retry sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            flatpak flatpak-builder; then
+            flatpak flatpak-builder imagemagick; then
             echo "::warning::flatpak tools install failed; Flatpak package will be skipped"
           fi
 
@@ -1302,22 +1315,37 @@ jobs:
           restore-keys: |
             Linux-${{ matrix.arch }}-fjs-precompiled-
 
-      # flutter-action cannot always resolve "stable/any" for linux arm64
+      # Flutter publishes no linux-arm64 SDK archive (releases_linux.json has
+      # zero arm64 entries), so flutter-action has nothing to download on the ARM
+      # runner and the SDK must come from a git clone of the pinned tag.
       - name: Set up Flutter (x64)
         if: steps.sel.outputs.run == 'true' && matrix.arch == 'x64'
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Set up Flutter (arm64 via git)
         if: steps.sel.outputs.run == 'true' && matrix.arch == 'arm64'
         run: |
           set -euo pipefail
-          git clone https://github.com/flutter/flutter.git -b stable --depth 1 "$HOME/flutter"
+          git clone https://github.com/flutter/flutter.git \
+            -b "$FLUTTER_VERSION" --depth 1 "$HOME/flutter"
           echo "$HOME/flutter/bin" >> "$GITHUB_PATH"
           export PATH="$HOME/flutter/bin:$PATH"
           flutter --version
+          # A tag clone cannot float like `-b stable` did, but assert it anyway:
+          # silent drift here would ship an arm64 binary built by a different
+          # toolchain than the x64 one published next to it.
+          GOT="$(flutter --version --machine 2>/dev/null \
+            | python3 -c 'import json,sys; print(json.load(sys.stdin).get("frameworkVersion",""))' 2>/dev/null || true)"
+          if [ -n "$GOT" ] && [ "$GOT" != "$FLUTTER_VERSION" ]; then
+            echo "::error::arm64 Flutter reports $GOT, expected the pinned $FLUTTER_VERSION"
+            exit 1
+          elif [ -z "$GOT" ]; then
+            echo "::warning::could not read the arm64 Flutter version to verify the $FLUTTER_VERSION pin"
+          fi
           # A git clone lacks the `version` stamp file the hosted toolcache
           # ships; flutter_oss_licenses reads it for the SDK's own pubspec.lock
           # entry. Materialize it from the JSON the tool writes on first run.
@@ -1477,6 +1505,24 @@ jobs:
             ls -la dist || true
             exit 1
           fi
+          # AppImage and Flatpak are best-effort inside package-from-bundle.sh: a
+          # missing tool or a rejected icon only writes to stderr, which is how
+          # the .flatpak asset disappeared from 1.0.1+10..+13 behind a green job.
+          # Surface the gap as an annotation instead of failing the release.
+          WANT_FORMATS="$FORMATS"
+          if [ "$FORMATS" = "all" ]; then
+            WANT_FORMATS="appimage flatpak"
+          fi
+          for fmt in $WANT_FORMATS; do
+            case "$fmt" in
+              appimage) glob="dist/*-linux-*.AppImage" ;;
+              flatpak) glob="dist/*-linux-*.flatpak" ;;
+              *) continue ;;
+            esac
+            if ! compgen -G "$glob" > /dev/null; then
+              echo "::warning::no $fmt package for $ARCH; this release ships without it"
+            fi
+          done
           ls -la dist
 
       - name: Upload Linux packages to homepage release
@@ -1839,7 +1885,7 @@ jobs:
           fi
           bash tool/ohos/build.sh release
 
-      - name: Stage HAP for release
+      - name: Stage HAPs for release
         id: stage
         shell: bash
         run: |
@@ -1850,25 +1896,26 @@ jobs:
           mkdir -p dist
           UNSIGNED="ohos/entry/build/default/outputs/default/entry-default-unsigned.hap"
           SIGNED="ohos/entry/build/default/outputs/default/entry-default-signed.hap"
+          staged=0
           if [ -f "$SIGNED" ]; then
-            SRC="$SIGNED"
-            KIND=signed
-          elif [ -f "$UNSIGNED" ]; then
-            SRC="$UNSIGNED"
-            KIND=unsigned
-            echo "::warning::Only unsigned HAP available; many devices reject unsigned packages."
-          else
+            cp -f "$SIGNED" "dist/luotopia-${SAFE_TAG}-harmonyos-arm64-signed.hap"
+            staged=1
+          fi
+          if [ -f "$UNSIGNED" ]; then
+            cp -f "$UNSIGNED" "dist/luotopia-${SAFE_TAG}-harmonyos-arm64-unsigned.hap"
+            staged=1
+            if [ ! -f "$SIGNED" ]; then
+              echo "::warning::Only unsigned HAP available; many devices reject unsigned packages."
+            fi
+          fi
+          if [ "$staged" -eq 0 ]; then
             echo "::error::No HAP under ohos/entry/build/..."
             find ohos -name '*.hap' 2>/dev/null || true
             exit 1
           fi
-          OUT="dist/luotopia-${SAFE_TAG}-harmonyos-arm64-${KIND}.hap"
-          cp -f "$SRC" "$OUT"
           ls -la dist
-          echo "hap_name=$(basename "$OUT")" >> "$GITHUB_OUTPUT"
-          echo "hap_path=$OUT" >> "$GITHUB_OUTPUT"
 
-      - name: Upload HAP to homepage release
+      - name: Upload HAPs to homepage release
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -1876,11 +1923,15 @@ jobs:
           TARGET_REPO: ${{ needs.context.outputs.target_repo }}
         run: |
           set -euo pipefail
-          HAP='${{ steps.stage.outputs.hap_path }}'
-          test -f "$HAP"
+          shopt -s nullglob
+          HAPS=(dist/*.hap)
+          if [ "${#HAPS[@]}" -eq 0 ]; then
+            echo "::error::No staged HAP under dist/"
+            exit 1
+          fi
           gh release view "$TAG" --repo "$TARGET_REPO" >/dev/null
-          gh release upload "$TAG" "$HAP" --repo "$TARGET_REPO" --clobber
-          echo "Uploaded $HAP to $TARGET_REPO@$TAG"
+          gh release upload "$TAG" "${HAPS[@]}" --repo "$TARGET_REPO" --clobber
+          echo "Uploaded ${#HAPS[@]} HAP(s) to $TARGET_REPO@$TAG"
           cat > dist/HARMONYOS-SIDELOAD.txt <<'EOF'
           HarmonyOS HAP (sideload)
           ------------------------
