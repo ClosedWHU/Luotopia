@@ -140,12 +140,7 @@ jobs:
             BUILD_MACOS=false
             # HAP needs self-hosted DevEco/OH Flutter; opt-in via manual dispatch.
             BUILD_OHOS=false
-            # Temporarily x64-only: the pinned fjs precompiled generation has
-            # no aarch64-unknown-linux-gnu asset, and CargoKit (mode auto, per
-            # cargokit_options.yaml) rejects targets outside the signed recipe
-            # before any local fallback. Restore to "both" once ClosedHarmony/
-            # fjs publishes a generation that includes the arm64 linux target.
-            LINUX_ARCH=x64
+            LINUX_ARCH=both
             LINUX_FORMATS=all
           else
             TAG='${{ inputs.tag }}'
@@ -1291,38 +1286,21 @@ jobs:
           command -v appimagetool
           appimagetool --version || true
 
-      # The pinned fjs precompiled generation ships no aarch64-unknown-linux-gnu
-      # artifact, and CargoKit only falls back to a local cargo build when
-      # rustup is present (its default mode disables precompiled lookups once
-      # rustup exists, and errors out with no toolchain otherwise). The ARM
-      # runner image has neither, so provide one. x64 keeps using the warmed
-      # precompiled store and must NOT get rustup — that would flip CargoKit
-      # into always-build-locally mode there too.
-      - name: Set up Rust for fjs (arm64 local build)
-        if: steps.sel.outputs.run == 'true' && matrix.arch == 'arm64'
-        run: |
-          set -euo pipefail
-          if ! command -v rustup >/dev/null 2>&1; then
-            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
-              | sh -s -- -y --default-toolchain stable --profile minimal
-          fi
-          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
-          export PATH="$HOME/.cargo/bin:$PATH"
-          rustup --version
-          rustc --version
-          cargo --version
-
-      - name: Cache fjs cargo build (arm64)
-        if: steps.sel.outputs.run == 'true' && matrix.arch == 'arm64'
+      # The pinned fjs generation (8a335ae77c41 / precompiled_3312295a...)
+      # ships signed aarch64-unknown-linux-gnu artifacts, so arm64 resolves
+      # from the precompiled store like x64 does. No Rust toolchain is
+      # installed here: cargokit_options.yaml pins the mode to `required`,
+      # which refuses a local cargo build outright, and a rustup on PATH would
+      # only add minutes. Caching the precompiled store keyed by arch keeps the
+      # two matrix legs from evicting each other.
+      - name: Cache fjs precompiled artifacts
+        if: steps.sel.outputs.run == 'true'
         uses: actions/cache@v6
         with:
-          path: |
-            .cargo-target
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: Linux-arm64-fjs-cargo-${{ hashFiles('pubspec.lock') }}
+          path: .cargo-target
+          key: Linux-${{ matrix.arch }}-fjs-precompiled-${{ hashFiles('pubspec.lock', 'cargokit_options.yaml') }}
           restore-keys: |
-            Linux-arm64-fjs-cargo-
+            Linux-${{ matrix.arch }}-fjs-precompiled-
 
       # flutter-action cannot always resolve "stable/any" for linux arm64
       - name: Set up Flutter (x64)
