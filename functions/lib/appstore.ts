@@ -8,7 +8,7 @@ export const APPSTORE_API_SWR = 3600;
 export const DEFAULT_BUNDLE_ID = "sb.whu.luotopia";
 export const DEFAULT_COUNTRY = "cn";
 /** Key ID is public metadata; private key stays in env secret. */
-export const DEFAULT_CONNECT_KEY_ID = "R4CW927W99";
+export const DEFAULT_CONNECT_KEY_ID = "M83ZL89TPZ";
 
 export type AppStoreSource = "itunes" | "appstoreconnect";
 export type AppStoreChannel = "appstore" | "testflight";
