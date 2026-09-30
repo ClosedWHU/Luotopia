@@ -381,7 +381,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: .cargo-target
-          key: Linux-fjs-precompiled-${{ hashFiles('pubspec.lock', 'android/build.gradle.kts') }}
+          key: Linux-fjs-precompiled-${{ hashFiles('pubspec.lock', 'android/build.gradle.kts', 'cargokit_options.yaml') }}
           restore-keys: |
             Linux-fjs-precompiled-
 
