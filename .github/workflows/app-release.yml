@@ -381,9 +381,9 @@ jobs:
         uses: actions/cache@v6
         with:
           path: .cargo-target
-          key: Linux-fjs-precompiled-${{ hashFiles('pubspec.lock', 'android/build.gradle.kts', 'cargokit_options.yaml') }}
+          key: Android-fjs-precompiled-${{ hashFiles('pubspec.lock', 'android/build.gradle.kts', 'cargokit_options.yaml') }}
           restore-keys: |
-            Linux-fjs-precompiled-
+            Android-fjs-precompiled-
 
       - name: Free disk space for Android build
         run: bash scripts/free_android_runner_space.sh
