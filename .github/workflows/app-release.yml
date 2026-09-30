@@ -1299,13 +1299,13 @@ jobs:
           command -v appimagetool
           appimagetool --version || true
 
-      # The pinned fjs generation (8a335ae77c41 / precompiled_3312295a...)
-      # ships signed aarch64-unknown-linux-gnu artifacts, so arm64 resolves
-      # from the precompiled store like x64 does. No Rust toolchain is
-      # installed here: cargokit_options.yaml pins the mode to `required`,
-      # which refuses a local cargo build outright, and a rustup on PATH would
-      # only add minutes. Caching the precompiled store keyed by arch keeps the
-      # two matrix legs from evicting each other.
+      # The pinned fjs generation (a73359fe / precompiled_dd0cf313...) ships
+      # signed aarch64-unknown-linux-gnu artifacts, so arm64 resolves from the
+      # precompiled store like x64 does. No Rust toolchain is installed here:
+      # cargokit_options.yaml pins the mode to `required`, which refuses a local
+      # cargo build outright, and a rustup on PATH would only add minutes.
+      # Caching the precompiled store keyed by arch keeps the two matrix legs
+      # from evicting each other.
       - name: Cache fjs precompiled artifacts
         if: steps.sel.outputs.run == 'true'
         uses: actions/cache@v6
