@@ -60,10 +60,10 @@ on:
         type: boolean
         default: false
       apple_action:
-        description: Build/upload, or distribute an existing TestFlight build without re-uploading
+        description: Build/upload, distribute an existing build, or read App Store Connect status
         required: false
         type: choice
-        options: [build, distribute]
+        options: [build, distribute, status]
         default: build
       build_ios_testflight:
         description: Build signed iOS/Watch/Widget/Tunnel IPA for TestFlight
@@ -216,7 +216,7 @@ jobs:
           LINUX_FORMATS="${LINUX_FORMATS:-all}"
           BUILD_OHOS="${BUILD_OHOS:-false}"
           APPLE_ACTION="${APPLE_ACTION:-build}"
-          case "$APPLE_ACTION" in build|distribute) ;; *) echo "::error::Unknown Apple action"; exit 1 ;; esac
+          case "$APPLE_ACTION" in build|distribute|status) ;; *) echo "::error::Unknown Apple action"; exit 1 ;; esac
           STRIPPED="${TAG#v}"
           if [[ "$STRIPPED" =~ ^([0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.]+)?)\+([0-9A-Za-z._-]+)$ ]]; then
             BUILD_NAME="${BASH_REMATCH[1]}"
@@ -229,7 +229,7 @@ jobs:
             BUILD_NUMBER=""
           fi
           # +14 is reserved for an Apple-only CI trial, including manual retries.
-          if [ "$TAG" = "v1.0.1+14" ] || [ '${{ inputs.apple_only }}' = "true" ] || [ "$APPLE_ACTION" = distribute ]; then
+          if [ "$TAG" = "v1.0.1+14" ] || [ '${{ inputs.apple_only }}' = "true" ] || [ "$APPLE_ACTION" != build ]; then
             BUILD_ANDROID=false
             BUILD_WINDOWS=false
             BUILD_LINUX=false
@@ -422,10 +422,10 @@ jobs:
     permissions:
       contents: read
     concurrency:
-      group: apple-testflight-${{ matrix.platform }}-${{ needs.context.outputs.tag }}
+      group: apple-testflight-${{ matrix.platform }}-${{ needs.context.outputs.tag }}${{ needs.context.outputs.apple_action == 'status' && '-status' || '' }}
       cancel-in-progress: false
     name: ${{ matrix.platform }} TestFlight ${{ needs.context.outputs.apple_action }}
-    runs-on: ${{ needs.context.outputs.apple_action == 'distribute' && 'ubuntu-latest' || matrix.platform == 'ios' && 'xcode-27' || 'macos-26' }}
+    runs-on: ${{ needs.context.outputs.apple_action != 'build' && 'ubuntu-latest' || matrix.platform == 'ios' && 'xcode-27' || 'macos-26' }}
     timeout-minutes: 90
     environment: testflight
     env:
@@ -565,12 +565,20 @@ jobs:
         run: bundle exec fastlane apple_upload
 
       - name: Distribute existing build to external TestFlight group
-        if: success() && (needs.context.outputs.apple_action == 'distribute' || (needs.context.outputs.upload_apple_testflight == 'true' && needs.context.outputs.distribute_apple_external == 'true'))
+        if: success() && (needs.context.outputs.apple_action == 'distribute' || (needs.context.outputs.apple_action == 'build' && needs.context.outputs.upload_apple_testflight == 'true' && needs.context.outputs.distribute_apple_external == 'true'))
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
         run: bundle exec fastlane apple_distribute
+
+      - name: Read App Store Connect build status
+        if: needs.context.outputs.apple_action == 'status'
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+        run: bundle exec fastlane apple_status
 
       - name: Job summary
         if: success()
