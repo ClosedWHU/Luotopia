@@ -1,0 +1,211 @@
+name: Apple TestFlight
+
+on:
+  workflow_call:
+    inputs:
+      platform:
+        type: string
+        required: true
+      app_sha:
+        type: string
+        required: true
+      tag:
+        type: string
+        required: true
+      build_name:
+        type: string
+        required: true
+      build_number:
+        type: string
+        required: true
+      upload_testflight:
+        type: boolean
+        default: false
+  workflow_dispatch:
+    inputs:
+      platform:
+        type: choice
+        options: [ios, macos]
+        required: true
+      app_sha:
+        description: Full private App commit SHA (no floating branch names)
+        type: string
+        required: true
+      tag:
+        description: Release tag, e.g. v1.0.1+14
+        type: string
+        required: true
+      build_name:
+        description: Numeric marketing version, e.g. 1.0.1
+        type: string
+        required: true
+      build_number:
+        description: Unused TestFlight build number, e.g. 14
+        type: string
+        required: true
+      upload_testflight:
+        description: Upload after signing, artifact, and private symbol checks pass
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# Serialize reruns for the same platform/version; never cancel an active upload.
+concurrency:
+  group: apple-testflight-${{ inputs.platform }}-${{ inputs.tag }}
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  APP_REPO: ClosedWHU/Luotopia-app
+  FASTLANE_SKIP_UPDATE_CHECK: "true"
+  FASTLANE_OPT_OUT_USAGE: "true"
+  FASTLANE_HIDE_CHANGELOG: "true"
+  LANG: en_US.UTF-8
+  LC_ALL: en_US.UTF-8
+
+jobs:
+  apple:
+    name: ${{ inputs.platform }} signed Store build
+    runs-on: macos-26
+    timeout-minutes: 90
+    environment: testflight
+    env:
+      APP_REPO_TOKEN: ${{ secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN }}
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      MATCH_GIT_URL: ${{ vars.MATCH_GIT_URL }}
+      MATCH_GIT_BRANCH: ${{ vars.MATCH_GIT_BRANCH || 'main' }}
+      MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+      APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+      APPLE_PLATFORM: ${{ inputs.platform }}
+      APPLE_APP_SHA: ${{ inputs.app_sha }}
+      APPLE_RELEASE_TAG: ${{ inputs.tag }}
+      APPLE_BUILD_NAME: ${{ inputs.build_name }}
+      APPLE_BUILD_NUMBER: ${{ inputs.build_number }}
+    steps:
+      - name: Check configuration
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in APP_REPO_TOKEN MATCH_PASSWORD MATCH_GIT_URL APPLE_TEAM_ID ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8_BASE64; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing Apple configuration: $name"
+              exit 1
+            fi
+          done
+          [[ "$APPLE_PLATFORM" == ios || "$APPLE_PLATFORM" == macos ]]
+          [[ "$APPLE_APP_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$APPLE_BUILD_NAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$APPLE_BUILD_NUMBER" =~ ^[1-9][0-9]*$ ]]
+          [[ "$APPLE_RELEASE_TAG" == "v${APPLE_BUILD_NAME}+${APPLE_BUILD_NUMBER}" ]]
+
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.APP_REPO }}
+          token: ${{ env.APP_REPO_TOKEN }}
+          ref: ${{ inputs.app_sha }}
+          persist-credentials: false
+
+      - name: Verify source and select Xcode
+        env:
+          XCODE_VERSION: ${{ vars.APPLE_XCODE_VERSION || '26.6' }}
+        run: |
+          set -euo pipefail
+          [[ "$(git rev-parse HEAD)" == "$APPLE_APP_SHA" ]]
+          sudo xcode-select -s "/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
+          xcodebuild -version
+          git submodule update --init --depth 1 lib/core/l10n/arb
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ vars.APPLE_FLUTTER_VERSION || '3.47.5' }}
+          channel: stable
+          cache: true
+
+      - name: Prepare Flutter and native dependencies
+        env:
+          GH_TOKEN: ${{ env.APP_REPO_TOKEN }}
+          GITHUB_TOKEN: ${{ env.APP_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          flutter config --enable-macos-desktop --enable-macos-arm64-only
+          flutter pub get --enforce-lockfile
+          bash tool/fetch_prebuilt_natives.sh
+          bash tool/fetch_fjs_xcframework.sh
+          bash tool/sync_model_metadata.sh --strict
+
+      - name: Test release orchestration
+        run: |
+          bundle exec ruby test/tool/apple_release_test.rb
+          python3 tool/test_apple_build_scripts.py
+
+      - name: Build and validate signed artifact
+        id: build
+        run: bundle exec fastlane apple_build
+
+      # This repo is public. Compiler logs, Dart symbols, and native dSYMs go
+      # directly to the private app repo, including on failed native builds.
+      - name: Preserve private symbols and build logs
+        id: symbols
+        if: always()
+        env:
+          GH_TOKEN: ${{ env.APP_REPO_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          paths=()
+          for path in "apple-ci/$APPLE_PLATFORM" "debug-info/$APPLE_PLATFORM-appstore"; do
+            if [ -d "build/$path" ]; then paths+=("$path"); fi
+          done
+          if [ "${#paths[@]}" -eq 0 ]; then
+            echo "No native build outputs to preserve"
+            exit 0
+          fi
+          symbol_tag="symbols-${APPLE_BUILD_NAME}-${APPLE_BUILD_NUMBER}"
+          archive="$RUNNER_TEMP/dart-symbols-${APPLE_PLATFORM}-testflight-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.tar.gz"
+          tar -czf "$archive" -C build "${paths[@]}"
+          if ! gh release view "$symbol_tag" --repo "$APP_REPO" >/dev/null 2>&1; then
+            gh release create "$symbol_tag" --repo "$APP_REPO" --target "$APPLE_APP_SHA" \
+              --title "Dart symbols $APPLE_RELEASE_TAG" \
+              --notes "Private symbols, native dSYMs, and logs for $APPLE_RELEASE_TAG; never publish these."
+          fi
+          gh release upload "$symbol_tag" "$archive" --repo "$APP_REPO"
+          rm -f "$archive"
+          echo "Preserved symbols privately at $APP_REPO@$symbol_tag"
+
+      - name: Upload to TestFlight and wait for processing
+        if: success() && inputs.upload_testflight
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+        run: bundle exec fastlane apple_upload
+
+      - name: Job summary
+        if: success()
+        env:
+          UPLOADED: ${{ inputs.upload_testflight }}
+        run: |
+          {
+            echo "### Apple $APPLE_PLATFORM"
+            echo "Version: $APPLE_BUILD_NAME ($APPLE_BUILD_NUMBER)"
+            echo "App commit: $APPLE_APP_SHA"
+            echo "Uploaded to TestFlight: $UPLOADED"
+            echo "Symbols and compiler logs: private App release symbols-${APPLE_BUILD_NAME}-${APPLE_BUILD_NUMBER}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Clean signing state
+        if: always()
+        run: |
+          security delete-keychain fastlane_tmp_keychain-db 2>/dev/null || true
+          rm -rf build/apple-ci build/debug-info
