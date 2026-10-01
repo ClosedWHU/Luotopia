@@ -56,9 +56,9 @@ jobs:
           ruby-version: "3.4"
           bundler-cache: true
 
-      # No profiles are recreated and no certificates are revoked. This only
-      # adopts the imported distribution certificate and creates an installer
-      # identity when none exists in encrypted Match storage.
+      # Reuse the existing distribution certificate. Imported Xcode-managed
+      # profiles need new manual Store profiles for CI; original Team Store
+      # profiles remain on the portal. No certificates are revoked.
       - name: Initialize installer identity
         run: bundle exec fastlane signing_bootstrap
 
