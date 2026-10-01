@@ -1,0 +1,77 @@
+name: Initialize Apple signing
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_sha:
+        description: Full private App commit containing the reviewed Fastlane lanes
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apple-signing-initialize
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  FASTLANE_SKIP_UPDATE_CHECK: "true"
+  FASTLANE_OPT_OUT_USAGE: "true"
+  FASTLANE_HIDE_CHANGELOG: "true"
+  LANG: en_US.UTF-8
+  LC_ALL: en_US.UTF-8
+
+jobs:
+  signing:
+    runs-on: macos-26
+    timeout-minutes: 20
+    environment: testflight
+    env:
+      APP_REPO_TOKEN: ${{ secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN }}
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      MATCH_GIT_URL: ${{ vars.MATCH_GIT_URL }}
+      MATCH_GIT_BRANCH: ${{ vars.MATCH_GIT_BRANCH || 'main' }}
+      MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_BOOTSTRAP_GIT_BASIC_AUTHORIZATION }}
+      APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+    steps:
+      - name: Check commit
+        env:
+          APP_SHA: ${{ inputs.app_sha }}
+        run: '[[ "$APP_SHA" =~ ^[0-9a-f]{40}$ ]]'
+
+      - uses: actions/checkout@v7
+        with:
+          repository: ClosedWHU/Luotopia-app
+          token: ${{ env.APP_REPO_TOKEN }}
+          ref: ${{ inputs.app_sha }}
+          persist-credentials: false
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      # No profiles are recreated and no certificates are revoked. This only
+      # adopts the imported distribution certificate and creates an installer
+      # identity when none exists in encrypted Match storage.
+      - name: Initialize installer identity
+        run: bundle exec fastlane signing_bootstrap
+
+      - name: Verify readonly iOS signing
+        env:
+          APPLE_PLATFORM: ios
+        run: bundle exec fastlane signing_check
+
+      - name: Verify readonly macOS signing
+        env:
+          APPLE_PLATFORM: macos
+        run: bundle exec fastlane signing_check
+
+      - name: Clean signing state
+        if: always()
+        run: security delete-keychain fastlane_tmp_keychain-db 2>/dev/null || true
