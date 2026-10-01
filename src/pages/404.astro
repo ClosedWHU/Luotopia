@@ -1,0 +1,1012 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Icon from "../components/Icon.astro";
+
+/*
+ * Astro emits this as `dist/404.html`, and its mere existence is load-bearing.
+ *
+ * Pages chooses between "custom 404" and "single-page application" purely on
+ * whether the build output contains a top-level `404.html`: with one, a miss is
+ * answered by that file at status 404; without one, Pages assumes an SPA and
+ * rewrites *every* unmatched path to `/` at 200. This site had no `404.html`,
+ * which is why `/typo` — and even `/missing.png` — used to come back as the
+ * homepage. There is no dashboard toggle for it and no `wrangler.jsonc` key
+ * either: `assets.not_found_handling` belongs to Workers static assets, a
+ * different product from Pages. Shipping this file *is* the configuration.
+ *
+ * `functions/_middleware.ts` is left with only the part the platform cannot do
+ * — handing a one-line `text/plain` 404 to clients that never asked for a
+ * document, so `curl` does not print 34 KB of markup into a terminal.
+ *
+ * Consequence of being a built file: `Astro.response.status` below is what makes
+ * `astro dev` honest, but `Astro.url.pathname` here is always `/404.html`. The
+ * offending path can only come from `location` at runtime — hence the
+ * placeholder the script fills in.
+ */
+Astro.response.status = 404;
+
+/**
+ * 5×7 dot-matrix glyphs for the digits the figure is built from.
+ *
+ * Every cell of the grid is rendered, not just the lit ones: the unlit cells
+ * draw the same dot the page-wide `.lt-aurora-grid` uses, so "404" reads as a
+ * shape picked out of the blueprint lattice behind it rather than as a graphic
+ * pasted on top. That is also what gives the pointer something to do across the
+ * whole rectangle instead of only over ~40 tiles.
+ */
+const GLYPHS: Record<string, string[]> = {
+  "4": ["10010", "10010", "10010", "11111", "00010", "00010", "00010"],
+  "0": ["01110", "10001", "10001", "10001", "10001", "10001", "01110"],
+};
+
+const DIGITS = ["4", "0", "4"];
+const COLS = GLYPHS["4"]![0]!.length;
+
+/** ms between successive cells of the entrance sweep. */
+const STEP = 28;
+
+/*
+ * The 武 brand mark, rendered in the matrix's own material rather than as an
+ * image: `SEAL_SVG` is used as a CSS mask and the dots underneath it are the
+ * same `radial-gradient` stipple the page-wide blueprint lattice uses, at a
+ * pitch tied to `--lt-404-cell`. So the logo is not sitting *on* the dot
+ * matrix, it is *made of* it — one material, two scales.
+ *
+ * Two consequences worth the odd indirection:
+ *
+ * - Because the pitch is a multiple of the cell size, the glyph resolves to
+ *   ~19 dots across at every viewport. That number is a floor, not a
+ *   preference: sampled below ~17, 戈's diagonal and 止's box merge into a
+ *   blob. A fixed pixel pitch would clear it on desktop and turn to mush on a
+ *   320px phone; a fixed *count* holds both.
+ * - It costs no bytes. `/img/app-icon.svg` is the tight-cropped vector master
+ *   of the same mark `src/lib/logo3d/wu.js` extrudes into the 3D logo on
+ *   /brand, and the Navbar on this very page already loaded it, so the mask is
+ *   a cache hit. Shipping three.js here instead — the obvious reading of "use
+ *   the 3D logo" — would spend a few hundred KB and a second WebGL context,
+ *   alongside the aurora shader, on the one route guaranteed to be hit by
+ *   accident on a bad connection by someone who wants a link home.
+ */
+const SEAL_SVG = "/img/app-icon.svg";
+---
+
+<BaseLayout title="页面不存在" noindex>
+  <section class="lt-404 relative overflow-hidden pt-28 sm:pt-32 pb-24 px-4">
+    <div class="lt-404-wash" aria-hidden="true"></div>
+
+    <div class="relative max-w-3xl mx-auto flex flex-col items-center text-center">
+      <p class="sr-only">404，页面不存在。</p>
+
+      <!--
+        `.lt-figure` owns the perspective, `.lt-matrix` the tilt, `.lt-cell` the
+        per-tile lift — a 3D chain that has to be unbroken (`preserve-3d` all the
+        way down) for a `translateZ` on any of them to mean anything.
+
+        The 武 seal rides *inside* that chain, pushed back on Z rather than laid
+        over the top as a flat layer. That is what makes the combination read as
+        one object: when the matrix tilts toward the cursor the seal parallaxes
+        against it at the correct rate, because it genuinely is behind it. A
+        seal stacked with `z-index` would slide the wrong way and give the game
+        away.
+
+        Nothing in here runs `backdrop-filter`, and that is load-bearing — a
+        grouping ancestor (`opacity < 1`, `filter`, `preserve-3d`) turns an
+        element into a backdrop root, so a glass plate inside the matrix would
+        sample nothing and render as flat tint. The seal is ink and mask only.
+      -->
+      <div class="lt-figure" data-lt-figure>
+        <div class="lt-matrix" data-lt-matrix aria-hidden="true">
+          <span class="lt-seal" data-lt-seal style={`--lt-seal-src: url(${SEAL_SVG})`}>
+            <span class="lt-seal-ink"></span>
+            <span class="lt-seal-glint"></span>
+          </span>
+          {
+            DIGITS.map((digit, di) => (
+              <div class="lt-digit" data-lt-digit>
+                {GLYPHS[digit]!.map((row, ri) =>
+                  row.split("").map((bit, ci) => (
+                    <span
+                      class="lt-cell"
+                      data-lit={bit === "1" ? "true" : undefined}
+                      style={`--lt-delay:${(di * (COLS + 1) + ci + ri) * STEP}ms`}
+                    />
+                  )),
+                )}
+              </div>
+            ))
+          }
+        </div>
+      </div>
+
+      <h1 class="lt-404-fade text-headline-small sm:text-headline-medium text-on-surface tracking-tight mt-12" style="--lt-reveal-delay: 520ms">
+        这个页面不在这里
+      </h1>
+      <p class="lt-404-fade mt-3 text-body-large text-on-surface-variant max-w-md" style="--lt-reveal-delay: 580ms">
+        地址可能拼错了，或者这一页已经被移动、下线。
+      </p>
+
+      <div id="lt-404-pathrow" class="lt-404-rise mt-7" data-shown="false">
+        <p class="text-body-small text-outline mb-2">你访问的地址</p>
+        <button
+          type="button"
+          id="lt-404-path"
+          data-copy="on"
+          class="lt-path state-layer inline-flex max-w-full items-center gap-2 rounded-full lt-inset py-1.5 pl-4 pr-1.5 text-on-surface cursor-pointer border-none"
+          title="复制这个地址"
+        >
+          <code id="lt-404-path-text" class="min-w-0 truncate font-mono text-body-small"></code>
+          <span class="lt-path-ico inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-primary" data-copy-idle>
+            <Icon name="content_copy" class="text-[15px]" />
+          </span>
+          <span class="lt-path-ico inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-primary" data-copy-done>
+            <Icon name="check" class="text-[15px]" />
+          </span>
+        </button>
+      </div>
+
+      <div class="lt-actions lt-404-rise mt-9" style="--lt-reveal-delay: 700ms">
+        <a href="/" class="filled-glass state-layer inline-flex items-center justify-center gap-2 rounded-full px-6 py-2.5 text-label-large font-medium no-underline">
+          <Icon name="home" class="text-lg" />
+          返回首页
+        </a>
+        <a href="/features" class="glass-control state-layer inline-flex items-center justify-center gap-2 rounded-full px-6 py-2.5 text-label-large text-on-surface no-underline font-medium">
+          <Icon name="apps" class="text-lg" />
+          功能总览
+        </a>
+        <a href="/download" class="glass-control state-layer inline-flex items-center justify-center gap-2 rounded-full px-6 py-2.5 text-label-large text-on-surface no-underline font-medium">
+          <Icon name="download" class="text-lg" />
+          下载 App
+        </a>
+      </div>
+
+      <!--
+        An unknown *site* path is very often a valid *app* route: the deep-link
+        host claims https://luotopia.whu.sb/* wholesale, so a link shared from
+        the app and opened with the host swapped lands here. Offering the same
+        path back on that host turns a dead end into the launch page.
+        Hidden until the script confirms the first segment is one the app owns.
+      -->
+      <div id="lt-404-deeplink" class="lt-404-rise mt-8 w-full max-w-md" data-shown="false">
+        <div class="lt-deeplink glass rounded-control px-5 py-4 text-left flex items-start gap-3">
+          <span class="lt-icon-chip text-primary text-[20px] shrink-0 mt-0.5"><Icon name="open_in_new" /></span>
+          <div class="min-w-0">
+            <p class="text-title-small text-on-surface">这看起来像 App 里的页面</p>
+            <p class="mt-1 text-body-small text-on-surface-variant">网页端没有这一页，但客户端可能认识它。</p>
+            <a
+              id="lt-404-deeplink-link"
+              href="#"
+              class="mt-3 inline-flex items-center gap-1.5 text-body-small text-primary no-underline hover:underline"
+            >
+              <Icon name="north_east" class="text-base" />
+              在 App 中打开这个链接
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <p class="lt-404-fade mt-12 text-body-small text-outline" style="--lt-reveal-delay: 820ms">
+        找不到想要的东西？去
+        <a href="/community" class="text-primary no-underline hover:underline">社区</a>
+        问一下，或者
+        <a href="https://github.com/ClosedWHU/Luotopia/issues" target="_blank" rel="noopener noreferrer" class="text-primary no-underline hover:underline">报个 issue</a>。
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  :global(:root) {
+    --lt-404-cell: clamp(11px, 3.1vw, 26px);
+    --lt-404-gap: calc(var(--lt-404-cell) * 0.34);
+    --lt-404-tile-bg: hsl(209 62% 97% / 0.42);
+    --lt-404-tile-sheen: linear-gradient(
+      150deg,
+      hsl(0 0% 100% / 0.66),
+      hsl(0 0% 100% / 0.12) 44%,
+      transparent 68%
+    );
+    --lt-404-tile-shadow: hsl(211 68% 30% / 0.28);
+    --lt-404-wash-from: hsl(213 62% 76% / 0.6);
+    --lt-404-wash-to: hsl(213 62% 76% / 0);
+    /* 0.40 × cell puts ~25 dots across the seal box. The glyph fills ~83% of
+     * `/img/app-icon.svg`'s viewBox, so that lands ~21 dots across the mark —
+     * comfortably over the measured floor (below ~17, 戈's diagonal and 止's box
+     * merge into a blob). Pitch is a multiple of the cell, not a fixed length,
+     * so the dot *count* holds from a 320px phone to a desktop; a fixed pitch
+     * would clear 21 on one and drown the other. */
+    --lt-404-seal-pitch: calc(var(--lt-404-cell) * 0.4);
+    /* 1.1× the matrix's own height (7 cells + 6 gaps = 9.04). Deliberately a
+     * hair taller than the figure rather than inscribed in it: a seal that stops
+     * exactly at the digits' edges reads as a background clipped to a box, while
+     * one that overhangs by ~12px reads as a mark the number is sitting on. The
+     * section's pt-28 / pb-24 leave far more room than that. */
+    --lt-404-seal-size: calc(var(--lt-404-cell) * 10);
+    --lt-404-seal-dot: hsl(211 62% 44% / 0.3);
+    --lt-404-seal-glint: hsl(205 92% 46% / 0.82);
+  }
+
+  :global(:root.dark) {
+    /* Pale blue at low alpha rather than white: on the dark aurora a white tile
+     * reads as a hole punched in the page, and 105 of them read as a barcode. */
+    --lt-404-tile-bg: hsl(207 58% 66% / 0.18);
+    --lt-404-tile-sheen: linear-gradient(
+      150deg,
+      hsl(204 74% 88% / 0.28),
+      hsl(0 0% 100% / 0.04) 46%,
+      transparent 70%
+    );
+    --lt-404-tile-shadow: hsl(216 60% 4% / 0.66);
+    --lt-404-wash-from: hsl(214 52% 26% / 0.5);
+    --lt-404-wash-to: hsl(214 52% 26% / 0);
+    --lt-404-seal-dot: hsl(205 74% 74% / 0.24);
+    --lt-404-seal-glint: hsl(200 96% 78% / 0.85);
+  }
+
+  .lt-404-wash {
+    position: absolute;
+    /* Four sides, not the `inset` shorthand (Chrome 87+): legacy-WebView floor. */
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background:
+      radial-gradient(40rem 22rem at 50% 18%, var(--lt-404-wash-from), var(--lt-404-wash-to) 72%),
+      radial-gradient(26rem 18rem at 16% 44%, hsl(196 62% 76% / 0.3), transparent 70%);
+    mask-image: linear-gradient(#000 0%, rgba(0, 0, 0, 0.88) 14%, transparent 96%);
+    -webkit-mask-image: linear-gradient(#000 0%, rgba(0, 0, 0, 0.88) 14%, transparent 96%);
+    pointer-events: none;
+  }
+
+  /* ── The figure ── */
+
+  .lt-figure {
+    position: relative;
+    /* Shrinks to the matrix so its centre and the matrix's centre coincide —
+     * the script measures the pointer against this box, which carries no
+     * transform of its own and therefore never moves while the matrix tilts. */
+    display: inline-block;
+    perspective: 1100px;
+    perspective-origin: 50% 46%;
+  }
+
+  .lt-matrix {
+    position: relative;
+    display: flex;
+    gap: calc(var(--lt-404-cell) * 1.05);
+    transform-style: preserve-3d;
+    transform: rotateX(var(--lt-tilt-x, 0deg)) rotateY(var(--lt-tilt-y, 0deg));
+  }
+
+  /*
+   * ── The seal ──
+   *
+   * The 武 mark, drawn in the figure's own material rather than dropped on top
+   * of it as an image. `/img/app-icon.svg` — the tight-cropped vector master of
+   * the same glyph `src/lib/logo3d/wu.js` extrudes into the 3D logo on /brand —
+   * is used as a *mask*, and what shows through it is the same stipple recipe
+   * the page-wide `.lt-aurora-grid` uses, at a pitch tuned so the glyph resolves
+   * to ~19 dots across. That number is a floor, not a taste call: sampled below
+   * ~17, 戈's diagonal and 止's box merge into a blob.
+   *
+   * The pitch is a multiple of `--lt-404-cell` rather than a fixed length so the
+   * dot *count* stays constant from a 320px phone to a desktop; a fixed pitch
+   * would clear 19 dots on one and drown the other.
+   *
+   * It sits inside the 3D chain on a negative Z, which is what makes the
+   * combination read as a single object: when the matrix tilts toward the
+   * cursor the seal parallaxes against it at the correct rate, because it
+   * genuinely is behind it. A `z-index` stack would slide the wrong way and
+   * give the game away. That is also why it can be here at all — it is ink and
+   * mask with no `backdrop-filter`, so the `preserve-3d` ancestry that would
+   * flatten a glass plate into tint does nothing to it.
+   */
+  .lt-seal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--lt-404-seal-size);
+    height: var(--lt-404-seal-size);
+    /* Negative margins, not `transform: translate(-50%, -50%)`: `transform` is
+     * the Z channel that places the seal behind the digits. */
+    margin-top: calc(var(--lt-404-seal-size) / -2);
+    margin-left: calc(var(--lt-404-seal-size) / -2);
+    transform: translateZ(calc(var(--lt-404-cell) * -2.4));
+    -webkit-mask-image: var(--lt-seal-src);
+    mask-image: var(--lt-seal-src);
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    pointer-events: none;
+    opacity: 0;
+    scale: 0.88;
+    animation: lt-seal-in 1s cubic-bezier(0.22, 1, 0.36, 1) 620ms forwards;
+  }
+
+  @keyframes lt-seal-in {
+    to {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+
+  .lt-seal-ink,
+  .lt-seal-glint {
+    position: absolute;
+    /* Four sides, not the `inset` shorthand (Chrome 87+): legacy-WebView floor. */
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-position: center;
+    background-size: var(--lt-404-seal-pitch) var(--lt-404-seal-pitch);
+  }
+
+  .lt-seal-ink {
+    background-image: radial-gradient(
+      circle calc(var(--lt-404-seal-pitch) * 0.21) at center,
+      var(--lt-404-seal-dot) 97%,
+      transparent 100%
+    );
+  }
+
+  /*
+   * The same stipple again, brighter, revealed only inside a disc that tracks
+   * the cursor — so sweeping across the figure lights the logo's dots under the
+   * pointer instead of the whole mark at once. Two custom properties per frame
+   * on one element, which is why this costs nothing next to the 105 tiles.
+   */
+  .lt-seal-glint {
+    background-image: radial-gradient(
+      circle calc(var(--lt-404-seal-pitch) * 0.21) at center,
+      var(--lt-404-seal-glint) 97%,
+      transparent 100%
+    );
+    -webkit-mask-image: radial-gradient(
+      circle calc(var(--lt-404-cell) * 3.6) at
+        calc(50% + var(--lt-glint-x, 0px)) calc(50% + var(--lt-glint-y, 0px)),
+      #000 0%,
+      rgba(0, 0, 0, 0.5) 46%,
+      transparent 74%
+    );
+    mask-image: radial-gradient(
+      circle calc(var(--lt-404-cell) * 3.6) at
+        calc(50% + var(--lt-glint-x, 0px)) calc(50% + var(--lt-glint-y, 0px)),
+      #000 0%,
+      rgba(0, 0, 0, 0.5) 46%,
+      transparent 74%
+    );
+    opacity: 0;
+    transition: opacity 0.45s ease;
+  }
+
+  .lt-seal[data-live="true"] .lt-seal-glint {
+    opacity: 1;
+  }
+
+  /* Dimmer while the idle sweep carries the highlight: a touch device never
+   * gets a cursor, and a highlight nobody is steering should not shout. */
+  .lt-seal[data-live="sweep"] .lt-seal-glint {
+    opacity: 0.5;
+  }
+
+  .lt-digit {
+    position: relative;
+    display: grid;
+    /* `flex: none`: the tracks are fixed lengths, so a default `flex-shrink: 1`
+     * would let a narrow viewport squeeze the digit boxes while the grid inside
+     * kept its size and overflowed them. Refuse to shrink and let the section's
+     * `overflow-hidden` be the only thing that ever clips. */
+    flex: none;
+    grid-template-columns: repeat(5, var(--lt-404-cell));
+    grid-auto-rows: var(--lt-404-cell);
+    gap: var(--lt-404-gap);
+    transform-style: preserve-3d;
+  }
+
+  /*
+   * Two transform channels, deliberately kept apart.
+   *
+   * `transform` is the pointer channel: the tile rises on Z toward the cursor
+   * and swells slightly, both driven by `--lt-hot` which the script writes every
+   * frame. The entrance therefore cannot use `transform` — an animation with
+   * `forwards` fill would win the cascade against the inline value permanently
+   * and freeze the whole figure flat. It rides `translate` and `opacity`
+   * instead, which compose with `transform` rather than competing (the same
+   * reason `.lt-lift` in global.css lifts on `translate`).
+   *
+   * Kernels without the individual transform properties (below Chrome 104) drop
+   * `translate` from the keyframes and keep the fade, which is the degradation
+   * we want rather than a stuck-invisible cell.
+   */
+  .lt-cell {
+    position: relative;
+    border-radius: calc(var(--lt-404-cell) * 0.32);
+    opacity: 0;
+    translate: 0 calc(var(--lt-404-cell) * 0.5);
+    transform: translateZ(calc(var(--lt-hot, 0) * var(--lt-404-cell) * 0.85))
+      scale(calc(1 + var(--lt-hot, 0) * 0.1));
+    animation: lt-cell-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-delay, 0ms) forwards;
+  }
+
+  @keyframes lt-cell-in {
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  /*
+   * Unlit cell: one dot from the same recipe as `.lt-aurora-grid`, so the
+   * matrix's negative space is literally a continuation of the page's blueprint
+   * lattice. It still answers the pointer — the lattice brightening around the
+   * cursor is most of what makes the figure feel alive rather than printed.
+   *
+   * The dot scales on the `scale` property, not `transform`: the cell's own
+   * `transform` is already carrying the Z lift, and a pseudo-element shares
+   * nothing with it, but keeping the two channels distinct means the dot's
+   * growth survives any future change to the cell's transform.
+   */
+  .lt-cell::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2.4px;
+    height: 2.4px;
+    margin: -1.2px 0 0 -1.2px;
+    border-radius: 999px;
+    background-color: var(--lt-grid-dot);
+    opacity: calc(0.6 + var(--lt-hot, 0) * 0.4);
+    scale: calc(1 + var(--lt-hot, 0) * 1.1);
+  }
+
+  .lt-cell[data-lit="true"] {
+    background-color: var(--lt-404-tile-bg);
+    background-image: var(--lt-404-tile-sheen);
+    box-shadow:
+      inset 0 1px 0 0 var(--lt-glass-rim),
+      inset 0 0 0 0.6px var(--lt-glass-edge),
+      0 calc(2px + var(--lt-hot, 0) * 5px) calc(7px + var(--lt-hot, 0) * 16px) -5px
+        var(--lt-404-tile-shadow);
+    filter: brightness(calc(1 + var(--lt-hot, 0) * 0.34));
+  }
+
+  .lt-cell[data-lit="true"]::before {
+    content: none;
+  }
+
+  /* ── Action row ──
+   *
+   * A grid, not `flex-wrap`, because the wrap order is part of the design.
+   * Flex fills each line greedily, so the first width at which three buttons no
+   * longer fit gives 2-on-top / 1-below — a lopsided orphan. The wanted
+   * intermediate is the opposite: the lead action alone on its own line, the two
+   * alternates paired under it. Only an explicit span can express that, so the
+   * row is a grid and the first child spans both columns in the middle tier.
+   *
+   * `justify-items: center` keeps every button at its natural pill width in all
+   * three tiers; without it a `1fr` track would stretch them into full-width
+   * bars, which is not how any other button row on the site behaves.
+   */
+  .lt-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+    justify-content: center;
+    justify-items: center;
+  }
+
+  /* 21rem: two pills (~282px) plus the section's px-4 clear a 336px viewport. */
+  @media (min-width: 21rem) {
+    .lt-actions {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .lt-actions > :first-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* 31rem: three pills (~429px) plus px-4 clear a 496px viewport. Above this
+   * the span is released and all three sit on one line. */
+  @media (min-width: 31rem) {
+    .lt-actions {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .lt-actions > :first-child {
+      grid-column: auto;
+    }
+  }
+
+  /* ── Copy ── */
+
+  #lt-404-pathrow,
+  #lt-404-deeplink {
+    display: none;
+  }
+
+  #lt-404-pathrow[data-shown="true"],
+  #lt-404-deeplink[data-shown="true"] {
+    display: block;
+  }
+
+  .lt-path {
+    font: inherit;
+    transition: box-shadow 0.3s ease;
+  }
+
+  /* The button is only a button while copying is actually possible; the script
+   * flips this off on kernels without the async clipboard, and the icon and the
+   * pointer affordance go with it. */
+  .lt-path[data-copy="off"] {
+    cursor: default;
+    padding-right: 1rem;
+  }
+
+  .lt-path[data-copy="off"] .lt-path-ico {
+    display: none;
+  }
+
+  .lt-path [data-copy-done] {
+    display: none;
+  }
+
+  .lt-path[data-copied="true"] [data-copy-idle] {
+    display: none;
+  }
+
+  .lt-path[data-copied="true"] [data-copy-done] {
+    display: inline-flex;
+  }
+
+  /* ── Entrance for the copy below the figure ──
+   *
+   * Local keyframes rather than `.lt-reveal`: that class starts at opacity 0
+   * and is released by an IntersectionObserver in the shared bundle, which
+   * would leave a no-JS 404 with no buttons at all. Animations run from first
+   * paint with nothing in the loop. `rise` is transform-only because the button
+   * row contains `filled-glass` / `glass-control`, and an opacity < 1 ancestor
+   * is a backdrop root that would flatten them.
+   */
+  @keyframes lt-404-fade {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes lt-404-rise {
+    from {
+      transform: translateY(22px);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  .lt-404-fade {
+    animation: lt-404-fade 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms) both;
+  }
+
+  .lt-404-rise {
+    animation: lt-404-rise 0.75s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms) both;
+  }
+
+  /*
+   * `data-shown` and `animation-fill-mode: both` disagree: the fill holds
+   * `transform: none` from first paint, but `display: none` also suppresses the
+   * animation entirely, so a block revealed later restarts from its `from`
+   * keyframe. That is the wanted behaviour — the path chip and the deep-link
+   * card slide in when the script decides they exist, not before.
+   */
+
+  @media (prefers-reduced-transparency: reduce) {
+    :global(:root),
+    :global(:root.dark) {
+      --lt-404-tile-bg: var(--lt-color-surface);
+      --lt-404-tile-sheen: none;
+    }
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    :global(:root) {
+      --lt-404-tile-bg: hsl(209 62% 97% / 0.78);
+    }
+
+    :global(:root.dark) {
+      --lt-404-tile-bg: hsl(207 40% 46% / 0.4);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lt-cell {
+      animation: none;
+      opacity: 1;
+      translate: none;
+      transform: none;
+      filter: none;
+    }
+
+    .lt-cell::before {
+      opacity: 1;
+      scale: none;
+    }
+
+    .lt-matrix {
+      transform: none;
+    }
+
+    /* The seal's entrance is what makes it visible at all (`opacity: 0` at
+     * rest), so cancelling the animation has to hand back the end state
+     * explicitly or reduced-motion users get no logo whatsoever. */
+    .lt-seal {
+      animation: none;
+      opacity: 1;
+      scale: none;
+      transform: none;
+    }
+
+    /* No tracking highlight without a loop to move it; the base stipple is the
+     * whole seal under reduced motion. */
+    .lt-seal-glint {
+      display: none;
+    }
+
+    .lt-404-fade,
+    .lt-404-rise {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  import { onPageSetup } from "../scripts/page-lifecycle";
+  import { isSupportedDeeplinkPath } from "../config/deeplinkRoutes";
+
+  const DEEPLINK_HOST = "https://luotopia.whu.sb";
+
+  onPageSetup((signal) => {
+    /* ── The requested path ──
+     * Only knowable at runtime: this document is built once, at /404.html, and
+     * the middleware replays it for whatever URL actually missed.
+     */
+    const wanted = location.pathname + location.search;
+
+    const pathRow = document.getElementById("lt-404-pathrow");
+    const pathBtn = document.getElementById("lt-404-path");
+    const pathText = document.getElementById("lt-404-path-text");
+    if (pathRow && pathText) {
+      pathText.textContent = wanted;
+      pathRow.setAttribute("data-shown", "true");
+    }
+
+    const canCopy = !!(navigator.clipboard && navigator.clipboard.writeText);
+    if (pathBtn) {
+      if (!canCopy) {
+        pathBtn.setAttribute("data-copy", "off");
+        pathBtn.removeAttribute("title");
+        pathBtn.setAttribute("aria-disabled", "true");
+      } else {
+        let reset = 0;
+        pathBtn.addEventListener("click", () => {
+          navigator.clipboard.writeText(wanted).then(
+            () => {
+              pathBtn.setAttribute("data-copied", "true");
+              window.clearTimeout(reset);
+              reset = window.setTimeout(() => pathBtn.removeAttribute("data-copied"), 1600);
+            },
+            () => { /* Clipboard can refuse (focus lost, permissions); the path is on screen either way. */ },
+          );
+        }, { signal });
+        signal.addEventListener("abort", () => window.clearTimeout(reset));
+      }
+    }
+
+    /* ── Deep-link escape hatch ── */
+    const deeplinkRow = document.getElementById("lt-404-deeplink");
+    const deeplinkAnchor = document.getElementById("lt-404-deeplink-link") as HTMLAnchorElement | null;
+    // `/404` itself is the page we are on, not an app route anyone meant.
+    if (deeplinkRow && deeplinkAnchor && isSupportedDeeplinkPath(location.pathname) && location.pathname !== "/404") {
+      deeplinkAnchor.href = DEEPLINK_HOST + wanted;
+      deeplinkRow.setAttribute("data-shown", "true");
+    }
+
+    /* ── The matrix ── */
+    const figure = document.querySelector<HTMLElement>("[data-lt-figure]");
+    const matrix = document.querySelector<HTMLElement>("[data-lt-matrix]");
+    const seal = document.querySelector<HTMLElement>("[data-lt-seal]");
+    if (!figure || !matrix) return;
+
+    const cells = Array.from(matrix.querySelectorAll<HTMLElement>(".lt-cell"));
+    if (cells.length === 0) return;
+
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (motion.matches) return;
+
+    /*
+     * Cell centres in *layout* space, measured with offsetLeft/offsetTop rather
+     * than getBoundingClientRect: the matrix is being rotated every frame, and a
+     * bounding rect would move with it. Layout offsets are transform-independent,
+     * so the field stays anchored to the figure instead of swimming under the
+     * tilt. The matrix's own half-extents are cached for the same reason — the
+     * frame loop must never read layout, or it forces a synchronous reflow on
+     * every one of the 105 style writes it is about to make.
+     */
+    let hot = new Float32Array(cells.length);
+    let pts: Array<{ x: number; y: number }> = [];
+    let cellSize = 12;
+    let halfW = 1;
+    let halfH = 1;
+
+    function measure() {
+      const digits = Array.from(matrix.querySelectorAll<HTMLElement>("[data-lt-digit]"));
+      halfW = matrix.offsetWidth / 2 || 1;
+      halfH = matrix.offsetHeight / 2 || 1;
+      const next: Array<{ x: number; y: number }> = [];
+      for (const digit of digits) {
+        for (const cell of Array.from(digit.children) as HTMLElement[]) {
+          next.push({
+            x: digit.offsetLeft + cell.offsetLeft + cell.offsetWidth / 2 - halfW,
+            y: digit.offsetTop + cell.offsetTop + cell.offsetHeight / 2 - halfH,
+          });
+        }
+      }
+      // Only adopt a complete measurement: a partially built list would leave
+      // the tail of `cells` without a coordinate and the loop would skip it.
+      if (next.length === cells.length) pts = next;
+      const first = cells[0];
+      if (first) cellSize = first.offsetWidth || 12;
+    }
+
+    measure();
+    if (pts.length !== cells.length) return;
+
+    let resizeFrame = 0;
+    const onResize = () => {
+      window.cancelAnimationFrame(resizeFrame);
+      resizeFrame = window.requestAnimationFrame(() => {
+        measure();
+        // A viewport change invalidates every written value; clear them so the
+        // loop re-writes from scratch instead of leaving stale lifts behind.
+        hot = new Float32Array(cells.length);
+        for (const cell of cells) cell.style.removeProperty("--lt-hot");
+      });
+    };
+    window.addEventListener("resize", onResize, { signal, passive: true });
+
+    /* ── Input state ── */
+    const pointer = { x: 0, y: 0, active: false };
+    // `written*` memoizes what is already on the element, so a settled matrix
+    // stops invalidating its 3D subtree every frame.
+    const tilt = { x: 0, y: 0, writtenX: 0, writtenY: 0 };
+    const glint = { x: 0, y: 0 };
+    let wave: { x: number; y: number; t: number } | null = null;
+    const started = performance.now();
+
+    const MAX_TILT = 7; // deg
+    const HOT_RADIUS = () => cellSize * 3.6;
+    const WAVE_SPEED = 0.62; // px per ms
+    const WAVE_SIGMA = () => cellSize * 1.9;
+    const WAVE_LIFE = 1200; // ms
+    const SWEEP_PERIOD = 5400; // ms
+    const SWEEP_OFF = -1e9; // sentinel: "no sweep this frame"
+
+    function clamp(v: number) {
+      return v > 1 ? 1 : v < -1 ? -1 : v;
+    }
+
+    function smooth(t: number) {
+      return t * t * (3 - 2 * t);
+    }
+
+    function toLocal(clientX: number, clientY: number) {
+      // Against the figure, not the matrix: the figure carries no transform, so
+      // this origin does not move while the matrix tilts toward the cursor.
+      const rect = figure.getBoundingClientRect();
+      return {
+        x: clientX - (rect.left + rect.width / 2),
+        y: clientY - (rect.top + rect.height / 2),
+      };
+    }
+
+    /*
+     * Two glint levels rather than one: full strength under a cursor that is
+     * deliberately there, dimmer while the idle sweep carries it. Without the
+     * distinction a touch device — which only ever gets the sweep — would show a
+     * highlight as insistent as a desktop user's, on a page nobody is steering.
+     */
+    const setGlintMode = (mode: string) => {
+      if (seal && seal.getAttribute("data-live") !== mode) {
+        seal.setAttribute("data-live", mode);
+      }
+    };
+
+    const onMove = (event: PointerEvent) => {
+      // Touch has no hover to track; a drag would smear the field across the
+      // figure while the page is trying to scroll under the finger.
+      if (event.pointerType === "touch") return;
+      const p = toLocal(event.clientX, event.clientY);
+      pointer.x = p.x;
+      pointer.y = p.y;
+      pointer.active = true;
+      setGlintMode("true");
+    };
+    const onLeave = () => {
+      pointer.active = false;
+      setGlintMode("sweep");
+    };
+    const onDown = (event: PointerEvent) => {
+      const p = toLocal(event.clientX, event.clientY);
+      wave = { x: p.x, y: p.y, t: performance.now() };
+    };
+
+    figure.addEventListener("pointermove", onMove, { signal, passive: true });
+    figure.addEventListener("pointerleave", onLeave, { signal });
+    figure.addEventListener("pointercancel", onLeave, { signal });
+    // A tap is the touch equivalent of a hover: one ripple out of the finger.
+    figure.addEventListener("pointerdown", onDown, { signal, passive: true });
+    setGlintMode("sweep");
+
+    let raf = 0;
+    let running = false;
+
+    function frame(now: number) {
+      raf = window.requestAnimationFrame(frame);
+
+      // Tilt follows the pointer, and eases back to flat when it leaves.
+      const targetTiltY = pointer.active ? clamp(pointer.x / halfW) * MAX_TILT : 0;
+      const targetTiltX = pointer.active ? -clamp(pointer.y / halfH) * MAX_TILT : 0;
+      tilt.x += (targetTiltX - tilt.x) * 0.09;
+      tilt.y += (targetTiltY - tilt.y) * 0.09;
+      // Written only while it is still moving. The idle sweep keeps this loop
+      // alive indefinitely, and two custom-property writes per frame on the
+      // matrix would invalidate its whole 3D subtree forever for a value that
+      // settled at 0 long ago.
+      if (tilt.x !== tilt.writtenX || tilt.y !== tilt.writtenY) {
+        if (Math.abs(tilt.x) < 0.001 && Math.abs(tilt.y) < 0.001) {
+          tilt.x = 0;
+          tilt.y = 0;
+        }
+        matrix.style.setProperty("--lt-tilt-x", `${tilt.x.toFixed(3)}deg`);
+        matrix.style.setProperty("--lt-tilt-y", `${tilt.y.toFixed(3)}deg`);
+        tilt.writtenX = tilt.x;
+        tilt.writtenY = tilt.y;
+      }
+
+      /*
+       * Idle sweep. Runs only while the pointer is away, so a desktop cursor
+       * never fights it and a touch device still gets a figure that breathes
+       * instead of one that is dead until tapped.
+       */
+      let sweep = SWEEP_OFF;
+      if (!pointer.active) {
+        const phase = ((now - started) % SWEEP_PERIOD) / SWEEP_PERIOD;
+        const span = halfW * 2 + halfH;
+        sweep = -span * 0.4 + phase * span * 1.8;
+      }
+
+      const radius = HOT_RADIUS();
+      const sigma = WAVE_SIGMA();
+      let waveAmp = 0;
+      let waveFront = 0;
+      if (wave) {
+        const age = now - wave.t;
+        if (age > WAVE_LIFE) {
+          wave = null;
+        } else {
+          waveAmp = 1 - age / WAVE_LIFE;
+          waveFront = age * WAVE_SPEED;
+        }
+      }
+
+      for (let i = 0; i < pts.length; i += 1) {
+        const p = pts[i]!;
+        let target = 0;
+
+        if (pointer.active) {
+          const dx = p.x - pointer.x;
+          const dy = p.y - pointer.y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < radius) target += smooth(1 - d / radius);
+        } else if (sweep !== SWEEP_OFF) {
+          // Projected onto the sweep direction, so the band travels diagonally.
+          const along = p.x + p.y * 0.55;
+          target += Math.exp(-Math.pow((along - sweep) / (halfW * 0.42), 2)) * 0.62;
+        }
+
+        if (wave) {
+          const dx = p.x - wave.x;
+          const dy = p.y - wave.y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          target += Math.exp(-Math.pow((d - waveFront) / sigma, 2)) * waveAmp;
+        }
+
+        if (target > 1) target = 1;
+
+        const prev = hot[i]!;
+        const next = prev + (target - prev) * 0.22;
+        // Snap and skip the write once settled: with the pointer parked in one
+        // corner this leaves ~20 of 105 cells dirty per frame instead of all of
+        // them, which is the difference between free and a style-recalc storm.
+        const value = Math.abs(next - target) < 0.004 ? target : next;
+        hot[i] = value;
+        if (Math.abs(value - prev) >= 0.002) {
+          cells[i]!.style.setProperty("--lt-hot", value.toFixed(3));
+        }
+      }
+
+      /*
+       * The seal's highlight rides the same field as the tiles: the cursor when
+       * there is one, otherwise the idle sweep, so a touch device still watches
+       * the logo light up as the band crosses it. Written in px because the
+       * mask's `calc(50% + var())` wants a length. Both origins coincide — the
+       * seal is centred on the matrix, and the pointer is measured from the
+       * figure, which shrink-wraps the matrix — so no conversion is needed.
+       *
+       * The idle sweep lives in "along" space (x + 0.55y); splitting it 0.82 /
+       * 0.25 puts the highlight back on the same diagonal the band travels.
+       */
+      if (seal) {
+        const gx = pointer.active ? pointer.x : sweep * 0.82;
+        const gy = pointer.active ? pointer.y : sweep * 0.25;
+        if (Math.abs(gx - glint.x) > 0.5 || Math.abs(gy - glint.y) > 0.5) {
+          glint.x = gx;
+          glint.y = gy;
+          seal.style.setProperty("--lt-glint-x", `${gx.toFixed(1)}px`);
+          seal.style.setProperty("--lt-glint-y", `${gy.toFixed(1)}px`);
+        }
+      }
+    }
+
+    function start() {
+      if (running || motion.matches || document.hidden) return;
+      running = true;
+      raf = window.requestAnimationFrame(frame);
+    }
+
+    function stop() {
+      if (!running) return;
+      running = false;
+      window.cancelAnimationFrame(raf);
+    }
+
+    /* Both gates matter: a background tab would otherwise burn frames on an
+     * invisible figure, and an OS reduced-motion flip mid-session has to be
+     * able to stop (and restart) the loop — the same contract index.astro's
+     * rotator keeps. */
+    const refresh = () => {
+      if (document.hidden || motion.matches) stop();
+      else start();
+    };
+
+    document.addEventListener("visibilitychange", refresh, { signal });
+    // The typeof guard covers engines whose MediaQueryList is not an
+    // EventTarget; there the reduced-motion state stays as first read.
+    if (typeof motion.addEventListener === "function") {
+      motion.addEventListener("change", refresh, { signal });
+    }
+
+    start();
+
+    return () => {
+      stop();
+      window.cancelAnimationFrame(resizeFrame);
+      for (const cell of cells) cell.style.removeProperty("--lt-hot");
+      matrix.style.removeProperty("--lt-tilt-x");
+      matrix.style.removeProperty("--lt-tilt-y");
+      if (seal) {
+        seal.style.removeProperty("--lt-glint-x");
+        seal.style.removeProperty("--lt-glint-y");
+        seal.removeAttribute("data-live");
+      }
+    };
+  });
+</script>

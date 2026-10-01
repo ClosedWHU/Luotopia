@@ -60,6 +60,38 @@ npm run hot-update:verify
 3. 可选：添加环境变量 `PUBLIC_SITE_URL` 为你的自定义域名
 4. 部署后可在 Pages 设置中绑定自定义域名
 
+### 404 处理
+
+`src/pages/404.astro` 构建为 `dist/404.html`，**这个文件本身就是配置**。
+
+Pages 判断「自定义 404」还是「单页应用」的唯一依据，是产物根目录有没有
+`404.html`：有则以 `404` 状态返回该文件；没有则认定为 SPA，把*所有*未命中路径
+重写到 `/` 并返回 `200`。本站此前没有 `404.html`，所以 `/typo` 乃至
+`/missing.png` 都会返回首页——这不是面板里的某个开关被打开，而是缺文件的默认
+推断。
+
+因此：
+
+- Pages 项目**没有** `not_found_handling` 配置项。文档里那段
+  `assets.not_found_handling: "404-page"` 属于 **Workers 静态资源**（`assets.directory`
+  + `main`），与 Pages 是两套产品。给 Pages 项目加 `wrangler.jsonc` 反而会使其
+  成为整个项目配置的 source of truth，面板里配好的环境变量与绑定会被覆盖，风险
+  远大于收益。
+- 也**不需要**在中间件里维护站点路由表。未命中由平台判定，新增页面不会漏配。
+
+`functions/_middleware.ts` 只保留平台做不到的那一半——**按客户端选择 404 的
+表示形式**：浏览器拿到完整的 `dist/404.html`，`curl` / `wget` / 各类 HTTP 库
+拿到一行 `text/plain`（`404 Not Found: /path` + 站点首页），避免 34 KB 的文档
+刷满终端。判定依据 `Accept` 是否显式包含 `text/html`，并用 `Sec-Fetch-Dest`
+兜底；Function 自己返回的 JSON 404（如 `/api/*`）不会被改写。
+
+部署后可这样验证：
+
+```sh
+curl -i https://www.whu.sb/definitely-not-a-page   # HTTP/2 404 + text/plain
+curl -s https://www.whu.sb/404 | head -c 120       # 404 页面本体
+```
+
 ### 深链域名（luotopia.whu.sb）
 
 App 将 `https://luotopia.whu.sb/*` 注册为 Android App Links（autoVerify）与
@@ -79,6 +111,12 @@ iOS Universal Links（applinks），链接与 App 内路由一一对应（GoRout
   经 `public/_headers` 以 `application/json` 提供；该文件必须无重定向直达。
 - 需在 Cloudflare Pages 的自定义域名中绑定 `luotopia.whu.sb`（DNS CNAME 指向
   Pages 项目）。域名必须**先于** App 发版上线，两端才会在安装时完成验证。
+- 该域名整体被 App 认领，所以扫描器探测、过期二维码等**不认识的路径也会落到
+  `/open` 落地页**。`src/config/deeplinkRoutes.ts` 列出 App 路由的顶层段
+  （与 `app/lib/app/router/app_route_paths.dart` 的首段一致）；首段不在其中时，
+  落地页会额外显示「App 里可能没有这个页面，仍会尝试打开」，但**唤起照常进行**
+  ——列表过期不应该拦住一个本来能成功的跳转。只校验首段是有意的：App 有数百个
+  嵌套路由且随版本变动，更深的匹配交给客户端自己的错误页。
 
 ### Cloudflare Workers (通过 `@astrojs/cloudflare`)
 
