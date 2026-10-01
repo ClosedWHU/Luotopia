@@ -59,6 +59,12 @@ on:
         required: false
         type: boolean
         default: false
+      apple_action:
+        description: Build/upload, or distribute an existing TestFlight build without re-uploading
+        required: false
+        type: choice
+        options: [build, distribute]
+        default: build
       build_ios_testflight:
         description: Build signed iOS/Watch/Widget/Tunnel IPA for TestFlight
         required: false
@@ -71,6 +77,11 @@ on:
         default: false
       upload_apple_testflight:
         description: Upload selected Apple builds after validation (false means build only)
+        required: false
+        type: boolean
+        default: true
+      distribute_apple_external:
+        description: Assign processed Apple builds to the configured external TestFlight group
         required: false
         type: boolean
         default: true
@@ -140,6 +151,8 @@ jobs:
       build_macos_testflight: ${{ steps.ctx.outputs.build_macos_testflight }}
       upload_apple_testflight: ${{ steps.ctx.outputs.upload_apple_testflight }}
       apple_platforms: ${{ steps.ctx.outputs.apple_platforms }}
+      apple_action: ${{ steps.ctx.outputs.apple_action }}
+      distribute_apple_external: ${{ steps.ctx.outputs.distribute_apple_external }}
       build_linux: ${{ steps.ctx.outputs.build_linux }}
       build_ohos: ${{ steps.ctx.outputs.build_ohos }}
       linux_arch: ${{ steps.ctx.outputs.linux_arch }}
@@ -172,6 +185,8 @@ jobs:
             BUILD_IOS_TESTFLIGHT=true
             BUILD_MACOS_TESTFLIGHT=true
             UPLOAD_APPLE_TESTFLIGHT=true
+            APPLE_ACTION=build
+            DISTRIBUTE_APPLE_EXTERNAL=true
             # HAP needs self-hosted DevEco/OH Flutter; opt-in via manual dispatch.
             BUILD_OHOS=false
             LINUX_ARCH=both
@@ -186,6 +201,8 @@ jobs:
             BUILD_IOS_TESTFLIGHT='${{ inputs.build_ios_testflight }}'
             BUILD_MACOS_TESTFLIGHT='${{ inputs.build_macos_testflight }}'
             UPLOAD_APPLE_TESTFLIGHT='${{ inputs.upload_apple_testflight }}'
+            APPLE_ACTION='${{ inputs.apple_action }}'
+            DISTRIBUTE_APPLE_EXTERNAL='${{ inputs.distribute_apple_external }}'
             BUILD_LINUX='${{ inputs.build_linux }}'
             BUILD_OHOS='${{ inputs.build_ohos }}'
             LINUX_ARCH='${{ inputs.linux_arch }}'
@@ -198,6 +215,8 @@ jobs:
           LINUX_ARCH="${LINUX_ARCH:-both}"
           LINUX_FORMATS="${LINUX_FORMATS:-all}"
           BUILD_OHOS="${BUILD_OHOS:-false}"
+          APPLE_ACTION="${APPLE_ACTION:-build}"
+          case "$APPLE_ACTION" in build|distribute) ;; *) echo "::error::Unknown Apple action"; exit 1 ;; esac
           STRIPPED="${TAG#v}"
           if [[ "$STRIPPED" =~ ^([0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.]+)?)\+([0-9A-Za-z._-]+)$ ]]; then
             BUILD_NAME="${BASH_REMATCH[1]}"
@@ -210,7 +229,7 @@ jobs:
             BUILD_NUMBER=""
           fi
           # +14 is reserved for an Apple-only CI trial, including manual retries.
-          if [ "$TAG" = "v1.0.1+14" ] || [ '${{ inputs.apple_only }}' = "true" ]; then
+          if [ "$TAG" = "v1.0.1+14" ] || [ '${{ inputs.apple_only }}' = "true" ] || [ "$APPLE_ACTION" = distribute ]; then
             BUILD_ANDROID=false
             BUILD_WINDOWS=false
             BUILD_LINUX=false
@@ -234,6 +253,8 @@ jobs:
             [[ "$BUILD_NUMBER" =~ ^[1-9][0-9]*$ ]] || { echo "::error::Apple build number must be a positive integer"; exit 1; }
           fi
           echo "apple_platforms=$APPLE_PLATFORMS" >> "$GITHUB_OUTPUT"
+          echo "apple_action=$APPLE_ACTION" >> "$GITHUB_OUTPUT"
+          echo "distribute_apple_external=$DISTRIBUTE_APPLE_EXTERNAL" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "prerelease=$PRE" >> "$GITHUB_OUTPUT"
           echo "target_repo=$TARGET" >> "$GITHUB_OUTPUT"
@@ -403,8 +424,8 @@ jobs:
     concurrency:
       group: apple-testflight-${{ matrix.platform }}-${{ needs.context.outputs.tag }}
       cancel-in-progress: false
-    name: ${{ matrix.platform }} signed Store build
-    runs-on: ${{ matrix.platform == 'ios' && 'xcode-27' || 'macos-26' }}
+    name: ${{ matrix.platform }} TestFlight ${{ needs.context.outputs.apple_action }}
+    runs-on: ${{ needs.context.outputs.apple_action == 'distribute' && 'ubuntu-latest' || matrix.platform == 'ios' && 'xcode-27' || 'macos-26' }}
     timeout-minutes: 90
     environment: testflight
     env:
@@ -424,6 +445,9 @@ jobs:
       APPLE_RELEASE_TAG: ${{ needs.context.outputs.tag }}
       APPLE_BUILD_NAME: ${{ needs.context.outputs.build_name }}
       APPLE_BUILD_NUMBER: ${{ needs.context.outputs.build_number }}
+      APPLE_ACTION: ${{ needs.context.outputs.apple_action }}
+      TESTFLIGHT_EXTERNAL_GROUP: ${{ vars.TESTFLIGHT_EXTERNAL_GROUP || 'WHU Closed' }}
+      TESTFLIGHT_TEST_NOTES: ${{ vars.TESTFLIGHT_TEST_NOTES || '欢迎加入Luotopia内测，可以加入内测QQ群994642924' }}
     steps:
       - name: Check configuration
         env:
@@ -433,7 +457,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for name in APP_REPO_TOKEN MATCH_PASSWORD MATCH_GIT_URL APPLE_TEAM_ID ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8_BASE64; do
+          required=(APP_REPO_TOKEN ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8_BASE64)
+          if [ "$APPLE_ACTION" = build ]; then required+=(MATCH_PASSWORD MATCH_GIT_URL APPLE_TEAM_ID); fi
+          for name in "${required[@]}"; do
             if [ -z "${!name}" ]; then
               echo "::error::Missing Apple configuration: $name"
               exit 1
@@ -453,6 +479,7 @@ jobs:
           persist-credentials: false
 
       - name: Verify source and select Xcode
+        if: needs.context.outputs.apple_action == 'build'
         env:
           XCODE_VERSION: ${{ matrix.platform == 'ios' && (vars.APPLE_IOS_XCODE_VERSION || '27.1') || vars.APPLE_XCODE_VERSION || '26.6' }}
         run: |
@@ -468,12 +495,14 @@ jobs:
           bundler-cache: true
 
       - uses: subosito/flutter-action@v2
+        if: needs.context.outputs.apple_action == 'build'
         with:
           flutter-version: ${{ vars.APPLE_FLUTTER_VERSION || '3.47.5' }}
           channel: stable
           cache: true
 
       - name: Prepare Flutter and native dependencies
+        if: needs.context.outputs.apple_action == 'build'
         env:
           GH_TOKEN: ${{ env.APP_REPO_TOKEN }}
           GITHUB_TOKEN: ${{ env.APP_REPO_TOKEN }}
@@ -486,11 +515,13 @@ jobs:
           bash tool/sync_model_metadata.sh --strict
 
       - name: Test release orchestration
+        if: needs.context.outputs.apple_action == 'build'
         run: |
           bundle exec ruby test/tool/apple_release_test.rb
           python3 tool/test_apple_build_scripts.py
 
       - name: Build and validate signed artifact
+        if: needs.context.outputs.apple_action == 'build'
         id: build
         run: bundle exec fastlane apple_build
 
@@ -498,7 +529,7 @@ jobs:
       # directly to the private app repo, including on failed native builds.
       - name: Preserve private symbols and build logs
         id: symbols
-        if: always()
+        if: always() && needs.context.outputs.apple_action == 'build'
         env:
           GH_TOKEN: ${{ env.APP_REPO_TOKEN }}
         shell: bash
@@ -526,12 +557,20 @@ jobs:
           echo "Preserved symbols privately at $APP_REPO@$symbol_tag"
 
       - name: Upload to TestFlight and wait for processing
-        if: success() && needs.context.outputs.upload_apple_testflight == 'true'
+        if: success() && needs.context.outputs.apple_action == 'build' && needs.context.outputs.upload_apple_testflight == 'true'
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
         run: bundle exec fastlane apple_upload
+
+      - name: Distribute existing build to external TestFlight group
+        if: success() && (needs.context.outputs.apple_action == 'distribute' || (needs.context.outputs.upload_apple_testflight == 'true' && needs.context.outputs.distribute_apple_external == 'true'))
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+        run: bundle exec fastlane apple_distribute
 
       - name: Job summary
         if: success()
@@ -547,7 +586,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Clean signing state
-        if: always()
+        if: always() && needs.context.outputs.apple_action == 'build'
         run: |
           security delete-keychain fastlane_tmp_keychain-db 2>/dev/null || true
           rm -rf build/apple-ci build/debug-info
