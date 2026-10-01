@@ -54,6 +54,21 @@ on:
         required: false
         type: boolean
         default: false
+      build_ios_testflight:
+        description: Build signed iOS/Watch/Widget/Tunnel IPA for TestFlight
+        required: false
+        type: boolean
+        default: false
+      build_macos_testflight:
+        description: Build signed Apple Silicon macOS PKG for TestFlight
+        required: false
+        type: boolean
+        default: false
+      upload_apple_testflight:
+        description: Upload selected Apple builds after validation (false means build only)
+        required: false
+        type: boolean
+        default: true
       build_linux:
         description: Build Linux packages (tar.gz/AppImage/deb/flatpak)
         required: false
@@ -116,6 +131,9 @@ jobs:
       build_android: ${{ steps.ctx.outputs.build_android }}
       build_windows: ${{ steps.ctx.outputs.build_windows }}
       build_macos: ${{ steps.ctx.outputs.build_macos }}
+      build_ios_testflight: ${{ steps.ctx.outputs.build_ios_testflight }}
+      build_macos_testflight: ${{ steps.ctx.outputs.build_macos_testflight }}
+      upload_apple_testflight: ${{ steps.ctx.outputs.upload_apple_testflight }}
       build_linux: ${{ steps.ctx.outputs.build_linux }}
       build_ohos: ${{ steps.ctx.outputs.build_ohos }}
       linux_arch: ${{ steps.ctx.outputs.linux_arch }}
@@ -145,6 +163,9 @@ jobs:
             # macOS ships through TestFlight like iOS/iPadOS; the DMG job is
             # opt-in by editing the release workflow inputs (manual dispatch).
             BUILD_MACOS=false
+            BUILD_IOS_TESTFLIGHT=true
+            BUILD_MACOS_TESTFLIGHT=true
+            UPLOAD_APPLE_TESTFLIGHT=true
             # HAP needs self-hosted DevEco/OH Flutter; opt-in via manual dispatch.
             BUILD_OHOS=false
             LINUX_ARCH=both
@@ -156,6 +177,9 @@ jobs:
             BUILD_ANDROID='${{ inputs.build_android }}'
             BUILD_WINDOWS='${{ inputs.build_windows }}'
             BUILD_MACOS='${{ inputs.build_macos }}'
+            BUILD_IOS_TESTFLIGHT='${{ inputs.build_ios_testflight }}'
+            BUILD_MACOS_TESTFLIGHT='${{ inputs.build_macos_testflight }}'
+            UPLOAD_APPLE_TESTFLIGHT='${{ inputs.upload_apple_testflight }}'
             BUILD_LINUX='${{ inputs.build_linux }}'
             BUILD_OHOS='${{ inputs.build_ohos }}'
             LINUX_ARCH='${{ inputs.linux_arch }}'
@@ -187,6 +211,9 @@ jobs:
           echo "build_android=$BUILD_ANDROID" >> "$GITHUB_OUTPUT"
           echo "build_windows=$BUILD_WINDOWS" >> "$GITHUB_OUTPUT"
           echo "build_macos=$BUILD_MACOS" >> "$GITHUB_OUTPUT"
+          echo "build_ios_testflight=$BUILD_IOS_TESTFLIGHT" >> "$GITHUB_OUTPUT"
+          echo "build_macos_testflight=$BUILD_MACOS_TESTFLIGHT" >> "$GITHUB_OUTPUT"
+          echo "upload_apple_testflight=$UPLOAD_APPLE_TESTFLIGHT" >> "$GITHUB_OUTPUT"
           echo "build_linux=$BUILD_LINUX" >> "$GITHUB_OUTPUT"
           echo "build_ohos=$BUILD_OHOS" >> "$GITHUB_OUTPUT"
           echo "linux_arch=$LINUX_ARCH" >> "$GITHUB_OUTPUT"
@@ -301,11 +328,9 @@ jobs:
             fi
           fi
           APP_SHA="${RESOLVED:-$(git rev-parse HEAD)}"
-          if [ -n "$RESOLVED" ]; then
-            echo "ref=$RESOLVED" >> "$GITHUB_OUTPUT"
-          else
-            echo "ref=" >> "$GITHUB_OUTPUT"
-          fi
+          # Every platform must check out the same immutable App commit. An
+          # empty ref would float to a newer HEAD between parallel jobs.
+          echo "ref=$APP_SHA" >> "$GITHUB_OUTPUT"
           echo "app_sha=$APP_SHA" >> "$GITHUB_OUTPUT"
           echo "Building $APP_SHA"
 
@@ -334,6 +359,38 @@ jobs:
             --title "Dart symbols ${TAG}" \
             --notes "Private. Dart obfuscation symbols for ${TAG} (built from ${APP_SHA}). Reverse the obfuscation: never publish these."
           echo "Created private symbols release $SYM_TAG on $APP_REPO"
+
+  ios-testflight:
+    name: iOS TestFlight
+    needs: context
+    if: needs.context.outputs.build_ios_testflight == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/app-apple-testflight.yml
+    with:
+      platform: ios
+      app_sha: ${{ needs.context.outputs.app_sha }}
+      tag: ${{ needs.context.outputs.tag }}
+      build_name: ${{ needs.context.outputs.build_name }}
+      build_number: ${{ needs.context.outputs.build_number }}
+      upload_testflight: ${{ needs.context.outputs.upload_apple_testflight == 'true' }}
+    secrets: inherit
+
+  macos-testflight:
+    name: macOS TestFlight
+    needs: context
+    if: needs.context.outputs.build_macos_testflight == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/app-apple-testflight.yml
+    with:
+      platform: macos
+      app_sha: ${{ needs.context.outputs.app_sha }}
+      tag: ${{ needs.context.outputs.tag }}
+      build_name: ${{ needs.context.outputs.build_name }}
+      build_number: ${{ needs.context.outputs.build_number }}
+      upload_testflight: ${{ needs.context.outputs.upload_apple_testflight == 'true' }}
+    secrets: inherit
 
   android:
     name: Android signed split APKs

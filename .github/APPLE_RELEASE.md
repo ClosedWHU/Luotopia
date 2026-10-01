@@ -1,0 +1,41 @@
+# Apple TestFlight operations
+
+Source, signing, build orchestration, and validations are maintained in the
+private `ClosedWHU/Luotopia-app` repository. These public workflows never
+publish source, Dart symbols, native dSYMs, or raw compiler output as artifacts.
+
+## First installation
+
+1. Configure the `testflight` environment and App Store Connect API secrets.
+2. Import the existing distribution identity and all Store profiles with Match
+   into `ClosedWHU/Luotopia-Certificates`. Store only encrypted signing files.
+3. Run **Initialize Apple signing**, passing the full private app commit with
+   the Fastlane configuration. This creates the installer identity if missing
+   and then proves both platforms can install signing material readonly.
+4. Run **Apple TestFlight** once per platform with `upload_testflight=false`.
+5. After successful validation, upload using an unused build number.
+
+The repository disables SSH deploy keys, so this installation uses the
+existing cross-repository HTTPS token. It needs access to both private repos:
+app contents read/write for private symbol releases, certificates read for
+routine builds, and certificates write only for one-time initialization.
+
+## Release and retry
+
+Publishing `v1.0.1+14`, for example, resolves an immutable private app commit
+whose pubspec matches `1.0.1+14`, builds both Apple platforms, preserves their
+private symbols, then uploads them to TestFlight. iOS and macOS have distinct
+jobs, so failure of one does not prevent the other platform's build.
+
+Manual **App release build** runs expose `build_ios_testflight` and
+`build_macos_testflight`, independently of the existing opt-in unsigned DMG.
+`upload_apple_testflight=false` validates without uploading. Other platforms
+can be turned off for an Apple-only retry. The standalone Apple workflow can
+also build a specified full app SHA before a public release is published.
+
+Do not retry an accepted App Store Connect build number. Check processing and
+upload status first. Compiler logs and symbols are in the private app repo's
+`symbols-<version>-<number>` release, with unique run/attempt asset names.
+
+Pinned runner: `macos-26` (arm64), with Xcode and Flutter selected by the
+`APPLE_XCODE_VERSION` and `APPLE_FLUTTER_VERSION` environment variables.
