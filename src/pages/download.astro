@@ -25,7 +25,7 @@ import { platforms, testFlightUrl } from "../config/downloads";
             <h2 class="text-title-medium text-on-surface">{p.name}</h2>
             <p class="text-body-medium text-on-surface-variant mt-1">{p.desc}</p>
             <div class="mt-4 flex flex-wrap gap-1.5 items-center platform-badges">
-              <span class="platform-status inline-block px-2.5 py-0.5 rounded-sm lt-inset text-on-surface-variant text-label-medium">
+              <span class="inline-block px-2.5 py-0.5 rounded-sm lt-inset text-on-surface-variant text-label-medium">
                 {p.externalUrl ? (p.id === "apple" ? "TestFlight 内测" : p.externalLabel) : "加载中…"}
               </span>
             </div>
@@ -171,6 +171,9 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
     let page = 1;
     let hasNext = false;
     let hasPrev = false;
+    // Read back by loadTestFlightVersion, which repaints the Apple badge after
+    // the release pass and must not drop the 测试版 chip.
+    let latestPrerelease = false;
 
     const latestMeta = document.getElementById("latest-meta");
     const listEl = document.getElementById("changelog-list");
@@ -347,27 +350,38 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
       return `<span class="inline-block px-2.5 py-0.5 rounded-sm bg-primary-container text-on-primary-container text-label-medium">${escapeHtml(text)}</span>`;
     }
 
-    function applyExternalLink(card, statusText) {
-      const status = card.querySelector(".platform-status");
-      const assetsEl = card.querySelector(".platform-assets");
-      if (!status || !assetsEl) return;
+    function statusBadge(text) {
+      return `<span class="inline-block px-2.5 py-0.5 rounded-sm lt-inset text-on-surface-variant text-label-medium">${escapeHtml(text)}</span>`;
+    }
 
+    /**
+     * Every card renders its version through here, whether or not it has
+     * GitHub assets. The Apple card ships via TestFlight and so has none; it
+     * used to keep the grey status pill while the others got a filled badge,
+     * which read as a different version even when the string matched.
+     */
+    function paintBadges(badges, verLabel, isPrerelease, statusText) {
+      badges.innerHTML = verLabel
+        ? (isPrerelease ? prereleaseBadge() : "") + stableBadge(verLabel)
+        : statusBadge(statusText || "暂无数据");
+    }
+
+    /** Returns the external-link markup, or "" when the card has none. */
+    function externalLinkHtml(card) {
       const externalUrl = card.getAttribute("data-external-url") || "";
+      if (!externalUrl) return "";
       const externalLabel = card.getAttribute("data-external-label") || "外部安装";
-      const id = card.getAttribute("data-platform");
+      return `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-body-small text-primary hover:underline no-underline">
+          ${openInNewIcon}
+          <span>${escapeHtml(externalLabel)}</span>
+        </a>`;
+    }
 
-      status.className =
-        "platform-status inline-block px-2.5 py-0.5 rounded-sm lt-inset text-on-surface-variant text-label-medium";
-
-      if (externalUrl) {
-        status.textContent = id === "apple" ? "TestFlight 内测" : statusText;
+    function paintAssets(assetsEl, html) {
+      if (html) {
         assetsEl.classList.remove("hidden");
-        assetsEl.innerHTML = `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-body-small text-primary hover:underline no-underline">
-            ${openInNewIcon}
-            <span>${escapeHtml(externalLabel)}</span>
-          </a>`;
+        assetsEl.innerHTML = html;
       } else {
-        status.textContent = statusText;
         assetsEl.classList.add("hidden");
         assetsEl.innerHTML = "";
       }
@@ -403,8 +417,9 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
         if (info?.error || info?.channel !== "testflight" || !info.version) return;
 
         const card = document.querySelector('.platform-card[data-platform="apple"]');
-        const status = card?.querySelector(".platform-status");
-        if (status) status.textContent = `TestFlight ${info.version}`;
+        const badges = card?.querySelector(".platform-badges");
+        if (!badges) return;
+        paintBadges(badges, info.version, latestPrerelease, "");
       } catch { /* Keep the static TestFlight label when Connect is unavailable. */ }
     }
 
@@ -421,13 +436,18 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
       if (!release || release.error) {
         if (latestMeta) latestMeta.textContent = "暂时无法获取最新版本，请前往 GitHub Releases。";
         document.querySelectorAll(".platform-card").forEach((card) => {
-          applyExternalLink(card, "暂无数据");
+          const badges = card.querySelector(".platform-badges");
+          const assetsEl = card.querySelector(".platform-assets");
+          if (!badges || !assetsEl) return;
+          paintBadges(badges, "", false, "暂无数据");
+          paintAssets(assetsEl, externalLinkHtml(card));
         });
         void loadTestFlightVersion();
         return;
       }
 
       const verLabel = release.version || release.tag || release.title;
+      latestPrerelease = !!release.prerelease;
       if (latestMeta) {
         latestMeta.innerHTML =
           `当前最新：<strong class="text-on-surface">${escapeHtml(verLabel)}</strong>` +
@@ -449,60 +469,42 @@ flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
         const id = card.getAttribute("data-platform");
         const badges = card.querySelector(".platform-badges");
         const assetsEl = card.querySelector(".platform-assets");
-        // The Apple card has no GitHub assets (iOS/iPadOS/macOS all ship via
-        // TestFlight), so `assets` stays empty and it keeps the external link.
-        const assets = byPlatform[id] || [];
-
         if (!badges || !assetsEl) return;
 
-        if (assets.length === 0) {
-          const fallback = release.prerelease ? `测试版 ${verLabel}` : `最新 ${verLabel}`;
-          applyExternalLink(card, fallback);
-          return;
-        }
+        paintBadges(badges, verLabel, release.prerelease, "");
 
-        badges.innerHTML = "";
-        if (release.prerelease) {
-          badges.insertAdjacentHTML("beforeend", prereleaseBadge());
-        }
-        badges.insertAdjacentHTML("beforeend", stableBadge(verLabel));
-
-        const installers = assets.filter((a) => !a.meta);
-        assetsEl.classList.remove("hidden");
-        const externalUrl = card.getAttribute("data-external-url") || "";
-        const externalLabel = card.getAttribute("data-external-label") || "外部安装";
-        const externalLink = externalUrl
-          ? `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-body-small text-primary hover:underline no-underline">
-              ${openInNewIcon}
-              <span>${escapeHtml(externalLabel)}</span>
-            </a>`
-          : "";
-        assetsEl.innerHTML = externalLink + installers
-          .map((a) => {
-            const title =
-              a.label ||
-              [a.archLabel || a.arch, a.formatLabel].filter(Boolean).join(" · ") ||
-              a.name;
-            const rec = a.recommended
-              ? `<span class="shrink-0 px-1.5 py-0.5 rounded-sm bg-primary-container text-on-primary-container text-label-small leading-none">推荐</span>`
-              : "";
-            const { base, ext } = splitFilename(a.name);
-            return `<a href="${escapeHtml(a.url)}" title="${escapeHtml(a.name)}" class="flex items-start gap-1.5 text-body-small text-primary hover:underline no-underline" download>
-                ${assetDownloadIcon}
-                <span class="min-w-0 flex-1">
-                  <span class="flex flex-wrap items-center gap-1.5">
-                    <span class="font-medium text-on-surface">${escapeHtml(title)}</span>
-                    ${rec}
+        const installers = (byPlatform[id] || []).filter((a) => !a.meta);
+        const externalLink = externalLinkHtml(card);
+        paintAssets(
+          assetsEl,
+          externalLink +
+            installers
+              .map((a) => {
+                const title =
+                  a.label ||
+                  [a.archLabel || a.arch, a.formatLabel].filter(Boolean).join(" · ") ||
+                  a.name;
+                const rec = a.recommended
+                  ? `<span class="shrink-0 px-1.5 py-0.5 rounded-sm bg-primary-container text-on-primary-container text-label-small leading-none">推荐</span>`
+                  : "";
+                const { base, ext } = splitFilename(a.name);
+                return `<a href="${escapeHtml(a.url)}" title="${escapeHtml(a.name)}" class="flex items-start gap-1.5 text-body-small text-primary hover:underline no-underline" download>
+                  ${assetDownloadIcon}
+                  <span class="min-w-0 flex-1">
+                    <span class="flex flex-wrap items-center gap-1.5">
+                      <span class="font-medium text-on-surface">${escapeHtml(title)}</span>
+                      ${rec}
+                    </span>
+                    <span class="flex min-w-0 items-baseline text-outline text-[11px] mt-0.5">
+                      <span class="truncate min-w-0">${escapeHtml(base)}</span>
+                      <span class="shrink-0">${escapeHtml(ext)}</span>
+                      <span class="shrink-0"> · ${formatSize(a.size)}</span>
+                    </span>
                   </span>
-                  <span class="flex min-w-0 items-baseline text-outline text-[11px] mt-0.5">
-                    <span class="truncate min-w-0">${escapeHtml(base)}</span>
-                    <span class="shrink-0">${escapeHtml(ext)}</span>
-                    <span class="shrink-0"> · ${formatSize(a.size)}</span>
-                  </span>
-                </span>
-              </a>`;
-          })
-          .join("");
+                </a>`;
+              })
+              .join(""),
+        );
       });
 
       void loadTestFlightVersion();
