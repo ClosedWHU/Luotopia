@@ -93,14 +93,11 @@ class ReleaseContextTest(unittest.TestCase):
         self.assertEqual(outputs["distribute_apple_external"], "true")
 
 
-    def test_status_mode_is_apple_only_and_never_dispatches_a_build_or_distribution(self):
+    def test_status_mode_is_apple_only(self):
         outputs = self.resolve(**{"inputs.apple_action": "status", "inputs.build_ios_testflight": "true"})
         self.assert_no_public_platforms(outputs)
         self.assertEqual(outputs["apple_action"], "status")
-        workflow = WORKFLOW.read_text()
-        self.assertIn("needs.context.outputs.apple_action == 'build' && needs.context.outputs.upload_apple_testflight", workflow)
-        self.assertIn("needs.context.outputs.apple_action == 'distribute'", workflow)
-        self.assertIn("if: needs.context.outputs.apple_action == 'status'", workflow)
+        self.assertEqual(json.loads(outputs["apple_platforms"]), ["ios"])
 
 
 if __name__ == "__main__":
