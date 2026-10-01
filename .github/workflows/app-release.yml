@@ -26,7 +26,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Homepage release tag (e.g. v1.0.0+2)
+        description: Build version tag (e.g. v1.0.1+14); Apple-only runs need no public release
         required: true
         type: string
       prerelease:
@@ -51,6 +51,11 @@ on:
         default: true
       build_macos:
         description: Build macOS release DMG (opt-in; macOS normally ships via TestFlight)
+        required: false
+        type: boolean
+        default: false
+      apple_only:
+        description: Apple TestFlight only; disables all public platform artifacts
         required: false
         type: boolean
         default: false
@@ -134,6 +139,7 @@ jobs:
       build_ios_testflight: ${{ steps.ctx.outputs.build_ios_testflight }}
       build_macos_testflight: ${{ steps.ctx.outputs.build_macos_testflight }}
       upload_apple_testflight: ${{ steps.ctx.outputs.upload_apple_testflight }}
+      apple_platforms: ${{ steps.ctx.outputs.apple_platforms }}
       build_linux: ${{ steps.ctx.outputs.build_linux }}
       build_ohos: ${{ steps.ctx.outputs.build_ohos }}
       linux_arch: ${{ steps.ctx.outputs.linux_arch }}
@@ -203,6 +209,31 @@ jobs:
             BUILD_NAME=""
             BUILD_NUMBER=""
           fi
+          # +14 is reserved for an Apple-only CI trial, including manual retries.
+          if [ "$TAG" = "v1.0.1+14" ] || [ '${{ inputs.apple_only }}' = "true" ]; then
+            BUILD_ANDROID=false
+            BUILD_WINDOWS=false
+            BUILD_LINUX=false
+            BUILD_OHOS=false
+            BUILD_MACOS=false
+            if [ "$BUILD_IOS_TESTFLIGHT" != "true" ] && [ "$BUILD_MACOS_TESTFLIGHT" != "true" ]; then
+              BUILD_IOS_TESTFLIGHT=true
+              BUILD_MACOS_TESTFLIGHT=true
+            fi
+          fi
+          APPLE_PLATFORMS='[]'
+          if [ "$BUILD_IOS_TESTFLIGHT" = "true" ] && [ "$BUILD_MACOS_TESTFLIGHT" = "true" ]; then
+            APPLE_PLATFORMS='["ios","macos"]'
+          elif [ "$BUILD_IOS_TESTFLIGHT" = "true" ]; then
+            APPLE_PLATFORMS='["ios"]'
+          elif [ "$BUILD_MACOS_TESTFLIGHT" = "true" ]; then
+            APPLE_PLATFORMS='["macos"]'
+          fi
+          if [ "$APPLE_PLATFORMS" != '[]' ]; then
+            [[ "$BUILD_NAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Apple version must be numeric x.y.z"; exit 1; }
+            [[ "$BUILD_NUMBER" =~ ^[1-9][0-9]*$ ]] || { echo "::error::Apple build number must be a positive integer"; exit 1; }
+          fi
+          echo "apple_platforms=$APPLE_PLATFORMS" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "prerelease=$PRE" >> "$GITHUB_OUTPUT"
           echo "target_repo=$TARGET" >> "$GITHUB_OUTPUT"
@@ -241,7 +272,7 @@ jobs:
       # Pulls commit history from the PRIVATE app repo (already checked out)
       # and compares against the previous release tag on the PUBLIC homepage repo.
       - name: Auto-generate changelog if needed
-        if: github.event_name == 'release'
+        if: github.event_name == 'release' && github.event.release.tag_name != 'v1.0.1+14'
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.ctx.outputs.tag }}
@@ -360,37 +391,166 @@ jobs:
             --notes "Private. Dart obfuscation symbols for ${TAG} (built from ${APP_SHA}). Reverse the obfuscation: never publish these."
           echo "Created private symbols release $SYM_TAG on $APP_REPO"
 
-  ios-testflight:
-    name: iOS TestFlight
+  apple-testflight:
     needs: context
-    if: needs.context.outputs.build_ios_testflight == 'true'
+    if: needs.context.outputs.apple_platforms != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ fromJSON(needs.context.outputs.apple_platforms) }}
     permissions:
       contents: read
-    uses: ./.github/workflows/app-apple-testflight.yml
-    with:
-      platform: ios
-      app_sha: ${{ needs.context.outputs.app_sha }}
-      tag: ${{ needs.context.outputs.tag }}
-      build_name: ${{ needs.context.outputs.build_name }}
-      build_number: ${{ needs.context.outputs.build_number }}
-      upload_testflight: ${{ needs.context.outputs.upload_apple_testflight == 'true' }}
-    secrets: inherit
+    concurrency:
+      group: apple-testflight-${{ matrix.platform }}-${{ needs.context.outputs.tag }}
+      cancel-in-progress: false
+    name: ${{ matrix.platform }} signed Store build
+    runs-on: ${{ matrix.platform == 'ios' && 'xcode-27' || 'macos-26' }}
+    timeout-minutes: 90
+    environment: testflight
+    env:
+      FASTLANE_SKIP_UPDATE_CHECK: "true"
+      FASTLANE_OPT_OUT_USAGE: "true"
+      FASTLANE_HIDE_CHANGELOG: "true"
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+      APP_REPO_TOKEN: ${{ secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN }}
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      MATCH_GIT_URL: ${{ vars.MATCH_GIT_URL }}
+      MATCH_GIT_BRANCH: ${{ vars.MATCH_GIT_BRANCH || 'main' }}
+      MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+      APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+      APPLE_PLATFORM: ${{ matrix.platform }}
+      APPLE_APP_SHA: ${{ needs.context.outputs.app_sha }}
+      APPLE_RELEASE_TAG: ${{ needs.context.outputs.tag }}
+      APPLE_BUILD_NAME: ${{ needs.context.outputs.build_name }}
+      APPLE_BUILD_NUMBER: ${{ needs.context.outputs.build_number }}
+    steps:
+      - name: Check configuration
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in APP_REPO_TOKEN MATCH_PASSWORD MATCH_GIT_URL APPLE_TEAM_ID ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8_BASE64; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing Apple configuration: $name"
+              exit 1
+            fi
+          done
+          [[ "$APPLE_PLATFORM" == ios || "$APPLE_PLATFORM" == macos ]]
+          [[ "$APPLE_APP_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$APPLE_BUILD_NAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$APPLE_BUILD_NUMBER" =~ ^[1-9][0-9]*$ ]]
+          [[ "$APPLE_RELEASE_TAG" == "v${APPLE_BUILD_NAME}+${APPLE_BUILD_NUMBER}" ]]
 
-  macos-testflight:
-    name: macOS TestFlight
-    needs: context
-    if: needs.context.outputs.build_macos_testflight == 'true'
-    permissions:
-      contents: read
-    uses: ./.github/workflows/app-apple-testflight.yml
-    with:
-      platform: macos
-      app_sha: ${{ needs.context.outputs.app_sha }}
-      tag: ${{ needs.context.outputs.tag }}
-      build_name: ${{ needs.context.outputs.build_name }}
-      build_number: ${{ needs.context.outputs.build_number }}
-      upload_testflight: ${{ needs.context.outputs.upload_apple_testflight == 'true' }}
-    secrets: inherit
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ env.APP_REPO }}
+          token: ${{ env.APP_REPO_TOKEN }}
+          ref: ${{ needs.context.outputs.app_sha }}
+          persist-credentials: false
+
+      - name: Verify source and select Xcode
+        env:
+          XCODE_VERSION: ${{ matrix.platform == 'ios' && (vars.APPLE_IOS_XCODE_VERSION || '27.1') || vars.APPLE_XCODE_VERSION || '26.6' }}
+        run: |
+          set -euo pipefail
+          [[ "$(git rev-parse HEAD)" == "$APPLE_APP_SHA" ]]
+          sudo xcode-select -s "/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
+          xcodebuild -version
+          git submodule update --init --depth 1 lib/core/l10n/arb
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ vars.APPLE_FLUTTER_VERSION || '3.47.5' }}
+          channel: stable
+          cache: true
+
+      - name: Prepare Flutter and native dependencies
+        env:
+          GH_TOKEN: ${{ env.APP_REPO_TOKEN }}
+          GITHUB_TOKEN: ${{ env.APP_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          flutter config --enable-macos-desktop --enable-macos-arm64-only
+          flutter pub get --enforce-lockfile
+          bash tool/fetch_prebuilt_natives.sh
+          bash tool/fetch_fjs_xcframework.sh
+          bash tool/sync_model_metadata.sh --strict
+
+      - name: Test release orchestration
+        run: |
+          bundle exec ruby test/tool/apple_release_test.rb
+          python3 tool/test_apple_build_scripts.py
+
+      - name: Build and validate signed artifact
+        id: build
+        run: bundle exec fastlane apple_build
+
+      # This repo is public. Compiler logs, Dart symbols, and native dSYMs go
+      # directly to the private app repo, including on failed native builds.
+      - name: Preserve private symbols and build logs
+        id: symbols
+        if: always()
+        env:
+          GH_TOKEN: ${{ env.APP_REPO_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          paths=()
+          for path in "apple-ci/$APPLE_PLATFORM" "debug-info/$APPLE_PLATFORM-appstore"; do
+            if [ -d "build/$path" ]; then paths+=("$path"); fi
+          done
+          if [ "${#paths[@]}" -eq 0 ]; then
+            echo "No native build outputs to preserve"
+            exit 0
+          fi
+          symbol_tag="symbols-${APPLE_BUILD_NAME}-${APPLE_BUILD_NUMBER}"
+          archive="$RUNNER_TEMP/dart-symbols-${APPLE_PLATFORM}-testflight-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.tar.gz"
+          tar -czf "$archive" -C build "${paths[@]}"
+          if ! gh release view "$symbol_tag" --repo "$APP_REPO" >/dev/null 2>&1; then
+            gh release create "$symbol_tag" --repo "$APP_REPO" --target "$APPLE_APP_SHA" \
+              --title "Dart symbols $APPLE_RELEASE_TAG" \
+              --notes "Private symbols, native dSYMs, and logs for $APPLE_RELEASE_TAG; never publish these." \
+              || gh release view "$symbol_tag" --repo "$APP_REPO" >/dev/null
+          fi
+          gh release upload "$symbol_tag" "$archive" --repo "$APP_REPO"
+          rm -f "$archive"
+          echo "Preserved symbols privately at $APP_REPO@$symbol_tag"
+
+      - name: Upload to TestFlight and wait for processing
+        if: success() && needs.context.outputs.upload_apple_testflight == 'true'
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8_BASE64: ${{ secrets.ASC_KEY_P8_BASE64 }}
+        run: bundle exec fastlane apple_upload
+
+      - name: Job summary
+        if: success()
+        env:
+          UPLOADED: ${{ needs.context.outputs.upload_apple_testflight }}
+        run: |
+          {
+            echo "### Apple $APPLE_PLATFORM"
+            echo "Version: $APPLE_BUILD_NAME ($APPLE_BUILD_NUMBER)"
+            echo "App commit: $APPLE_APP_SHA"
+            echo "Uploaded to TestFlight: $UPLOADED"
+            echo "Symbols and compiler logs: private App release symbols-${APPLE_BUILD_NAME}-${APPLE_BUILD_NUMBER}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Clean signing state
+        if: always()
+        run: |
+          security delete-keychain fastlane_tmp_keychain-db 2>/dev/null || true
+          rm -rf build/apple-ci build/debug-info
 
   android:
     name: Android signed split APKs

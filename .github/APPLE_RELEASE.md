@@ -1,50 +1,68 @@
 # Apple TestFlight operations
 
-Source, signing, build orchestration, and validations are maintained in the
-private `ClosedWHU/Luotopia-app` repository. These public workflows never
-publish source, Dart symbols, native dSYMs, or raw compiler output as artifacts.
+All Apple release jobs live in **App release build** (`app-release.yml`).
+The source, Fastlane lanes, signing, and artifact checks live in the private
+`ClosedWHU/Luotopia-app` repository.
 
-## First installation
+## Signing
 
-1. Configure the `testflight` environment and App Store Connect API secrets.
-2. Import the existing distribution identity and all Store profiles with Match
-   into `ClosedWHU/Luotopia-Certificates`. Store only encrypted signing files.
-3. Run **Initialize Apple signing**, passing the full private app commit with
-   the Fastlane configuration. This creates the installer identity if missing
-   and then proves both platforms can install signing material readonly.
-4. Run **Apple TestFlight** once per platform with `upload_testflight=false`.
-5. After successful validation, upload using an unused build number.
+Existing Apple Distribution material is reused, the Mac Installer identity
+is stored in encrypted Match storage, and five manual Store profiles cover
+Runner, Watch, Widget, Packet Tunnel, and macOS. CI installs them readonly.
+Original Xcode-managed profiles remain on the Apple portal. Initialization
+has completed; no separate signing workflow is needed.
 
-The repository disables SSH deploy keys, so this installation uses the
-existing cross-repository HTTPS token. It needs access to both private repos:
-app contents read/write for private symbol releases, certificates read for
-routine builds, and certificates write only for one-time initialization.
+The `testflight` environment contains `MATCH_PASSWORD` and toolchain variables.
+Repository secrets `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8_BASE64`, and the
+existing cross-repo token provide API and repository access. The certificate
+repo disables SSH deploy keys, so Match uses the existing HTTPS token. Future
+certificate/profile maintenance uses the app's `signing_bootstrap` lane with
+a write-capable operator credential; routine CI uses readonly Match.
 
-## Release and retry
+## Apple-only +14 trial
 
-`1.0.1+14` is reserved for Apple-only TestFlight CI validation. Use the
-standalone **Apple TestFlight** workflow with uploads enabled for iOS and
-macOS. Do not create a public `v1.0.1+14` release or trigger the multi-platform
-release workflow. No Android, Windows, Linux, or HarmonyOS artifacts or public
-website release notes are published for this build.
+`1.0.1+14` is reserved for Apple TestFlight CI validation. Dispatch **App release
+build** on `main`, specifying:
 
-Publishing `v1.0.1+14`, for example, resolves an immutable private app commit
-whose pubspec matches `1.0.1+14`, builds both Apple platforms, preserves their
-private symbols, then uploads them to TestFlight. iOS and macOS have distinct
-jobs, so failure of one does not prevent the other platform's build.
+- `tag=v1.0.1+14`
+- `ref=<full App commit SHA>` (or omit to resolve the matching pubspec version)
+- `apple_only=true`
+- `build_ios_testflight=true`
+- `build_macos_testflight=true`
+- `upload_apple_testflight=true`
 
-Manual **App release build** runs expose `build_ios_testflight` and
-`build_macos_testflight`, independently of the existing opt-in unsigned DMG.
-`upload_apple_testflight=false` validates without uploading. Other platforms
-can be turned off for an Apple-only retry. The standalone Apple workflow can
-also build a specified full app SHA before a public release is published.
+No public GitHub release is needed or created. The +14 context also disables
+Android, Windows, Linux, HarmonyOS, and the unsigned DMG even if their manual
+input defaults were left enabled. Public website release notes are not added.
+For a single-platform retry, enable only its TestFlight switch. Set
+`upload_apple_testflight=false` to validate without uploading.
 
-Do not retry an accepted App Store Connect build number. Check processing and
-upload status first. Compiler logs and symbols are in the private app repo's
-`symbols-<version>-<number>` release, with unique run/attempt asset names.
+## Validation and archives
 
-iOS uses `xcode-27` with `APPLE_IOS_XCODE_VERSION=27.1` because the native tab
-bar requires that SDK. macOS uses `macos-26` (arm64) and
-`APPLE_XCODE_VERSION=26.6`. Both use `APPLE_FLUTTER_VERSION=3.47.5`.
-The iOS runner is currently a public preview; App Store Connect determines
-whether builds made with that Xcode version may be uploaded.
+The context resolves one full private App SHA. An Apple matrix builds selected
+platforms independently, verifies signatures and embedded target versions,
+then matches the Dart binary UUID to the saved `.symbols`. Private archives
+include symbols, native dSYMs, source/asset hashes, and compiler logs. Each
+run/attempt has a unique asset under private `symbols-<version>-<number>`.
+Failure of archive upload prevents TestFlight upload.
+
+Native compiler logs and symbols never become public Actions artifacts.
+Transient SwiftPM network download interruptions have bounded retries;
+compilation, signing, and symbol failures stop immediately. Fastlane waits
+up to 30 minutes for the accepted TestFlight build to finish processing.
+External tester distribution is disabled.
+
+Do not re-upload an already accepted TestFlight build number. Check App Store
+Connect and workflow status before retries. Per-platform concurrency also
+prevents parallel uploads of the same version.
+
+iOS uses `xcode-27` / Xcode 27.1 because the native tab bar requires that SDK.
+macOS uses `macos-26` / Xcode 26.6. Both use pinned Flutter 3.47.5. App Store
+Connect determines whether the selected Xcode version is upload-eligible.
+
+## Configuration tests
+
+```sh
+python3 .github/scripts/test_release_context.py
+actionlint -ignore SC2129 .github/workflows/app-release.yml
+```
