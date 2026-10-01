@@ -113,7 +113,7 @@ jobs:
 
       - name: Verify source and select Xcode
         env:
-          XCODE_VERSION: ${{ inputs.platform == 'ios' && vars.APPLE_IOS_XCODE_VERSION || vars.APPLE_XCODE_VERSION || '26.6' }}
+          XCODE_VERSION: ${{ inputs.platform == 'ios' && (vars.APPLE_IOS_XCODE_VERSION || '27.1') || vars.APPLE_XCODE_VERSION || '26.6' }}
         run: |
           set -euo pipefail
           [[ "$(git rev-parse HEAD)" == "$APPLE_APP_SHA" ]]
