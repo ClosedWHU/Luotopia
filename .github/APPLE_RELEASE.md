@@ -22,6 +22,12 @@ routine builds, and certificates write only for one-time initialization.
 
 ## Release and retry
 
+`1.0.1+14` is reserved for Apple-only TestFlight CI validation. Use the
+standalone **Apple TestFlight** workflow with uploads enabled for iOS and
+macOS. Do not create a public `v1.0.1+14` release or trigger the multi-platform
+release workflow. No Android, Windows, Linux, or HarmonyOS artifacts or public
+website release notes are published for this build.
+
 Publishing `v1.0.1+14`, for example, resolves an immutable private app commit
 whose pubspec matches `1.0.1+14`, builds both Apple platforms, preserves their
 private symbols, then uploads them to TestFlight. iOS and macOS have distinct
