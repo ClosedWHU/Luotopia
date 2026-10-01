@@ -583,10 +583,11 @@ jobs:
       - name: Job summary
         if: success()
         env:
-          UPLOADED: ${{ needs.context.outputs.upload_apple_testflight }}
+          UPLOADED: ${{ needs.context.outputs.apple_action == 'build' && needs.context.outputs.upload_apple_testflight == 'true' }}
         run: |
           {
             echo "### Apple $APPLE_PLATFORM"
+            echo "Operation: $APPLE_ACTION"
             echo "Version: $APPLE_BUILD_NAME ($APPLE_BUILD_NUMBER)"
             echo "App commit: $APPLE_APP_SHA"
             echo "Uploaded to TestFlight: $UPLOADED"
