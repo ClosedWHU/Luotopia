@@ -50,7 +50,16 @@ Native compiler logs and symbols never become public Actions artifacts.
 Transient SwiftPM network download interruptions have bounded retries;
 compilation, signing, and symbol failures stop immediately. Fastlane waits
 up to 30 minutes for the accepted TestFlight build to finish processing.
-External tester distribution is disabled.
+Processed builds are assigned to external group `WHU Closed` and submitted
+for Beta Review when required. The workflow reports the external state;
+successful submission does not imply Apple has approved external testing.
+Testing notes are exactly:
+`欢迎加入Luotopia内测，可以加入内测QQ群994642924`.
+
+For an existing accepted build, select `apple_action=distribute` and the desired
+Apple platform switch. This runs only API distribution, skipping compilation,
+signing, and re-upload. It never expires previous builds. Normal builds can
+opt out of external assignment with `distribute_apple_external=false`.
 
 Do not re-upload an already accepted TestFlight build number. Check App Store
 Connect and workflow status before retries. Per-platform concurrency also

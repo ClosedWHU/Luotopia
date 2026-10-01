@@ -33,6 +33,7 @@ class ReleaseContextTest(unittest.TestCase):
             "github.event.release.prerelease": "true",
             "inputs.tag": "v1.0.1+15", "inputs.prerelease": "true",
             "inputs.apple_only": "false", "inputs.build_android": "true",
+            "inputs.apple_action": "build", "inputs.distribute_apple_external": "true",
             "inputs.build_windows": "true", "inputs.build_macos": "false",
             "inputs.build_ios_testflight": "false", "inputs.build_macos_testflight": "false",
             "inputs.upload_apple_testflight": "true", "inputs.build_linux": "true",
@@ -83,6 +84,13 @@ class ReleaseContextTest(unittest.TestCase):
     def test_build_only_mode_does_not_enable_upload(self):
         outputs = self.resolve(**{"inputs.apple_only": "true", "inputs.upload_apple_testflight": "false"})
         self.assertEqual(outputs["upload_apple_testflight"], "false")
+
+    def test_external_distribution_mode_disables_all_public_platforms(self):
+        outputs = self.resolve(**{"inputs.apple_action": "distribute", "inputs.build_macos_testflight": "true"})
+        self.assert_no_public_platforms(outputs)
+        self.assertEqual(outputs["apple_action"], "distribute")
+        self.assertEqual(json.loads(outputs["apple_platforms"]), ["macos"])
+        self.assertEqual(outputs["distribute_apple_external"], "true")
 
 
 if __name__ == "__main__":
