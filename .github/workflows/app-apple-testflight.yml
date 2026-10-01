@@ -177,7 +177,8 @@ jobs:
           if ! gh release view "$symbol_tag" --repo "$APP_REPO" >/dev/null 2>&1; then
             gh release create "$symbol_tag" --repo "$APP_REPO" --target "$APPLE_APP_SHA" \
               --title "Dart symbols $APPLE_RELEASE_TAG" \
-              --notes "Private symbols, native dSYMs, and logs for $APPLE_RELEASE_TAG; never publish these."
+              --notes "Private symbols, native dSYMs, and logs for $APPLE_RELEASE_TAG; never publish these." \
+              || gh release view "$symbol_tag" --repo "$APP_REPO" >/dev/null
           fi
           gh release upload "$symbol_tag" "$archive" --repo "$APP_REPO"
           rm -f "$archive"
