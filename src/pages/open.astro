@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import AppIcon from "../components/AppIcon.astro";
 import Icon from "../components/Icon.astro";
+import { DEEPLINK_ROOT_SEGMENTS } from "../config/deeplinkRoutes";
 
 /*
  * App-launch landing page for the deep-link domain (luotopia.whu.sb).
@@ -33,6 +34,24 @@ const SITE = "https://www.whu.sb";
     <AppIcon class="w-24 h-24" size={96} plate />
     <h1 class="mt-6 text-headline-small text-on-surface">珞家</h1>
     <p class="mt-1 text-body-medium text-on-surface-variant">武汉大学一站式数字校园平台</p>
+
+    <!--
+      Unrecognised link. The deep-link host claims `luotopia.whu.sb/*` wholesale,
+      so this page is served for paths the app has never heard of as readily as
+      for real routes — a stale QR code, a truncated share, a scanner probing for
+      `/wp-login.php`. The launch still happens either way: the app is better
+      placed than this page to decide what to do with a path it does not
+      recognise, and a wrong guess here would silently refuse to open a link
+      that would have worked. This is a warning, never a gate.
+    -->
+    <p
+      id="launch-unsupported"
+      data-shown="false"
+      class="lt-open-warn mt-6 inline-flex items-center gap-2 rounded-full lt-inset px-4 py-2 text-left text-body-small text-on-surface-variant"
+    >
+      <Icon name="link_off" class="text-base shrink-0" />
+      <span>App 里可能没有这个页面，仍会尝试打开</span>
+    </p>
 
     <div class="mt-8 flex items-center justify-center gap-2 text-body-medium text-on-surface-variant">
       <span id="launch-spinner" class="lt-open-spinner" aria-hidden="true"></span>
@@ -121,6 +140,17 @@ const SITE = "https://www.whu.sb";
     display: flex;
   }
 
+  /* Same reason, and the scoped rule has to beat the `inline-flex` utility the
+   * element carries: Astro emits component styles unlayered, so this wins, but
+   * only because the toggle is written here rather than as a class swap. */
+  #launch-unsupported {
+    display: none;
+  }
+
+  #launch-unsupported[data-shown="true"] {
+    display: inline-flex;
+  }
+
   .lt-open-mask {
     position: fixed;
     /* Four sides, not the `inset` shorthand (Chrome 87+): in-app WebViews are
@@ -153,6 +183,8 @@ const SITE = "https://www.whu.sb";
     }
   }
 </style>
+
+<script is:inline set:html={`var __ltDeeplinkRoots = ${JSON.stringify(DEEPLINK_ROOT_SEGMENTS)};`}></script>
 
 <script is:inline>
   // Deliberately inline (not a bundled module): the launch attempt must run
@@ -187,6 +219,19 @@ const SITE = "https://www.whu.sb";
     var spinnerEl = document.getElementById("launch-spinner");
     var fallbackEl = document.getElementById("launch-fallback");
     var maskEl = document.getElementById("wechat-mask");
+    var warnEl = document.getElementById("launch-unsupported");
+
+    /*
+     * Only the first segment is checked, and only to *warn*. The app owns a
+     * couple of hundred nested routes that change release to release; duplicating
+     * them here would mean a stale list refusing to launch links that work. A
+     * first segment the router has never had is the one case that cannot match,
+     * so that is the only claim this page makes. The launch runs regardless.
+     */
+    var roots = window.__ltDeeplinkRoots || [];
+    var rootSegment = path.replace(/^\/+/, "").split("/")[0];
+    var isKnownRoot = rootSegment === "" || roots.indexOf(rootSegment) !== -1;
+    if (!isKnownRoot && warnEl) warnEl.setAttribute("data-shown", "true");
 
     var opened = false;
     var attempted = false;
