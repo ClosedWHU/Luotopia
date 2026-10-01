@@ -37,5 +37,8 @@ Do not retry an accepted App Store Connect build number. Check processing and
 upload status first. Compiler logs and symbols are in the private app repo's
 `symbols-<version>-<number>` release, with unique run/attempt asset names.
 
-Pinned runner: `macos-26` (arm64), with Xcode and Flutter selected by the
-`APPLE_XCODE_VERSION` and `APPLE_FLUTTER_VERSION` environment variables.
+iOS uses `xcode-27` with `APPLE_IOS_XCODE_VERSION=27.1` because the native tab
+bar requires that SDK. macOS uses `macos-26` (arm64) and
+`APPLE_XCODE_VERSION=26.6`. Both use `APPLE_FLUTTER_VERSION=3.47.5`.
+The iOS runner is currently a public preview; App Store Connect determines
+whether builds made with that Xcode version may be uploaded.
