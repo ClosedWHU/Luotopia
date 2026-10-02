@@ -1844,12 +1844,21 @@ jobs:
         env:
           AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
         run: |
-          if [ -z "$AUR_SSH_PRIVATE_KEY" ]; then
+          key="$AUR_SSH_PRIVATE_KEY"
+          if [ -z "$key" ]; then
             echo "::warning::AUR_SSH_PRIVATE_KEY is not configured; skipping AUR publish"
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          # A set-but-malformed key must not reach `git push` and fail the whole
+          # run: require PEM armor (BEGIN/END PRIVATE KEY) before attempting it.
+          if ! printf '%s\n' "$key" | grep -q '^-----BEGIN .*PRIVATE KEY-----$' \
+             || ! printf '%s\n' "$key" | grep -q '^-----END .*PRIVATE KEY-----$'; then
+            echo "::warning::AUR_SSH_PRIVATE_KEY is set but is not a valid PEM private key; skipping AUR publish"
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
 
       - name: Install AUR publishing tools
         if: steps.aur.outputs.enabled == 'true'
