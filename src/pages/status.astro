@@ -1,0 +1,1363 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+import Icon from "../components/Icon.astro";
+
+/** Must match the UptimeRobot check interval the monitors are configured with. */
+const REFRESH_SECONDS = 300;
+const LEGEND = [
+  { state: "up", label: "正常" },
+  { state: "degraded", label: "部分中断" },
+  { state: "down", label: "全天中断" },
+  { state: "none", label: "无数据" },
+];
+---
+
+<BaseLayout title="服务状态" description="WHU.sb 各项服务的实时可用状态与最近 90 天运行记录">
+  <PageHeader title="服务状态" subtitle="实时监控各项服务的可用性，数据每 5 分钟刷新一次" />
+
+  <section class="lt-st-page relative pb-24 px-4">
+    <div class="max-w-content mx-auto">
+      <!--
+        Overview chrome is server-rendered and only its text is swapped, so the
+        card keeps its `lt-reveal-lift` entrance and never becomes a backdrop
+        root mid-flight. Everything below `#status-groups` is built at runtime
+        and must therefore animate `transform` only — see the card keyframes.
+      -->
+      <div
+        id="status-overview"
+        class="lt-reveal-lift glass rounded-group p-6 sm:p-8"
+        data-state="loading"
+      >
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-center">
+          <div class="flex min-w-0 flex-1 items-center gap-4 sm:gap-5">
+            <span class="lt-st-beacon" data-role="beacon" aria-hidden="true">
+              <span class="lt-st-beacon-ring"></span>
+              <span class="lt-st-beacon-core"></span>
+            </span>
+            <div class="min-w-0">
+              <h2 class="text-headline-small text-on-surface" data-role="title">正在获取状态…</h2>
+              <p class="mt-1 text-body-medium text-on-surface-variant" data-role="desc">
+                正在从监控接口读取数据
+              </p>
+              <div class="mt-3 flex flex-wrap gap-1.5" data-role="chips"></div>
+            </div>
+          </div>
+
+          <div class="flex shrink-0 items-center gap-4 lg:flex-col lg:items-end lg:gap-3">
+            <div class="lg:text-right">
+              <p class="text-label-medium text-outline">下次刷新</p>
+              <p class="text-title-large text-on-surface tabular-nums" data-role="countdown">
+                {`${Math.floor(REFRESH_SECONDS / 60)}:${String(REFRESH_SECONDS % 60).padStart(2, "0")}`}
+              </p>
+            </div>
+            <button
+              type="button"
+              id="status-refresh"
+              class="lt-st-btn state-layer glass-control rounded-control inline-flex items-center gap-1.5 px-4 py-2 text-label-large text-primary cursor-pointer border-none"
+            >
+              <span class="lt-st-btn-icon inline-flex" data-role="refresh-icon">
+                <Icon name="refresh" class="text-[18px]" />
+              </span>
+              <span data-role="refresh-label">立即刷新</span>
+            </button>
+          </div>
+        </div>
+
+        <dl class="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+          <div class="lt-st-tile">
+            <dt class="lt-st-tile-label">平均可用率</dt>
+            <dd class="lt-st-tile-value" data-stat="uptime">—</dd>
+          </div>
+          <div class="lt-st-tile">
+            <dt class="lt-st-tile-label">监控服务</dt>
+            <dd class="lt-st-tile-value" data-stat="services">—</dd>
+          </div>
+          <div class="lt-st-tile">
+            <dt class="lt-st-tile-label">中断次数</dt>
+            <dd class="lt-st-tile-value" data-stat="incidents">—</dd>
+          </div>
+          <div class="lt-st-tile">
+            <dt class="lt-st-tile-label">累计中断</dt>
+            <dd class="lt-st-tile-value" data-stat="downtime">—</dd>
+          </div>
+        </dl>
+
+        <p class="mt-4 text-body-small text-outline" data-role="meta">
+          数据来源 UptimeRobot · 每 5 分钟检查一次
+        </p>
+      </div>
+
+      <!-- Toolbar: colour legend + day-window switch -->
+      <div class="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+        <ul class="lt-st-legend flex flex-wrap items-center gap-x-4 gap-y-1.5 text-body-small text-outline">
+          {
+            LEGEND.map((item) => (
+              <li class="flex items-center gap-1.5">
+                <span class="lt-st-dot" data-state={item.state} aria-hidden="true" />
+                {item.label}
+              </li>
+            ))
+          }
+        </ul>
+        <div class="flex items-center gap-3">
+          <span class="text-body-small text-outline" id="status-window-label">最近 90 天</span>
+          <div class="lt-st-seg" role="group" aria-label="时间范围" id="status-window">
+            <button type="button" class="lt-st-seg-btn" data-days="30" aria-pressed="false">30 天</button>
+            <button type="button" class="lt-st-seg-btn" data-days="90" aria-pressed="true">90 天</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="status-groups" class="mt-5 space-y-5" aria-busy="true">
+        <!-- Mirrors the loaded structure — one glass panel, inset rows inside —
+             so the swap does not change the page's rhythm or its blur count.
+             Widths are percentages capped by a max, never fixed px: a 200px
+             placeholder inside a 228px card overflows at 320px viewport, which
+             is the one width the skeleton is most likely to be seen at. -->
+        <div class="glass rounded-group p-4 sm:p-6" aria-hidden="true">
+          <div class="mb-3.5 flex items-center justify-between gap-3">
+            <span class="lt-st-skel" style="width: 30%; max-width: 96px; height: 18px"></span>
+            <span class="lt-st-skel shrink-0" style="width: 22%; max-width: 72px; height: 12px"></span>
+          </div>
+          <div class="grid gap-2.5">
+            {
+              [0, 1, 2].map((i) => (
+                <div class="lt-st-card rounded-nested p-3.5 sm:p-4">
+                  <div class="flex items-center gap-2.5">
+                    <span class="lt-st-skel shrink-0" style="width: 9px; height: 9px; border-radius: 999px"></span>
+                    <span class="lt-st-skel min-w-0" style={`width: ${30 + i * 8}%; max-width: ${120 + i * 40}px; height: 14px`}></span>
+                    <span class="lt-st-skel ml-auto shrink-0" style="width: 24%; max-width: 64px; height: 20px; border-radius: 999px"></span>
+                  </div>
+                  <div class="lt-st-skel mt-4" style="height: 38px; border-radius: 8px"></div>
+                  <div class="mt-3 flex items-center justify-between gap-3">
+                    <span class="lt-st-skel shrink-0" style="width: 18%; max-width: 56px; height: 10px"></span>
+                    <span class="lt-st-skel min-w-0" style="width: 46%; max-width: 180px; height: 10px"></span>
+                    <span class="lt-st-skel shrink-0" style="width: 10%; max-width: 32px; height: 10px"></span>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+
+      <noscript>
+        <p class="mt-8 text-center text-body-medium text-outline">
+          本页的实时数据需要 JavaScript；监控原始数据由 UptimeRobot 每 5 分钟采集一次。
+        </p>
+      </noscript>
+    </div>
+  </section>
+
+  <!-- MD3 plain tooltip / snackbar: inverse surface, opaque, so fading them in
+       never turns either one into a backdrop root. The tooltip stays
+       aria-hidden for good — its content is announced through #status-live. -->
+  <div id="status-tip" class="lt-st-tip" aria-hidden="true"></div>
+  <div id="status-toast" class="lt-st-toast" role="status" aria-live="polite"></div>
+  <p id="status-live" class="sr-only" aria-live="polite"></p>
+</BaseLayout>
+
+<style is:global>
+  /*
+   * Namespaced under `.lt-st-page` (plus the two floating layers, which live
+   * outside it) because this block is `is:global`: every rule here has to earn
+   * its own prefix, and the tooltip/toast are appended to <body>.
+   *
+   * Global rather than scoped because almost all of the DOM it styles is built
+   * at runtime from the API payload. Astro's scoping attribute is stamped onto
+   * the template at build time, so scoped selectors would not match a single
+   * card the script renders.
+   */
+
+  /* One set of state variables, inherited by everything inside the element
+   * that declares `data-state`. Dots, chips, beacons and bars all read
+   * `--lt-st-color` rather than repeating the mapping four times. */
+  .lt-st-page [data-state="up"] {
+    --lt-st-color: var(--lt-color-success);
+    --lt-st-tint: var(--lt-color-success-container);
+    --lt-st-ink: var(--lt-color-on-success-container);
+  }
+  .lt-st-page [data-state="degraded"] {
+    --lt-st-color: var(--lt-color-warning);
+    --lt-st-tint: var(--lt-color-warning-container);
+    --lt-st-ink: var(--lt-color-on-warning-container);
+  }
+  .lt-st-page [data-state="down"] {
+    --lt-st-color: var(--lt-color-error);
+    --lt-st-tint: var(--lt-color-error-container);
+    --lt-st-ink: var(--lt-color-on-error-container);
+  }
+  .lt-st-page [data-state="loading"] {
+    --lt-st-color: var(--lt-color-primary);
+    --lt-st-tint: var(--lt-color-primary-container);
+    --lt-st-ink: var(--lt-color-on-primary-container);
+  }
+  /* paused / pending / unknown: nothing is wrong, nothing is running. */
+  .lt-st-page [data-state="paused"],
+  .lt-st-page [data-state="pending"],
+  .lt-st-page [data-state="unknown"] {
+    --lt-st-color: var(--lt-color-outline);
+    --lt-st-tint: var(--lt-glass-control);
+    --lt-st-ink: var(--lt-color-on-surface-variant);
+  }
+  /* "No data" is a fourth state, not a muted third: it has to read as an empty
+   * slot next to the coloured bars, so it steps down to outline-variant rather
+   * than sharing the paused grey. */
+  .lt-st-page [data-state="none"] {
+    --lt-st-color: var(--lt-color-outline-variant);
+    --lt-st-tint: var(--lt-glass-control);
+    --lt-st-ink: var(--lt-color-on-surface-variant);
+  }
+
+  .lt-st-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background-color: var(--lt-st-color);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--lt-st-color) 18%, transparent);
+  }
+
+  .lt-st-chip {
+    /*
+     * inline-block, not inline-flex: a chip's only child is text, and
+     * `text-overflow` does not apply to a flex container's items. The chip
+     * lives in a `shrink-0` cluster, so without its own ellipsis a long one —
+     * 持续 16 天 12 小时 on an outage that has been running a fortnight — would
+     * push the whole header row past the card's right edge on a narrow phone.
+     */
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background-color: var(--lt-st-tint);
+    color: var(--lt-st-ink);
+    font-size: 12px;
+    line-height: 18px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* ── Beacon ── */
+  .lt-st-beacon {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background-color: var(--lt-glass-subtle);
+    box-shadow:
+      inset 0 1px 0 0 var(--lt-glass-rim),
+      inset 0 0 0 0.6px var(--lt-glass-edge);
+  }
+  .lt-st-beacon-core,
+  .lt-st-beacon-ring {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background-color: var(--lt-st-color);
+  }
+  .lt-st-beacon-ring {
+    position: absolute;
+    opacity: 0.4;
+    animation: lt-st-pulse 2.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+  /* A pulse means "alive". Nothing is alive in these four states, and a ring
+   * breathing on a paused fleet reads as a spinner that never resolves. */
+  .lt-st-page [data-state="paused"] .lt-st-beacon-ring,
+  .lt-st-page [data-state="pending"] .lt-st-beacon-ring,
+  .lt-st-page [data-state="unknown"] .lt-st-beacon-ring,
+  .lt-st-page [data-state="none"] .lt-st-beacon-ring,
+  .lt-st-page [data-state="loading"] .lt-st-beacon-ring {
+    animation: none;
+    opacity: 0.16;
+  }
+  @keyframes lt-st-pulse {
+    0% { transform: scale(1); opacity: 0.4; }
+    70%, 100% { transform: scale(2.5); opacity: 0; }
+  }
+
+  /* ── Tiles ── */
+  .lt-st-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 14px;
+    border-radius: var(--lt-radius-nested);
+    background-color: var(--lt-glass-subtle);
+    box-shadow: inset 0 0 0 0.6px var(--lt-glass-edge);
+  }
+  .lt-st-tile-label {
+    font-size: 12px;
+    line-height: 16px;
+    color: var(--lt-color-outline);
+  }
+  .lt-st-tile-value {
+    margin: 0;
+    font-size: 20px;
+    line-height: 26px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--lt-color-on-surface);
+  }
+
+  /* ── Refresh affordances ── */
+  .lt-st-btn:disabled {
+    opacity: 0.5;
+    cursor: progress;
+  }
+  .lt-st-page[data-refreshing="true"] .lt-st-btn-icon svg {
+    animation: lt-st-spin 0.9s linear infinite;
+  }
+  @keyframes lt-st-spin { to { transform: rotate(360deg); } }
+
+  /* ── Segmented window switch (MD3) ── */
+  .lt-st-seg {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: 999px;
+    background-color: var(--lt-glass-subtle);
+    box-shadow: inset 0 0 0 0.6px var(--lt-glass-edge);
+  }
+  .lt-st-seg-btn {
+    padding: 5px 14px;
+    border: none;
+    border-radius: 999px;
+    background-color: transparent;
+    color: var(--lt-color-on-surface-variant);
+    font-family: inherit;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.25s cubic-bezier(0.22, 1, 0.36, 1), color 0.25s ease;
+  }
+  .lt-st-seg-btn[aria-pressed="true"] {
+    background-color: var(--lt-color-secondary-container);
+    color: var(--lt-color-on-secondary-container);
+  }
+
+  /* ── Group panels + nested rows ── */
+  .lt-st-cat-bar {
+    display: inline-block;
+    width: 0.25rem;
+    height: 1.15rem;
+    border-radius: 999px;
+    background-image: linear-gradient(to bottom, var(--lt-color-primary), var(--lt-color-tertiary));
+  }
+  .lt-st-group {
+    min-width: 0;
+    animation: lt-st-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation-delay: var(--lt-st-delay, 0ms);
+  }
+
+  /*
+   * Nested glass. The rows sit inside a `glass` panel, so they take a
+   * translucent fill with no `backdrop-filter` of their own — the panel has
+   * already blurred the aurora, and blurring an already-blurred backdrop again
+   * only buys a compositor layer. Same rule FriendLinks follows.
+   *
+   * Those layers were what the fast-scroll artefact was made of. Twelve cards
+   * each re-sampling a fixed WebGL canvas every frame is past what the
+   * compositor commits to during a fling, so it dropped the blur and painted
+   * the card's own flat white fill instead — the white block mid-scroll. Six
+   * panels with no nested blur fit the budget, and a row that does lag now
+   * shows the panel's glass behind it rather than a white slab.
+   */
+  .lt-st-card {
+    min-width: 0;
+    background-color: var(--lt-glass-subtle);
+    box-shadow: inset 0 0 0 0.6px var(--lt-glass-edge);
+    transition:
+      background-color 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+  /* Pointer-gated: hover styles stick after taps on touch devices. */
+  @media (hover: hover) {
+    .lt-st-card:hover {
+      background-color: var(--lt-glass-control);
+      box-shadow:
+        inset 0 1px 0 0 var(--lt-glass-rim),
+        inset 0 0 0 0.6px var(--lt-glass-edge);
+    }
+  }
+
+  /*
+   * `backwards`, not `both`. The end keyframe is the element's natural state,
+   * so a forwards fill exists only to keep a composited layer alive for the
+   * rest of the page's life — and every one of those is re-rastered on each
+   * scroll frame. `backwards` still holds the offset through the delay, then
+   * lets go.
+   *
+   * `transform`, never `opacity`: below full opacity an element becomes a
+   * backdrop root and would flatten the panel's own glass mid-entrance — the
+   * exact trap global.css documents for `.lt-reveal-lift`.
+   */
+  @keyframes lt-st-rise {
+    from { transform: translateY(18px); }
+    to { transform: none; }
+  }
+  .lt-st-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+  .lt-st-iconbtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    border-radius: var(--lt-radius-control);
+    color: var(--lt-color-outline);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  @media (hover: hover) {
+    .lt-st-iconbtn:hover { color: var(--lt-color-primary); }
+  }
+
+  /* ── Day bars ──
+   *
+   * Grid, not flex. `flex: 1 1 0` with `min-width: 0` computes the same equal
+   * split in theory, but at 90 columns inside a 320px viewport the bars land
+   * around 1.5px each and the row was measurably overflowing its card on narrow
+   * phones — flex distributes leftover space in device pixels, and `gap` is the
+   * one part of the row that cannot shrink to pay for the rounding.
+   * `minmax(0, 1fr)` sets the track's minimum to zero by construction, so the
+   * columns are sized from the container inwards and can never push past it,
+   * however many there are or how thin they get.
+   */
+  .lt-st-bars {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 2px;
+    height: 38px;
+    min-width: 0;
+    border-radius: var(--lt-radius-sm);
+  }
+  .lt-st-bars:focus-visible {
+    outline: 2px solid var(--lt-color-primary);
+    outline-offset: 3px;
+  }
+  .lt-st-bar {
+    min-width: 0;
+    border-radius: 999px;
+    background-color: var(--lt-st-color);
+    transform-origin: bottom;
+    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+    cursor: pointer;
+  }
+  /* No data is not "0% uptime" and must never be painted as an outage: the
+   * `none` state variable already steps down to outline-variant, one rung
+   * below the paused grey, which reads as an empty slot rather than a failure.
+   * No inset ring on these — 90 shadows per row is 90 more paint ops on the
+   * exact elements that were lagging during a fling. */
+  @media (hover: hover) {
+    .lt-st-bar:hover { transform: scaleY(1.16); }
+  }
+  .lt-st-bar[data-active="true"] {
+    transform: scaleY(1.16);
+    box-shadow: 0 0 0 1.5px var(--lt-color-primary);
+  }
+  @media (max-width: 639px) {
+    .lt-st-bars { gap: 1px; height: 32px; }
+  }
+
+  /* ── Skeleton ── */
+  .lt-st-skel {
+    display: inline-block;
+    border-radius: 999px;
+    background-image: linear-gradient(
+      100deg,
+      var(--lt-glass-subtle) 32%,
+      var(--lt-glass-control) 50%,
+      var(--lt-glass-subtle) 68%
+    );
+    background-size: 220% 100%;
+    animation: lt-st-shimmer 1.6s ease-in-out infinite;
+  }
+  @keyframes lt-st-shimmer {
+    from { background-position: 120% 0; }
+    to { background-position: -120% 0; }
+  }
+
+  /* ── Tooltip + snackbar ── */
+  .lt-st-tip {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 70;
+    max-width: 260px;
+    padding: 8px 12px;
+    border-radius: var(--lt-radius-control);
+    background-color: var(--lt-color-inverse-surface);
+    color: var(--lt-color-inverse-on-surface);
+    box-shadow: var(--lt-shadow-3);
+    pointer-events: none;
+    visibility: hidden;
+    opacity: 0;
+    transform: translate(var(--lt-st-x, 0px), var(--lt-st-y, 0px)) scale(0.96);
+    transition:
+      opacity 0.14s ease,
+      transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 0.18s;
+  }
+  .lt-st-tip[data-visible="true"] {
+    visibility: visible;
+    opacity: 1;
+    transform: translate(var(--lt-st-x, 0px), var(--lt-st-y, 0px)) scale(1);
+    transition:
+      opacity 0.14s ease,
+      transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s;
+  }
+  .lt-st-tip-date {
+    font-size: 12px;
+    line-height: 18px;
+    font-weight: 500;
+  }
+  .lt-st-tip-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 12px;
+    line-height: 18px;
+    opacity: 0.82;
+  }
+  .lt-st-tip-row b { font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  .lt-st-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    z-index: 70;
+    max-width: min(92vw, 420px);
+    padding: 12px 18px;
+    border-radius: var(--lt-radius-control);
+    background-color: var(--lt-color-inverse-surface);
+    color: var(--lt-color-inverse-on-surface);
+    box-shadow: var(--lt-shadow-4);
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+    visibility: hidden;
+    opacity: 0;
+    transform: translate(-50%, 16px);
+    transition:
+      opacity 0.2s ease,
+      transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 0.3s;
+  }
+  .lt-st-toast[data-visible="true"] {
+    visibility: visible;
+    opacity: 1;
+    transform: translate(-50%, 0);
+    transition:
+      opacity 0.2s ease,
+      transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lt-st-beacon-ring,
+    .lt-st-group,
+    .lt-st-card,
+    .lt-st-skel,
+    .lt-st-bar,
+    .lt-st-page[data-refreshing="true"] .lt-st-btn-icon svg {
+      animation: none;
+      transition: none;
+    }
+    .lt-st-bar[data-active="true"],
+    .lt-st-bar:hover { transform: none; }
+  }
+</style>
+
+<script>
+  import { onPageSetup } from "../scripts/page-lifecycle";
+  import { normalizeIconSvg } from "../scripts/icon-svg";
+  import northEastRaw from "@material-symbols/svg-400/outlined/north_east.svg?raw";
+
+  const northEastIcon = normalizeIconSvg(northEastRaw, "text-base");
+
+  /** Keep in step with the `REFRESH_SECONDS` the template renders as "5:00". */
+  const REFRESH_SECONDS = 300;
+  /** Client-side floor for the refresh button; the API enforces its own. */
+  const MANUAL_REFRESH_FLOOR_MS = 30_000;
+  const WINDOW_KEY = "lt-status-window";
+
+  const STATE_LABEL: Record<string, string> = {
+    up: "运行中",
+    down: "已中断",
+    degraded: "不稳定",
+    paused: "已暂停",
+    pending: "待检查",
+    unknown: "未知",
+    none: "无数据",
+  };
+
+  interface StatusDay {
+    date: number;
+    uptime: number;
+    incidents: number;
+    downtime: number;
+    state: string;
+  }
+  interface StatusMonitor {
+    id: number;
+    name: string;
+    group: string;
+    label: string;
+    url?: string;
+    state: string;
+    typeLabel: string;
+    interval: number;
+    uptime: number | null;
+    incidents: number;
+    downtime: number;
+    ongoing: boolean;
+    lastIncident: { at: number; code: number | null; detail: string | null } | null;
+    days: StatusDay[];
+  }
+  interface StatusGroup {
+    key: string;
+    label: string;
+    count: number;
+    active: number;
+    up: number;
+    state: string;
+    monitors: StatusMonitor[];
+  }
+  interface StatusSnapshot {
+    generatedAt: number;
+    days: number;
+    timeZone: string;
+    grouped: boolean;
+    summary: {
+      count: number;
+      active: number;
+      up: number;
+      down: number;
+      degraded: number;
+      paused: number;
+      pending: number;
+      unknown: number;
+      uptime: number | null;
+      incidents: number;
+      downtime: number;
+      state: string;
+    };
+    groups: StatusGroup[];
+  }
+
+  onPageSetup((signal) => {
+    const page = document.querySelector<HTMLElement>(".lt-st-page");
+    const overview = document.getElementById("status-overview");
+    const groupsEl = document.getElementById("status-groups");
+    const refreshBtn = document.getElementById("status-refresh") as HTMLButtonElement | null;
+    const segEl = document.getElementById("status-window");
+    const windowLabel = document.getElementById("status-window-label");
+    const tip = document.getElementById("status-tip");
+    const toastEl = document.getElementById("status-toast");
+    const live = document.getElementById("status-live");
+    if (!page || !overview || !groupsEl || !tip || !toastEl) return;
+
+    const q = (role: string) => overview!.querySelector<HTMLElement>(`[data-role="${role}"]`);
+    const titleEl = q("title");
+    const descEl = q("desc");
+    const chipsEl = q("chips");
+    const countdownEl = q("countdown");
+    const metaEl = q("meta");
+    const refreshLabelEl = q("refresh-label");
+    const statEls: Record<string, HTMLElement | null> = {
+      uptime: overview.querySelector('[data-stat="uptime"]'),
+      services: overview.querySelector('[data-stat="services"]'),
+      incidents: overview.querySelector('[data-stat="incidents"]'),
+      downtime: overview.querySelector('[data-stat="downtime"]'),
+    };
+
+    let snapshot: StatusSnapshot | null = null;
+    let windowDays = 0;
+    let remaining = REFRESH_SECONDS;
+    let lastLoadedAt = 0;
+    let loadId = 0;
+    let tickTimer = 0;
+    let toastTimer = 0;
+    let tipTimer = 0;
+
+    /* ── Formatting ──
+     * Every formatter is bound to the snapshot's zone, not the reader's: the
+     * day columns are cut in Asia/Shanghai upstream, and labelling one with
+     * the browser's local date would put a different day under the tooltip
+     * than the bar describes.
+     */
+    let dayFmt: Intl.DateTimeFormat | null = null;
+    let weekdayFmt: Intl.DateTimeFormat | null = null;
+    let clockFmt: Intl.DateTimeFormat | null = null;
+    let fmtZone = "";
+
+    function prepareFormatters(timeZone: string) {
+      if (fmtZone === timeZone) return;
+      fmtZone = timeZone;
+      const make = (opts: Intl.DateTimeFormatOptions) => {
+        try {
+          return new Intl.DateTimeFormat("zh-CN", { timeZone, ...opts });
+        } catch {
+          // An unknown zone string throws; fall back to the reader's own.
+          return new Intl.DateTimeFormat("zh-CN", opts);
+        }
+      };
+      dayFmt = make({ month: "long", day: "numeric" });
+      weekdayFmt = make({ weekday: "short" });
+      clockFmt = make({ hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
+    }
+
+    function fmtDay(unixSeconds: number) {
+      return dayFmt ? dayFmt.format(new Date(unixSeconds * 1000)) : "";
+    }
+    function fmtClock(ms: number) {
+      return clockFmt ? clockFmt.format(new Date(ms)) : "";
+    }
+
+    function fmtDuration(seconds: number) {
+      const s = Math.max(0, Math.floor(seconds));
+      if (s < 60) return `${s} 秒`;
+      const days = Math.floor(s / 86400);
+      const hours = Math.floor((s % 86400) / 3600);
+      const minutes = Math.floor((s % 3600) / 60);
+      if (days > 0) return hours > 0 ? `${days} 天 ${hours} 小时` : `${days} 天`;
+      if (hours > 0) return minutes > 0 ? `${hours} 小时 ${minutes} 分` : `${hours} 小时`;
+      const secs = s % 60;
+      return minutes > 0 ? (secs > 0 ? `${minutes} 分 ${secs} 秒` : `${minutes} 分`) : `${secs} 秒`;
+    }
+
+    function fmtInterval(seconds: number) {
+      if (!seconds) return "";
+      if (seconds >= 3600) {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        return m > 0 ? `${h} 小时 ${m} 分` : `${h} 小时`;
+      }
+      if (seconds >= 60) {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return s > 0 ? `${m} 分 ${s} 秒` : `${m} 分钟`;
+      }
+      return `${seconds} 秒`;
+    }
+
+    /*
+     * Adaptive precision.
+     *
+     * A fixed two decimals prints 99.996 as "100.00%" — right next to an amber
+     * column that says something did go wrong. That contradiction is worse than
+     * either number alone, because the reader cannot tell which one to believe.
+     * So a value below 100 keeps buying decimals until the printed figure is
+     * still below 100; only a genuine 100 is allowed to read as one.
+     */
+    function fmtUptime(value: number | null) {
+      if (value === null || !Number.isFinite(value)) return "—";
+      if (value >= 100) return "100%";
+      for (const decimals of [2, 3, 4]) {
+        const text = value.toFixed(decimals);
+        if (Number.parseFloat(text) < 100) return `${text}%`;
+      }
+      // Sub-0.0001% downtime: below what any check interval can produce, but
+      // still not a perfect window, and claiming one is the whole bug above.
+      return "<100%";
+    }
+
+    function escapeHtml(value: unknown) {
+      // `replace(/g)`, not `replaceAll` (Chrome 85+): this bundle has to parse
+      // and run on WebView kernels back to ~66.
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    /*
+     * Host only. The path belongs to the probe, not to the identity of the
+     * thing being monitored: `/favicon.ico` repeated down a column of CDN cards
+     * says nothing, and it was pushing the one part worth reading — which host
+     * — off the end of a truncated row. The link still opens the full URL.
+     */
+    function shortUrl(url: string) {
+      try {
+        return new URL(url).host;
+      } catch {
+        // Not a parseable absolute URL (a bare host, say). Strip what we can.
+        return url.replace(/^[a-z][a-z0-9+.-]*:\/\//i, "").replace(/[/?#].*$/, "");
+      }
+    }
+
+    /* ── Window stats ──
+     * Recomputed from the days actually on screen, so the 30-day view reports
+     * the 30-day figure rather than the full window the API returned.
+     */
+    function visibleDays(monitor: StatusMonitor) {
+      const from = Math.max(0, monitor.days.length - windowDays);
+      return monitor.days.slice(from);
+    }
+
+    function windowStats(days: StatusDay[]) {
+      let sum = 0;
+      let measured = 0;
+      let incidents = 0;
+      let downtime = 0;
+      for (const day of days) {
+        incidents += day.incidents;
+        downtime += day.downtime;
+        if (day.state === "none") continue;
+        sum += day.uptime;
+        measured += 1;
+      }
+      return {
+        uptime: measured > 0 ? sum / measured : null,
+        measured,
+        incidents,
+        downtime,
+      };
+    }
+
+    function monitorSummaryText(stats: ReturnType<typeof windowStats>) {
+      if (stats.measured === 0) return "窗口内没有可用数据";
+      const parts = [`${fmtUptime(stats.uptime)} 可用`];
+      if (stats.incidents > 0) {
+        parts.push(`中断 ${stats.incidents} 次`, `累计 ${fmtDuration(stats.downtime)}`);
+      } else {
+        parts.push("无中断记录");
+      }
+      return parts.join(" · ");
+    }
+
+    /* ── Rendering ── */
+
+    function chipHtml(state: string, text: string) {
+      return `<span class="lt-st-chip" data-state="${escapeHtml(state)}">${escapeHtml(text)}</span>`;
+    }
+
+    /*
+     * The bars carry their own numbers as data attributes rather than being
+     * looked up by index on hover: the chart is re-rendered whenever the
+     * window changes, and a tooltip built from a captured array reference is
+     * one stale closure away from labelling the wrong day.
+     */
+    function barsHtml(days: StatusDay[]) {
+      return days
+        .map(
+          (day) =>
+            `<span class="lt-st-bar" data-state="${escapeHtml(day.state)}" data-date="${day.date}" data-uptime="${day.uptime}" data-incidents="${day.incidents}" data-downtime="${day.downtime}" aria-hidden="true"></span>`,
+        )
+        .join("");
+    }
+
+    function cardHtml(monitor: StatusMonitor) {
+      const days = visibleDays(monitor);
+      const stats = windowStats(days);
+      const state = monitor.state;
+
+      const metaBits = [monitor.typeLabel, monitor.interval ? `每 ${fmtInterval(monitor.interval)}` : ""];
+      if (monitor.url) metaBits.push(shortUrl(monitor.url));
+      const metaLine = metaBits.filter(Boolean).join(" · ");
+
+      /* An unresolved outage is the one number a reader wants next, so it
+       * replaces the generic state chip instead of sitting beside it. */
+      let chip: string;
+      if (monitor.ongoing && monitor.lastIncident) {
+        const elapsed = Date.now() / 1000 - monitor.lastIncident.at;
+        chip = chipHtml(state, `持续 ${fmtDuration(elapsed)}`);
+      } else {
+        chip = chipHtml(state, STATE_LABEL[state] ?? STATE_LABEL.unknown);
+      }
+
+      const link = monitor.url
+        ? `<a class="lt-st-iconbtn state-layer" href="${escapeHtml(monitor.url)}" target="_blank" rel="noopener noreferrer" aria-label="打开 ${escapeHtml(monitor.label)} 的监控目标">${northEastIcon}</a>`
+        : "";
+
+      const first = days.length > 0 ? fmtDay(days[0].date) : "";
+      const summary = monitorSummaryText(stats);
+      const chartLabel = `${monitor.label} 最近 ${windowDays} 天每日可用率，使用左右方向键查看`;
+
+      return `<article class="lt-st-card rounded-nested p-3.5 sm:p-4" data-state="${escapeHtml(state)}">
+        <div class="flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">
+          <div class="flex min-w-0 flex-1 items-center gap-2.5">
+            <span class="lt-st-dot" aria-hidden="true"></span>
+            <div class="min-w-0">
+              <h3 class="truncate text-title-medium text-on-surface" title="${escapeHtml(monitor.name)}">${escapeHtml(monitor.label)}</h3>
+              <p class="lt-st-meta mt-0.5 truncate text-body-small text-outline" title="${escapeHtml(metaLine)}">${escapeHtml(metaLine)}</p>
+            </div>
+          </div>
+          <div class="flex min-w-0 shrink items-center gap-1.5">${chip}${link}</div>
+        </div>
+        <div class="lt-st-bars mt-4" role="group" aria-label="${escapeHtml(chartLabel)}" tabindex="0" data-chart>${barsHtml(days)}</div>
+        <p class="sr-only">${escapeHtml(`${monitor.label}：${STATE_LABEL[state] ?? ""}，${summary}`)}</p>
+        <div class="mt-2 flex items-center justify-between gap-3 text-body-small text-outline">
+          <span class="shrink-0">${escapeHtml(first)}</span>
+          <span class="min-w-0 flex-1 truncate text-center">${escapeHtml(summary)}</span>
+          <span class="shrink-0">今天</span>
+        </div>
+      </article>`;
+    }
+
+    /*
+     * One glass panel per group, rows nested inside it. The panel is the only
+     * surface on this page that carries `backdrop-filter` besides the overview
+     * — see `.lt-st-card` for why the rows must not.
+     */
+    function groupHtml(group: StatusGroup, showHeader: boolean, index: number) {
+      const cards = group.monitors.map((monitor) => cardHtml(monitor)).join("");
+      const header = showHeader
+        ? `<header class="mb-3.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+          <h3 class="flex items-center gap-2.5 text-title-large text-on-surface">
+            <span class="lt-st-cat-bar" aria-hidden="true"></span>${escapeHtml(group.label)}
+          </h3>
+          <p class="flex items-center gap-1.5 text-body-small text-outline">
+            <span class="lt-st-dot" data-state="${escapeHtml(group.state)}" aria-hidden="true"></span>
+            ${group.up} / ${group.active} 在线${group.count > group.active ? ` · ${group.count - group.active} 已暂停` : ""}
+          </p>
+        </header>`
+        : "";
+      return `<section class="lt-st-group glass rounded-group p-4 sm:p-6" style="--lt-st-delay: ${Math.min(index, 6) * 70}ms">
+        ${header}
+        <div class="grid gap-2.5">${cards}</div>
+      </section>`;
+    }
+
+    function renderGroups() {
+      if (!snapshot) return;
+      if (snapshot.groups.length === 0) {
+        groupsEl!.innerHTML = `<div class="lt-st-group glass rounded-group p-8 text-center">
+          <p class="text-title-medium text-on-surface">监控列表是空的</p>
+          <p class="mt-1.5 text-body-medium text-on-surface-variant">UptimeRobot 账号下还没有任何监控项。</p>
+        </div>`;
+        groupsEl!.setAttribute("aria-busy", "false");
+        return;
+      }
+      const showHeader = snapshot.grouped;
+      groupsEl!.innerHTML = snapshot.groups
+        .map((group, index) => groupHtml(group, showHeader, index))
+        .join("");
+      groupsEl!.setAttribute("aria-busy", "false");
+    }
+
+    function renderOverview() {
+      if (!snapshot) return;
+      const s = snapshot!.summary;
+      const state = s.state;
+
+      overview!.dataset.state = state;
+      const titles: Record<string, string> = {
+        up: "全部服务正常",
+        degraded: "部分中断",
+        down: "服务中断",
+        unknown: "状态未知",
+      };
+      if (titleEl) titleEl.textContent = titles[state] ?? titles.unknown;
+      if (descEl) {
+        descEl.textContent =
+          state === "up"
+            ? `${s.active} 项服务全部在线 · 更新于 ${fmtClock(snapshot!.generatedAt)}`
+            : `${s.up} / ${s.active} 项服务在线 · 更新于 ${fmtClock(snapshot!.generatedAt)}`;
+      }
+
+      const chips: string[] = [];
+      if (s.up > 0) chips.push(chipHtml("up", `运行中 ${s.up}`));
+      if (s.down > 0) chips.push(chipHtml("down", `已中断 ${s.down}`));
+      if (s.degraded > 0) chips.push(chipHtml("degraded", `不稳定 ${s.degraded}`));
+      if (s.pending > 0) chips.push(chipHtml("pending", `待检查 ${s.pending}`));
+      if (s.paused > 0) chips.push(chipHtml("paused", `已暂停 ${s.paused}`));
+      if (chipsEl) chipsEl.innerHTML = chips.join("");
+
+      if (statEls.uptime) statEls.uptime.textContent = fmtUptime(s.uptime);
+      /*
+       * A bare count, not a ratio. The banner right above already says
+       * "11 / 12 项服务在线", and a tile reading "12 / 12" next to it invites
+       * the question of which of the two is lying. Paused monitors — the only
+       * reason the two numbers would ever differ — are called out as their own
+       * chip in the same banner.
+       */
+      if (statEls.services) statEls.services.textContent = String(s.count);
+      if (statEls.incidents) statEls.incidents.textContent = String(s.incidents);
+      if (statEls.downtime) statEls.downtime.textContent = s.downtime > 0 ? fmtDuration(s.downtime) : "0 秒";
+
+      if (metaEl) {
+        metaEl.textContent = `数据来源 UptimeRobot · 每 ${fmtInterval(REFRESH_SECONDS)}刷新 · 统计窗口 ${snapshot!.days} 天 · 时区 ${snapshot!.timeZone}`;
+      }
+    }
+
+    function renderError(message: string) {
+      // "unknown", not "down": the monitoring feed is what failed, and painting
+      // that red would claim an outage the page has no evidence for.
+      overview!.dataset.state = "unknown";
+      if (titleEl) titleEl.textContent = "无法获取状态数据";
+      if (descEl) descEl.textContent = message;
+      if (chipsEl) chipsEl.innerHTML = "";
+      if (metaEl) metaEl.textContent = "监控接口暂时不可用，页面会在一分钟后自动重试";
+      groupsEl!.innerHTML = `<div class="lt-st-group glass rounded-group p-8 text-center">
+        <p class="text-title-medium text-on-surface">暂时读不到监控数据</p>
+        <p class="mt-1.5 text-body-medium text-on-surface-variant">${escapeHtml(message)}</p>
+        <button type="button" id="status-retry" class="lt-st-btn state-layer glass-control rounded-control mt-5 inline-flex items-center gap-1.5 px-4 py-2 text-label-large text-primary cursor-pointer border-none">重试</button>
+      </div>`;
+      groupsEl!.setAttribute("aria-busy", "false");
+      const retry = document.getElementById("status-retry");
+      retry?.addEventListener("click", () => void load(true), { signal });
+    }
+
+    function renderAll() {
+      renderOverview();
+      renderGroups();
+    }
+
+    /* ── Countdown ── */
+
+    function paintCountdown() {
+      const left = Math.max(0, remaining);
+      const minutes = Math.floor(left / 60);
+      const seconds = left % 60;
+      if (countdownEl) {
+        countdownEl.textContent = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+      }
+    }
+
+    function startTicking() {
+      stopTicking();
+      tickTimer = window.setInterval(() => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          remaining = REFRESH_SECONDS;
+          void load(false);
+          return;
+        }
+        paintCountdown();
+      }, 1000);
+    }
+    function stopTicking() {
+      if (tickTimer) window.clearInterval(tickTimer);
+      tickTimer = 0;
+    }
+
+    /*
+     * A background tab that keeps counting down would come back to a page
+     * claiming "刷新于 3 分钟前" over data that is an hour old. Stopping the
+     * clock on hide and resyncing from the wall clock on show keeps the label
+     * honest and skips pointless polling while nobody is looking.
+     */
+    function onVisibility() {
+      if (document.hidden) {
+        stopTicking();
+        return;
+      }
+      const elapsed = lastLoadedAt > 0 ? (Date.now() - lastLoadedAt) / 1000 : REFRESH_SECONDS;
+      if (elapsed >= REFRESH_SECONDS) {
+        remaining = REFRESH_SECONDS;
+        void load(false);
+      } else {
+        remaining = Math.max(1, Math.round(REFRESH_SECONDS - elapsed));
+        paintCountdown();
+      }
+      startTicking();
+    }
+
+    /* ── Loading ── */
+
+    /**
+     * Navigation signal plus a timeout, combined by hand: `AbortSignal.any` is
+     * Chrome 116+ and `AbortSignal.timeout` 103+, both far above this bundle's
+     * ~66 floor.
+     */
+    function fetchWithTimeout(url: string, ms: number) {
+      const ctrl = new AbortController();
+      const timer = window.setTimeout(() => ctrl.abort(), ms);
+      const onNavAbort = () => ctrl.abort();
+      if (signal.aborted) onNavAbort();
+      else signal.addEventListener("abort", onNavAbort, { once: true });
+      return fetch(url, { signal: ctrl.signal }).finally(() => {
+        window.clearTimeout(timer);
+        signal.removeEventListener("abort", onNavAbort);
+      });
+    }
+
+    function setRefreshing(on: boolean) {
+      page!.dataset.refreshing = on ? "true" : "false";
+      if (refreshBtn) refreshBtn.disabled = on;
+      if (refreshLabelEl) refreshLabelEl.textContent = on ? "刷新中…" : "立即刷新";
+    }
+
+    async function load(fresh: boolean) {
+      const requestId = ++loadId;
+      setRefreshing(true);
+      try {
+        const response = await fetchWithTimeout(fresh ? "/api/status?fresh=1" : "/api/status", 15000);
+        const payload = (await response.json().catch(() => null)) as (StatusSnapshot & { error?: string; message?: string }) | null;
+        if (requestId !== loadId || signal.aborted) return;
+        if (!response.ok || !payload || payload.error || !payload.groups) {
+          throw new Error(payload?.message || `接口返回 ${response.status}`);
+        }
+        prepareFormatters(payload.timeZone);
+        snapshot = payload;
+        lastLoadedAt = Date.now();
+        remaining = REFRESH_SECONDS;
+        renderAll();
+        paintCountdown();
+      } catch (error) {
+        if (requestId !== loadId || signal.aborted) return;
+        const message = error instanceof Error ? error.message : String(error);
+        // With data already on screen a failed poll is a footnote, not a
+        // takeover: keep the cards and say so.
+        if (snapshot) {
+          toast("刷新失败，仍在显示上一次的数据");
+          remaining = REFRESH_SECONDS;
+        } else {
+          renderError(message);
+          remaining = 30;
+        }
+        paintCountdown();
+      } finally {
+        if (requestId === loadId) setRefreshing(false);
+      }
+    }
+
+    /* ── Toast + tooltip ── */
+
+    function toast(message: string) {
+      toastEl!.textContent = message;
+      toastEl!.dataset.visible = "true";
+      window.clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => {
+        toastEl!.dataset.visible = "false";
+      }, 3200);
+    }
+
+    function hideTip() {
+      tip!.dataset.visible = "false";
+      window.clearTimeout(tipTimer);
+      const active = groupsEl!.querySelector('[data-active="true"]');
+      if (active) delete (active as HTMLElement).dataset.active;
+    }
+
+    function tipContent(bar: HTMLElement) {
+      const state = bar.dataset.state || "none";
+      const date = Number(bar.dataset.date || 0);
+      const uptime = Number(bar.dataset.uptime || 0);
+      const incidents = Number(bar.dataset.incidents || 0);
+      const downtime = Number(bar.dataset.downtime || 0);
+      const head = date > 0 ? `${fmtDay(date)} ${weekdayFmt ? weekdayFmt.format(new Date(date * 1000)) : ""}` : "未知日期";
+      const rows: string[] = [];
+      const spoken: string[] = [head];
+      if (state === "none") {
+        rows.push(`<div class="lt-st-tip-row"><span>该日没有监控数据</span></div>`);
+        spoken.push("没有监控数据");
+      } else {
+        rows.push(`<div class="lt-st-tip-row"><span>可用率</span><b>${fmtUptime(uptime)}</b></div>`);
+        spoken.push(`可用率 ${fmtUptime(uptime)}`);
+        if (incidents > 0) {
+          rows.push(`<div class="lt-st-tip-row"><span>中断</span><b>${incidents} 次 · ${fmtDuration(downtime)}</b></div>`);
+          spoken.push(`中断 ${incidents} 次，累计 ${fmtDuration(downtime)}`);
+        } else if (downtime > 0) {
+          // An incident is booked to the day it *started*, so the middle days of
+          // a multi-day outage carry downtime with a count of zero. Saying "无"
+          // next to a 26% availability figure would be the same kind of
+          // self-contradiction as rounding that figure up to 100%.
+          rows.push(`<div class="lt-st-tip-row"><span>中断</span><b>跨日 · ${fmtDuration(downtime)}</b></div>`);
+          spoken.push(`跨日中断，累计 ${fmtDuration(downtime)}`);
+        } else {
+          rows.push(`<div class="lt-st-tip-row"><span>中断</span><b>无</b></div>`);
+          spoken.push("无中断");
+        }
+      }
+      return { html: `<div class="lt-st-tip-date">${escapeHtml(head)}</div>${rows.join("")}`, spoken: spoken.join("，") };
+    }
+
+    function showTip(bar: HTMLElement, pinned: boolean) {
+      const content = tipContent(bar);
+      tip!.innerHTML = content.html;
+      tip!.dataset.visible = "true";
+      const rect = bar.getBoundingClientRect();
+      // Measured after the content swap: the tooltip sizes to its text.
+      const width = tip!.offsetWidth;
+      const height = tip!.offsetHeight;
+      let left = rect.left + rect.width / 2 - width / 2;
+      left = Math.max(8, Math.min(left, window.innerWidth - width - 8));
+      let top = rect.top - height - 10;
+      if (top < 8) top = rect.bottom + 10;
+      tip!.style.setProperty("--lt-st-x", `${Math.round(left)}px`);
+      tip!.style.setProperty("--lt-st-y", `${Math.round(top)}px`);
+
+      const previous = groupsEl!.querySelector('[data-active="true"]');
+      if (previous && previous !== bar) delete (previous as HTMLElement).dataset.active;
+      bar.dataset.active = "true";
+      // The tooltip itself stays aria-hidden — it is a visual duplicate of this
+      // announcement, and exposing both would read every day twice.
+      if (live) live.textContent = content.spoken;
+
+      window.clearTimeout(tipTimer);
+      /* Touch has no hover: `pointerout` fires the instant the tap ends, so a
+       * pinned tooltip needs its own expiry or it vanishes before it is read. */
+      if (pinned) {
+        tipTimer = window.setTimeout(hideTip, 3200);
+      }
+    }
+
+    /* ── Chart interaction ──
+     * One focusable chart per card, not 90 focusable bars: the bars are
+     * aria-hidden decoration and the day under the cursor is announced through
+     * the page's live region, so a screen reader gets the data without a tab
+     * stop per pixel and a keyboard gets the same tour with the arrows.
+     */
+    function bindCharts() {
+      groupsEl!.addEventListener(
+        "pointerover",
+        (event) => {
+          const bar = (event.target as HTMLElement).closest?.(".lt-st-bar") as HTMLElement | null;
+          if (!bar) return;
+          showTip(bar, false);
+        },
+        { signal },
+      );
+      groupsEl!.addEventListener(
+        "pointerout",
+        (event) => {
+          const bar = (event.target as HTMLElement).closest?.(".lt-st-bar") as HTMLElement | null;
+          if (!bar) return;
+          const to = event.relatedTarget as HTMLElement | null;
+          if (to && to.closest && to.closest(".lt-st-bar")) return;
+          hideTip();
+        },
+        { signal },
+      );
+      groupsEl!.addEventListener(
+        "click",
+        (event) => {
+          const bar = (event.target as HTMLElement).closest?.(".lt-st-bar") as HTMLElement | null;
+          if (bar) showTip(bar, true);
+        },
+        { signal },
+      );
+      groupsEl!.addEventListener(
+        "focusin",
+        (event) => {
+          const chart = (event.target as HTMLElement).closest?.("[data-chart]") as HTMLElement | null;
+          if (!chart) return;
+          const bars = chart.querySelectorAll<HTMLElement>(".lt-st-bar");
+          const active = chart.querySelector<HTMLElement>('[data-active="true"]');
+          const index = active ? Array.prototype.indexOf.call(bars, active) : bars.length - 1;
+          const bar = bars[Math.max(0, Math.min(index, bars.length - 1))];
+          if (bar) showTip(bar, false);
+        },
+        { signal },
+      );
+      groupsEl!.addEventListener("focusout", () => hideTip(), { signal });
+      groupsEl!.addEventListener(
+        "keydown",
+        (event) => {
+          const chart = (event.target as HTMLElement).closest?.("[data-chart]") as HTMLElement | null;
+          if (!chart) return;
+          const key = event.key;
+          if (key !== "ArrowLeft" && key !== "ArrowRight" && key !== "Home" && key !== "End") return;
+          event.preventDefault();
+          const bars = chart.querySelectorAll<HTMLElement>(".lt-st-bar");
+          if (bars.length === 0) return;
+          const active = chart.querySelector<HTMLElement>('[data-active="true"]');
+          const current = active ? Array.prototype.indexOf.call(bars, active) : bars.length - 1;
+          let next = current;
+          if (key === "ArrowLeft") next = current - 1;
+          else if (key === "ArrowRight") next = current + 1;
+          else if (key === "Home") next = 0;
+          else next = bars.length - 1;
+          const bar = bars[Math.max(0, Math.min(next, bars.length - 1))];
+          if (bar) showTip(bar, false);
+        },
+        { signal },
+      );
+    }
+
+    /* ── Window switch ── */
+
+    function setWindow(days: number, persist: boolean) {
+      windowDays = days;
+      segEl?.querySelectorAll<HTMLElement>(".lt-st-seg-btn").forEach((button) => {
+        button.setAttribute("aria-pressed", String(Number(button.dataset.days) === days));
+      });
+      if (windowLabel) windowLabel.textContent = `最近 ${days} 天`;
+      if (snapshot) renderGroups();
+      if (persist) {
+        try {
+          localStorage.setItem(WINDOW_KEY, String(days));
+        } catch {
+          /* Private mode / restricted WebView: the choice just does not stick. */
+        }
+      }
+    }
+
+    function initialWindow(): number {
+      try {
+        const stored = Number(localStorage.getItem(WINDOW_KEY));
+        if (stored === 30 || stored === 90) return stored;
+      } catch {
+        /* fall through to the width-based default */
+      }
+      // 90 columns inside a 320px card are ~1px of colour each: readable as a
+      // texture, useless as a chart. Narrow screens start on the 30-day view.
+      return window.innerWidth < 640 ? 30 : 90;
+    }
+
+    segEl?.addEventListener(
+      "click",
+      (event) => {
+        const button = (event.target as HTMLElement).closest?.(".lt-st-seg-btn") as HTMLElement | null;
+        if (!button) return;
+        const days = Number(button.dataset.days);
+        if (days === windowDays || !days) return;
+        setWindow(days, true);
+      },
+      { signal },
+    );
+
+    refreshBtn?.addEventListener(
+      "click",
+      () => {
+        if (page!.dataset.refreshing === "true") return;
+        if (lastLoadedAt > 0 && Date.now() - lastLoadedAt < MANUAL_REFRESH_FLOOR_MS) {
+          toast("监控数据每 5 分钟更新一次，刚刚已经取过了");
+          return;
+        }
+        remaining = REFRESH_SECONDS;
+        paintCountdown();
+        void load(true);
+      },
+      { signal },
+    );
+
+    document.addEventListener("visibilitychange", onVisibility, { signal });
+
+    // The server-rendered skeleton *is* the loading state, so nothing here has
+    // to paint one; `load` swaps it for data or for the error card.
+    setWindow(initialWindow(), false);
+    bindCharts();
+    void load(false);
+    startTicking();
+    paintCountdown();
+
+    return () => {
+      stopTicking();
+      window.clearTimeout(toastTimer);
+      window.clearTimeout(tipTimer);
+      hideTip();
+      toastEl!.dataset.visible = "false";
+    };
+  });
+</script>
+</BaseLayout>
