@@ -54,6 +54,16 @@
   --lt-palette-error40: #ba1a1a;
   --lt-palette-error80: #ffb4ab;
   --lt-palette-error90: #ffdad6;
+  --lt-palette-success10: #002204;
+  --lt-palette-success30: #00530f;
+  --lt-palette-success40: #146c2e;
+  --lt-palette-success80: #82d79a;
+  --lt-palette-success90: #9ef5b4;
+  --lt-palette-warning10: #2c1600;
+  --lt-palette-warning30: #693f00;
+  --lt-palette-warning40: #8b5000;
+  --lt-palette-warning80: #ffb95d;
+  --lt-palette-warning90: #ffddb7;
   --lt-palette-neutral10: #1b1b1f;
   --lt-palette-neutral20: #303034;
   --lt-palette-neutral30: #47474b;
@@ -98,6 +108,27 @@
   --lt-color-error: var(--lt-palette-error40);
   --lt-color-error-container: var(--lt-palette-error90);
   --lt-color-on-error-container: #410002;
+  /*
+   * Success and warning, on the same tone map MD3 uses for error (40 / 90 /
+   * 10 in light, 80 / 30 / 90 in dark).
+   *
+   * MD3 ships an `error` role and stops: there is no "it worked" and no "it is
+   * degraded but still answering", which is exactly the vocabulary a status
+   * page is written in. The seeds are Material's green and orange tonal
+   * palettes rather than anything derived from the site's blue — the tertiary
+   * teal was the obvious candidate and was rejected, because it already means
+   * "accent" here and a green uptime bar is a convention worth more than
+   * palette purity. Both tone-40 values land within a point of error40's
+   * luminance (L 0.111 / 0.112 vs 0.110), so the three state colours read as
+   * one family at the same weight against the aurora, and all three clear
+   * 4.5:1 on it at body size.
+   */
+  --lt-color-success: var(--lt-palette-success40);
+  --lt-color-success-container: var(--lt-palette-success90);
+  --lt-color-on-success-container: var(--lt-palette-success10);
+  --lt-color-warning: var(--lt-palette-warning40);
+  --lt-color-warning-container: var(--lt-palette-warning90);
+  --lt-color-on-warning-container: var(--lt-palette-warning10);
   --lt-color-inverse-surface: var(--lt-palette-neutral20);
   --lt-color-inverse-on-surface: var(--lt-palette-neutral95);
 
@@ -261,6 +292,12 @@
   --lt-color-error: var(--lt-palette-error80);
   --lt-color-error-container: var(--lt-palette-error30);
   --lt-color-on-error-container: var(--lt-palette-error90);
+  --lt-color-success: var(--lt-palette-success80);
+  --lt-color-success-container: var(--lt-palette-success30);
+  --lt-color-on-success-container: var(--lt-palette-success90);
+  --lt-color-warning: var(--lt-palette-warning80);
+  --lt-color-warning-container: var(--lt-palette-warning30);
+  --lt-color-on-warning-container: var(--lt-palette-warning90);
   --lt-color-inverse-surface: var(--lt-palette-neutral90);
   --lt-color-inverse-on-surface: var(--lt-palette-neutral20);
 
@@ -371,6 +408,12 @@
   --color-error: var(--lt-color-error);
   --color-error-container: var(--lt-color-error-container);
   --color-on-error-container: var(--lt-color-on-error-container);
+  --color-success: var(--lt-color-success);
+  --color-success-container: var(--lt-color-success-container);
+  --color-on-success-container: var(--lt-color-on-success-container);
+  --color-warning: var(--lt-color-warning);
+  --color-warning-container: var(--lt-color-warning-container);
+  --color-on-warning-container: var(--lt-color-on-warning-container);
   --color-inverse-surface: var(--lt-color-inverse-surface);
   --color-inverse-on-surface: var(--lt-color-inverse-on-surface);
 
@@ -429,6 +472,25 @@
   --text-label-small: 11px;
   --text-label-small--line-height: 16px;
   --text-label-small--font-weight: 500;
+
+  /*
+   * ── Measure ──
+   *
+   * Page content is capped one step below the navbar's box, not equal to it.
+   *
+   * The bar is 1152px (`max-width` in Navbar.astro's `.lt-navbar`) and insets
+   * its own contents by `lg:px-8`, so its logo and links sit on a 1088px
+   * measure. Content that also ran to 1152 put the page's left edge on the
+   * *glass* edge rather than on the text inside it, which reads as the body
+   * overhanging the navigation. 68rem = 1088px lines the two up and leaves the
+   * bar a 32px lip on each side — narrow enough to see, wide enough that the
+   * content still reads as the page's spine.
+   *
+   * Below ~1152px the viewport is the binding constraint and the sections'
+   * `px-4 sm:px-6 lg:px-8` take over, so the cap only ever applies where the
+   * comparison with the bar is actually visible.
+   */
+  --container-content: 68rem;
 
   /* ── Shape: aliases onto the raw ladder above ── */
   --radius-xs: var(--lt-radius-xs);

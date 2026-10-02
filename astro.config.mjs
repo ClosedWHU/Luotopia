@@ -1,4 +1,6 @@
 // @ts-check
+import { existsSync, readFileSync } from 'node:fs';
+import path from 'node:path';
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import postcss from 'postcss';
@@ -96,6 +98,110 @@ function flattenCssLayers() {
   };
 }
 
+/**
+ * Local stand-in for `functions/api/status.ts`.
+ *
+ * `astro dev` serves the site only — Pages Functions are a Cloudflare runtime
+ * concern and never run under Vite — so without this the status page would show
+ * its error card on every local visit. Both paths call the same
+ * runtime-agnostic core in `functions/lib/uptimerobot.ts`; only the caching
+ * differs (a Map here, `caches.default` in production), which is the whole
+ * reason that core avoids Workers globals.
+ *
+ * Credentials are read the way wrangler reads them: `.dev.vars` first, then the
+ * Vite env files, then the real environment. A missing key answers 503
+ * `not_configured` — the same response production gives — so the page's failure
+ * path is exercised locally rather than papered over.
+ */
+function statusDevApi() {
+  /** Mirrors MIN_FRESH_AGE_MS in functions/api/status.ts. */
+  const MIN_FRESH_AGE_MS = 60_000;
+  let cached = null; // { at, body }
+  let corePromise = null;
+
+  function readEnvFiles(root) {
+    const values = {};
+    for (const file of ['.dev.vars', '.env.local', '.env']) {
+      const filePath = path.join(root, file);
+      if (!existsSync(filePath)) continue;
+      for (const line of readFileSync(filePath, 'utf8').split(/\r?\n/)) {
+        const match = /^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/.exec(line);
+        if (!match) continue;
+        let value = match[2].trim();
+        if (/^(".*"|'.*')$/s.test(value)) value = value.slice(1, -1);
+        if (values[match[1]] === undefined) values[match[1]] = value;
+      }
+    }
+    return values;
+  }
+
+  return {
+    name: 'luotopia-status-dev-api',
+    apply: 'serve',
+    configureServer(server) {
+      /*
+       * A filter callback rather than `use('/api/status', handler)`: connect
+       * strips the mount prefix from `req.url`, so the query string would have
+       * to be reconstructed to find `?fresh=1`. Matching by hand keeps the full
+       * URL intact.
+       */
+      server.middlewares.use((req, res, next) => {
+        const requestUrl = req.url || '';
+        if (!requestUrl.startsWith('/api/status')) return next();
+        if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+
+        const send = (body, status, headers) => {
+          res.writeHead(status, {
+            'content-type': 'application/json; charset=utf-8',
+            'cache-control': 'no-store',
+            ...headers,
+          });
+          res.end(req.method === 'HEAD' ? undefined : body);
+        };
+
+        (async () => {
+          if (!corePromise) {
+            // Loaded through Vite rather than `import()`: the core is TypeScript,
+            // and the dev server is the thing that knows how to transform it.
+            const load = server.environments?.ssr?.loadModule ?? server.ssrLoadModule.bind(server);
+            corePromise = load('/functions/lib/uptimerobot.ts');
+          }
+          const core = await corePromise;
+          const env = { ...readEnvFiles(server.config.root), ...process.env };
+          const options = core.resolveStatusOptions(env);
+          if (!options.apiKey) {
+            return send(
+              JSON.stringify({
+                error: 'not_configured',
+                message: 'UPTIMEROBOT_API_KEY is not set — add it to homepage/.dev.vars',
+              }),
+              503,
+            );
+          }
+
+          const fresh = new URL(requestUrl, 'http://localhost').searchParams.get('fresh') === '1';
+          const now = Date.now();
+          if (cached && (!fresh || now - cached.at < MIN_FRESH_AGE_MS)) {
+            return send(cached.body, 200, { 'x-status-source': fresh ? 'throttled' : 'cache' });
+          }
+
+          const snapshot = await core.buildStatusSnapshot(options, now);
+          cached = { at: now, body: JSON.stringify(snapshot) };
+          return send(cached.body, 200, { 'x-status-source': 'api' });
+        })().catch((error) => {
+          send(
+            JSON.stringify({
+              error: error?.code ?? 'fetch_failed',
+              message: error?.message ?? String(error),
+            }),
+            typeof error?.status === 'number' ? error.status : 500,
+          );
+        });
+      });
+    },
+  };
+}
+
 export default defineConfig({
   site: 'https://whu.sb',
   prefetch: {
@@ -103,7 +209,7 @@ export default defineConfig({
     defaultStrategy: 'hover',
   },
   vite: {
-    plugins: [misansWeights(), flattenCssLayers(), tailwindcss()],
+    plugins: [misansWeights(), flattenCssLayers(), statusDevApi(), tailwindcss()],
     build: {
       /*
        * Legacy WebView floor. Vite's default (baseline-widely-available,

@@ -1,0 +1,20 @@
+# Local secrets for `astro dev`.
+#
+# Copy to `.dev.vars` (gitignored) and fill in. `astro dev` does not run Pages
+# Functions — the status endpoint is served locally by the `statusDevApi`
+# middleware in `astro.config.mjs`, which reads this file the way wrangler
+# would, then falls back to `.env.local` / `.env` / the real environment.
+#
+# Production values belong in Cloudflare Pages → Settings → Environment
+# variables, not here.
+
+# /status — a Read-Only key is enough
+# https://dashboard.uptimerobot.com/integrations
+UPTIMEROBOT_API_KEY=
+
+# Optional overrides (defaults shown)
+# UPTIMEROBOT_API_URL=https://api.uptimerobot.com/v2/
+# STATUS_COUNT_DAYS=90
+# STATUS_SHOW_LINKS=1
+# STATUS_TIME_ZONE=Asia/Shanghai
+# STATUS_CACHE_TTL=300
