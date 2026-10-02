@@ -17,6 +17,10 @@ pnpm-debug.log*
 .env
 .env.production
 .env.hot-update
+# wrangler / Pages Functions local secrets (never commit; .example is fine)
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
 
 # macOS-specific files
 .DS_Store

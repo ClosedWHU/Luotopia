@@ -118,6 +118,36 @@ iOS Universal Links（applinks），链接与 App 内路由一一对应（GoRout
   ——列表过期不应该拦住一个本来能成功的跳转。只校验首段是有意的：App 有数百个
   嵌套路由且随版本变动，更深的匹配交给客户端自己的错误页。
 
+### 服务状态页（/status）
+
+`/status` 取代了原先独立部署的 `status.whu.sb`（Nuxt + naive-ui 的
+`imsyy/site-status` 分支），与官网共用同一套 MD3 玻璃设计、导航与深浅色。
+
+数据链路：
+
+- `functions/lib/uptimerobot.ts` — 运行时无关的核心：按 `Asia/Shanghai`
+  切分日界、构造 `custom_uptime_ranges`、把 UptimeRobot 的 monitors/logs
+  聚合成页面直接消费的快照（分组、每日状态、中断次数与时长）。
+- `functions/api/status.ts` — Pages Function，`GET /api/status`。用
+  `caches.default` 缓存派生快照（默认 300 秒），`?fresh=1` 可绕过读取，
+  但仍有 60 秒下限，避免单个客户端刷爆 UptimeRobot 的 API 配额。
+- `src/pages/status.astro` — 页面本体。客户端每 5 分钟轮询一次，标签页隐藏
+  时停止计时、回到前台按墙上时钟补齐；30/90 天切换只在前端切片同一份快照。
+
+环境变量见 `.env.example` 的 `/status` 段；本地开发写在 `.dev.vars`
+（参考 `.dev.vars.example`）。`astro dev` 不会运行 Pages Functions，因此
+`astro.config.mjs` 里的 `statusDevApi` 中间件在本地提供同一个 `/api/status`，
+调用的是**同一份**核心代码，只把 `caches.default` 换成一个内存 Map。没有配置
+`UPTIMEROBOT_API_KEY` 时两端都返回 503 `not_configured`，页面显示错误卡片。
+
+UptimeRobot 侧的监控命名约定会影响分组：形如 `WHU.sb Backend (Cloudflare)`
+的名字会被拆成分组 `Backend` + 条目 `Cloudflare`；不符合该形状的名字进入
+「其他服务」分组并保留全名。
+
+`status.whu.sb` 迁移：在 Cloudflare 上给该子域配 301 到
+`https://www.whu.sb/status/`（Bulk Redirects 或一条 Redirect Rule 即可），
+DNS 记录可以保留在原处。
+
 ### Cloudflare Workers (通过 `@astrojs/cloudflare`)
 
 若需 SSR / Workers 部署模式：
