@@ -29,5 +29,8 @@
   },
   "devDependencies": {
     "postcss": "^8.5.28"
+  },
+  "overrides": {
+    "devalue": "^5.9.4"
   }
 }
