@@ -525,8 +525,10 @@ jobs:
         id: build
         run: bundle exec fastlane apple_build
 
-      # This repo is public. Compiler logs, Dart symbols, and native dSYMs go
-      # directly to the private app repo, including on failed native builds.
+      # This repo is public. Compiler logs and Dart symbols go directly to the
+      # private app repo, including on failed native builds. Native dSYMs are
+      # not archived here: the Crashlytics run-script phase and Xcode's
+      # `uploadSymbols` export option push them upstream during the build.
       - name: Preserve private symbols and build logs
         id: symbols
         if: always() && needs.context.outputs.apple_action == 'build'
@@ -536,7 +538,10 @@ jobs:
         run: |
           set -euo pipefail
           paths=()
-          for path in "apple-ci/$APPLE_PLATFORM" "debug-info/$APPLE_PLATFORM-appstore"; do
+          # record_manifest already copies the Dart .symbols into
+          # apple-ci/$APPLE_PLATFORM/dart-symbols/, so the raw
+          # debug-info/$APPLE_PLATFORM-appstore tree is a byte-for-byte duplicate.
+          for path in "apple-ci/$APPLE_PLATFORM"; do
             if [ -d "build/$path" ]; then paths+=("$path"); fi
           done
           if [ "${#paths[@]}" -eq 0 ]; then
@@ -549,7 +554,7 @@ jobs:
           if ! gh release view "$symbol_tag" --repo "$APP_REPO" >/dev/null 2>&1; then
             gh release create "$symbol_tag" --repo "$APP_REPO" --target "$APPLE_APP_SHA" \
               --title "Dart symbols $APPLE_RELEASE_TAG" \
-              --notes "Private symbols, native dSYMs, and logs for $APPLE_RELEASE_TAG; never publish these." \
+              --notes "Private symbols and logs for $APPLE_RELEASE_TAG; never publish these." \
               || gh release view "$symbol_tag" --repo "$APP_REPO" >/dev/null
           fi
           gh release upload "$symbol_tag" "$archive" --repo "$APP_REPO"
