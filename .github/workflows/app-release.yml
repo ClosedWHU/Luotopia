@@ -514,6 +514,11 @@ jobs:
           bash tool/fetch_fjs_xcframework.sh
           bash tool/sync_model_metadata.sh --strict
 
+      - name: Patch liquid_glass_easy shaders (remove main() early return)
+        if: needs.context.outputs.apple_action == 'build'
+        shell: pwsh
+        run: ./scripts/patch_liquid_glass_shaders.ps1
+
       - name: Test release orchestration
         if: needs.context.outputs.apple_action == 'build'
         run: |
@@ -743,6 +748,10 @@ jobs:
         # always carry the pristine sources, so this must run on every build.
         run: ./scripts/patch_freerasp_kotlin.ps1
 
+      - name: Patch liquid_glass_easy shaders (remove main() early return)
+        shell: pwsh
+        run: ./scripts/patch_liquid_glass_shaders.ps1
+
       - name: Build release split APKs (signed, obfuscated)
         env:
           # Opt back into the Crashlytics mapping upload that build.gradle.kts
@@ -956,6 +965,10 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Patch liquid_glass_easy shaders (remove main() early return)
+        shell: pwsh
+        run: ./scripts/patch_liquid_glass_shaders.ps1
+
       - name: Fetch native prebuilts
         env:
           GITHUB_TOKEN: ${{ env.APP_TOKEN }}
@@ -1163,6 +1176,10 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Patch liquid_glass_easy shaders (remove main() early return)
+        shell: pwsh
+        run: ./scripts/patch_liquid_glass_shaders.ps1
 
       - name: Fetch native prebuilts
         env:
@@ -1637,6 +1654,11 @@ jobs:
         run: |
           export PATH="$HOME/flutter/bin:$PATH"
           flutter pub get
+
+      - name: Patch liquid_glass_easy shaders (remove main() early return)
+        if: steps.sel.outputs.run == 'true'
+        shell: pwsh
+        run: ./scripts/patch_liquid_glass_shaders.ps1
 
       - name: Fetch native prebuilts
         if: steps.sel.outputs.run == 'true'
