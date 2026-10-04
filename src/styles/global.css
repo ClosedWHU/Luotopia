@@ -6,6 +6,10 @@
 @source not "../../scripts";
 @source not "../../tools";
 @source not "../../functions";
+/* Same reason, different shape: the developer docs quote real markup, so every
+ * class in an example would otherwise be scanned as a candidate and emitted
+ * site-wide whether or not any page uses it. */
+@source not "../../docs";
 
 /*
  * Luotopia web design tokens.

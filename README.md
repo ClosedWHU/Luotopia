@@ -1,182 +1,64 @@
-# Luotopia
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FClosedWHU%2FLuotopia.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FClosedWHU%2FLuotopia?ref=badge_shield)
+# 珞家 Luotopia
 
+武汉大学综合校园服务 App —— 整合校园服务，构建开放生态。
 
-珞家 — 武汉大学综合校园服务 App。
+[English](README.en.md) ·
+[官网](https://www.whu.sb) ·
+[下载](https://www.whu.sb/download/) ·
+[用户文档](https://docs.whu.sb) ·
+[服务状态](https://www.whu.sb/status/)
 
-[English](README.en.md)
+> 本仓库是官网 [www.whu.sb](https://www.whu.sb) 的源码（Astro），同时通过
+> [GitHub Releases](https://github.com/ClosedWHU/Luotopia/releases) 发布 App 安装包。
+> 想参与官网开发请直接看 [docs/development.md](docs/development.md)。
 
-> 本仓库为项目主页源码（Astro 构建），托管于 [ClosedWHU/Luotopia](https://github.com/ClosedWHU/Luotopia)。
-> APK 发行版通过 GitHub Releases / Pre-releases 发布，请访问 [Releases](https://github.com/ClosedWHU/Luotopia/releases) 页面下载。
+## 能做什么
 
-## 项目简介
+**课程与学业** —— 课程表、日程与待办、空闲教室、自习座位与运动场馆预约、全校课表
+与蹭课匹配、成绩查询、学业状态、校历、课程给分与评价。
 
-Luotopia 是一款面向武汉大学师生的综合校园服务应用，提供课表查询、校园资讯、生活服务等功能。
+**校园服务** —— 珞珈 E 卡与付款码、校车、校园地图、就医服务、水电费与取水码、
+校园消息、智慧珞珈、校园网与 VPN、论坛「珞珈防空洞」。
 
-- 主页：[https://www.whu.sb](https://www.whu.sb)
+**智能工具** —— AI 助手、天气与空气质量、Coremail 邮箱、壁纸中心、Apple 快捷指令。
 
-## 本地开发
+**跨端与账号** —— 桌面小组件、手表联动、桌面快捷方式、多账号切换、第三方账号绑定、
+多语言。
 
-```bash
-npm install
-npm run dev        # 启动开发服务器 localhost:4321
-npm run build      # 构建到 dist/
-npm run preview    # 本地预览构建产物
-```
+完整清单（含开发中的能力）见 [功能全览](https://www.whu.sb/features/)。
 
-## 热更新脚本
+## 下载
 
-解析器热更新脚本位于 `public/hot-update/scripts/`。应用仅接受已签名的
-`public/hot-update/manifest.json`；即使校验和正确，没有有效 Ed25519 签名的清单也会被拒绝。
+| 平台 | 方式 |
+|------|------|
+| Android | APK，按 ABI 分发（arm64-v8a / armeabi-v7a / x86_64）—— [Releases](https://github.com/ClosedWHU/Luotopia/releases) |
+| iOS / iPadOS / macOS | [TestFlight](https://testflight.apple.com/join/dMwZT97V) |
+| Windows | zip / MSIX / Scoop |
+| Linux | tar.gz / AppImage / deb / AUR / flatpak |
+| HarmonyOS | `.hap` 随部分版本发布，按包内说明侧载 |
 
-首次本地开发时初始化签名密钥：
+安装步骤、包管理器命令与各平台注意事项见 [下载页](https://www.whu.sb/download/)。
 
-```sh
-npm run hot-update:init-key
-```
+## 帮助与反馈
 
-该命令会将私钥写入已被忽略的 `.env.hot-update`，并仅将公钥安装到相邻的 App 工作区。
-请勿提交 `.env.hot-update`。
+- **用户指南与常见问题**：[docs.whu.sb](https://docs.whu.sb)
+- **QQ 群**：994642924
+- **Bug 与建议**：[GitHub Issues](https://github.com/ClosedWHU/Luotopia/issues)
+- **应用内社区**：论坛「珞珈防空洞」与课程给分评价（在「设置 → 导航」中开启论坛标签）
+- **服务是否正常**：[服务状态页](https://www.whu.sb/status/)，每 5 分钟自动检测一次
 
-生成并校验清单：
+## 更多
 
-```sh
-npm run hot-update:generate
-npm run hot-update:verify
-```
+- [品牌资源](https://www.whu.sb/brand/) —— Logo、图标与使用规范
+- [法律信息](https://www.whu.sb/legal/) —— 用户协议与隐私政策
+- [开发者文档](https://docs.whu.sb) —— 用户指南 / 客户端 / 服务端 / 电单车接口
+- [ClosedWHU 组织](https://github.com/ClosedWHU)
 
-`npm run build` 会自动生成清单，并在签名密钥不可用时失败。生产环境必须以 secret 的形式提供
-`HOT_UPDATE_ED25519_PRIVATE_KEY`，其值为上述命令生成的 base64 编码 PKCS#8 Ed25519 私钥。
+## 参与官网开发
 
-## 部署
-
-### Cloudflare Pages
-
-1. 在 Cloudflare Dashboard 中创建 Pages 项目，连接本 GitHub 仓库
-2. 构建配置：
-   - **框架预设**: Astro
-   - **构建命令**: `npm run build`
-   - **构建输出目录**: `dist`
-3. 可选：添加环境变量 `PUBLIC_SITE_URL` 为你的自定义域名
-4. 部署后可在 Pages 设置中绑定自定义域名
-
-### 404 处理
-
-`src/pages/404.astro` 构建为 `dist/404.html`，**这个文件本身就是配置**。
-
-Pages 判断「自定义 404」还是「单页应用」的唯一依据，是产物根目录有没有
-`404.html`：有则以 `404` 状态返回该文件；没有则认定为 SPA，把*所有*未命中路径
-重写到 `/` 并返回 `200`。本站此前没有 `404.html`，所以 `/typo` 乃至
-`/missing.png` 都会返回首页——这不是面板里的某个开关被打开，而是缺文件的默认
-推断。
-
-因此：
-
-- Pages 项目**没有** `not_found_handling` 配置项。文档里那段
-  `assets.not_found_handling: "404-page"` 属于 **Workers 静态资源**（`assets.directory`
-  + `main`），与 Pages 是两套产品。给 Pages 项目加 `wrangler.jsonc` 反而会使其
-  成为整个项目配置的 source of truth，面板里配好的环境变量与绑定会被覆盖，风险
-  远大于收益。
-- 也**不需要**在中间件里维护站点路由表。未命中由平台判定，新增页面不会漏配。
-
-`functions/_middleware.ts` 只保留平台做不到的那一半——**按客户端选择 404 的
-表示形式**：浏览器拿到完整的 `dist/404.html`，`curl` / `wget` / 各类 HTTP 库
-拿到一行 `text/plain`（`404 Not Found: /path` + 站点首页），避免 34 KB 的文档
-刷满终端。判定依据 `Accept` 是否显式包含 `text/html`，并用 `Sec-Fetch-Dest`
-兜底；Function 自己返回的 JSON 404（如 `/api/*`）不会被改写。
-
-部署后可这样验证：
-
-```sh
-curl -i https://www.whu.sb/definitely-not-a-page   # HTTP/2 404 + text/plain
-curl -s https://www.whu.sb/404 | head -c 120       # 404 页面本体
-```
-
-### 深链域名（luotopia.whu.sb）
-
-App 将 `https://luotopia.whu.sb/*` 注册为 Android App Links（autoVerify）与
-iOS Universal Links（applinks），链接与 App 内路由一一对应（GoRouter 按 path
-匹配）。已安装且验证通过时由系统直接唤起 App；否则由
-`functions/_middleware.ts` 将该域名上的 HTML 导航重写到 `/open` 落地页
-（保留原始 URL），由页面脚本映射回 `luotopia://app/<path>` 并提供
-「打开 App / 下载」引导。
-
-维护要点：
-
-- `public/.well-known/assetlinks.json` 中的 `sha256_cert_fingerprints` 必须与
-  **实际分发的签名证书**一致（当前包含 release 证书与仓库共享 debug 证书）。
-  更换签名密钥后需同步更新，否则 Android 侧验证失效。指纹可用
-  `apksigner verify --print-certs app.apk` 查看。
-- `public/.well-known/apple-app-site-association` 对应 Team ID `ZW372988NV`，
-  经 `public/_headers` 以 `application/json` 提供；该文件必须无重定向直达。
-- 需在 Cloudflare Pages 的自定义域名中绑定 `luotopia.whu.sb`（DNS CNAME 指向
-  Pages 项目）。域名必须**先于** App 发版上线，两端才会在安装时完成验证。
-- 该域名整体被 App 认领，所以扫描器探测、过期二维码等**不认识的路径也会落到
-  `/open` 落地页**。`src/config/deeplinkRoutes.ts` 列出 App 路由的顶层段
-  （与 `app/lib/app/router/app_route_paths.dart` 的首段一致）；首段不在其中时，
-  落地页会额外显示「App 里可能没有这个页面，仍会尝试打开」，但**唤起照常进行**
-  ——列表过期不应该拦住一个本来能成功的跳转。只校验首段是有意的：App 有数百个
-  嵌套路由且随版本变动，更深的匹配交给客户端自己的错误页。
-
-### 服务状态页（/status）
-
-`/status` 取代了原先独立部署的 `status.whu.sb`（Nuxt + naive-ui 的
-`imsyy/site-status` 分支），与官网共用同一套 MD3 玻璃设计、导航与深浅色。
-
-数据链路：
-
-- `functions/lib/uptimerobot.ts` — 运行时无关的核心：按 `Asia/Shanghai`
-  切分日界、构造 `custom_uptime_ranges`、把 UptimeRobot 的 monitors/logs
-  聚合成页面直接消费的快照（分组、每日状态、中断次数与时长）。
-- `functions/api/status.ts` — Pages Function，`GET /api/status`。用
-  `caches.default` 缓存派生快照（默认 300 秒），`?fresh=1` 可绕过读取，
-  但仍有 60 秒下限，避免单个客户端刷爆 UptimeRobot 的 API 配额。
-- `src/pages/status.astro` — 页面本体。客户端每 5 分钟轮询一次，标签页隐藏
-  时停止计时、回到前台按墙上时钟补齐；30/90 天切换只在前端切片同一份快照。
-
-环境变量见 `.env.example` 的 `/status` 段；本地开发写在 `.dev.vars`
-（参考 `.dev.vars.example`）。`astro dev` 不会运行 Pages Functions，因此
-`astro.config.mjs` 里的 `statusDevApi` 中间件在本地提供同一个 `/api/status`，
-调用的是**同一份**核心代码，只把 `caches.default` 换成一个内存 Map。没有配置
-`UPTIMEROBOT_API_KEY` 时两端都返回 503 `not_configured`，页面显示错误卡片。
-
-UptimeRobot 侧的监控命名约定会影响分组：形如 `WHU.sb Backend (Cloudflare)`
-的名字会被拆成分组 `Backend` + 条目 `Cloudflare`；不符合该形状的名字进入
-「其他服务」分组并保留全名。
-
-`status.whu.sb` 迁移：在 Cloudflare 上给该子域配 301 到
-`https://www.whu.sb/status/`（Bulk Redirects 或一条 Redirect Rule 即可），
-DNS 记录可以保留在原处。
-
-### Cloudflare Workers (通过 `@astrojs/cloudflare`)
-
-若需 SSR / Workers 部署模式：
-
-```bash
-npx astro add cloudflare
-```
-
-然后在 `astro.config.mjs` 中配置 `output: 'server'` 与 `adapter: cloudflare()` 模块，之后：
-
-```bash
-npm run build
-```
-
-将 `dist/` 或 `dist/_worker.js` 部署到 Cloudflare Workers。
-
-### Vercel
-
-1. 在 Vercel 中导入本 GitHub 仓库
-2. 框架自动检测为 Astro，无需额外配置
-3. 默认 Framework Preset 选择 **Astro**
-4. 部署后可在 Vercel 项目设置中绑定自定义域名
-
-### 手动部署（静态）
-
-```bash
-npm run build
-# 将 dist/ 目录部署到任意静态托管服务（Nginx, GitHub Pages, Netlify 等）
-```
+本仓库是官网源码。开发约定、设计 token 与构建目标见
+[docs/development.md](docs/development.md)；部署、环境变量与域名配置见
+[docs/deployment.md](docs/deployment.md)。
 
 ## Star History
 
@@ -192,6 +74,4 @@ npm run build
 
 [MIT](LICENSE)
 
-
-## License
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FClosedWHU%2FLuotopia.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FClosedWHU%2FLuotopia?ref=badge_large)
