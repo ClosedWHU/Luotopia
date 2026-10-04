@@ -1,100 +1,74 @@
-# Luotopia
+# Luotopia (珞家)
 
-Luojia: a comprehensive campus services app for Wuhan University.
+A comprehensive campus services app for Wuhan University — integrating campus
+services, building an open ecosystem.
 
-[简体中文](README.md)
+[简体中文](README.md) ·
+[Website](https://www.whu.sb) ·
+[Download](https://www.whu.sb/download/) ·
+[User docs](https://docs.whu.sb) ·
+[Service status](https://www.whu.sb/status/)
 
-> This repository contains the Astro source for the project homepage, hosted at
-> [ClosedWHU/Luotopia](https://github.com/ClosedWHU/Luotopia).
-> APK releases and pre-releases are published through
-> [GitHub Releases](https://github.com/ClosedWHU/Luotopia/releases).
+> This repository holds the source of the [www.whu.sb](https://www.whu.sb) website
+> (Astro) and publishes the app installers through
+> [GitHub Releases](https://github.com/ClosedWHU/Luotopia/releases). To work on the
+> website itself, start at [docs/development.en.md](docs/development.en.md).
 
-## Overview
+## What it does
 
-Luotopia is a comprehensive campus services app for Wuhan University students
-and staff, with timetable, campus information, and daily-life services.
+**Courses and study** — timetable, schedule and to-dos, free classrooms, study-seat
+and sports-venue booking, campus-wide timetable matching for sitting in on classes,
+grades, academic standing, academic calendar, course grading and reviews.
 
-- Homepage: [https://www.whu.sb](https://www.whu.sb)
+**Campus services** — Luojia E-card and payment code, campus shuttles, campus map,
+medical services, utilities and water codes, campus notices, Smart Luojia, campus
+network and VPN, and the "Luojia Air-Raid Shelter" forum.
 
-## Local Development
+**Smart tools** — AI assistant, weather and air quality, Coremail, wallpaper centre,
+Apple Shortcuts.
 
-```bash
-npm install
-npm run dev        # Start the development server at localhost:4321
-npm run build      # Build to dist/
-npm run preview    # Preview the build locally
-```
+**Cross-device and accounts** — home-screen widgets, watch integration, desktop
+shortcuts, multi-account switching, third-party account linking, multiple languages.
 
-## Hot-update Scripts
+The full list, including what is still in development, is on the
+[features page](https://www.whu.sb/features/).
 
-Parser hot-update scripts are stored in `public/hot-update/scripts/`. The app
-only accepts the signed `public/hot-update/manifest.json`; manifests without a
-valid Ed25519 signature are rejected even if their checksums match.
+## Download
 
-Initialize a local signing key once:
+| Platform | How |
+|----------|-----|
+| Android | APK, split per ABI (arm64-v8a / armeabi-v7a / x86_64) — [Releases](https://github.com/ClosedWHU/Luotopia/releases) |
+| iOS / iPadOS / macOS | [TestFlight](https://testflight.apple.com/join/dMwZT97V) |
+| Windows | zip / MSIX / Scoop |
+| Linux | tar.gz / AppImage / deb / AUR / flatpak |
+| HarmonyOS | `.hap` ships with some releases; sideload per the notes in the package |
 
-```sh
-npm run hot-update:init-key
-```
+Installation steps, package-manager commands and per-platform caveats are on the
+[download page](https://www.whu.sb/download/).
 
-This writes the private key to the ignored `.env.hot-update` file and installs
-only the public key in the adjacent App workspace. Never commit
-`.env.hot-update`.
+## Help and feedback
 
-Generate and verify the manifest:
+- **User guide and FAQ**: [docs.whu.sb](https://docs.whu.sb)
+- **QQ group**: 994642924
+- **Bugs and suggestions**: [GitHub Issues](https://github.com/ClosedWHU/Luotopia/issues)
+- **In-app community**: the "Luojia Air-Raid Shelter" forum and course grading
+  reviews (enable the forum tab under Settings → Navigation)
+- **Is something down?**: the [status page](https://www.whu.sb/status/), checked
+  every 5 minutes
 
-```sh
-npm run hot-update:generate
-npm run hot-update:verify
-```
+## More
 
-`npm run build` generates the manifest automatically and fails when the signing
-key is unavailable. Production must provide `HOT_UPDATE_ED25519_PRIVATE_KEY` as
-a secret containing the base64-encoded PKCS#8 Ed25519 private key generated
-above.
+- [Brand assets](https://www.whu.sb/brand/) — logos, icons and usage rules
+- [Legal](https://www.whu.sb/legal/) — terms of service and privacy policy
+- [Developer docs](https://docs.whu.sb) — user guide / client / server / e-bike APIs
+- [ClosedWHU on GitHub](https://github.com/ClosedWHU)
 
-## Deployment
+## Working on the website
 
-### Cloudflare Pages
-
-1. Create a Pages project in the Cloudflare Dashboard and connect this GitHub repository.
-2. Set the build configuration:
-   - **Framework preset**: Astro
-   - **Build command**: `npm run build`
-   - **Build output directory**: `dist`
-3. Optionally set `PUBLIC_SITE_URL` to your custom domain.
-4. Bind the custom domain in the Pages settings after deployment.
-
-### Cloudflare Workers (with `@astrojs/cloudflare`)
-
-For SSR or Workers deployment mode:
-
-```bash
-npx astro add cloudflare
-```
-
-Configure `output: 'server'` and the `cloudflare()` adapter in
-`astro.config.mjs`, then run:
-
-```bash
-npm run build
-```
-
-Deploy `dist/` or `dist/_worker.js` to Cloudflare Workers.
-
-### Vercel
-
-1. Import this GitHub repository into Vercel.
-2. Astro is detected automatically; no additional configuration is required.
-3. Keep **Astro** as the Framework Preset.
-4. Bind your custom domain in the Vercel project settings after deployment.
-
-### Manual Static Deployment
-
-```bash
-npm run build
-# Deploy dist/ to any static hosting service, such as Nginx, GitHub Pages, or Netlify.
-```
+This repository is the website source. Conventions, design tokens and the build
+target are in [docs/development.en.md](docs/development.en.md); deployment,
+environment variables and domain setup are in
+[docs/deployment.en.md](docs/deployment.en.md).
 
 ## Star History
 
@@ -109,3 +83,5 @@ npm run build
 ## License
 
 [MIT](LICENSE)
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FClosedWHU%2FLuotopia.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FClosedWHU%2FLuotopia?ref=badge_large)
