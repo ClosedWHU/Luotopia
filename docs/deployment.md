@@ -29,7 +29,57 @@ truth，面板里配好的环境变量与绑定会被文件覆盖 —— 风险�
 | `check:aasa` | 校验 `public/.well-known/apple-app-site-association` 格式 | 构建中止 |
 | `hot-update:generate` | 生成并签名 `public/hot-update/manifest.json` | 缺签名密钥时构建中止 |
 
-也就是说 `HOT_UPDATE_ED25519_PRIVATE_KEY` 是**必需**的 secret，不是可选项。
+也就是说 `HOT_UPDATE_ED25519_PRIVATE_KEY` 是**必需**的 secret，不是可选项 ——
+但只对生产构建必需，见下。
+
+### PR 预览构建
+
+Pages 会给每个 PR 建一次 preview 部署。Preview 环境默认拿不到 secret，于是
+`hot-update:generate` 抛错、整次构建红掉 —— 每个 PR 都是红叉，久了就没人看红叉了。
+
+**不要把 `HOT_UPDATE_ED25519_PRIVATE_KEY` 配到 Preview 环境。** 这是本仓库里唯一
+一个泄露后果是「远程代码执行」的密钥：它签名的解析器脚本会在**每一台已安装的 App**
+里执行。而 preview 构建跑的是 PR 的代码 —— 任何能开 PR 的人都能在 workflow 或构建
+脚本里加一行把它读出来。App Store Connect 密钥能吊销重发，这个密钥泄露要轮换签名
+公钥、发版、等所有客户端更新。
+
+正确做法是让「必须签名」这件事变成有条件的：**preview 部署的清单没有任何人读**，
+所以没什么可签的。在 Pages 的 **Preview** 环境（只 Preview，不要选 All
+environments）加一个变量：
+
+```
+HOT_UPDATE_ALLOW_UNSIGNED=1
+```
+
+设置之后，缺密钥的构建会：
+
+- 照常跑完所有校验 —— 测试向量齐全性检查、checksum、版本号计算，所以「新增解析器
+  脚本却忘了配测试向量」在 PR 上依然会失败
+- **不写** `manifest.json`，保留仓库里已提交的那份签名清单。不写而不是写一份未签名
+  的，是因为写了等于让 preview 部署一个所有 App 都会拒收的清单，还会在构建目录里
+  留一份现成的未签名文件
+- 打印明确的警告
+
+生产构建的行为完全不变：没有密钥就失败。
+
+还有一道防线，防止有人图省事把这个变量配在 **All environments** 上：Cloudflare 会
+注入 `CF_PAGES` 与 `CF_PAGES_BRANCH`，脚本发现自己在生产分支上就直接拒绝未签名构建
+（分支名可用 `HOT_UPDATE_PRODUCTION_BRANCH` 覆盖，默认 `main`）。否则一次面板误操作
+就会让生产清单悄悄停止更新 —— 脚本改了、清单没签、热更新不再到达任何客户端，而构建
+是绿的。
+
+### Preview 上哪些功能不可用
+
+Preview 环境没有运行时 secret，所以：
+
+| 路由 | Preview 上的表现 |
+|------|------------------|
+| `/status` | 503 `not_configured`，页面显示错误卡片 |
+| `/api/releases*`、`/api/appstore/latest` | 无 `GITHUB_TOKEN` 时走匿名限额；下载页可能退回静态占位文案 |
+| 静态页面、样式、交互 | 全部正常 |
+
+`UPTIMEROBOT_API_KEY` 是只读的，配到 Preview 风险很低，想让 PR 审阅时能看到真实状态
+页就配上。App Store Connect 那组**不要**配到 Preview。
 
 ## 环境变量
 
@@ -38,7 +88,9 @@ truth，面板里配好的环境变量与绑定会被文件覆盖 —— 风险�
 
 | 变量 | 必需 | 说明 |
 |------|------|------|
-| `HOT_UPDATE_ED25519_PRIVATE_KEY` | 是 | base64 的 PKCS#8 Ed25519 私钥，`npm run hot-update:init-key` 生成 |
+| `HOT_UPDATE_ED25519_PRIVATE_KEY` | 是 | base64 的 PKCS#8 Ed25519 私钥，`npm run hot-update:init-key` 生成。**只配 Production** |
+| `HOT_UPDATE_ALLOW_UNSIGNED` | 否 | `1` 时允许无密钥构建（只校验、不签名、不写清单）。**只配 Preview**，见 [PR 预览构建](#pr-预览构建) |
+| `HOT_UPDATE_PRODUCTION_BRANCH` | 否 | 生产分支名，默认 `main`。用于拒绝在生产分支上未签名构建 |
 | `UPTIMEROBOT_API_KEY` | `/status` 需要 | Read-Only key 即可 |
 | `GITHUB_TOKEN` | 否 | 提高 `/api/releases*` 的 GitHub API 限额 |
 | `REPO` | 否 | 默认 `ClosedWHU/Luotopia` |

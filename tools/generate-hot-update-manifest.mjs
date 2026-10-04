@@ -11,6 +11,42 @@ const envPath = path.join(root, '.env.hot-update');
 const verifierPath = path.resolve(root, '..', 'app', 'lib', 'features', 'hot_update', 'data', 'hot_update_manifest_verifier.dart');
 const keyId = 'luotopia-hot-update-2026-01';
 
+/*
+ * Unsigned builds.
+ *
+ * The signing key is the one secret in this repo that must never reach a
+ * preview environment: it signs parser scripts that every installed app
+ * executes, so anyone who can read it can ship code to the whole fleet. But
+ * Pages builds a preview for every PR, and a preview build that dies on a
+ * missing key is a red X on every pull request — which teaches people to
+ * ignore red Xs.
+ *
+ * The way out is not to relax the requirement but to make it conditional: a
+ * preview deployment's manifest is read by nobody, so there is nothing to sign.
+ * Opt in per environment with HOT_UPDATE_ALLOW_UNSIGNED=1 (Preview only), and
+ * the build validates everything it can and leaves the committed manifest
+ * alone instead of writing an unsigned one.
+ *
+ * Production still hard-fails, and the guard below makes that true even if the
+ * flag is set project-wide: Cloudflare exposes CF_PAGES/CF_PAGES_BRANCH, so a
+ * build on the production branch refuses to go unsigned however it was asked.
+ * Without that, one dashboard mistake — the flag set for "All environments" —
+ * would silently stop signing production manifests and hot updates would just
+ * stop arriving, with a green build to say everything was fine.
+ */
+const productionBranch = process.env.HOT_UPDATE_PRODUCTION_BRANCH || 'main';
+const isPagesProduction =
+  process.env.CF_PAGES === '1' && (!process.env.CF_PAGES_BRANCH || process.env.CF_PAGES_BRANCH === productionBranch);
+const allowUnsigned =
+  process.argv.includes('--allow-unsigned') || process.env.HOT_UPDATE_ALLOW_UNSIGNED === '1';
+
+if (allowUnsigned && isPagesProduction) {
+  throw new Error(
+    `Refusing an unsigned hot-update manifest on a Cloudflare Pages production build (branch ${productionBranch}). ` +
+      'HOT_UPDATE_ALLOW_UNSIGNED is for preview environments only; unset it for Production, or provide HOT_UPDATE_ED25519_PRIVATE_KEY.',
+  );
+}
+
 const tests = {
   'course-parser': { input: { kbList: [{ kcmc: '高等数学', xqj: '1', jcs: '1-2', zcd: '1-2周', jxbmc: '001', cdmc: '教室A', xm: '张三', kcxz: '必修', xf: '4.0', kssj: '08:00', jssj: '09:35' }] }, expect: { courses: [{ title: '高等数学', weekday: 1, classFrom: 1, classTo: 2 }] } },
   'score-parser': { input: { items: [{ xnm: '2024', xqm: '3', kcmc: '高等数学', jsxmmc: '张三', jxbmc: '001', xf: '4.0', kcxzmc: '必修', bfzcj: '92', kkbmmc: '数学学院', cjbz: '', ksxz: '正常考试' }] }, expect: { scores: [{ year: 2024, semester: 1, name: '高等数学', score: 92 }] } },
@@ -72,7 +108,7 @@ function canonical(value) {
   return JSON.stringify(value);
 }
 
-async function loadPrivateKey() {
+async function loadPrivateKey({ required = true } = {}) {
   let encoded = process.env.HOT_UPDATE_ED25519_PRIVATE_KEY?.trim();
   if (!encoded) {
     try {
@@ -80,7 +116,10 @@ async function loadPrivateKey() {
       encoded = env.match(/^HOT_UPDATE_ED25519_PRIVATE_KEY=(.+)$/m)?.[1]?.trim();
     } catch {}
   }
-  if (!encoded) throw new Error('Missing HOT_UPDATE_ED25519_PRIVATE_KEY; run npm run hot-update:init-key');
+  if (!encoded) {
+    if (!required) return null;
+    throw new Error('Missing HOT_UPDATE_ED25519_PRIVATE_KEY; run npm run hot-update:init-key');
+  }
   return createPrivateKey({ key: Buffer.from(encoded, 'base64'), format: 'der', type: 'pkcs8' });
 }
 
@@ -95,7 +134,7 @@ async function initKey() {
 }
 
 async function generate() {
-  const privateKey = await loadPrivateKey();
+  const privateKey = await loadPrivateKey({ required: !allowUnsigned });
   const existing = JSON.parse(await readFile(manifestPath, 'utf8'));
   const existingScripts = Object.fromEntries((existing.scripts || []).map((item) => [item.name, item]));
   const files = (await readdir(scriptsDir)).filter((name) => name.endsWith('.js')).sort();
@@ -129,6 +168,31 @@ async function generate() {
     keyId,
     scripts,
   };
+  if (!privateKey) {
+    /*
+     * Validate, then stop. Everything above — the test-vector check, the
+     * checksums, the version arithmetic — still ran, so a PR that adds a parser
+     * without a test vector fails here exactly as it would in production.
+     *
+     * What is deliberately *not* done is writing the manifest. Overwriting the
+     * committed signed one with an unsigned copy would make this build's
+     * deployment serve a manifest every app rejects, and would leave a
+     * ready-made unsigned file one `git add` away from the repository. Leaving
+     * it alone means the preview serves the last good signed manifest, which
+     * the app accepts or rejects on checksum — fail-closed either way, and
+     * nothing new is published.
+     */
+    const drifted = canonical(existing.scripts || []) !== canonical(scripts);
+    console.warn('[hot-update] No signing key; HOT_UPDATE_ALLOW_UNSIGNED is set, so skipping the signature.');
+    console.warn(`[hot-update] Validated ${scripts.length} scripts against their test vectors.`);
+    console.warn(
+      drifted
+        ? '[hot-update] This build\'s scripts differ from the committed manifest. Leaving it untouched: the deployment will serve a manifest whose checksums do not match, and the app rejects those.'
+        : '[hot-update] Scripts match the committed manifest; leaving it untouched.',
+    );
+    console.warn('[hot-update] Unsigned builds are for preview deployments only. Never for production.');
+    return;
+  }
   const signature = sign(null, Buffer.from(canonical(payload)), privateKey).toString('base64');
   await writeFile(manifestPath, `${JSON.stringify({ ...payload, signature }, null, 2)}\n`);
   console.log(`Generated signed manifest with ${scripts.length} scripts`);
