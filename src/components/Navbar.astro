@@ -24,8 +24,11 @@ const isActive = (href: string) => {
 <nav id="lt-navbar" class="lt-navbar fixed z-50" transition:persist="lt-navbar">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
     <a href="/" class="flex items-center gap-2 text-title-large font-bold text-on-surface no-underline state-layer rounded-control px-2 py-1">
-      <AppIcon class="w-8 h-8" size={32} plate />
-      Luotopia
+          <!-- Decorative: the wordmark text beside it is the link's accessible
+               name. An alt here would make a screen reader say "Luotopia
+               Luotopia". -->
+          <AppIcon class="w-8 h-8" size={32} plate alt="" />
+          Luotopia
     </a>
 
     <div class="hidden md:flex items-center gap-0.5">
