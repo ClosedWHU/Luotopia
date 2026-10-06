@@ -19,7 +19,13 @@ const slides = [
 ];
 ---
 
-<div class="lt-carousel glass relative overflow-hidden rounded-group pb-10">
+<div
+  class="lt-carousel glass relative overflow-hidden rounded-group pb-10"
+  role="group"
+  aria-roledescription="轮播"
+  aria-label="应用界面截图"
+  data-carousel-root
+>
   <div id="carousel-track" class="flex transition-transform duration-500 ease-out">
     {slides.map((slide) => (
       <div class="shrink-0 w-full sm:w-1/2 lg:w-1/4 p-1.5">
@@ -29,6 +35,30 @@ const slides = [
             alt={slide.label}
             formats={["avif", "webp"]}
             widths={[360, 720]}
+            /*
+             * Crop at build time to the ratio the CSS actually shows.
+             *
+             * The captures are 1024×2284 (ratio 0.448) but the rendered box is
+             * `aspect-[9/16]` capped at 500px, so `object-cover` was discarding
+             * roughly a sixth of every downloaded image. Astro's service derives
+             * srcset heights from the *source* ratio unless both width and height
+             * are given — with only `widths`, it emitted 720×1606 and shipped the
+             * pixels it knew would be cropped.
+             *
+             * Naming a 9:16 target makes `getTargetDimensions` return it
+             * untouched, so `widths` scales against 0.5625 and sharp crops to
+             * cover. It also moves the `src` fallback off the full-size original
+             * (a 462 KB PNG for the campus shot) onto the 720 variant.
+             *
+             * 9/16 rather than the mobile box's own ~0.74: above 1024px the
+             * 500px cap does not bind and the slide really is 9:16, so cropping
+             * tighter would start cutting the *sides* off the screenshot there.
+             * This is the ratio that is lossless at the largest breakpoint.
+             */
+            width={720}
+            height={1280}
+            fit="cover"
+            position="center"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             quality={72}
             loading="lazy"
@@ -50,9 +80,27 @@ const slides = [
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
   </button>
 
-  <div class="absolute bottom-3.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+  <!--
+    `gap-0` is deliberate, not an oversight. Each dot button is a 24×24 CSS px
+    hit box (WCAG 2.5.8), so the buttons already supply their own spacing; a
+    gap on top would push the row past 200px. The visible marks stay small —
+    what changed is that the *pitch* between them had to grow to 24px, because
+    the alternative allowance in 2.5.8 (an undersized target whose 24px circle
+    intersects no other target's) demands the same centre-to-centre distance.
+  -->
+  <div class="absolute bottom-3.5 left-1/2 -translate-x-1/2 flex items-center gap-0" data-carousel-controls>
     {slides.map((_, i) => (
-      <button class="lt-dot" data-index={i} aria-label={`第 ${i + 1} 张截图`}></button>
+      <button
+        class="lt-dot"
+        type="button"
+        data-index={i}
+        // Match what update() will compute, so the roving tabindex and
+        // aria-current are already right before the module arrives — and stay
+        // right if it never does.
+        tabindex={i === 0 ? 0 : -1}
+        aria-current={i === 0 ? "true" : undefined}
+        aria-label={`第 ${i + 1} 张截图：${slides[i].label}`}
+      ></button>
     ))}
     <!--
       WCAG 2.2.2: auto-advancing content needs a user-reachable pause, and
@@ -64,6 +112,14 @@ const slides = [
       <svg data-glyph="play" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l10.5-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z"/></svg>
     </button>
   </div>
+
+  <!--
+    Announces slide changes, but only the ones the user caused — see announce()
+    in the script. Feeding autoplay into a live region would have a screen
+    reader interrupt whatever the user is doing every five seconds, which is
+    worse than saying nothing.
+  -->
+  <p class="sr-only" role="status" aria-live="polite" data-carousel-status></p>
 </div>
 
 <style>
@@ -132,39 +188,56 @@ const slides = [
     scale: 0.95;
   }
 
+  /*
+   * A 24×24 transparent hit box, with the visible mark on ::after.
+   *
+   * The previous version sized the *button* to the dot (6.4px) and grew a
+   * ::before to fake a larger hit area. That failed twice over: 12.4px wide is
+   * under the 24px floor in WCAG 2.5.8, and animating `width` on a button in a
+   * flex row reflowed every sibling dot on each carousel step.
+   *
+   * The mark is now a fixed 1.15rem × 0.4rem box whose shape comes from
+   * `clip-path`. Animating an inset rectangle is compositor-only — the element's
+   * box never changes, so there is nothing left to lay out — and the geometry
+   * stays exact: the browser clamps `round 999px` to half the *clipped* rect, so
+   * the zero inset yields a stadium pill and the 0.375rem side insets
+   * ((1.15rem - 0.4rem) / 2) yield a true circle. A `scaleX()` on the same pill
+   * would have been composited too, but it stretches the end caps into ellipses
+   * and the resting dot reads as a rounded square rather than a circle.
+   */
   .lt-dot {
-    position: relative;
-    width: 0.4rem;
-    height: 0.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
     padding: 0;
     border: none;
-    border-radius: 999px;
+    background: none;
+    cursor: pointer;
+    /* Keep a tap on a dot from being claimed as a scroll gesture first. */
+    touch-action: manipulation;
+  }
+
+  .lt-dot::after {
+    content: "";
+    width: 1.15rem;
+    height: 0.4rem;
     background-color: var(--lt-color-outline);
     opacity: 0.45;
-    cursor: pointer;
+    clip-path: inset(0 0.375rem 0 0.375rem round 999px);
+    /* `background-color` is not transitioned: it is paint work, and a hue snap
+     * under a 350ms shape morph on a 6.4px mark is not perceptible. */
     transition:
-      width 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-      opacity 0.35s ease,
-      background-color 0.35s ease;
+      clip-path 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.35s ease;
   }
 
-  /* A 6.4px dot is untappable; expand the hit area without moving layout.
-   * Horizontal expansion stays under half the 6px gap so neighbours' zones
-   * never overlap. */
-  .lt-dot::before {
-    content: "";
-    position: absolute;
-    /* Four sides, not the `inset` shorthand (Chrome 87+). */
-    top: -10px;
-    right: -3px;
-    bottom: -10px;
-    left: -3px;
-  }
-
-  .lt-dot[data-active="true"] {
-    width: 1.15rem;
-    opacity: 1;
+  .lt-dot[data-active="true"]::after {
     background-color: var(--lt-color-primary);
+    opacity: 1;
+    clip-path: inset(0 0 0 0 round 999px);
   }
 
   .lt-pause {
@@ -198,7 +271,7 @@ const slides = [
   @media (prefers-reduced-motion: reduce) {
     .lt-shot,
     .lt-arrow,
-    .lt-dot {
+    .lt-dot::after {
       transition: none;
     }
 
@@ -222,11 +295,23 @@ const slides = [
     const prev = document.getElementById("carousel-prev");
     const next = document.getElementById("carousel-next");
     const pauseBtn = document.getElementById("carousel-pause");
+    const status = document.querySelector<HTMLElement>("[data-carousel-status]");
     const dots = Array.from(document.querySelectorAll<HTMLElement>(".lt-dot"));
     if (!track || !prev || !next) return;
 
     const total = dots.length;
     const container = track.parentElement;
+    const controls = document.querySelector<HTMLElement>("[data-carousel-controls]");
+    /*
+     * Slide names read back out of the rendered figcaptions rather than passed
+     * down from the frontmatter: a `<script>` is its own module, and getting the
+     * list here would mean `define:vars`, which inlines the script and takes it
+     * out of the bundle. The caption is already the source of truth for what a
+     * slide is called, so the announcement cannot drift from it.
+     */
+    const labels = Array.from(track.children).map(
+      (child) => child.querySelector("figcaption")?.textContent?.trim() ?? "",
+    );
     // Live read, not a snapshot: an OS reduced-motion flip mid-session has to
     // stop (or restart) autoplay — same contract as the hero rotator and the
     // dialog close timing.
@@ -261,8 +346,21 @@ const slides = [
       dots.forEach((dot, i) => {
         const active = i >= current && i < current + cols;
         dot.dataset.active = String(active);
-        if (i === current) dot.setAttribute("aria-current", "true");
-        else dot.removeAttribute("aria-current");
+        if (i === current) {
+          dot.setAttribute("aria-current", "true");
+          /*
+           * Roving tabindex: the seven dots are one control, not seven tab
+           * stops. Without this a keyboard user crossing the carousel pays ten
+           * Tab presses (two arrows, seven dots, the pause button) to get past
+           * a widget whose arrows already do the same job. Only the dot that
+           * `aria-current` marks is reachable by Tab; the arrows below move
+           * within the group, which is the standard composite-widget contract.
+           */
+          dot.tabIndex = 0;
+        } else {
+          dot.removeAttribute("aria-current");
+          dot.tabIndex = -1;
+        }
       });
 
       // The slide after the visible window is the next one autoplay will show;
@@ -315,12 +413,77 @@ const slides = [
       }
     }
 
+    /*
+     * Speak only what the user asked for. Autoplay deliberately does NOT call
+     * this: a polite live region updated every five seconds interrupts whatever
+     * else a screen reader user is doing, indefinitely, which is the classic way
+     * an "accessible" carousel becomes unusable. The autoplay is already
+     * pauseable and stops on focus, so a user who wants to inspect a slide can.
+     *
+     * `cols` slides are visible at once above 640px, so the announcement covers
+     * the window rather than claiming a single slide is showing when four are.
+     */
+    function announce() {
+      if (!status) return;
+      const cols = getCols();
+      const shown = labels.slice(current, current + cols).filter(Boolean);
+      const from = current + 1;
+      const to = Math.min(current + cols, total);
+      const span = to > from ? `第 ${from} 到 ${to} 张` : `第 ${from} 张`;
+      status.textContent = shown.length > 0 ? `${span}，共 ${total} 张：${shown.join("、")}` : `${span}，共 ${total} 张`;
+    }
+
     // A manual control should also restart the 5s clock, otherwise the next
     // auto-advance can land a beat after the user's own click.
     function manual(go: () => void) {
       go();
+      announce();
       startAutoplay();
     }
+
+    /*
+     * Arrow keys move within the dot group (the roving-tabindex half of the
+     * composite-widget contract) and Home/End jump to the ends. Scoped to the
+     * controls row rather than the whole carousel, so the arrow buttons and the
+     * pause button keep their normal Space/Enter behaviour and page-level arrow
+     * scrolling is not hijacked from anywhere else.
+     */
+    function focusDot(index: number) {
+      const clamped = Math.min(Math.max(0, index), Math.max(0, total - getCols()));
+      manual(() => {
+        current = clamped;
+        update();
+      });
+      dots[clamped]?.focus();
+    }
+
+    controls?.addEventListener("keydown", (event) => {
+      const target = event.target as HTMLElement | null;
+      if (!target?.classList.contains("lt-dot")) return;
+
+      switch (event.key) {
+        case "ArrowLeft":
+        case "ArrowUp":
+          event.preventDefault();
+          focusDot(current - 1);
+          break;
+        case "ArrowRight":
+        case "ArrowDown":
+          event.preventDefault();
+          focusDot(current + 1);
+          break;
+        case "Home":
+          event.preventDefault();
+          focusDot(0);
+          break;
+        case "End":
+          event.preventDefault();
+          focusDot(total - 1);
+          break;
+        default:
+          break;
+      }
+    }, { signal });
 
     prev.addEventListener("click", () => manual(() => { current = Math.max(0, current - 1); update(); }), { signal });
     next.addEventListener("click", () => manual(() => {

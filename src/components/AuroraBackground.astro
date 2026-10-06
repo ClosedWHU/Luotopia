@@ -171,6 +171,28 @@
     z-index: -1;
     width: 100%;
     height: 100%;
+    /*
+     * The mount is deferred to idle, so the CSS mesh is what the page shows
+     * first and the canvas is inserted on top of it some time later. Fading it
+     * in keeps that handover from reading as a cut. Opacity only — it composites
+     * without repainting the field.
+     */
+    animation: lt-aurora-in 0.7s ease both;
+  }
+
+  @keyframes lt-aurora-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lt-aurora [data-lt-aurora-field] canvas {
+      animation: none;
+    }
   }
 </style>
 
@@ -212,6 +234,22 @@
   /** Hero-grade speed is 14; a field that sits under body copy must be calmer. */
   const SPEED = 7;
 
+  /*
+   * Draw rate, decoupled from the display rate.
+   *
+   * `render()` advances the animation by `dt * speed`, so it is time-based, not
+   * frame-based: drawing 20 times a second instead of 60 moves the field at
+   * exactly the same rate, it just samples it less often. For a gradient this
+   * slow the difference is not visible, while the cost is two thirds fewer
+   * WebGL draws and, more importantly, two thirds fewer backdrop-filter
+   * invalidations across every glass surface on the page.
+   *
+   * 20 is the floor where a drifting field still reads as continuous motion
+   * rather than as a slideshow.
+   */
+  const FPS = 20;
+  const FRAME_MS = 1000 / FPS;
+
   const host = document.querySelector("[data-lt-aurora-field]");
 
   if (host) {
@@ -223,7 +261,7 @@
     };
     const field = () => (isDark() ? FIELD.dark : FIELD.light).map(toRgba);
 
-    import("@paper-design/shaders")
+    const mountField = () => import("@paper-design/shaders")
       .then(async ({ ShaderMount, warpFragmentShader, getShaderNoiseTexture, defaultPatternSizing, ShaderFitOptions }) => {
         const sizing = defaultPatternSizing;
 
@@ -271,10 +309,26 @@
             // show through instead, which is the fallback we want anyway. The
             // shader writes alpha 1, so the running field still fully covers it.
             { antialias: false, depth: false, stencil: false, powerPreference: "low-power" },
-            // speed 0 stops the rAF loop outright — a static frame, matching
-            // the library's own "no recurring cost" path
-            reduceMotion ? 0 : SPEED,
-            reduceMotion ? 4200 : undefined,
+            /*
+             * Speed is ALWAYS 0 here, even when animating. The ticker below
+             * advances the frame instead — see FPS.
+             *
+             * The library pauses itself when `document.hidden || !isInViewport`,
+             * and this element is `position: fixed` over the whole viewport, so
+             * `isInViewport` is permanently true: left to itself the shader runs
+             * a rAF loop at display rate for as long as the tab is open. Every
+             * frame it repaints, it invalidates the backdrop of every `glass`
+             * surface on the page, and each of those has to re-run its
+             * `backdrop-filter` blur — including the fixed navbar's 24px one.
+             * That is what put the main thread at ~9s of uncategorized work and
+             * pushed TTI to roughly double LCP.
+             *
+             * At speed 0 `render()` draws exactly one frame and clears `rafId`
+             * instead of scheduling another, so the loop is off and `setFrame()`
+             * becomes a manual single-frame draw.
+             */
+            0,
+            reduceMotion ? 4200 : 0,
             // Soft gradients need no retina sampling; 1x capped at 1080p keeps
             // the per-frame cost near a quarter of the library default.
             1,
@@ -290,6 +344,54 @@
           return;
         }
 
+        /*
+         * The frame ticker. `setFrame()` performs one draw and, because the
+         * mount's speed is 0, does not schedule another — so this loop is the
+         * only thing driving the shader, and stopping it stops all recurring
+         * cost on the page.
+         *
+         * Frames are advanced by the *measured* elapsed time rather than by a
+         * fixed increment per draw, which is what keeps the field moving at
+         * exactly SPEED regardless of the cap or of dropped frames. `lastDraw`
+         * is reset whenever the loop restarts, so returning to a foreground tab
+         * resumes in place instead of jumping by however long it was hidden.
+         */
+        if (!reduceMotion) {
+          let frameValue = 0;
+          let lastDraw = 0;
+          let rafId = 0;
+
+          const tick = (now) => {
+            rafId = requestAnimationFrame(tick);
+            const elapsed = now - lastDraw;
+            if (elapsed < FRAME_MS) return;
+            lastDraw = now;
+            frameValue += elapsed * SPEED;
+            mount.setFrame(frameValue);
+          };
+
+          const stop = () => {
+            if (!rafId) return;
+            cancelAnimationFrame(rafId);
+            rafId = 0;
+          };
+
+          const start = () => {
+            if (rafId) return;
+            lastDraw = performance.now();
+            rafId = requestAnimationFrame(tick);
+          };
+
+          // The library's own visibility pause cannot help here: it works by
+          // forcing currentSpeed to 0, which is already 0 in this setup.
+          document.addEventListener("visibilitychange", () => {
+            if (document.hidden) stop();
+            else start();
+          });
+
+          start();
+        }
+
         // Re-tint on theme flip; `.dark` on <html> is the only input.
         let dark = isDark();
         new MutationObserver(() => {
@@ -302,5 +404,25 @@
       .catch(() => {
         /* chunk failed to load — the CSS mesh already covers us */
       });
+
+    /*
+     * Mount on idle, not on script evaluation.
+     *
+     * Fetching, parsing and compiling the shader chunk cost a ~274ms long task
+     * that landed inside the load critical path, competing with the fonts and
+     * the LCP paint for the same main thread. None of it is urgent: the CSS mesh
+     * underneath is already a visually equivalent field, so the page is complete
+     * before this runs and the shader simply refines what is on screen.
+     *
+     * `requestIdleCallback` is Chrome 47+ but only reached Safari in 16.4, so
+     * the timer fallback is not defensive padding — it is what iOS users get.
+     * The `timeout` caps how long a busy page can postpone the mount, so a site
+     * that never goes idle still gets its field.
+     */
+    if (typeof requestIdleCallback === "function") {
+      requestIdleCallback(mountField, { timeout: 2000 });
+    } else {
+      setTimeout(mountField, 400);
+    }
   }
 </script>

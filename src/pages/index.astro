@@ -23,7 +23,9 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
     <div class="relative max-w-content mx-auto flex flex-col items-center text-center">
 
       <div class="lt-hero-rise" style="--lt-reveal-delay: 60ms">
-        <AppIcon class="w-[120px] h-[120px]" size={120} plate />
+        {/* Decorative: the h1 below carries an sr-only "Luotopia", so the mark
+            itself must not announce a second copy of the name. */}
+        <AppIcon class="w-[120px] h-[120px]" size={120} plate alt="" />
       </div>
 
       <h1 class="lt-hero-fade lt-hero-title mt-6 text-display-small sm:text-display-medium lg:text-display-large text-on-surface tracking-tight" style="--lt-reveal-delay: 120ms">
@@ -175,20 +177,18 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
     animation: lt-hero-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms) both;
   }
 
-  /*
-   * Rotating hero word.
-   *
-   * The candidates are stacked in a single grid cell rather than absolutely
-   * positioned, so the rotator is always as wide as the widest one and the
-   * "· 珞家" tail never shifts mid-cycle. Every candidate being two characters
-   * is what makes that invisible; a longer word would re-centre the line.
-   *
-   * `overflow: hidden` supplies the slot-roll clip. The padding exists only to
-   * give the blur somewhere to happen — overflow clips at the *padding* box, so
-   * without it a blur(10px) glyph gets sliced flat at its own edge. The
-   * matching negative margin cancels the padding's layout footprint, so the
-   * flex gap still reads as designed.
-   */
+   /*
+    * Rotating hero word.
+    *
+    * The candidates are stacked in a single grid cell rather than absolutely
+    * positioned, so the rotator is always as wide as the widest one and the
+    * "· 珞家" tail never shifts mid-cycle. Every candidate being two characters
+    * is what makes that invisible; a longer word would re-centre the line.
+    *
+    * The padding plus its cancelling negative margin enlarge the clip reference
+    * box without enlarging the layout box, so the flex gap still reads as
+    * designed. See `.lt-rotator` for what the extra room is for.
+    */
   .lt-hero-title {
     display: flex;
     align-items: baseline;
@@ -215,12 +215,14 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
      * roughly a line-height and drove the word into the logo above it.
      * `clip-path` leaves the baseline alone.
      *
-     * The negative inset expands the clipping rectangle beyond the text box so
-     * the 8–10px blur can dissipate instead of accumulating against a hard
-     * square. It is still bounded: the slot travel is 0.72em, so the departing
-     * and entering words remain clipped before they collide with the logo or
-     * subtitle, and the smaller horizontal inset keeps them from smearing far
-     * into the separator and accent tail.
+     * The negative inset expands the clipping rectangle past the text box so a
+     * word at rest is never shaved by it — CJK ink reaches ~88% of the em box,
+     * well past the half-leading a Latin metric would leave. It stays bounded on
+     * purpose: the slot travel is 0.72em, so the departing and entering words
+     * are still clipped mid-roll, which is what makes the swap read as a slot
+     * rolling rather than a cross-fade, and they cannot travel far enough to
+     * collide with the logo above or the subtitle below. The smaller horizontal
+     * inset keeps them out of the separator and the accent tail.
      */
     clip-path: inset(-0.5em -0.2em);
     padding: 0.18em 0.24em;
@@ -232,17 +234,14 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
     justify-self: center;
     opacity: 0;
     transform: translateY(0.72em) scale(0.94);
-    filter: blur(10px);
     transition:
       opacity 0.5s ease,
-      transform 0.72s cubic-bezier(0.22, 1, 0.36, 1),
-      filter 0.5s ease;
+      transform 0.72s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .lt-rotator > .lt-word[data-active="true"] {
     opacity: 1;
     transform: none;
-    filter: blur(0);
   }
 
   /* Must come after the [data-active] rule: both selectors are (0,2,0), and a
@@ -250,8 +249,25 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
   .lt-rotator > .lt-word[data-leaving="true"] {
     opacity: 0;
     transform: translateY(-0.72em) scale(0.96);
-    filter: blur(8px);
   }
+
+  /*
+   * Only `opacity` and `transform` are animated above, and that is a constraint
+   * rather than a preference: they are the two properties the compositor can run
+   * on its own thread.
+   *
+   * These words used to also transition `filter: blur(10px)`. Chromium cannot
+   * composite a filter animation — every frame of it re-rasterizes the text and
+   * re-runs the blur passes on the main thread — and this rotator fires two
+   * overlapping blurs (the entering word and the leaving one) every 2.6 seconds
+   * for as long as the tab is open, at display-large size. Lighthouse listed
+   * both under non-composited animations.
+   *
+   * The roll and the fade carry the motion on their own; what is lost is a
+   * defocus cue on a half-second transition, which is not something the swap
+   * reads as missing. If the blur is wanted back, the price is a permanently
+   * non-composited heading, so it should be a deliberate choice.
+   */
 
   /* Keeps select-all / copy on the heading from yielding all five candidates
    * concatenated. */
@@ -325,7 +341,6 @@ const HERO_WORDS = ["智慧", "开放", "共享", "高效", "便捷"];
      * opacity 0, which is why no display juggling is needed here. */
     .lt-rotator > .lt-word {
       transition: none;
-      filter: none;
     }
   }
 </style>
