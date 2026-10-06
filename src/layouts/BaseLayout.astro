@@ -8,7 +8,6 @@
   import "@fontsource-variable/plus-jakarta-sans/wght.css";
   import "misans/lib/Normal/MiSans-Regular.min.css";
   import "misans/lib/Normal/MiSans-Medium.min.css";
-  import "misans/lib/Normal/MiSans-Bold.min.css";
   import "../styles/global.css";
   import Navbar from "../components/Navbar.astro";
   import Footer from "../components/Footer.astro";
@@ -153,8 +152,24 @@
   </head>
   <body class="min-h-screen flex flex-col relative">
     <AuroraBackground />
+    <!--
+      First focusable element in the document, so one Tab press reaches it.
+      Without this a keyboard user repeats the whole navbar — brand, every nav
+      link, the theme toggle, the download CTA — on every single page.
+
+      Not rendered on `bare` pages: those drop the navbar, so the page *is* the
+      single CTA and there is no chrome to skip past.
+    -->
+    {!bare && <a href="#lt-main" class="lt-skip text-label-large">跳到主要内容</a>}
     {!bare && <Navbar />}
-    <main class="flex-1 relative z-10">
+    <!--
+      `tabindex="-1"` is what makes the skip link actually move focus rather
+      than just scroll: an element that is not focusable cannot receive it, and
+      several browsers then leave focus on the link. The matching
+      `#lt-main:focus` rule in global.css suppresses the outline, so the
+      programmatic focus does not draw a ring around the entire page.
+    -->
+    <main id="lt-main" class="flex-1 relative z-10" tabindex="-1">
       <slot />
     </main>
     {!bare && <Footer />}

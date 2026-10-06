@@ -9,14 +9,22 @@ const year = new Date().getFullYear();
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       <div class="lt-reveal">
         <div class="flex items-center gap-2 text-title-large text-on-surface mb-3">
-          <AppIcon class="w-[22px] h-[22px]" size={22} lift />
+          <AppIcon class="w-[22px] h-[22px]" size={22} lift alt="" />
           Luotopia
         </div>
         <p class="text-body-medium text-on-surface-variant">整合校园服务，构建开放生态。</p>
       </div>
 
       <div class="lt-reveal" style="--lt-reveal-delay: 80ms">
-        <h4 class="text-title-small text-on-surface mb-3">导航</h4>
+        <!--
+          h2, not h4. The footer follows whatever the page ended on — h2 on the
+          homepage, deeper on the docs pages — and a heading may only step *down*
+          one level at a time. h2 is the one level that is never a skip
+          regardless of the preceding page, and it is also the honest outline
+          position: these are site-wide navigation groups, peers of the main
+          content sections rather than children of them.
+        -->
+        <h2 class="text-title-small text-on-surface mb-3">导航</h2>
         <ul class="space-y-2 text-body-medium">
           <li><a href="/features" class="text-on-surface-variant hover:text-primary no-underline transition-colors">功能概览</a></li>
           <li><a href="/download" class="text-on-surface-variant hover:text-primary no-underline transition-colors">下载</a></li>
@@ -27,7 +35,7 @@ const year = new Date().getFullYear();
       </div>
 
       <div class="lt-reveal" style="--lt-reveal-delay: 160ms">
-        <h4 class="text-title-small text-on-surface mb-3">相关资源</h4>
+        <h2 class="text-title-small text-on-surface mb-3">相关资源</h2>
         <ul class="space-y-2 text-body-medium">
           <li><a href="/status" class="text-on-surface-variant hover:text-primary no-underline transition-colors">服务状态</a></li>
           <li><a href="https://docs.whu.sb" class="text-on-surface-variant hover:text-primary no-underline transition-colors" target="_blank" rel="noopener noreferrer">开发者文档</a></li>

@@ -966,6 +966,51 @@ body {
   outline-offset: 2px;
 }
 
+/*
+ * Skip link. Off-screen but still focusable — `display: none` until focus would
+ * take it out of the tab order entirely, defeating the point, and `visibility:
+ * hidden` does the same. It is translated up out of the viewport instead, so
+ * the first Tab press brings it down over the navbar.
+ *
+ * Above the navbar (z-50) but below dialogs (z-70/z-100): it must not be
+ * buried under the fixed glass bar it exists to bypass, and must not out-rank a
+ * modal that has deliberately trapped focus.
+ */
+.lt-skip {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 60;
+  padding: 0.75rem 1.25rem;
+  color: var(--lt-color-on-primary);
+  background-color: var(--lt-color-primary);
+  border-radius: 0 0 var(--lt-radius-control) var(--lt-radius-control);
+  text-decoration: none;
+  white-space: nowrap;
+  transform: translate(-50%, -120%);
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lt-skip:focus-visible {
+  /* Override the shared ring: on a solid primary fill the primary-coloured
+   * outline is invisible, so invert it against the fill instead. */
+  outline-color: var(--lt-color-on-primary);
+  transform: translate(-50%, 0);
+}
+
+/* The skip target is focused programmatically, not by the user; a ring around
+ * the entire page would be noise, and `:focus-visible` matches it anyway
+ * because the focus did originate from a key press. */
+#lt-main:focus {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lt-skip {
+    transition: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .state-layer::before {
     transition: none;
