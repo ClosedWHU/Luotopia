@@ -1,0 +1,163 @@
+{
+  "id": "sds",
+  "name": "抑郁自评量表",
+  "nameEn": "Zung Self-Rating Depression Scale",
+  "abbreviation": "SDS",
+  "category": "抑郁",
+  "year": 2024,
+  "instructions": "请根据您最近一周的实际情况，选择最符合的一项。",
+  "instructionsEn": "Based on your actual situation over the past week, choose the option that fits you best.",
+  "license": "Zung 编制，可免费使用，使用时请注明出处。",
+  "options": [
+    {
+      "value": 1,
+      "label": "偶或无",
+      "labelEn": "None or a little of the time"
+    },
+    {
+      "value": 2,
+      "label": "有时",
+      "labelEn": "Some of the time"
+    },
+    {
+      "value": 3,
+      "label": "经常",
+      "labelEn": "Good part of the time"
+    },
+    {
+      "value": 4,
+      "label": "持续",
+      "labelEn": "Most of the time"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "我感到情绪沮丧、郁闷",
+      "textEn": "I feel down-hearted and blue."
+    },
+    {
+      "index": 2,
+      "text": "我感到早晨心情最好",
+      "textEn": "I feel best in the morning.",
+      "reverse": true
+    },
+    {
+      "index": 3,
+      "text": "我要哭或想哭",
+      "textEn": "I have crying spells or feel like crying."
+    },
+    {
+      "index": 4,
+      "text": "我夜间睡眠不好",
+      "textEn": "I have trouble sleeping at night."
+    },
+    {
+      "index": 5,
+      "text": "我吃饭像平时一样多",
+      "textEn": "I eat as much as I used to.",
+      "reverse": true
+    },
+    {
+      "index": 6,
+      "text": "我的性功能正常",
+      "textEn": "My sexual function is normal.",
+      "reverse": true
+    },
+    {
+      "index": 7,
+      "text": "我感到体重减轻",
+      "textEn": "I feel that I am losing weight."
+    },
+    {
+      "index": 8,
+      "text": "我为便秘烦恼",
+      "textEn": "I am bothered by constipation."
+    },
+    {
+      "index": 9,
+      "text": "我的心跳比平时快",
+      "textEn": "My heart beats faster than usual."
+    },
+    {
+      "index": 10,
+      "text": "我无故感到疲劳",
+      "textEn": "I get tired for no reason."
+    },
+    {
+      "index": 11,
+      "text": "我的头脑像往常一样清楚",
+      "textEn": "My mind is as clear as it used to be.",
+      "reverse": true
+    },
+    {
+      "index": 12,
+      "text": "我做事情像平时一样不感到困难",
+      "textEn": "I find it as easy to do things as I always did.",
+      "reverse": true
+    },
+    {
+      "index": 13,
+      "text": "我坐卧不安，难以保持平静",
+      "textEn": "I feel restless and cannot keep still."
+    },
+    {
+      "index": 14,
+      "text": "我对未来感到有希望",
+      "textEn": "I feel hopeful about the future.",
+      "reverse": true
+    },
+    {
+      "index": 15,
+      "text": "我比平时更容易激怒",
+      "textEn": "I am more irritable than usual."
+    },
+    {
+      "index": 16,
+      "text": "我觉得决定什么事很容易",
+      "textEn": "I find it easy to make decisions.",
+      "reverse": true
+    },
+    {
+      "index": 17,
+      "text": "我感到自己是有用的和不可缺少的人",
+      "textEn": "I feel that I am useful and indispensable.",
+      "reverse": true
+    },
+    {
+      "index": 18,
+      "text": "我的生活很有意义",
+      "textEn": "I feel that my life is meaningful.",
+      "reverse": true
+    },
+    {
+      "index": 19,
+      "text": "假若我死了别人会过得更好",
+      "textEn": "I would be better off if I were dead."
+    },
+    {
+      "index": 20,
+      "text": "我仍旧喜爱自己平时喜爱的东西",
+      "textEn": "I still enjoy the things I used to enjoy.",
+      "reverse": true
+    }
+  ],
+  "scoring": {
+    "kind": "sumTimesK",
+    "decimals": 0,
+    "multiplier": 1.25,
+    "hasTotal": true,
+    "totalLabel": "标准分",
+    "totalBands": [
+      { "min": 0, "max": 50, "level": "无抑郁", "description": "标准分低于50分，未提示明显抑郁症状。" },
+      { "min": 50, "max": 60, "level": "轻度抑郁", "description": "标准分50-59分，提示轻度抑郁。" },
+      { "min": 60, "max": 70, "level": "中度抑郁", "description": "标准分60-69分，提示中度抑郁。" },
+      { "min": 70, "max": 101, "level": "重度抑郁", "description": "标准分70分及以上，提示重度抑郁。" }
+    ]
+  },
+  "crisis": {
+    "itemIndexes": [19],
+    "threshold": 2,
+    "message": "您在第19题（假若我死了别人会过得更好）上回答为“经常”或“持续”。如果您正处于危机之中或感到不安全，请立即联系当地急救电话或心理援助热线，或告诉身边可信任的人。"
+  }
+}

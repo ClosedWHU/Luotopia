@@ -1,0 +1,151 @@
+{
+  "id": "pcl5",
+  "name": "创伤后应激障碍检查表",
+  "nameEn": "PTSD Checklist for DSM-5",
+  "abbreviation": "PCL-5",
+  "category": "创伤应激",
+  "year": 2026,
+  "instructions": "请回想最让你感到痛苦的一次创伤性经历。在过去一个月里，你多大程度上被以下问题所困扰？请选择最符合的一项。",
+  "instructionsEn": "Please think back to the traumatic experience that was the most upsetting to you. Over the past month, how much were you bothered by each of the following problems? Choose the option that fits you best.",
+  "license": "美国退伍军人事务部（US VA）编制，公领域，可自由使用，使用时请注明出处。",
+  "note": "PCL-5 依据 DSM-5 的创伤后应激障碍（PTSD）标准编制：条目 1-5 为闯入性症状，6-7 为回避，8-14 为认知与情绪的负性改变，15-20 为警觉性与反应性改变。",
+  "options": [
+    {
+      "value": 0,
+      "label": "一点也不",
+      "labelEn": "Not at all"
+    },
+    {
+      "value": 1,
+      "label": "有一点",
+      "labelEn": "A little bit"
+    },
+    {
+      "value": 2,
+      "label": "中等程度",
+      "labelEn": "Moderately"
+    },
+    {
+      "value": 3,
+      "label": "相当程度",
+      "labelEn": "Quite a bit"
+    },
+    {
+      "value": 4,
+      "label": "极度",
+      "labelEn": "Extremely"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "反复出现关于创伤经历的令人不安的、不想要的记忆。",
+      "textEn": "Repeated, unwanted, distressing memories of the stressful experience."
+    },
+    {
+      "index": 2,
+      "text": "反复做关于创伤经历的不安的梦。",
+      "textEn": "Repeated, distressing dreams about the stressful experience."
+    },
+    {
+      "index": 3,
+      "text": "突然感觉或表现得好像创伤经历真的再次发生（好像真的回到了过去重新经历）。",
+      "textEn": "Suddenly feeling or acting as if the stressful experience were really happening again (as if you were actually back there reliving it)."
+    },
+    {
+      "index": 4,
+      "text": "当某件事让你想起创伤经历时，感到非常不安。",
+      "textEn": "Feeling very upset when something reminded you of the stressful experience."
+    },
+    {
+      "index": 5,
+      "text": "当某件事让你想起创伤经历时，出现强烈的生理反应（如心跳加快、呼吸困难、出汗）。",
+      "textEn": "Having strong physical reactions when something reminded you of the stressful experience (for example, a racing heart, difficulty breathing, or sweating)."
+    },
+    {
+      "index": 6,
+      "text": "回避与创伤经历有关的记忆、想法或感受。",
+      "textEn": "Avoiding memories, thoughts, or feelings related to the stressful experience."
+    },
+    {
+      "index": 7,
+      "text": "回避让你想起创伤经历的外部提醒（如人物、地点、谈话、活动、物品或情境）。",
+      "textEn": "Avoiding external reminders of the stressful experience (for example, people, places, conversations, activities, objects, or situations)."
+    },
+    {
+      "index": 8,
+      "text": "难以回忆创伤经历的重要部分。",
+      "textEn": "Trouble remembering important parts of the stressful experience."
+    },
+    {
+      "index": 9,
+      "text": "对自己、他人或世界有强烈的负面信念（例如：我很坏，我出了严重问题，谁都不能信任，世界完全危险）。",
+      "textEn": "Strong negative beliefs about yourself, other people, or the world (for example, I am bad, something is seriously wrong with me, no one can be trusted, the world is completely dangerous)."
+    },
+    {
+      "index": 10,
+      "text": "因创伤经历或其后发生的事情而责备自己或他人。",
+      "textEn": "Blaming yourself or someone else for the stressful experience or for what happened after it."
+    },
+    {
+      "index": 11,
+      "text": "有强烈的负面情绪，如恐惧、惊恐、愤怒、内疚或羞愧。",
+      "textEn": "Having strong negative emotions such as fear, horror, anger, guilt, or shame."
+    },
+    {
+      "index": 12,
+      "text": "对以前喜欢的活动失去兴趣。",
+      "textEn": "Loss of interest in activities you used to enjoy."
+    },
+    {
+      "index": 13,
+      "text": "感到与他人疏远或隔离。",
+      "textEn": "Feeling distant or cut off from other people."
+    },
+    {
+      "index": 14,
+      "text": "难以体验到正面情绪（如无法感到快乐，或对亲近的人没有爱意）。",
+      "textEn": "Trouble experiencing positive emotions (for example, being unable to feel happy, or feeling no love for people close to you)."
+    },
+    {
+      "index": 15,
+      "text": "易怒、发脾气或攻击行为。",
+      "textEn": "Irritability, angry outbursts, or aggressive behavior."
+    },
+    {
+      "index": 16,
+      "text": "冒太多风险，或做一些可能伤害自己的事。",
+      "textEn": "Taking too many risks, or doing things that could harm yourself."
+    },
+    {
+      "index": 17,
+      "text": "过度警觉、戒备或警惕。",
+      "textEn": "Being overly alert, watchful, or on guard."
+    },
+    {
+      "index": 18,
+      "text": "容易受惊或被吓到。",
+      "textEn": "Being easily startled or frightened."
+    },
+    {
+      "index": 19,
+      "text": "难以集中注意力。",
+      "textEn": "Difficulty concentrating."
+    },
+    {
+      "index": 20,
+      "text": "难以入睡或保持睡眠。",
+      "textEn": "Trouble falling asleep or staying asleep."
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 0, "max": 33, "level": "无明显应激症状", "description": "总分低于33，未提示明显的创伤后应激症状。" },
+      { "min": 33, "level": "提示可能PTSD", "description": "总分达到33及以上，提示可能存在创伤后应激障碍，建议尽快寻求专业评估。" }
+    ]
+  }
+}

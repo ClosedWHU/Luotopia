@@ -29,6 +29,7 @@ outweighs the benefit (see [404 handling](#404-handling)).
 |------|---------|-----------|
 | `check:aasa` | Validates `public/.well-known/apple-app-site-association` | Build aborts |
 | `hot-update:generate` | Generates and signs `public/hot-update/manifest.json` | Build aborts without a signing key |
+| `scales:generate` | Generates `public/scales/manifest.json` (unsigned) | Build aborts on invalid scale data |
 
 So `HOT_UPDATE_ED25519_PRIVATE_KEY` is a **required** secret rather than an
 optional one — but only for production builds, see below.

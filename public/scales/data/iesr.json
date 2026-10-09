@@ -1,0 +1,162 @@
+{
+  "id": "iesr",
+  "name": "事件影响量表修订版",
+  "nameEn": "Impact of Event Scale-Revised",
+  "abbreviation": "IES-R",
+  "category": "创伤应激",
+  "year": 2024,
+  "instructions": "以下问题涉及您对某个压力事件的反应。请根据过去一周的实际情况作答。",
+  "instructionsEn": "The following questions concern your reaction to a particular stressful event. Please answer according to your actual experience over the past week.",
+  "license": "Weiss 等编制，可免费用于非商业用途，使用时请注明出处。",
+  "options": [
+    {
+      "value": 0,
+      "label": "完全没有",
+      "labelEn": "Not at all"
+    },
+    {
+      "value": 1,
+      "label": "轻微",
+      "labelEn": "A little"
+    },
+    {
+      "value": 2,
+      "label": "中度",
+      "labelEn": "Moderately"
+    },
+    {
+      "value": 3,
+      "label": "重度",
+      "labelEn": "Quite a bit"
+    },
+    {
+      "value": 4,
+      "label": "极重度",
+      "labelEn": "Extremely"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "任何与事件相关的回忆都会让我感到痛苦。",
+      "textEn": "Any memory related to the event made me feel distressed."
+    },
+    {
+      "index": 2,
+      "text": "我难以入睡或保持睡眠。",
+      "textEn": "I had trouble falling asleep or staying asleep."
+    },
+    {
+      "index": 3,
+      "text": "其他事情会让我想起那个事件。",
+      "textEn": "Other things reminded me of the event."
+    },
+    {
+      "index": 4,
+      "text": "我感到烦躁和愤怒。",
+      "textEn": "I felt irritable and angry."
+    },
+    {
+      "index": 5,
+      "text": "当我想起那个事件时，我会不自主地颤抖或出汗。",
+      "textEn": "When I thought about the event, I would tremble or sweat involuntarily."
+    },
+    {
+      "index": 6,
+      "text": "我尽量不去想那个事件。",
+      "textEn": "I tried not to think about the event."
+    },
+    {
+      "index": 7,
+      "text": "尽管已经过去，但事件的影响仍然存在。",
+      "textEn": "Even though the event was already over, its impact was still there."
+    },
+    {
+      "index": 8,
+      "text": "我对事件相关的图片和声音很敏感。",
+      "textEn": "I was very sensitive to images and sounds related to the event."
+    },
+    {
+      "index": 9,
+      "text": "我尽量保持忙碌，以免想起那个事件。",
+      "textEn": "I tried to stay busy so I would not think about the event."
+    },
+    {
+      "index": 10,
+      "text": "事件相关的想法和感受会闯入我的脑海。",
+      "textEn": "Thoughts and feelings about the event intruded into my mind."
+    },
+    {
+      "index": 11,
+      "text": "我感到情感麻木。",
+      "textEn": "I felt emotionally numb."
+    },
+    {
+      "index": 12,
+      "text": "我觉得自己像是在重新经历那个事件。",
+      "textEn": "I felt as though I were reliving the event."
+    },
+    {
+      "index": 13,
+      "text": "我难以集中注意力。",
+      "textEn": "I had trouble concentrating."
+    },
+    {
+      "index": 14,
+      "text": "与事件相关的身体反应让我很困扰。",
+      "textEn": "I was bothered by physical reactions related to the event."
+    },
+    {
+      "index": 15,
+      "text": "我会做噩梦，内容与事件相关。",
+      "textEn": "I had dreams about the event."
+    },
+    {
+      "index": 16,
+      "text": "我对事件相关的活动或场景感到回避。",
+      "textEn": "I avoided activities or situations related to the event."
+    },
+    {
+      "index": 17,
+      "text": "我感到容易受惊。",
+      "textEn": "I felt easily startled."
+    },
+    {
+      "index": 18,
+      "text": "我尽量不谈论那个事件。",
+      "textEn": "I tried not to talk about the event."
+    },
+    {
+      "index": 19,
+      "text": "事件相关的想法和感受让我无法放松。",
+      "textEn": "Thoughts and feelings about the event kept me from relaxing."
+    },
+    {
+      "index": 20,
+      "text": "我对他人失去兴趣。",
+      "textEn": "I lost interest in other people."
+    },
+    {
+      "index": 21,
+      "text": "我感到疏离或与他人隔绝。",
+      "textEn": "I felt detached or cut off from other people."
+    },
+    {
+      "index": 22,
+      "text": "我难以体验积极情绪。",
+      "textEn": "I had trouble experiencing positive feelings."
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 0, "max": 24, "level": "亚临床", "description": "总分低于24，未达到临床创伤应激标准。" },
+      { "min": 24, "max": 33, "level": "轻度", "description": "总分24-33，存在轻度创伤应激反应，建议关注。" },
+      { "min": 33, "max": 44, "level": "中度", "description": "总分33-44，存在中度创伤应激反应，建议寻求专业评估。" },
+      { "min": 44, "max": 89, "level": "重度", "description": "总分44及以上，存在重度创伤应激反应，建议尽快寻求专业帮助。" }
+    ]
+  }
+}

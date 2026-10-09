@@ -1,0 +1,98 @@
+{
+  "id": "phq9",
+  "name": "患者健康问卷抑郁量表",
+  "nameEn": "Patient Health Questionnaire-9",
+  "abbreviation": "PHQ-9",
+  "category": "抑郁",
+  "year": 2024,
+  "instructions": "在过去的两周里，你有多频繁地被以下问题所困扰？请根据实际情况选择最符合的一项。",
+  "instructionsEn": "Over the last two weeks, how often have you been bothered by the following problems? Please choose the option that best matches your actual situation.",
+  "license": "Kroenke 等开发，可免费使用，使用时请注明出处。",
+  "options": [
+    {
+      "value": 0,
+      "label": "完全没有",
+      "labelEn": "Not at all"
+    },
+    {
+      "value": 1,
+      "label": "有几天",
+      "labelEn": "Several days"
+    },
+    {
+      "value": 2,
+      "label": "一半以上的天数",
+      "labelEn": "More than half the days"
+    },
+    {
+      "value": 3,
+      "label": "几乎每天",
+      "labelEn": "Nearly every day"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "做事时提不起劲或没有兴趣",
+      "textEn": "Little interest or pleasure in doing things"
+    },
+    {
+      "index": 2,
+      "text": "感到心情低落、沮丧或绝望",
+      "textEn": "Feeling down, depressed, or hopeless"
+    },
+    {
+      "index": 3,
+      "text": "入睡困难、睡不安稳或睡得过多",
+      "textEn": "Trouble falling or staying asleep, or sleeping too much"
+    },
+    {
+      "index": 4,
+      "text": "感觉疲倦或没有活力",
+      "textEn": "Feeling tired or having little energy"
+    },
+    {
+      "index": 5,
+      "text": "食欲不振或吃太多",
+      "textEn": "Poor appetite or overeating"
+    },
+    {
+      "index": 6,
+      "text": "觉得自己很糟——或觉得自己很失败，或让自己或家人失望",
+      "textEn": "Feeling bad about yourself — or that you are a failure or have let yourself or your family down"
+    },
+    {
+      "index": 7,
+      "text": "对事物专注有困难，例如阅读报纸或看电视时",
+      "textEn": "Trouble concentrating on things, such as reading the newspaper or watching television"
+    },
+    {
+      "index": 8,
+      "text": "动作或说话速度缓慢到别人已经察觉？或正好相反——烦躁或坐立不安、动来动去的情况更胜于平常",
+      "textEn": "Moving or speaking so slowly that other people could have noticed? Or the opposite — being so fidgety or restless that you have been moving around a lot more than usual"
+    },
+    {
+      "index": 9,
+      "text": "有不如死掉或用某种方式伤害自己的念头",
+      "textEn": "Thoughts that you would be better off dead or of hurting yourself in some way"
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 0, "max": 5, "level": "无抑郁", "description": "目前没有明显的抑郁症状。" },
+      { "min": 5, "max": 10, "level": "轻度抑郁", "description": "存在轻度抑郁症状，建议关注并适时自我调节。" },
+      { "min": 10, "max": 15, "level": "中度抑郁", "description": "存在中度抑郁症状，建议寻求专业心理评估。" },
+      { "min": 15, "max": 20, "level": "中重度抑郁", "description": "存在较明显的抑郁症状，建议尽快寻求专业帮助。" },
+      { "min": 20, "max": 28, "level": "重度抑郁", "description": "存在重度抑郁症状，请尽快寻求专业医疗帮助。" }
+    ]
+  },
+  "crisis": {
+    "itemIndexes": [9],
+    "threshold": 1,
+    "message": "您在第9题（伤害自己的念头）上有阳性回答。如果您正处于危机之中或感到不安全，请立即联系当地急救电话或心理援助热线，或告诉身边可信任的人。"
+  }
+}

@@ -1,0 +1,232 @@
+{
+  "id": "ders",
+  "name": "情绪调节困难量表",
+  "nameEn": "Difficulties in Emotion Regulation Scale",
+  "abbreviation": "DERS",
+  "category": "情绪",
+  "year": 2024,
+  "instructions": "以下问题涉及您在情绪方面的困难。请根据您的实际情况作答。",
+  "instructionsEn": "The following questions concern difficulties you may have with your emotions. Please answer according to your actual situation.",
+  "license": "Gratz 等编制，可免费用于非商业用途，使用时请注明出处。",
+  "options": [
+    {
+      "value": 1,
+      "label": "几乎从不",
+      "labelEn": "Almost never"
+    },
+    {
+      "value": 2,
+      "label": "有时",
+      "labelEn": "Sometimes"
+    },
+    {
+      "value": 3,
+      "label": "大约一半时间",
+      "labelEn": "About half the time"
+    },
+    {
+      "value": 4,
+      "label": "大部分时间",
+      "labelEn": "Most of the time"
+    },
+    {
+      "value": 5,
+      "label": "几乎总是",
+      "labelEn": "Almost always"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "我很清楚自己的感受。",
+      "textEn": "I am clear about my feelings."
+    },
+    {
+      "index": 2,
+      "text": "我会关注自己的情绪变化。",
+      "textEn": "I pay attention to changes in my emotions."
+    },
+    {
+      "index": 3,
+      "text": "我常常觉得自己的情绪难以承受，而且完全失控。",
+      "textEn": "I often feel that my emotions are overwhelming and completely out of control."
+    },
+    {
+      "index": 4,
+      "text": "我不知道自己此刻到底是什么感受。",
+      "textEn": "I don't know exactly what I'm feeling right now."
+    },
+    {
+      "index": 5,
+      "text": "我很难弄明白自己的感受。",
+      "textEn": "I have difficulty making sense of my feelings."
+    },
+    {
+      "index": 6,
+      "text": "我会细心留意自己的感受。",
+      "textEn": "I pay close attention to my feelings."
+    },
+    {
+      "index": 7,
+      "text": "我确切地知道自己此刻的感受。",
+      "textEn": "I know exactly what I'm feeling right now."
+    },
+    {
+      "index": 8,
+      "text": "我很在意自己的感受。",
+      "textEn": "I am very aware of my feelings."
+    },
+    {
+      "index": 9,
+      "text": "我对自己的感受感到困惑。",
+      "textEn": "I am confused about how I feel."
+    },
+    {
+      "index": 10,
+      "text": "当我心烦时，我会承认并接受自己的情绪。",
+      "textEn": "I am able to acknowledge my feelings when I am upset."
+    },
+    {
+      "index": 11,
+      "text": "当我心烦时，我会因为自己有这种情绪而生自己的气。",
+      "textEn": "When I'm upset, I get angry at myself for having this emotion."
+    },
+    {
+      "index": 12,
+      "text": "当我情绪低落时，我会因为自己有这种情绪而觉得尴尬。",
+      "textEn": "When I'm upset, I become embarrassed for feeling that way."
+    },
+    {
+      "index": 13,
+      "text": "当我心情糟糕时，我很难把手头的事情做完。",
+      "textEn": "When I'm upset, I have difficulty getting work done."
+    },
+    {
+      "index": 14,
+      "text": "当我心烦时，我会变得无法控制自己。",
+      "textEn": "When I'm upset, I become out of control."
+    },
+    {
+      "index": 15,
+      "text": "当我心烦时，我相信自己会这样低落很久。",
+      "textEn": "When I'm upset, I believe I will feel down for a long time."
+    },
+    {
+      "index": 16,
+      "text": "当我心烦时，我觉得自己最后会变得非常消沉。",
+      "textEn": "When I'm upset, I feel that I will eventually become very depressed."
+    },
+    {
+      "index": 17,
+      "text": "当我难过时，我相信自己的感受是有意义且重要的。",
+      "textEn": "When I'm feeling sad, I believe my feelings are meaningful and important."
+    },
+    {
+      "index": 18,
+      "text": "当我情绪不好时，我很难把注意力集中到别的事情上。",
+      "textEn": "When I'm upset, I have difficulty focusing on other tasks."
+    },
+    {
+      "index": 19,
+      "text": "当我心烦时，我感觉自己处于失控状态。",
+      "textEn": "When I'm upset, I feel out of control."
+    },
+    {
+      "index": 20,
+      "text": "当我难过时，我依然能把该做的事情做完。",
+      "textEn": "When I'm feeling sad, I can still finish what I need to do."
+    },
+    {
+      "index": 21,
+      "text": "当我心烦时，我会为自己竟然有这种感受而感到羞愧。",
+      "textEn": "I am ashamed of how I feel when I am upset."
+    },
+    {
+      "index": 22,
+      "text": "当我心烦时，我知道自己总能找到办法好起来。",
+      "textEn": "When I'm upset, I believe I can find a way to eventually feel better."
+    },
+    {
+      "index": 23,
+      "text": "当我难过时，我觉得这样的自己很软弱。",
+      "textEn": "When I'm upset, I feel weak."
+    },
+    {
+      "index": 24,
+      "text": "当我情绪激动时，我觉得自己仍然能控制住自己的行为。",
+      "textEn": "When I'm emotionally aroused, I feel that I can still control my behavior."
+    },
+    {
+      "index": 25,
+      "text": "当我心烦时，我会为自己有这种感受而感到内疚。",
+      "textEn": "When I'm upset, I feel guilty for feeling that way."
+    },
+    {
+      "index": 26,
+      "text": "当我心情低落时，我很难专心致志。",
+      "textEn": "When I'm upset, I have difficulty keeping concentrated."
+    },
+    {
+      "index": 27,
+      "text": "当我情绪激动时，我很难控制自己的行为。",
+      "textEn": "When I'm upset, I have difficulty controlling my behaviors."
+    },
+    {
+      "index": 28,
+      "text": "当我心烦时，我觉得自己毫无办法让自己好起来。",
+      "textEn": "When I'm upset, I believe that there is nothing I can do to make myself feel better."
+    },
+    {
+      "index": 29,
+      "text": "当我情绪不佳时，我会对自己产生的情绪感到恼火。",
+      "textEn": "When I'm upset, I become irritable."
+    },
+    {
+      "index": 30,
+      "text": "当我心烦时，我会开始觉得自己很糟糕。",
+      "textEn": "When I'm upset, I start to feel bad about myself."
+    },
+    {
+      "index": 31,
+      "text": "当我心烦时，我觉得除了沉溺其中我什么也做不了。",
+      "textEn": "When I'm upset, I believe that wallowing in it is all I can do."
+    },
+    {
+      "index": 32,
+      "text": "当我心烦意乱时，我无法管住自己的行为。",
+      "textEn": "When I'm upset, I can't control my behavior."
+    },
+    {
+      "index": 33,
+      "text": "当我心烦时，我很难考虑其他事情。",
+      "textEn": "When I'm upset, I have difficulty thinking about other things."
+    },
+    {
+      "index": 34,
+      "text": "当我心情不好时，我会花时间弄清楚自己真正的感受。",
+      "textEn": "When I'm in a bad mood, I take time to work out what I'm really feeling."
+    },
+    {
+      "index": 35,
+      "text": "当我心烦时，往往要过很久我才能感觉好起来。",
+      "textEn": "When I'm upset, it takes me a long time to calm down."
+    },
+    {
+      "index": 36,
+      "text": "当我心烦时，我的情绪会把我压垮。",
+      "textEn": "When I'm upset, I feel overwhelmed by my feelings."
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 36, "max": 75, "level": "情绪调节良好", "description": "总分低于75，情绪调节能力良好。" },
+      { "min": 75, "max": 100, "level": "轻度困难", "description": "总分75-100，存在轻度情绪调节困难。" },
+      { "min": 100, "max": 125, "level": "中度困难", "description": "总分100-125，存在中度情绪调节困难，建议关注。" },
+      { "min": 125, "max": 181, "level": "重度困难", "description": "总分125及以上，存在重度情绪调节困难，建议寻求专业帮助。" }
+    ]
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "id": "core10",
+  "name": "临床结果常规评估量表",
+  "nameEn": "Clinical Outcomes in Routine Evaluation-10",
+  "abbreviation": "CORE-10",
+  "category": "综合症状",
+  "year": 2024,
+  "instructions": "以下问题涉及您过去一周的感受。请根据实际情况作答。",
+  "instructionsEn": "The following questions concern how you have been feeling over the past week. Please answer according to your actual experience.",
+  "license": "Barkham 等编制，可免费用于非商业用途，使用时请注明出处。",
+  "options": [
+    {
+      "value": 0,
+      "label": "从未",
+      "labelEn": "Never"
+    },
+    {
+      "value": 1,
+      "label": "很少",
+      "labelEn": "Rarely"
+    },
+    {
+      "value": 2,
+      "label": "有时",
+      "labelEn": "Sometimes"
+    },
+    {
+      "value": 3,
+      "label": "经常",
+      "labelEn": "Often"
+    },
+    {
+      "value": 4,
+      "label": "大部分时间或始终",
+      "labelEn": "Most of the time or all of the time"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "我感到紧张或焦虑。",
+      "textEn": "I have felt tense or anxious."
+    },
+    {
+      "index": 2,
+      "text": "我感到孤独。",
+      "textEn": "I have felt lonely."
+    },
+    {
+      "index": 3,
+      "text": "我感到情绪低落。",
+      "textEn": "I have felt depressed."
+    },
+    {
+      "index": 4,
+      "text": "我没有任何积极的想法。",
+      "textEn": "I have not had any positive thoughts."
+    },
+    {
+      "index": 5,
+      "text": "我感到恐慌或恐惧。",
+      "textEn": "I have felt panic or terror."
+    },
+    {
+      "index": 6,
+      "text": "我很难入睡或保持睡眠。",
+      "textEn": "I have had difficulty falling asleep or staying asleep."
+    },
+    {
+      "index": 7,
+      "text": "我感到绝望。",
+      "textEn": "I have felt hopeless."
+    },
+    {
+      "index": 8,
+      "text": "我感到失望。",
+      "textEn": "I have felt disappointed."
+    },
+    {
+      "index": 9,
+      "text": "我感到烦躁或愤怒。",
+      "textEn": "I have felt irritable or angry."
+    },
+    {
+      "index": 10,
+      "text": "我很难集中注意力。",
+      "textEn": "I have had difficulty concentrating."
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 0, "max": 11, "level": "亚临床", "description": "总分低于11，未达到临床心理困扰标准。" },
+      { "min": 11, "max": 16, "level": "轻度困扰", "description": "总分11-16，存在轻度心理困扰，建议关注。" },
+      { "min": 16, "max": 21, "level": "中度困扰", "description": "总分16-21，存在中度心理困扰，建议寻求专业评估。" },
+      { "min": 21, "max": 26, "level": "中重度困扰", "description": "总分21-26，存在中重度心理困扰，建议尽快寻求专业帮助。" },
+      { "min": 26, "max": 41, "level": "重度困扰", "description": "总分26及以上，存在重度心理困扰，请尽快寻求专业医疗帮助。" }
+    ]
+  }
+}

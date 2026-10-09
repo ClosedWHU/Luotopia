@@ -1,0 +1,357 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "updatedAt": "2026-10-09T12:45:10.714Z",
+  "scales": [
+    {
+      "id": "asrs",
+      "label": "成人ADHD自评量表",
+      "abbreviation": "ASRS v1.1",
+      "version": 1,
+      "url": "/scales/data/asrs.json",
+      "checksum": "sha256:9159a26b8a32b460e6e884c57eca05975ecbde82e64d9d3daddc6b3944142a7e",
+      "bytes": 3314,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "audit",
+      "label": "酒精使用障碍筛查量表",
+      "abbreviation": "AUDIT",
+      "version": 1,
+      "url": "/scales/data/audit.json",
+      "checksum": "sha256:708b178ee4afa49b9b6d2c304011c46f229b8dc0b87b39b755280f3e43008300",
+      "bytes": 6119,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "bfi2",
+      "label": "大五人格量表简版",
+      "abbreviation": "BFI-2",
+      "version": 1,
+      "url": "/scales/data/bfi2.json",
+      "checksum": "sha256:72d44aea477375c6e79829bece5f017f0a51486ee090389b01cdc05159acf799",
+      "bytes": 10892,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "cdrisc",
+      "label": "心理弹性量表",
+      "abbreviation": "CD-RISC",
+      "version": 1,
+      "url": "/scales/data/cdrisc.json",
+      "checksum": "sha256:50a3c7fdfde4cab845aeacea1d8c0cf6bee7cf7c8cc92bd73bbb3330141a26b3",
+      "bytes": 5381,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "cesd",
+      "label": "流调中心抑郁量表",
+      "abbreviation": "CES-D",
+      "version": 1,
+      "url": "/scales/data/cesd.json",
+      "checksum": "sha256:4eec4d04e36e48a1d50d0b78732fd5fe0d923224f6d48c57e510332ff362045c",
+      "bytes": 4579,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "core10",
+      "label": "临床结果常规评估量表",
+      "abbreviation": "CORE-10",
+      "version": 1,
+      "url": "/scales/data/core10.json",
+      "checksum": "sha256:88916d470fd782297388ec63e04b074a2026c6b9642307866cdf01715d751802",
+      "bytes": 3123,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "ders",
+      "label": "情绪调节困难量表",
+      "abbreviation": "DERS",
+      "version": 1,
+      "url": "/scales/data/ders.json",
+      "checksum": "sha256:05811424901b7319993644a5118bf5b21d648d807d932478736d1cf8e308578d",
+      "bytes": 8131,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "epqr",
+      "label": "艾森克人格问卷",
+      "abbreviation": "EPQ-R",
+      "version": 1,
+      "url": "/scales/data/epqr.json",
+      "checksum": "sha256:14c40162427ebe0458a507efc2995d81db631bddac8ae99b09fbba0d2f4ccf4a",
+      "bytes": 16648,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "epworth",
+      "label": "爱普沃斯嗜睡量表",
+      "abbreviation": "ESS",
+      "version": 1,
+      "url": "/scales/data/epworth.json",
+      "checksum": "sha256:40695f34a678c0381e4a7b3bfe7772687d3cdeb37282a91dabb51c7c5a8d3dc8",
+      "bytes": 2888,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "gad2",
+      "label": "广泛性焦虑障碍2项量表",
+      "abbreviation": "GAD-2",
+      "version": 1,
+      "url": "/scales/data/gad2.json",
+      "checksum": "sha256:575e8ee01358e70f37b771ed07cf667adb1dd8971e377cf5d1a0f546a514417c",
+      "bytes": 1659,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "gad7",
+      "label": "广泛性焦虑障碍量表",
+      "abbreviation": "GAD-7",
+      "version": 1,
+      "url": "/scales/data/gad7.json",
+      "checksum": "sha256:b29a73488ad9ea59f31ca5a530498c5c91e1f32a88b44fb06df093b2df78779e",
+      "bytes": 2606,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "gds",
+      "label": "老年抑郁量表",
+      "abbreviation": "GDS",
+      "version": 1,
+      "url": "/scales/data/gds.json",
+      "checksum": "sha256:d2b4cb23ea50d26ea28ce70b49daec303143d89d293e02e8c148292d7a08b8ae",
+      "bytes": 5958,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "hcl32",
+      "label": "轻躁狂检测清单",
+      "abbreviation": "HCL-32",
+      "version": 1,
+      "url": "/scales/data/hcl32.json",
+      "checksum": "sha256:057a9d043b1eed9c0c79e851d8db036f1a38235b02cea981bdc78d3927b0c6fc",
+      "bytes": 5151,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "iesr",
+      "label": "事件影响量表修订版",
+      "abbreviation": "IES-R",
+      "version": 1,
+      "url": "/scales/data/iesr.json",
+      "checksum": "sha256:470da4ee24a6a0647d3d3e6bbbcb7a9b4fd2434bc94df8585c8875b933ffb4e2",
+      "bytes": 5150,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "isi",
+      "label": "失眠严重程度指数",
+      "abbreviation": "ISI",
+      "version": 1,
+      "url": "/scales/data/isi.json",
+      "checksum": "sha256:5b648339082b8f7210457a4af47f63c2879125e4c28b22925d2f41af46bce4aa",
+      "bytes": 2900,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "k10",
+      "label": "Kessler心理困扰量表",
+      "abbreviation": "K10",
+      "version": 1,
+      "url": "/scales/data/k10.json",
+      "checksum": "sha256:d3d78d0edf26ca50bb0a05797caa30784c92327b64f19db36d234900de966a14",
+      "bytes": 3144,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "mdq",
+      "label": "心境障碍问卷",
+      "abbreviation": "MDQ",
+      "version": 1,
+      "url": "/scales/data/mdq.json",
+      "checksum": "sha256:aa53ceae89f2564e3c30893763a9140e74cb5b5a0241c1d281ca4513a3fa08ef",
+      "bytes": 5191,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "mmpi2",
+      "label": "明尼苏达多项人格测验第二版",
+      "abbreviation": "MMPI-2",
+      "version": 1,
+      "url": "/scales/data/mmpi2.json",
+      "checksum": "sha256:9e03817eab31706d3423abfbd984d1b6a4eb6143c90c1f3d07c3e2cdd21d2661",
+      "bytes": 267251,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "mmpi2_short",
+      "label": "明尼苏达多项人格测验第二版（短卷）",
+      "abbreviation": "MMPI-2短卷",
+      "version": 1,
+      "url": "/scales/data/mmpi2_short.json",
+      "checksum": "sha256:2c548bf068ac187ce11fdf1a1d1e674ce700c713a9e896b6e9b4044cf2568735",
+      "bytes": 138499,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "pcl5",
+      "label": "创伤后应激障碍检查表",
+      "abbreviation": "PCL-5",
+      "version": 1,
+      "url": "/scales/data/pcl5.json",
+      "checksum": "sha256:e618deef0c0036be21de8734502b88c9e409c0b2392d2d03a31815a289c2ae68",
+      "bytes": 6091,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "phq15",
+      "label": "患者健康问卷躯体症状量表",
+      "abbreviation": "PHQ-15",
+      "version": 1,
+      "url": "/scales/data/phq15.json",
+      "checksum": "sha256:f8167d6dc5b589eecccc6fa291e40a06992041d3750a028fda2bf942334e3d9c",
+      "bytes": 3180,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "phq2",
+      "label": "患者健康问卷2项量表",
+      "abbreviation": "PHQ-2",
+      "version": 1,
+      "url": "/scales/data/phq2.json",
+      "checksum": "sha256:5086002c2b4644a09b81f6d073510a24d66fd926795afa274a372a828ba0a8b3",
+      "bytes": 1654,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "phq9",
+      "label": "患者健康问卷抑郁量表",
+      "abbreviation": "PHQ-9",
+      "version": 1,
+      "url": "/scales/data/phq9.json",
+      "checksum": "sha256:ac7c96f9f428de1c6d30a4698d17dce9df754cbb5c1e92811b519ee57d0e997e",
+      "bytes": 3811,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "psqi",
+      "label": "匹兹堡睡眠质量指数",
+      "abbreviation": "PSQI",
+      "version": 1,
+      "url": "/scales/data/psqi.json",
+      "checksum": "sha256:232d56eba459ac0376e2e35f0970638344d07d41738b2d9e82af3e087b7118d0",
+      "bytes": 5187,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "pss10",
+      "label": "压力知觉量表",
+      "abbreviation": "PSS-10",
+      "version": 1,
+      "url": "/scales/data/pss10.json",
+      "checksum": "sha256:3e7ac35285768a453a64a68ffb40cc3884feba3086fc592883f2df4b5c175afa",
+      "bytes": 4136,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "rses",
+      "label": "罗森伯格自尊量表",
+      "abbreviation": "RSES",
+      "version": 1,
+      "url": "/scales/data/rses.json",
+      "checksum": "sha256:3eaf42dddc4d10018d56a43f27546895540983bafd83fa99e05bdaea8195c52a",
+      "bytes": 3272,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "sas",
+      "label": "焦虑自评量表",
+      "abbreviation": "SAS",
+      "version": 1,
+      "url": "/scales/data/sas.json",
+      "checksum": "sha256:5d8bdae1b05f6d485ab6307b1466b9255a6d0ec61988458cc1a71b4f24dcfbd5",
+      "bytes": 4503,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "scl90",
+      "label": "90项症状清单",
+      "abbreviation": "SCL-90",
+      "version": 1,
+      "url": "/scales/data/scl90.json",
+      "checksum": "sha256:cd7da075913c053648877d9a108f2653c74cccd8121a986cea4122fddc0245b4",
+      "bytes": 16655,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "sds",
+      "label": "抑郁自评量表",
+      "abbreviation": "SDS",
+      "version": 1,
+      "url": "/scales/data/sds.json",
+      "checksum": "sha256:d2efaf1f68081ac3582ffc265fe3323b7e9e5ef5628568f08894a565b247e97e",
+      "bytes": 4692,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "stai",
+      "label": "状态-特质焦虑量表",
+      "abbreviation": "STAI",
+      "version": 1,
+      "url": "/scales/data/stai.json",
+      "checksum": "sha256:55cd80c1a45e9c043421dd602ce3b690598cb36ceb3b0f5bb3502b280796696a",
+      "bytes": 7693,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "tas20",
+      "label": "述情障碍量表",
+      "abbreviation": "TAS-20",
+      "version": 1,
+      "url": "/scales/data/tas20.json",
+      "checksum": "sha256:8d95c240110de41e803082bb972f00b04ba52d0eed4d23d13b1baaac80aba4c1",
+      "bytes": 5334,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "ucla",
+      "label": "UCLA孤独量表",
+      "abbreviation": "UCLA-LS",
+      "version": 1,
+      "url": "/scales/data/ucla.json",
+      "checksum": "sha256:4b053c18cc69ec325b5a99b18236bf66da8c0acaf16def7ab94a86f40ef025b0",
+      "bytes": 4622,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "wemwbs",
+      "label": "沃里克-爱丁堡心理健康量表",
+      "abbreviation": "WEMWBS",
+      "version": 1,
+      "url": "/scales/data/wemwbs.json",
+      "checksum": "sha256:6d4ffc31bef0a206e258b4b349e91de62eb0aea7f48b371e9ccf8587ba1576c7",
+      "bytes": 3274,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "who5",
+      "label": "世界卫生组织幸福指数",
+      "abbreviation": "WHO-5",
+      "version": 1,
+      "url": "/scales/data/who5.json",
+      "checksum": "sha256:e50e0d98368f0eaac7383683f1d4e4e91c9d25d5242a76bbeb36cf6fd40728f4",
+      "bytes": 2416,
+      "minAppVersion": "1.0.0"
+    },
+    {
+      "id": "ybocs",
+      "label": "耶鲁-布朗强迫量表",
+      "abbreviation": "Y-BOCS",
+      "version": 1,
+      "url": "/scales/data/ybocs.json",
+      "checksum": "sha256:886208c76fb399d7eb9c12a076d9e118f22562be23c09c90923d876eb9da9445",
+      "bytes": 3828,
+      "minAppVersion": "1.0.0"
+    }
+  ]
+}

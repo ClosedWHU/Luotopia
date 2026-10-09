@@ -1,0 +1,142 @@
+{
+  "id": "psqi",
+  "name": "匹兹堡睡眠质量指数",
+  "nameEn": "Pittsburgh Sleep Quality Index",
+  "abbreviation": "PSQI",
+  "category": "睡眠",
+  "year": 2024,
+  "instructions": "以下问题涉及您过去一个月的睡眠情况。请根据实际情况作答。",
+  "instructionsEn": "The following questions concern your sleep over the past month. Please answer according to your actual situation.",
+  "license": "Buysse 等编制，可免费用于非商业用途，使用时请注明出处。",
+  "options": [
+    {
+      "value": 0,
+      "label": "非常好",
+      "labelEn": "Very good"
+    },
+    {
+      "value": 1,
+      "label": "较好",
+      "labelEn": "Fairly good"
+    },
+    {
+      "value": 2,
+      "label": "较差",
+      "labelEn": "Fairly poor"
+    },
+    {
+      "value": 3,
+      "label": "非常差",
+      "labelEn": "Very poor"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "过去一个月，您通常晚上几点上床睡觉？",
+      "textEn": "Over the past month, what time do you usually get into bed at night?"
+    },
+    {
+      "index": 2,
+      "text": "过去一个月，您通常需要多长时间才能入睡？",
+      "textEn": "Over the past month, how long does it usually take you to fall asleep?"
+    },
+    {
+      "index": 3,
+      "text": "过去一个月，您通常早上几点起床？",
+      "textEn": "Over the past month, what time do you usually get up in the morning?"
+    },
+    {
+      "index": 4,
+      "text": "过去一个月，您实际每晚睡多少小时？",
+      "textEn": "Over the past month, how many hours of actual sleep do you get each night?"
+    },
+    {
+      "index": 5,
+      "text": "过去一个月，您入睡困难的频率如何？",
+      "textEn": "Over the past month, how often have you had trouble falling asleep?"
+    },
+    {
+      "index": 6,
+      "text": "过去一个月，您夜间醒来或早醒的频率如何？",
+      "textEn": "Over the past month, how often have you woken up during the night or woken up too early?"
+    },
+    {
+      "index": 7,
+      "text": "过去一个月，您夜间起床上厕所的频率如何？",
+      "textEn": "Over the past month, how often have you had to get up to use the bathroom during the night?"
+    },
+    {
+      "index": 8,
+      "text": "过去一个月，您呼吸不畅的频率如何？",
+      "textEn": "Over the past month, how often have you had trouble breathing?"
+    },
+    {
+      "index": 9,
+      "text": "过去一个月，您咳嗽或打鼾的频率如何？",
+      "textEn": "Over the past month, how often have you coughed or snored?"
+    },
+    {
+      "index": 10,
+      "text": "过去一个月，您感到寒冷的频率如何？",
+      "textEn": "Over the past month, how often have you felt too cold?"
+    },
+    {
+      "index": 11,
+      "text": "过去一个月，您感到炎热的频率如何？",
+      "textEn": "Over the past month, how often have you felt too hot?"
+    },
+    {
+      "index": 12,
+      "text": "过去一个月，您做噩梦的频率如何？",
+      "textEn": "Over the past month, how often have you had bad dreams?"
+    },
+    {
+      "index": 13,
+      "text": "过去一个月，您感到疼痛的频率如何？",
+      "textEn": "Over the past month, how often have you felt pain?"
+    },
+    {
+      "index": 14,
+      "text": "过去一个月，您因其他原因睡不好的频率如何？",
+      "textEn": "Over the past month, how often have you had trouble sleeping for other reasons?"
+    },
+    {
+      "index": 15,
+      "text": "过去一个月，您服用安眠药的频率如何？",
+      "textEn": "Over the past month, how often have you taken sleeping pills?"
+    },
+    {
+      "index": 16,
+      "text": "过去一个月，您白天感到困倦的频率如何？",
+      "textEn": "Over the past month, how often have you felt drowsy during the day?"
+    },
+    {
+      "index": 17,
+      "text": "过去一个月，您白天感到精力不足的频率如何？",
+      "textEn": "Over the past month, how often have you lacked energy during the day?"
+    },
+    {
+      "index": 18,
+      "text": "过去一个月，您对目前睡眠质量的总体评价如何？",
+      "textEn": "Over the past month, how would you rate your sleep quality overall?"
+    },
+    {
+      "index": 19,
+      "text": "过去一个月，您是否有床伴或室友？",
+      "textEn": "Over the past month, have you had a bed partner or roommate?"
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 0, "max": 6, "level": "睡眠质量良好", "description": "总分低于6，睡眠质量良好。" },
+      { "min": 6, "max": 11, "level": "睡眠质量一般", "description": "总分6-11，睡眠质量一般，存在轻度睡眠问题。" },
+      { "min": 11, "max": 16, "level": "睡眠质量较差", "description": "总分11-16，睡眠质量较差，建议关注睡眠健康。" },
+      { "min": 16, "max": 22, "level": "睡眠质量很差", "description": "总分16及以上，睡眠质量很差，建议寻求专业帮助。" }
+    ]
+  }
+}

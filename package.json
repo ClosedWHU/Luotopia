@@ -14,7 +14,11 @@
     "hot-update:init-key": "node tools/generate-hot-update-manifest.mjs --init-key",
     "hot-update:generate": "node tools/generate-hot-update-manifest.mjs",
     "hot-update:verify": "node tools/generate-hot-update-manifest.mjs --verify",
-    "prebuild": "npm run check:aasa && npm run hot-update:generate"
+    "scales:generate": "node tools/generate-scale-manifest.mjs",
+    "scales:check": "node tools/generate-scale-manifest.mjs --check",
+    "scales:mmpi2": "node tools/build-mmpi2-scale.cjs",
+    "scales:mmpi2:short": "node tools/build-mmpi2-scale.cjs --short 370",
+    "prebuild": "npm run check:aasa && npm run hot-update:generate && npm run scales:generate"
   },
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.3.0",

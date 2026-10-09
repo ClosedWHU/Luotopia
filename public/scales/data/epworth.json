@@ -1,0 +1,87 @@
+{
+  "id": "epworth",
+  "name": "爱普沃斯嗜睡量表",
+  "nameEn": "Epworth Sleepiness Scale",
+  "abbreviation": "ESS",
+  "category": "睡眠",
+  "year": 2026,
+  "instructions": "以下是一些常见的场景。请评估你在这些场景中打瞌睡或睡着的可能性。即使你最近没有遇到某些场景，也请尽量想象其情形来作答。",
+  "instructionsEn": "Below are some common situations. Please rate how likely you are to doze off or fall asleep in each one. Even if you have not recently encountered some of these situations, please try to imagine them as you answer.",
+  "license": "Johns 编制，可免费用于临床与研究，使用时请注明出处。",
+  "options": [
+    {
+      "value": 0,
+      "label": "不会打瞌睡",
+      "labelEn": "Would never doze"
+    },
+    {
+      "value": 1,
+      "label": "轻微可能",
+      "labelEn": "Slight chance"
+    },
+    {
+      "value": 2,
+      "label": "中等可能",
+      "labelEn": "Moderate chance"
+    },
+    {
+      "value": 3,
+      "label": "很可能",
+      "labelEn": "High chance"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "坐着阅读时",
+      "textEn": "Sitting and reading"
+    },
+    {
+      "index": 2,
+      "text": "看电视时",
+      "textEn": "Watching television"
+    },
+    {
+      "index": 3,
+      "text": "在公共场所安静坐着时（如剧院、会议）",
+      "textEn": "Sitting, inactive in a public place (for example, a theatre or meeting)"
+    },
+    {
+      "index": 4,
+      "text": "作为乘客坐车连续一小时以上不休息时",
+      "textEn": "As a passenger in a car for an hour without a break"
+    },
+    {
+      "index": 5,
+      "text": "下午躺着休息时（条件允许时）",
+      "textEn": "Lying down to rest in the afternoon when circumstances permit"
+    },
+    {
+      "index": 6,
+      "text": "坐着与人交谈时",
+      "textEn": "Sitting and talking to someone"
+    },
+    {
+      "index": 7,
+      "text": "午餐后安静坐着时（未饮酒）",
+      "textEn": "Sitting quietly after a lunch without alcohol"
+    },
+    {
+      "index": 8,
+      "text": "开车时因堵车而停下几分钟时",
+      "textEn": "Stopping for a few minutes in traffic while driving"
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 0, "max": 11, "level": "正常", "description": "未提示明显嗜睡。" },
+      { "min": 11, "max": 13, "level": "轻度嗜睡", "description": "存在轻度嗜睡倾向，建议关注睡眠状况。" },
+      { "min": 13, "max": 16, "level": "中度嗜睡", "description": "存在中度嗜睡，建议就医评估。" },
+      { "min": 16, "level": "重度嗜睡", "description": "存在重度嗜睡，可能提示睡眠障碍，请尽快就医评估。" }
+    ]
+  }
+}
