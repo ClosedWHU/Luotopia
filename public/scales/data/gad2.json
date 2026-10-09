@@ -1,0 +1,55 @@
+{
+  "id": "gad2",
+  "name": "广泛性焦虑障碍2项量表",
+  "nameEn": "Generalized Anxiety Disorder-2",
+  "abbreviation": "GAD-2",
+  "category": "焦虑",
+  "year": 2024,
+  "instructions": "在过去两周里，你有多频繁地被以下问题所困扰？请根据实际情况选择最符合的一项。",
+  "instructionsEn": "Over the last two weeks, how often have you been bothered by the following problems? Please choose the option that best matches your actual situation.",
+  "license": "Kroenke 等开发，可免费使用，使用时请注明出处。",
+  "options": [
+    {
+      "value": 0,
+      "label": "完全没有",
+      "labelEn": "Not at all"
+    },
+    {
+      "value": 1,
+      "label": "有几天",
+      "labelEn": "Several days"
+    },
+    {
+      "value": 2,
+      "label": "一半以上的天数",
+      "labelEn": "More than half the days"
+    },
+    {
+      "value": 3,
+      "label": "几乎每天",
+      "labelEn": "Nearly every day"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "感到紧张、焦虑或烦躁",
+      "textEn": "Feeling nervous, anxious, or on edge"
+    },
+    {
+      "index": 2,
+      "text": "无法停止或控制担忧",
+      "textEn": "Not being able to stop or control worrying"
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 0, "max": 4, "level": "阴性", "description": "总分低于3，广泛性焦虑筛查阴性。" },
+      { "min": 3, "max": 7, "level": "阳性", "description": "总分3及以上，广泛性焦虑筛查阳性，建议进一步评估。" }
+    ]
+  }
+}

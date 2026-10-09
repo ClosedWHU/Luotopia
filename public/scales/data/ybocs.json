@@ -1,0 +1,103 @@
+{
+  "id": "ybocs",
+  "name": "耶鲁-布朗强迫量表",
+  "nameEn": "Yale-Brown Obsessive Compulsive Scale",
+  "abbreviation": "Y-BOCS",
+  "category": "强迫",
+  "year": 2024,
+  "instructions": "以下问题涉及您最近的强迫思维和强迫行为。请根据过去一周的实际情况作答。",
+  "instructionsEn": "The following questions concern your recent obsessive thoughts and compulsive behaviors. Please answer according to what actually happened over the past week.",
+  "license": "Goodman 等编制，可免费用于非商业用途，使用时请注明出处。",
+  "options": [
+    {
+      "value": 0,
+      "label": "无",
+      "labelEn": "None"
+    },
+    {
+      "value": 1,
+      "label": "轻微",
+      "labelEn": "Mild"
+    },
+    {
+      "value": 2,
+      "label": "中度",
+      "labelEn": "Moderate"
+    },
+    {
+      "value": 3,
+      "label": "重度",
+      "labelEn": "Severe"
+    },
+    {
+      "value": 4,
+      "label": "极重度",
+      "labelEn": "Extreme"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "您花在强迫思维上的时间有多少？（过去一周）",
+      "textEn": "How much time do you spend on obsessive thoughts? (over the past week)"
+    },
+    {
+      "index": 2,
+      "text": "强迫思维对您的社交、工作或其他重要功能的影响程度如何？",
+      "textEn": "How much do obsessive thoughts interfere with your social life, work, or other important activities?"
+    },
+    {
+      "index": 3,
+      "text": "您因强迫思维而感到的痛苦程度如何？",
+      "textEn": "How much distress do you feel because of obsessive thoughts?"
+    },
+    {
+      "index": 4,
+      "text": "您对强迫思维的抵抗程度如何？",
+      "textEn": "How much do you resist the obsessive thoughts?"
+    },
+    {
+      "index": 5,
+      "text": "您对强迫思维的控制程度如何？",
+      "textEn": "How much control do you have over the obsessive thoughts?"
+    },
+    {
+      "index": 6,
+      "text": "您花在强迫行为上的时间有多少？（过去一周）",
+      "textEn": "How much time do you spend on compulsive behaviors? (over the past week)"
+    },
+    {
+      "index": 7,
+      "text": "强迫行为对您的社交、工作或其他重要功能的影响程度如何？",
+      "textEn": "How much do compulsive behaviors interfere with your social life, work, or other important activities?"
+    },
+    {
+      "index": 8,
+      "text": "当强迫行为被阻止时，您的焦虑程度如何？",
+      "textEn": "How anxious would you feel if you were prevented from carrying out your compulsive behaviors?"
+    },
+    {
+      "index": 9,
+      "text": "您对强迫行为的抵抗程度如何？",
+      "textEn": "How much do you resist the compulsive behaviors?"
+    },
+    {
+      "index": 10,
+      "text": "您对强迫行为的控制程度如何？",
+      "textEn": "How much control do you have over the compulsive behaviors?"
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 0, "max": 8, "level": "亚临床", "description": "总分低于8，未达到临床强迫症状标准。" },
+      { "min": 8, "max": 16, "level": "轻度强迫", "description": "总分8-16，存在轻度强迫症状，建议关注。" },
+      { "min": 16, "max": 24, "level": "中度强迫", "description": "总分16-24，存在中度强迫症状，建议寻求专业评估。" },
+      { "min": 24, "max": 32, "level": "重度强迫", "description": "总分24-32，存在重度强迫症状，建议尽快寻求专业帮助。" },
+      { "min": 32, "max": 41, "level": "极重度强迫", "description": "总分32及以上，存在极重度强迫症状，请尽快寻求专业医疗帮助。" }
+    ]
+  }
+}

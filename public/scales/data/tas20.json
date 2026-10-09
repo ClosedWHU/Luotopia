@@ -1,0 +1,156 @@
+{
+  "id": "tas20",
+  "name": "述情障碍量表",
+  "nameEn": "Toronto Alexithymia Scale-20",
+  "abbreviation": "TAS-20",
+  "category": "情绪",
+  "year": 2024,
+  "instructions": "以下问题涉及您对情绪和感受的态度。请根据您的实际情况作答。",
+  "instructionsEn": "The following questions concern your attitudes toward emotions and feelings. Please answer according to your actual situation.",
+  "license": "Bagby 等编制，可免费用于非商业用途，使用时请注明出处。",
+  "options": [
+    {
+      "value": 1,
+      "label": "非常不同意",
+      "labelEn": "Strongly disagree"
+    },
+    {
+      "value": 2,
+      "label": "不同意",
+      "labelEn": "Disagree"
+    },
+    {
+      "value": 3,
+      "label": "中立",
+      "labelEn": "Neutral"
+    },
+    {
+      "value": 4,
+      "label": "同意",
+      "labelEn": "Agree"
+    },
+    {
+      "value": 5,
+      "label": "非常同意",
+      "labelEn": "Strongly agree"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "我常常搞不清自己是什么情绪。",
+      "textEn": "I am often confused about what emotion I am feeling."
+    },
+    {
+      "index": 2,
+      "text": "我很难为自己的感受找到合适的词语。",
+      "textEn": "It is difficult for me to find the right words for my feelings."
+    },
+    {
+      "index": 3,
+      "text": "我有一些连医生也无法解释的身体感受。",
+      "textEn": "I have some bodily sensations that even doctors cannot explain."
+    },
+    {
+      "index": 4,
+      "text": "我能够轻松地描述自己的感受。",
+      "textEn": "I am able to describe my feelings easily.",
+      "reverse": true
+    },
+    {
+      "index": 5,
+      "text": "我更愿意分析问题，而不是描述感受。",
+      "textEn": "I prefer to analyze problems rather than describe feelings.",
+      "reverse": true
+    },
+    {
+      "index": 6,
+      "text": "我心烦时，分不清自己是难过、害怕还是生气。",
+      "textEn": "When I am upset, I cannot tell whether I am sad, frightened, or angry."
+    },
+    {
+      "index": 7,
+      "text": "我常常对自己身体的感觉感到困惑。",
+      "textEn": "I am often puzzled by the sensations I experience in my body."
+    },
+    {
+      "index": 8,
+      "text": "我宁愿顺其自然，也不愿弄清事情为何如此。",
+      "textEn": "I prefer to let things happen naturally rather than find out why they turn out the way they do."
+    },
+    {
+      "index": 9,
+      "text": "我有一些自己说不清的感受。",
+      "textEn": "I have some feelings that I cannot quite identify."
+    },
+    {
+      "index": 10,
+      "text": "能够体察自己的情绪很重要。",
+      "textEn": "Being able to perceive my emotions is important to me.",
+      "reverse": true
+    },
+    {
+      "index": 11,
+      "text": "我很难描述自己对别人的感受。",
+      "textEn": "I find it difficult to describe my feelings toward other people."
+    },
+    {
+      "index": 12,
+      "text": "别人常常要我多谈谈自己的感受。",
+      "textEn": "People often tell me to describe more what I am feeling."
+    },
+    {
+      "index": 13,
+      "text": "我不知道自己内心到底发生了什么。",
+      "textEn": "I do not know what is really going on inside me."
+    },
+    {
+      "index": 14,
+      "text": "我常常不知道自己为什么生气。",
+      "textEn": "I usually do not know why I am feeling angry."
+    },
+    {
+      "index": 15,
+      "text": "我更愿意和别人聊日常生活，而不是聊感受。",
+      "textEn": "I prefer talking about daily activities rather than my feelings."
+    },
+    {
+      "index": 16,
+      "text": "我更喜欢看轻松的娱乐节目，而不是心理片。",
+      "textEn": "I prefer watching light entertainment programs rather than psychological dramas."
+    },
+    {
+      "index": 17,
+      "text": "即使对很亲密的人，我也很难敞开心扉说出内心的感受。",
+      "textEn": "I find it difficult to reveal my innermost feelings, even to close people."
+    },
+    {
+      "index": 18,
+      "text": "即使相对无言，我也能感到与对方亲近。",
+      "textEn": "I can feel close to someone even when no words are spoken.",
+      "reverse": true
+    },
+    {
+      "index": 19,
+      "text": "我认为审视自己的感受有助于解决个人问题。",
+      "textEn": "I believe that examining my feelings helps me solve personal problems.",
+      "reverse": true
+    },
+    {
+      "index": 20,
+      "text": "在电影或戏剧中寻找隐含意义会妨碍我享受它们。",
+      "textEn": "Looking for hidden meanings in films or plays interferes with my enjoyment of them."
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 20, "max": 52, "level": "无述情障碍", "description": "总分低于52，情绪识别和表达能力正常。" },
+      { "min": 52, "max": 61, "level": "可能述情障碍", "description": "总分52-61，可能存在述情障碍倾向，建议关注。" },
+      { "min": 61, "max": 101, "level": "述情障碍", "description": "总分61及以上，存在述情障碍，建议寻求专业评估。" }
+    ]
+  }
+}

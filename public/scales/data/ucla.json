@@ -1,0 +1,156 @@
+{
+  "id": "ucla",
+  "name": "UCLA孤独量表",
+  "nameEn": "UCLA Loneliness Scale",
+  "abbreviation": "UCLA-LS",
+  "category": "人际关系",
+  "year": 2024,
+  "instructions": "以下问题涉及您与他人的关系。请根据您的实际感受作答。",
+  "instructionsEn": "The following questions concern your relationships with others. Please answer according to how you actually feel.",
+  "license": "Russell 编制，可免费用于非商业用途，使用时请注明出处。",
+  "options": [
+    {
+      "value": 1,
+      "label": "从不",
+      "labelEn": "Never"
+    },
+    {
+      "value": 2,
+      "label": "很少",
+      "labelEn": "Rarely"
+    },
+    {
+      "value": 3,
+      "label": "有时",
+      "labelEn": "Sometimes"
+    },
+    {
+      "value": 4,
+      "label": "总是",
+      "labelEn": "Always"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "我觉得自己与周围的人相处融洽。",
+      "textEn": "I feel that I am in tune with the people around me.",
+      "reverse": true
+    },
+    {
+      "index": 2,
+      "text": "我感到自己缺乏朋友。",
+      "textEn": "I feel that I lack companionship."
+    },
+    {
+      "index": 3,
+      "text": "我觉得没有人可以依靠。",
+      "textEn": "I feel that I have no one to rely on."
+    },
+    {
+      "index": 4,
+      "text": "我感到孤单。",
+      "textEn": "I feel lonely."
+    },
+    {
+      "index": 5,
+      "text": "我觉得自己是朋友圈中的一员。",
+      "textEn": "I feel that I am part of a group of friends.",
+      "reverse": true
+    },
+    {
+      "index": 6,
+      "text": "我和周围的人有许多共同之处。",
+      "textEn": "I have a lot in common with the people around me.",
+      "reverse": true
+    },
+    {
+      "index": 7,
+      "text": "我觉得自己不再与任何人亲近。",
+      "textEn": "I feel that I am no longer close to anyone."
+    },
+    {
+      "index": 8,
+      "text": "我觉得周围的人与我没有共同的兴趣和想法。",
+      "textEn": "I feel that the people around me do not share my interests and ideas."
+    },
+    {
+      "index": 9,
+      "text": "我觉得自己为人外向、友善。",
+      "textEn": "I feel that I am an outgoing and friendly person.",
+      "reverse": true
+    },
+    {
+      "index": 10,
+      "text": "我感到与他人关系亲密。",
+      "textEn": "I feel close to other people.",
+      "reverse": true
+    },
+    {
+      "index": 11,
+      "text": "我感到自己被冷落。",
+      "textEn": "I feel left out."
+    },
+    {
+      "index": 12,
+      "text": "我觉得与别人的关系没有意义。",
+      "textEn": "I feel that my relationships with others are not meaningful."
+    },
+    {
+      "index": 13,
+      "text": "我感到没有人真正了解我。",
+      "textEn": "I feel that no one really knows me well."
+    },
+    {
+      "index": 14,
+      "text": "我感到与他人隔绝。",
+      "textEn": "I feel isolated from others."
+    },
+    {
+      "index": 15,
+      "text": "我想要陪伴时总能找到伙伴。",
+      "textEn": "I can always find companionship when I want it.",
+      "reverse": true
+    },
+    {
+      "index": 16,
+      "text": "我觉得有人真正理解我。",
+      "textEn": "I feel that there are people who truly understand me.",
+      "reverse": true
+    },
+    {
+      "index": 17,
+      "text": "我容易感到害羞。",
+      "textEn": "I easily feel shy."
+    },
+    {
+      "index": 18,
+      "text": "我觉得人们虽在身边，却并不与我为伴。",
+      "textEn": "I feel that people are around me but not with me."
+    },
+    {
+      "index": 19,
+      "text": "我有可以交谈的人。",
+      "textEn": "I have someone I can talk to.",
+      "reverse": true
+    },
+    {
+      "index": 20,
+      "text": "我有可以求助的人。",
+      "textEn": "I have someone I can turn to for help.",
+      "reverse": true
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 20, "max": 35, "level": "低孤独感", "description": "总分低于35，孤独感较低，社交关系良好。" },
+      { "min": 35, "max": 50, "level": "中等孤独感", "description": "总分35-50，存在中等程度的孤独感。" },
+      { "min": 50, "max": 65, "level": "高孤独感", "description": "总分50-65，孤独感较高，建议关注社交健康。" },
+      { "min": 65, "max": 81, "level": "极高孤独感", "description": "总分65及以上，孤独感极高，建议寻求专业帮助。" }
+    ]
+  }
+}

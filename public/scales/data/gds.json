@@ -1,0 +1,196 @@
+{
+  "id": "gds",
+  "name": "老年抑郁量表",
+  "nameEn": "Geriatric Depression Scale",
+  "abbreviation": "GDS",
+  "category": "抑郁",
+  "year": 2024,
+  "instructions": "以下问题涉及您最近的感受。请根据您的实际情况回答“是”或“否”。",
+  "instructionsEn": "The following questions concern how you have been feeling recently. Please answer “Yes” or “No” according to your actual situation.",
+  "license": "Yesavage 等编制，可免费用于非商业用途，使用时请注明出处。",
+  "options": [
+    {
+      "value": 0,
+      "label": "否",
+      "labelEn": "No"
+    },
+    {
+      "value": 1,
+      "label": "是",
+      "labelEn": "Yes"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "您对自己基本满意吗？",
+      "textEn": "Are you basically satisfied with your life?",
+      "reverse": true
+    },
+    {
+      "index": 2,
+      "text": "您是否放弃了很多活动和兴趣？",
+      "textEn": "Have you dropped many of your activities and interests?"
+    },
+    {
+      "index": 3,
+      "text": "您是否觉得生活空虚？",
+      "textEn": "Do you feel that your life is empty?"
+    },
+    {
+      "index": 4,
+      "text": "您是否经常感到无聊？",
+      "textEn": "Do you often get bored?"
+    },
+    {
+      "index": 5,
+      "text": "您是否对未来充满希望？",
+      "textEn": "Are you hopeful about the future?",
+      "reverse": true
+    },
+    {
+      "index": 6,
+      "text": "您是否被一些难以摆脱的想法困扰？",
+      "textEn": "Are you bothered by thoughts that you can't get out of your head?"
+    },
+    {
+      "index": 7,
+      "text": "您是否大部分时间都心情愉快？",
+      "textEn": "Are you in good spirits most of the time?",
+      "reverse": true
+    },
+    {
+      "index": 8,
+      "text": "您是否担心有不好的事情会发生？",
+      "textEn": "Are you afraid that something bad is going to happen to you?"
+    },
+    {
+      "index": 9,
+      "text": "您是否大部分时间都感到快乐？",
+      "textEn": "Do you feel happy most of the time?",
+      "reverse": true
+    },
+    {
+      "index": 10,
+      "text": "您是否经常感到无助？",
+      "textEn": "Do you often feel helpless?"
+    },
+    {
+      "index": 11,
+      "text": "您是否经常坐立不安？",
+      "textEn": "Do you often get restless?"
+    },
+    {
+      "index": 12,
+      "text": "您是否宁愿待在家里，也不愿出去尝试新事物？",
+      "textEn": "Do you prefer to stay at home rather than going out and doing new things?"
+    },
+    {
+      "index": 13,
+      "text": "您是否经常为未来担忧？",
+      "textEn": "Do you frequently worry about the future?"
+    },
+    {
+      "index": 14,
+      "text": "您是否觉得自己的记忆力比别人差？",
+      "textEn": "Do you feel that you have more problems with memory than most?"
+    },
+    {
+      "index": 15,
+      "text": "您是否觉得活着是件美好的事？",
+      "textEn": "Do you think it is wonderful to be alive?",
+      "reverse": true
+    },
+    {
+      "index": 16,
+      "text": "您是否经常感到心情沮丧？",
+      "textEn": "Do you often feel downhearted and blue?"
+    },
+    {
+      "index": 17,
+      "text": "您是否觉得自己现在毫无价值？",
+      "textEn": "Do you feel pretty worthless the way you are now?"
+    },
+    {
+      "index": 18,
+      "text": "您是否经常为过去的事担忧？",
+      "textEn": "Do you often worry about the past?"
+    },
+    {
+      "index": 19,
+      "text": "您是否觉得生活令人兴奋？",
+      "textEn": "Do you feel that life is exciting?",
+      "reverse": true
+    },
+    {
+      "index": 20,
+      "text": "您是否觉得开始新项目很困难？",
+      "textEn": "Is it hard for you to take on new projects?"
+    },
+    {
+      "index": 21,
+      "text": "您是否觉得自己精力充沛？",
+      "textEn": "Do you feel that you have plenty of energy?",
+      "reverse": true
+    },
+    {
+      "index": 22,
+      "text": "您是否觉得自己的处境毫无希望？",
+      "textEn": "Do you feel that your situation is hopeless?"
+    },
+    {
+      "index": 23,
+      "text": "您是否觉得大多数人都过得比您好？",
+      "textEn": "Do you feel that most people are better off than you are?"
+    },
+    {
+      "index": 24,
+      "text": "您是否常为小事心烦？",
+      "textEn": "Do you often get upset over little things?"
+    },
+    {
+      "index": 25,
+      "text": "您是否经常想哭？",
+      "textEn": "Do you often feel like crying?"
+    },
+    {
+      "index": 26,
+      "text": "您是否难以集中注意力？",
+      "textEn": "Do you have trouble concentrating?"
+    },
+    {
+      "index": 27,
+      "text": "您是否喜欢早上起床？",
+      "textEn": "Do you enjoy getting up in the morning?",
+      "reverse": true
+    },
+    {
+      "index": 28,
+      "text": "您是否宁愿回避社交聚会？",
+      "textEn": "Do you prefer to avoid social gatherings?"
+    },
+    {
+      "index": 29,
+      "text": "您是否很容易作出决定？",
+      "textEn": "Do you find it easy to make decisions?",
+      "reverse": true
+    },
+    {
+      "index": 30,
+      "text": "您的思维是否和以前一样清晰？",
+      "textEn": "Is your mind as clear as it used to be?",
+      "reverse": true
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 0, "max": 11, "level": "正常", "description": "总分低于11，未提示明显抑郁症状。" },
+      { "min": 11, "max": 21, "level": "轻度抑郁", "description": "总分11-21，存在轻度抑郁症状，建议关注。" },
+      { "min": 21, "max": 31, "level": "重度抑郁", "description": "总分21及以上，存在重度抑郁症状，建议尽快寻求专业帮助。" }
+    ]
+  }
+}

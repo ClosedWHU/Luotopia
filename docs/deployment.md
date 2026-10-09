@@ -28,6 +28,7 @@ truth，面板里配好的环境变量与绑定会被文件覆盖 —— 风险�
 |------|------|----------|
 | `check:aasa` | 校验 `public/.well-known/apple-app-site-association` 格式 | 构建中止 |
 | `hot-update:generate` | 生成并签名 `public/hot-update/manifest.json` | 缺签名密钥时构建中止 |
+| `scales:generate` | 生成 `public/scales/manifest.json`（不签名） | 量表数据非法时构建中止 |
 
 也就是说 `HOT_UPDATE_ED25519_PRIVATE_KEY` 是**必需**的 secret，不是可选项 ——
 但只对生产构建必需，见下。
@@ -194,7 +195,7 @@ curl -sI https://luotopia.whu.sb/.well-known/apple-app-site-association
 | 本地 | `astro.config.mjs` 的 `statusDevApi` | `astro dev` 下提供同一个端点，共用上面那份核心 |
 
 `?fresh=1` 的 60 秒下限不是多余的：只存在于浏览器里的节流只是建议，一个循环请求
-`?fresh=1` 的客户端能耗光账号的 API 配额，把状态页自己搞挂 —— 而这正是它要报告的
+`?fresh=1` 的客户端能耗光账户的 API 配额，把状态页自己搞挂 —— 而这正是它要报告的
 事情。
 
 `days` **不接受查询参数**，只能由 `STATUS_COUNT_DAYS` 配置。它是上游请求和缓存键的

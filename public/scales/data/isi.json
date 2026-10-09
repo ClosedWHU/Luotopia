@@ -1,0 +1,87 @@
+{
+  "id": "isi",
+  "name": "失眠严重程度指数",
+  "nameEn": "Insomnia Severity Index",
+  "abbreviation": "ISI",
+  "category": "睡眠",
+  "year": 2024,
+  "instructions": "以下问题涉及您最近的睡眠情况。请根据过去两周的实际情况作答。",
+  "instructionsEn": "The following questions concern your recent sleep. Please answer according to what actually happened over the past two weeks.",
+  "license": "Morin 编制，可免费用于非商业用途，使用时请注明出处。",
+  "options": [
+    {
+      "value": 0,
+      "label": "无",
+      "labelEn": "None"
+    },
+    {
+      "value": 1,
+      "label": "轻微",
+      "labelEn": "Mild"
+    },
+    {
+      "value": 2,
+      "label": "中度",
+      "labelEn": "Moderate"
+    },
+    {
+      "value": 3,
+      "label": "重度",
+      "labelEn": "Severe"
+    },
+    {
+      "value": 4,
+      "label": "极重度",
+      "labelEn": "Very severe"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "您入睡困难的严重程度如何？",
+      "textEn": "How severe were your difficulties falling asleep?"
+    },
+    {
+      "index": 2,
+      "text": "您维持睡眠困难的严重程度如何？",
+      "textEn": "How severe were your difficulties staying asleep?"
+    },
+    {
+      "index": 3,
+      "text": "您早醒问题的严重程度如何？",
+      "textEn": "How severe was your problem with early morning awakenings?"
+    },
+    {
+      "index": 4,
+      "text": "您对目前睡眠模式的满意程度如何？",
+      "textEn": "How satisfied were you with your current sleep pattern?"
+    },
+    {
+      "index": 5,
+      "text": "您的睡眠问题对您日常功能的影响程度如何？",
+      "textEn": "How much did your sleep problems interfere with your daily functioning?"
+    },
+    {
+      "index": 6,
+      "text": "您认为您的睡眠问题在多大程度上影响了您的生活质量？",
+      "textEn": "To what extent have your sleep problems affected your quality of life?"
+    },
+    {
+      "index": 7,
+      "text": "您对目前睡眠问题的担忧程度如何？",
+      "textEn": "How worried were you about your current sleep problems?"
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 0, "max": 8, "level": "无临床失眠", "description": "总分低于8，未达到临床失眠标准。" },
+      { "min": 8, "max": 15, "level": "亚临床失眠", "description": "总分8-15，存在轻度睡眠问题，建议关注睡眠卫生。" },
+      { "min": 15, "max": 22, "level": "中度失眠", "description": "总分15-22，存在中度失眠症状，建议寻求专业评估。" },
+      { "min": 22, "max": 29, "level": "重度失眠", "description": "总分22及以上，存在重度失眠症状，建议尽快寻求专业帮助。" }
+    ]
+  }
+}

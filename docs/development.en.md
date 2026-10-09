@@ -61,8 +61,8 @@ functions/        # Cloudflare Pages Functions
   api/            # /api/releases, /api/appstore, /api/status
   lib/            # Runtime-agnostic cores (importable from plain Node)
   _middleware.ts  # Host allowlist, deep-link rewrite, 404 representation
-public/           # Static assets, .well-known, hot-update
-tools/            # Build scripts (hot-update manifest, AASA validation)
+public/           # Static assets, .well-known, hot-update, scales
+tools/            # Build scripts (hot-update manifest, scale manifest, AASA validation)
 ```
 
 Prefer changing content in `src/config/` over editing pages: features, download
@@ -254,6 +254,31 @@ signing key is unavailable. Production must provide
 
 `prebuild` also runs `check:aasa` (`tools/verify-aasa.mjs`), which validates the
 `apple-app-site-association` file.
+
+## Scale library manifest
+
+The app's psychological scale data lives in `public/scales/data/`, with the manifest
+at `public/scales/manifest.json`. Unlike hot-update, **this manifest is unsigned and
+needs no key material at all** — scales are data rather than executable code, so
+integrity comes from HTTPS plus a per-file sha256 that the client verifies after each
+download. It therefore generates identically on a laptop, in a PR preview and in
+production; there is no "preview cannot see the secret" problem here.
+
+```sh
+npm run scales:generate   # Re-scan data/ and rewrite manifest.json
+npm run scales:check      # Verify the committed manifest is current, write nothing (CI)
+```
+
+The generator (`tools/generate-scale-manifest.mjs`) fails outright when a file is not
+valid JSON, when a file's internal `id` does not match its filename, when `name` or
+`abbreviation` is missing, when a file exceeds 4 MB, or when the resulting manifest
+would be empty. `updatedAt` and both `version` fields only move when the content
+actually changed, so repeated runs are idempotent — which is exactly what lets
+`scales:check` catch "edited the data, forgot to regenerate the manifest".
+
+Field meanings, the client's cache-and-verify flow, and **the copyright and licensing
+of the scale data** (MMPI-2's upstream is GPLv3 and needs separate assessment) are in
+[public/scales/README.md](../public/scales/README.md).
 
 ## Before committing
 

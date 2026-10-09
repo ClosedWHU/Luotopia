@@ -1,0 +1,190 @@
+{
+  "id": "audit",
+  "name": "酒精使用障碍筛查量表",
+  "nameEn": "Alcohol Use Disorders Identification Test",
+  "abbreviation": "AUDIT",
+  "category": "物质使用",
+  "year": 2026,
+  "instructions": "以下问题涉及你的饮酒情况。请根据你的实际情况选择最符合的一项。“一杯”指一个标准杯（约含10克纯酒精）。",
+  "instructionsEn": "The following questions concern your drinking. Please choose the option that best matches your actual situation. “One drink” means one standard drink (containing about 10 grams of pure alcohol).",
+  "license": "世界卫生组织（WHO）编制，可免费使用，使用时请注明出处。",
+  "options": [
+    {
+      "value": 0,
+      "label": "从不",
+      "labelEn": "Never"
+    },
+    {
+      "value": 1,
+      "label": "每月少于1次",
+      "labelEn": "Less than monthly"
+    },
+    {
+      "value": 2,
+      "label": "每月1次",
+      "labelEn": "Monthly"
+    },
+    {
+      "value": 3,
+      "label": "每周1次",
+      "labelEn": "Weekly"
+    },
+    {
+      "value": 4,
+      "label": "每天或几乎每天",
+      "labelEn": "Daily or almost daily"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "你多久喝一次含酒精的饮料？",
+      "textEn": "How often do you have a drink containing alcohol?",
+      "options": [
+        {
+          "value": 0,
+          "label": "从不",
+          "labelEn": "Never"
+        },
+        {
+          "value": 1,
+          "label": "每月1次或更少",
+          "labelEn": "Monthly or less"
+        },
+        {
+          "value": 2,
+          "label": "每月2-4次",
+          "labelEn": "2 to 4 times a month"
+        },
+        {
+          "value": 3,
+          "label": "每周2-3次",
+          "labelEn": "2 to 3 times a week"
+        },
+        {
+          "value": 4,
+          "label": "每周4次或更多",
+          "labelEn": "4 or more times a week"
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "text": "在饮酒的日子里，你通常喝多少杯？",
+      "textEn": "On a day when you drink, how many drinks do you usually have?",
+      "options": [
+        {
+          "value": 0,
+          "label": "1-2杯",
+          "labelEn": "1 or 2 drinks"
+        },
+        {
+          "value": 1,
+          "label": "3-4杯",
+          "labelEn": "3 or 4 drinks"
+        },
+        {
+          "value": 2,
+          "label": "5-6杯",
+          "labelEn": "5 or 6 drinks"
+        },
+        {
+          "value": 3,
+          "label": "7-9杯",
+          "labelEn": "7 to 9 drinks"
+        },
+        {
+          "value": 4,
+          "label": "10杯或更多",
+          "labelEn": "10 or more drinks"
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "text": "你多久一次在一次场合喝6杯或以上？",
+      "textEn": "How often do you have six or more drinks on one occasion?"
+    },
+    {
+      "index": 4,
+      "text": "过去一年里，你多少次发现一旦开始喝酒就无法停止？",
+      "textEn": "In the past year, how often have you found that you were unable to stop drinking once you had started?"
+    },
+    {
+      "index": 5,
+      "text": "过去一年里，你多少次因喝酒而没能做应该做的事？",
+      "textEn": "In the past year, how often have you failed to do what was normally expected of you because of drinking?"
+    },
+    {
+      "index": 6,
+      "text": "过去一年里，你多少次在大量饮酒后的第二天早上需要先喝一杯才能让自己清醒？",
+      "textEn": "In the past year, how often have you needed a first drink in the morning to get yourself going after heavy drinking the night before?"
+    },
+    {
+      "index": 7,
+      "text": "过去一年里，你多少次在喝酒后感到内疚或悔恨？",
+      "textEn": "In the past year, how often have you had a feeling of guilt or remorse after drinking?"
+    },
+    {
+      "index": 8,
+      "text": "过去一年里，你多少次因喝酒而记不起前一天晚上发生的事？",
+      "textEn": "In the past year, how often have you been unable to remember what happened the night before because of drinking?"
+    },
+    {
+      "index": 9,
+      "text": "你或他人是否曾因你喝酒而受伤？",
+      "textEn": "Have you or someone else been injured because of your drinking?",
+      "options": [
+        {
+          "value": 0,
+          "label": "没有",
+          "labelEn": "No"
+        },
+        {
+          "value": 2,
+          "label": "有过，但不在过去一年",
+          "labelEn": "Yes, but not in the last year"
+        },
+        {
+          "value": 4,
+          "label": "有过，在过去一年",
+          "labelEn": "Yes, during the last year"
+        }
+      ]
+    },
+    {
+      "index": 10,
+      "text": "是否有亲友、医生或其他卫生工作者关心你的饮酒情况或建议你减少饮酒？",
+      "textEn": "Has a relative, friend, doctor, or other health worker been concerned about your drinking or suggested that you cut down?",
+      "options": [
+        {
+          "value": 0,
+          "label": "没有",
+          "labelEn": "No"
+        },
+        {
+          "value": 2,
+          "label": "有过，但不在过去一年",
+          "labelEn": "Yes, but not in the last year"
+        },
+        {
+          "value": 4,
+          "label": "有过，在过去一年",
+          "labelEn": "Yes, during the last year"
+        }
+      ]
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 0, "max": 8, "level": "低风险", "description": "饮酒处于低风险水平。" },
+      { "min": 8, "max": 16, "level": "有害饮酒风险", "description": "提示存在有害饮酒风险，建议适当减少饮酒。" },
+      { "min": 16, "max": 20, "level": "高风险", "description": "提示饮酒风险较高，建议寻求专业评估与帮助。" },
+      { "min": 20, "level": "可能酒精依赖", "description": "提示可能存在酒精依赖，请尽快寻求专业帮助。" }
+    ]
+  }
+}

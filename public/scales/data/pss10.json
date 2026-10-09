@@ -1,0 +1,105 @@
+{
+  "id": "pss10",
+  "name": "压力知觉量表",
+  "nameEn": "Perceived Stress Scale-10",
+  "abbreviation": "PSS-10",
+  "category": "压力",
+  "year": 2026,
+  "instructions": "请回想过去一个月内，你对以下情况的感受和想法。请根据实际发生的频率，选择最符合的一项。",
+  "instructionsEn": "Please think back over the past month about how you felt and thought about the following situations. Choose the option that best matches how often it actually happened.",
+  "license": "Cohen 等编制，可免费用于研究与非商业用途，使用时请注明出处。",
+  "options": [
+    {
+      "value": 0,
+      "label": "从不",
+      "labelEn": "Never"
+    },
+    {
+      "value": 1,
+      "label": "偶尔",
+      "labelEn": "Rarely"
+    },
+    {
+      "value": 2,
+      "label": "有时",
+      "labelEn": "Sometimes"
+    },
+    {
+      "value": 3,
+      "label": "经常",
+      "labelEn": "Often"
+    },
+    {
+      "value": 4,
+      "label": "总是",
+      "labelEn": "Always"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "过去一个月里，你是否经常因为一些没有预料到的事情而感到心烦意乱？",
+      "textEn": "In the last month, how often have you been upset because of something that happened unexpectedly?"
+    },
+    {
+      "index": 2,
+      "text": "过去一个月里，你是否经常觉得自己无法控制生活中重要的事情？",
+      "textEn": "In the last month, how often have you felt unable to control important things in your life?"
+    },
+    {
+      "index": 3,
+      "text": "过去一个月里，你是否经常感到紧张不安、有压力？",
+      "textEn": "In the last month, how often have you felt nervous and stressed?"
+    },
+    {
+      "index": 4,
+      "text": "过去一个月里，你是否经常对自己处理个人问题的能力感到有信心？",
+      "textEn": "In the last month, how often have you felt confident in your ability to handle your personal problems?",
+      "reverse": true
+    },
+    {
+      "index": 5,
+      "text": "过去一个月里，你是否经常觉得事情正按自己的意愿发展？",
+      "textEn": "In the last month, how often have you felt that things were going your way?",
+      "reverse": true
+    },
+    {
+      "index": 6,
+      "text": "过去一个月里，你是否经常发现自己无法应付所有该做的事情？",
+      "textEn": "In the last month, how often have you found that you could not cope with all the things you had to do?"
+    },
+    {
+      "index": 7,
+      "text": "过去一个月里，你是否经常能够控制生活中的烦心事？",
+      "textEn": "In the last month, how often have you been able to control irritations in your life?",
+      "reverse": true
+    },
+    {
+      "index": 8,
+      "text": "过去一个月里，你是否经常觉得自己能游刃有余地处理好各种事情？",
+      "textEn": "In the last month, how often have you felt that you were on top of things?",
+      "reverse": true
+    },
+    {
+      "index": 9,
+      "text": "过去一个月里，你是否经常因为一些自己无法控制的事情而生气？",
+      "textEn": "In the last month, how often have you been angered because of things that were outside of your control?"
+    },
+    {
+      "index": 10,
+      "text": "过去一个月里，你是否经常觉得困难堆积如山，自己无法克服？",
+      "textEn": "In the last month, how often have you felt that difficulties were piling up so high that you could not overcome them?"
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 0, "max": 14, "level": "低压力", "description": "当前感知到的压力水平较低。" },
+      { "min": 14, "max": 27, "level": "中度压力", "description": "存在中等程度的压力感，建议关注并适时自我调节。" },
+      { "min": 27, "level": "高压力", "description": "感知到的压力水平较高，长期高压力可能影响身心健康，建议寻求支持或专业帮助。" }
+    ]
+  }
+}

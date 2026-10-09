@@ -1,0 +1,124 @@
+{
+  "id": "bfi2",
+  "name": "大五人格量表简版",
+  "nameEn": "Big Five Inventory-2",
+  "abbreviation": "BFI-2",
+  "category": "人格",
+  "year": 2023,
+  "instructions": "以下是一些描述个人性格的句子。请根据这些句子在多大程度上符合您的真实情况，选择最符合的一项。",
+  "instructionsEn": "The following statements describe personality traits. Choose the response that best matches how well each statement describes you as a person.",
+  "license": "John 与 Soto 编制，可免费用于非商业用途，使用时请注明出处。",
+  "note": "参考示例：条目为示例性中文译述，各维度常模均值/标准差为占位数值，正式使用前须以官方授权版本及目标人群常模核对。",
+  "options": [
+    { "value": 1, "label": "非常不同意", "labelEn": "Strongly disagree" },
+    { "value": 2, "label": "不太同意", "labelEn": "Disagree" },
+    { "value": 3, "label": "中立", "labelEn": "Neutral" },
+    { "value": 4, "label": "同意", "labelEn": "Agree" },
+    { "value": 5, "label": "非常同意", "labelEn": "Strongly agree" }
+  ],
+  "items": [
+    { "index": 1, "text": "是外向的、爱交际的", "textEn": "Is outgoing, sociable" },
+    { "index": 2, "text": "个性坚定自信", "textEn": "Has an assertive personality" },
+    { "index": 3, "text": "有支配欲，像领导者一样行事", "textEn": "Is dominant and acts like a leader" },
+    { "index": 4, "text": "健谈", "textEn": "Is talkative" },
+    { "index": 5, "text": "精力充沛", "textEn": "Is energetic" },
+    { "index": 6, "text": "表现出很多热情", "textEn": "Shows a great deal of enthusiasm" },
+    { "index": 7, "text": "沉默寡言", "textEn": "Is quiet and speaks little", "reverse": true },
+    { "index": 8, "text": "有时害羞、内向", "textEn": "Is sometimes shy and introverted", "reverse": true },
+    { "index": 9, "text": "很难影响别人", "textEn": "Finds it hard to influence other people", "reverse": true },
+    { "index": 10, "text": "更喜欢让别人做主", "textEn": "Prefers to let others make the decisions", "reverse": true },
+    { "index": 11, "text": "喜欢结识新朋友", "textEn": "Enjoys meeting new people" },
+    { "index": 12, "text": "在人多的地方也能轻松自在", "textEn": "Is comfortable even in crowded places" },
+
+    { "index": 13, "text": "同情他人、关心他人", "textEn": "Is sympathetic and caring" },
+    { "index": 14, "text": "尊重他人、有礼貌", "textEn": "Is respectful and polite" },
+    { "index": 15, "text": "相信别人、心地善良", "textEn": "Is trusting and good-natured" },
+    { "index": 16, "text": "乐于助人、不自私", "textEn": "Is helpful and unselfish" },
+    { "index": 17, "text": "宽容、能原谅别人", "textEn": "Is tolerant and forgiving" },
+    { "index": 18, "text": "温和、不与人争执", "textEn": "Is mild-mannered and does not argue" },
+    { "index": 19, "text": "容易与人争吵", "textEn": "Starts arguments with others easily", "reverse": true },
+    { "index": 20, "text": "对人苛刻、挑剔", "textEn": "Is demanding and critical of others", "reverse": true },
+    { "index": 21, "text": "有时对他人冷漠", "textEn": "Is sometimes cold or indifferent toward others", "reverse": true },
+    { "index": 22, "text": "对别人不耐烦", "textEn": "Is impatient with others", "reverse": true },
+    { "index": 23, "text": "认为大多数人都值得信赖", "textEn": "Believes most people are trustworthy" },
+    { "index": 24, "text": "愿意花时间帮助别人", "textEn": "Is willing to spend time helping others" },
+
+    { "index": 25, "text": "做事有始有终", "textEn": "Sees things through to the end" },
+    { "index": 26, "text": "有条理、爱整洁", "textEn": "Is well-organized and likes tidiness" },
+    { "index": 27, "text": "可靠、可信赖", "textEn": "Is dependable and trustworthy" },
+    { "index": 28, "text": "勤奋努力", "textEn": "Works hard" },
+    { "index": 29, "text": "自律", "textEn": "Is self-disciplined" },
+    { "index": 30, "text": "做决定果断", "textEn": "Is decisive" },
+    { "index": 31, "text": "有时粗心大意", "textEn": "Is sometimes careless", "reverse": true },
+    { "index": 32, "text": "容易分心、难以专注", "textEn": "Is easily distracted and finds it hard to concentrate", "reverse": true },
+    { "index": 33, "text": "做事拖延", "textEn": "Tends to put things off", "reverse": true },
+    { "index": 34, "text": "缺乏条理", "textEn": "Is disorganized", "reverse": true },
+    { "index": 35, "text": "提前计划、目标明确", "textEn": "Plans ahead and sets clear goals" },
+    { "index": 36, "text": "按时完成任务", "textEn": "Finishes tasks on time" },
+
+    { "index": 37, "text": "经常感到焦虑、担心", "textEn": "Often feels anxious and worried" },
+    { "index": 38, "text": "容易感到紧张、有压力", "textEn": "Easily becomes tense and stressed" },
+    { "index": 39, "text": "情绪起伏大、容易低落", "textEn": "Has large mood swings and easily feels down" },
+    { "index": 40, "text": "容易感到害怕、惊恐", "textEn": "Is easily frightened or panicked" },
+    { "index": 41, "text": "容易发怒、急躁", "textEn": "Gets angry and irritated easily" },
+    { "index": 42, "text": "容易感到悲伤、沮丧", "textEn": "Easily feels sad or depressed" },
+    { "index": 43, "text": "情绪稳定、不易慌乱", "textEn": "Stays even-keeled and does not panic easily", "reverse": true },
+    { "index": 44, "text": "很少感到焦虑", "textEn": "Rarely feels anxious", "reverse": true },
+    { "index": 45, "text": "遇到压力也能保持平静", "textEn": "Stays calm even under pressure", "reverse": true },
+    { "index": 46, "text": "心态放松、随遇而安", "textEn": "Is relaxed and takes things as they come", "reverse": true },
+    { "index": 47, "text": "常常自我怀疑", "textEn": "Often experiences self-doubt" },
+    { "index": 48, "text": "容易被别人的批评伤害", "textEn": "Is easily hurt by criticism from others" },
+
+    { "index": 49, "text": "好奇心强、喜欢新事物", "textEn": "Is curious and enjoys new things" },
+    { "index": 50, "text": "富有想象力", "textEn": "Is imaginative" },
+    { "index": 51, "text": "喜欢艺术、音乐、文学", "textEn": "Enjoys art, music, and literature" },
+    { "index": 52, "text": "兴趣广泛", "textEn": "Has a wide range of interests" },
+    { "index": 53, "text": "喜欢深入思考抽象问题", "textEn": "Likes to ponder abstract questions" },
+    { "index": 54, "text": "有创意、点子多", "textEn": "Is creative and full of ideas" },
+    { "index": 55, "text": "不喜欢变化、墨守成规", "textEn": "Dislikes change and follows convention", "reverse": true },
+    { "index": 56, "text": "对艺术兴趣不大", "textEn": "Has little interest in art", "reverse": true },
+    { "index": 57, "text": "思想传统、不爱探索新想法", "textEn": "Is traditional and dislikes exploring new ideas", "reverse": true },
+    { "index": 58, "text": "避免深奥的、哲学的讨论", "textEn": "Avoids profound or philosophical discussions", "reverse": true },
+    { "index": 59, "text": "愿意尝试新方法", "textEn": "Is willing to try new ways of doing things" },
+    { "index": 60, "text": "喜欢学习新知识", "textEn": "Enjoys learning new things" }
+  ],
+  "scoring": {
+    "kind": "tScore",
+    "decimals": 0,
+    "hasTotal": false,
+    "totalLabel": "",
+    "totalBands": [],
+    "factors": [
+      { "id": "extraversion", "name": "外向性", "normMean": 40, "normSd": 9, "itemIndexes": [1,2,3,4,5,6,7,8,9,10,11,12], "bands": [
+        { "min": 0, "max": 40, "level": "偏低", "description": "T分低于40，该维度特征较不明显。" },
+        { "min": 40, "max": 60, "level": "平均", "description": "T分40-60，处于一般人群平均水平。" },
+        { "min": 60, "max": 70, "level": "偏高", "description": "T分60-70，该维度特征较突出。" },
+        { "min": 70, "max": 101, "level": "显著偏高", "description": "T分70及以上，该维度特征非常突出。" }
+      ] },
+      { "id": "agreeableness", "name": "宜人性", "normMean": 45, "normSd": 7, "itemIndexes": [13,14,15,16,17,18,19,20,21,22,23,24], "bands": [
+        { "min": 0, "max": 40, "level": "偏低", "description": "T分低于40，该维度特征较不明显。" },
+        { "min": 40, "max": 60, "level": "平均", "description": "T分40-60，处于一般人群平均水平。" },
+        { "min": 60, "max": 70, "level": "偏高", "description": "T分60-70，该维度特征较突出。" },
+        { "min": 70, "max": 101, "level": "显著偏高", "description": "T分70及以上，该维度特征非常突出。" }
+      ] },
+      { "id": "conscientiousness", "name": "尽责性", "normMean": 44, "normSd": 8, "itemIndexes": [25,26,27,28,29,30,31,32,33,34,35,36], "bands": [
+        { "min": 0, "max": 40, "level": "偏低", "description": "T分低于40，该维度特征较不明显。" },
+        { "min": 40, "max": 60, "level": "平均", "description": "T分40-60，处于一般人群平均水平。" },
+        { "min": 60, "max": 70, "level": "偏高", "description": "T分60-70，该维度特征较突出。" },
+        { "min": 70, "max": 101, "level": "显著偏高", "description": "T分70及以上，该维度特征非常突出。" }
+      ] },
+      { "id": "negative_emotionality", "name": "神经质/负性情绪", "normMean": 36, "normSd": 9, "itemIndexes": [37,38,39,40,41,42,43,44,45,46,47,48], "bands": [
+        { "min": 0, "max": 40, "level": "偏低", "description": "T分低于40，该维度特征较不明显。" },
+        { "min": 40, "max": 60, "level": "平均", "description": "T分40-60，处于一般人群平均水平。" },
+        { "min": 60, "max": 70, "level": "偏高", "description": "T分60-70，该维度特征较突出。" },
+        { "min": 70, "max": 101, "level": "显著偏高", "description": "T分70及以上，该维度特征非常突出。" }
+      ] },
+      { "id": "open_mindedness", "name": "开放性", "normMean": 43, "normSd": 8, "itemIndexes": [49,50,51,52,53,54,55,56,57,58,59,60], "bands": [
+        { "min": 0, "max": 40, "level": "偏低", "description": "T分低于40，该维度特征较不明显。" },
+        { "min": 40, "max": 60, "level": "平均", "description": "T分40-60，处于一般人群平均水平。" },
+        { "min": 60, "max": 70, "level": "偏高", "description": "T分60-70，该维度特征较突出。" },
+        { "min": 70, "max": 101, "level": "显著偏高", "description": "T分70及以上，该维度特征非常突出。" }
+      ] }
+    ]
+  }
+}

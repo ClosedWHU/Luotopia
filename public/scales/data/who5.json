@@ -1,0 +1,81 @@
+{
+  "id": "who5",
+  "name": "世界卫生组织幸福指数",
+  "nameEn": "World Health Organization-Well-Being Index",
+  "abbreviation": "WHO-5",
+  "category": "幸福感",
+  "year": 2024,
+  "instructions": "以下问题涉及您过去两周的感受。请根据实际情况作答。",
+  "instructionsEn": "The following questions concern how you have been feeling over the past two weeks. Please answer according to your actual experience.",
+  "license": "世界卫生组织编制，可免费使用，使用时请注明出处。",
+  "options": [
+    {
+      "value": 0,
+      "label": "从未",
+      "labelEn": "At no time"
+    },
+    {
+      "value": 1,
+      "label": "偶尔",
+      "labelEn": "Some of the time"
+    },
+    {
+      "value": 2,
+      "label": "少于一半时间",
+      "labelEn": "Less than half the time"
+    },
+    {
+      "value": 3,
+      "label": "多于一半时间",
+      "labelEn": "More than half the time"
+    },
+    {
+      "value": 4,
+      "label": "大部分时间",
+      "labelEn": "Most of the time"
+    },
+    {
+      "value": 5,
+      "label": "始终",
+      "labelEn": "All of the time"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "我感到愉快和心情好。",
+      "textEn": "I have felt cheerful and in good spirits"
+    },
+    {
+      "index": 2,
+      "text": "我感到平静和放松。",
+      "textEn": "I have felt calm and relaxed"
+    },
+    {
+      "index": 3,
+      "text": "我感到活跃和精力充沛。",
+      "textEn": "I have felt active and vigorous"
+    },
+    {
+      "index": 4,
+      "text": "我醒来时感到休息充足、精神焕发。",
+      "textEn": "I woke up feeling fresh and rested"
+    },
+    {
+      "index": 5,
+      "text": "我的日常生活充满了有趣的事情。",
+      "textEn": "My daily life has been filled with things that interest me"
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 0, "max": 13, "level": "幸福感较低", "description": "总分低于13，幸福感较低，可能存在抑郁风险，建议关注心理健康。" },
+      { "min": 13, "max": 26, "level": "幸福感一般", "description": "总分13-25，幸福感处于一般水平。" },
+      { "min": 26, "max": 31, "level": "幸福感良好", "description": "总分25及以上，幸福感良好。" }
+    ]
+  }
+}

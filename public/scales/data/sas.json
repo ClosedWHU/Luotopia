@@ -1,0 +1,153 @@
+{
+  "id": "sas",
+  "name": "焦虑自评量表",
+  "nameEn": "Zung Self-Rating Anxiety Scale",
+  "abbreviation": "SAS",
+  "category": "焦虑",
+  "year": 2024,
+  "instructions": "请根据您最近一周的实际情况，选择最符合的一项。",
+  "instructionsEn": "Based on your actual situation over the past week, choose the option that fits you best.",
+  "license": "Zung 编制，可免费使用，使用时请注明出处。",
+  "options": [
+    {
+      "value": 1,
+      "label": "没有或很少时间",
+      "labelEn": "None or a little of the time"
+    },
+    {
+      "value": 2,
+      "label": "小部分时间",
+      "labelEn": "Some of the time"
+    },
+    {
+      "value": 3,
+      "label": "相当多时间",
+      "labelEn": "Good part of the time"
+    },
+    {
+      "value": 4,
+      "label": "绝大部分或全部时间",
+      "labelEn": "Most or all of the time"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "我觉得比平常容易紧张和着急",
+      "textEn": "I feel more nervous and anxious than usual."
+    },
+    {
+      "index": 2,
+      "text": "我无缘无故地感到害怕",
+      "textEn": "I feel afraid for no reason."
+    },
+    {
+      "index": 3,
+      "text": "我容易心里烦乱或觉得惊恐",
+      "textEn": "I get upset easily or feel panicky."
+    },
+    {
+      "index": 4,
+      "text": "我觉得我可能将要发疯",
+      "textEn": "I feel that I might be going crazy."
+    },
+    {
+      "index": 5,
+      "text": "我觉得一切都很好，也不会发生什么不幸",
+      "textEn": "I feel that everything is all right and nothing bad will happen.",
+      "reverse": true
+    },
+    {
+      "index": 6,
+      "text": "我手脚发抖打颤",
+      "textEn": "My arms and legs shake and tremble."
+    },
+    {
+      "index": 7,
+      "text": "我因为头痛、颈痛和背痛而苦恼",
+      "textEn": "I am bothered by headaches, neck pain, and back pain."
+    },
+    {
+      "index": 8,
+      "text": "我感觉容易衰弱和疲乏",
+      "textEn": "I feel weak and get tired easily."
+    },
+    {
+      "index": 9,
+      "text": "我觉得心平气和，并且容易安静坐着",
+      "textEn": "I feel calm and can sit quietly with ease.",
+      "reverse": true
+    },
+    {
+      "index": 10,
+      "text": "我觉得心跳得很快",
+      "textEn": "I feel that my heart is beating fast."
+    },
+    {
+      "index": 11,
+      "text": "我因为一阵阵头晕而苦恼",
+      "textEn": "I am bothered by spells of dizziness."
+    },
+    {
+      "index": 12,
+      "text": "我有晕倒发作，或觉得要晕倒似的",
+      "textEn": "I have spells of fainting, or feel like I am going to faint."
+    },
+    {
+      "index": 13,
+      "text": "我呼气吸气都感到很容易",
+      "textEn": "I can breathe in and out easily.",
+      "reverse": true
+    },
+    {
+      "index": 14,
+      "text": "我手脚麻木和刺痛",
+      "textEn": "I feel numbness and tingling in my hands and feet."
+    },
+    {
+      "index": 15,
+      "text": "我因为胃痛和消化不良而苦恼",
+      "textEn": "I am bothered by stomach pain and indigestion."
+    },
+    {
+      "index": 16,
+      "text": "我常常要小便",
+      "textEn": "I have to empty my bladder often."
+    },
+    {
+      "index": 17,
+      "text": "我的手常常是干燥温暖的",
+      "textEn": "My hands are usually dry and warm.",
+      "reverse": true
+    },
+    {
+      "index": 18,
+      "text": "我脸红发热",
+      "textEn": "My face gets hot and flushed."
+    },
+    {
+      "index": 19,
+      "text": "我容易入睡并且一夜睡得很好",
+      "textEn": "I fall asleep easily and sleep soundly through the night.",
+      "reverse": true
+    },
+    {
+      "index": 20,
+      "text": "我做恶梦",
+      "textEn": "I have nightmares."
+    }
+  ],
+  "scoring": {
+    "kind": "sumTimesK",
+    "decimals": 0,
+    "multiplier": 1.25,
+    "hasTotal": true,
+    "totalLabel": "标准分",
+    "totalBands": [
+      { "min": 0, "max": 50, "level": "无焦虑", "description": "标准分低于50分，未提示明显焦虑症状。" },
+      { "min": 50, "max": 60, "level": "轻度焦虑", "description": "标准分50-59分，提示轻度焦虑。" },
+      { "min": 60, "max": 70, "level": "中度焦虑", "description": "标准分60-69分，提示中度焦虑。" },
+      { "min": 70, "max": 101, "level": "重度焦虑", "description": "标准分70分及以上，提示重度焦虑。" }
+    ]
+  }
+}

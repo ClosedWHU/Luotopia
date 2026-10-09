@@ -1,0 +1,176 @@
+{
+  "id": "cdrisc",
+  "name": "心理弹性量表",
+  "nameEn": "Connor-Davidson Resilience Scale",
+  "abbreviation": "CD-RISC",
+  "category": "心理弹性",
+  "year": 2024,
+  "instructions": "以下问题涉及您在面对困难时的应对方式。请根据您的实际情况作答。",
+  "instructionsEn": "The following questions concern how you cope when facing difficulties. Please answer according to your actual situation.",
+  "license": "Connor 等编制，可免费用于非商业用途，使用时请注明出处。",
+  "options": [
+    {
+      "value": 0,
+      "label": "从不",
+      "labelEn": "Not true at all"
+    },
+    {
+      "value": 1,
+      "label": "很少",
+      "labelEn": "Rarely true"
+    },
+    {
+      "value": 2,
+      "label": "有时",
+      "labelEn": "Sometimes true"
+    },
+    {
+      "value": 3,
+      "label": "经常",
+      "labelEn": "Often true"
+    },
+    {
+      "value": 4,
+      "label": "几乎总是",
+      "labelEn": "True nearly all of the time"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "我能够适应变化。",
+      "textEn": "I am able to adapt to change."
+    },
+    {
+      "index": 2,
+      "text": "我拥有亲密而可靠的人际关系。",
+      "textEn": "I have close and dependable relationships."
+    },
+    {
+      "index": 3,
+      "text": "我相信命运或上天有时会帮助我。",
+      "textEn": "I believe that fate or heaven sometimes helps me."
+    },
+    {
+      "index": 4,
+      "text": "无论发生什么，我都能应对。",
+      "textEn": "I can deal with whatever comes my way."
+    },
+    {
+      "index": 5,
+      "text": "过去的成功让我有信心迎接新的挑战。",
+      "textEn": "Past successes give me confidence to take on new challenges."
+    },
+    {
+      "index": 6,
+      "text": "我能看到事情幽默的一面。",
+      "textEn": "I can see the humorous side of things."
+    },
+    {
+      "index": 7,
+      "text": "我能在应对压力中变得更强大。",
+      "textEn": "I become stronger through coping with stress."
+    },
+    {
+      "index": 8,
+      "text": "生病或遭遇困难之后，我能很快恢复。",
+      "textEn": "I can recover quickly after illness or going through hard times."
+    },
+    {
+      "index": 9,
+      "text": "事情的发生都是有原因的。",
+      "textEn": "Everything happens for a reason."
+    },
+    {
+      "index": 10,
+      "text": "无论结果如何，我都能尽力而为。",
+      "textEn": "Whatever the outcome, I can give my best effort."
+    },
+    {
+      "index": 11,
+      "text": "我相信自己能够实现目标。",
+      "textEn": "I believe I am able to achieve my goals."
+    },
+    {
+      "index": 12,
+      "text": "即使情况看似毫无希望，我也不会放弃。",
+      "textEn": "Even when a situation seems hopeless, I do not give up."
+    },
+    {
+      "index": 13,
+      "text": "我知道遇到困难时可以向谁求助。",
+      "textEn": "I know who I can turn to for help when I run into difficulties."
+    },
+    {
+      "index": 14,
+      "text": "在压力之下，我能集中注意力、清晰思考。",
+      "textEn": "Under pressure, I can concentrate and think clearly."
+    },
+    {
+      "index": 15,
+      "text": "解决问题时，我愿意带头。",
+      "textEn": "When solving problems, I am willing to take the lead."
+    },
+    {
+      "index": 16,
+      "text": "我不会轻易被失败打倒。",
+      "textEn": "I do not let failure defeat me easily."
+    },
+    {
+      "index": 17,
+      "text": "我认为自己是个坚强的人。",
+      "textEn": "I think of myself as a strong person."
+    },
+    {
+      "index": 18,
+      "text": "我敢于作出不讨好他人或艰难的决定。",
+      "textEn": "I dare to make tough decisions that may not please others."
+    },
+    {
+      "index": 19,
+      "text": "我能够处理不愉快的情绪。",
+      "textEn": "I am able to handle unpleasant emotions."
+    },
+    {
+      "index": 20,
+      "text": "必要时我会凭直觉行事。",
+      "textEn": "When necessary, I act on my intuition."
+    },
+    {
+      "index": 21,
+      "text": "我对自己想要的生活有明确的目标感。",
+      "textEn": "I have a clear sense of the life I want to live."
+    },
+    {
+      "index": 22,
+      "text": "我能掌控自己的生活。",
+      "textEn": "I am in control of my own life."
+    },
+    {
+      "index": 23,
+      "text": "我喜欢迎接挑战。",
+      "textEn": "I enjoy taking on challenges."
+    },
+    {
+      "index": 24,
+      "text": "我会为实现目标而努力。",
+      "textEn": "I work hard to achieve my goals."
+    },
+    {
+      "index": 25,
+      "text": "我为自己的成就感到自豪。",
+      "textEn": "I am proud of my achievements."
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 0, "max": 50, "level": "低弹性", "description": "总分低于50，心理弹性较低，建议关注心理健康。" },
+      { "min": 50, "max": 75, "level": "中等弹性", "description": "总分50-75，心理弹性处于中等水平。" },
+      { "min": 75, "max": 101, "level": "高弹性", "description": "总分75及以上，心理弹性较高，面对困难时恢复能力较强。" }
+    ]
+  }
+}
