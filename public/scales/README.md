@@ -35,6 +35,8 @@ scales/
 | `id` | 量表标识，与 `data/` 下的文件名一致（去掉 `.json` 后缀） |
 | `label` | 中文名称，取自量表文件自己的 `name` 字段 |
 | `abbreviation` | 缩写，取自量表文件自己的 `abbreviation` 字段 |
+| `category` | 分类（如 `抑郁`、`人格`、`睡眠`），取自量表文件自己的 `category` 字段，客户端按它给量表列表分组 |
+| `itemCount` | 条目数，即量表文件 `items` 数组的长度，用于卡片副标题 |
 | `version` | 该量表的版本，内容（checksum）变化时自动递增，新量表从 1 开始 |
 | `url` | 下载路径，形如 `/scales/data/phq9.json` |
 | `checksum` | 文件摘要，形如 `sha256:<hex>`，对磁盘上的原始字节计算 |
@@ -103,7 +105,7 @@ MMPI 与 MMPI-2 与其他量表不同，它是**在版权保护下商业发行**
 2. 本地运行 `npm run scales:generate`，确认 `manifest.json` 更新（新量表 `version` 为 1，清单顶层 `version` 递增）。
 3. 将数据文件与 `manifest.json` **一并提交**。构建时的 `prebuild` 钩子会再次生成；CI 里可以用 `npm run scales:check` 校验已提交的清单是不是最新的。
 
-生成器会在以下情况**直接失败**：文件不是合法 JSON、内部 `id` 与文件名不符、缺少 `name` 或 `abbreviation`、文件超过 4 MB、或者生成的清单为空。
+生成器会在以下情况**直接失败**：文件不是合法 JSON、内部 `id` 与文件名不符、缺少 `name`、`abbreviation` 或 `category`、`items` 缺失／不是数组／为空、任一条目缺少正整数 `index`、文件超过 4 MB、或者生成的清单为空。
 
 ### 重新生成两个 MMPI 文件
 
