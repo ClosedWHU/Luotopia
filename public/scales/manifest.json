@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "version": 1,
-  "updatedAt": "2026-10-09T12:45:10.714Z",
+  "version": 2,
+  "updatedAt": "2026-10-09T14:34:28.870Z",
   "scales": [
     {
       "id": "asrs",
@@ -27,10 +27,10 @@
       "id": "bfi2",
       "label": "大五人格量表简版",
       "abbreviation": "BFI-2",
-      "version": 1,
+      "version": 2,
       "url": "/scales/data/bfi2.json",
-      "checksum": "sha256:72d44aea477375c6e79829bece5f017f0a51486ee090389b01cdc05159acf799",
-      "bytes": 10892,
+      "checksum": "sha256:0b2d89a61f0f7d7abfad36fce3ac27b190d5527cb8eb5a3fa95a9733286e17e4",
+      "bytes": 10768,
       "minAppVersion": "1.0.0"
     },
     {
