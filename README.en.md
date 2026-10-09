@@ -1,7 +1,7 @@
 # Luotopia (珞家)
 
-A comprehensive campus services app for Wuhan University — integrating campus
-services, building an open ecosystem.
+A comprehensive campus services app for Wuhan University, available on Android,
+iOS / iPadOS / macOS, Windows, Linux and HarmonyOS.
 
 [简体中文](README.md) ·
 [Website](https://www.whu.sb) ·
@@ -16,18 +16,18 @@ services, building an open ecosystem.
 
 ## What it does
 
-**Courses and study** — timetable, schedule and to-dos, free classrooms, study-seat
+Courses and study — timetable, schedule and to-dos, free classrooms, study-seat
 and sports-venue booking, campus-wide timetable matching for sitting in on classes,
 grades, academic standing, academic calendar, course grading and reviews.
 
-**Campus services** — Luojia E-card and payment code, campus shuttles, campus map,
+Campus services — Luojia E-card and payment code, campus shuttles, campus map,
 medical services, utilities and water codes, campus notices, Smart Luojia, campus
 network and VPN, and the "Luojia Air-Raid Shelter" forum.
 
-**Smart tools** — AI assistant, weather and air quality, Coremail, wallpaper centre,
+Smart tools — AI assistant, weather and air quality, Coremail, wallpaper centre,
 Apple Shortcuts.
 
-**Cross-device and accounts** — home-screen widgets, watch integration, desktop
+Cross-device and accounts — home-screen widgets, watch integration, desktop
 shortcuts, multi-account switching, third-party account linking, multiple languages.
 
 The full list, including what is still in development, is on the
@@ -48,12 +48,12 @@ Installation steps, package-manager commands and per-platform caveats are on the
 
 ## Help and feedback
 
-- **User guide and FAQ**: [docs.whu.sb](https://docs.whu.sb)
-- **QQ group**: 994642924
-- **Bugs and suggestions**: [GitHub Issues](https://github.com/ClosedWHU/Luotopia/issues)
-- **In-app community**: the "Luojia Air-Raid Shelter" forum and course grading
+- User guide and FAQ: [docs.whu.sb](https://docs.whu.sb)
+- QQ group: 994642924
+- Bugs and suggestions: [GitHub Issues](https://github.com/ClosedWHU/Luotopia/issues)
+- In-app community: the "Luojia Air-Raid Shelter" forum and course grading
   reviews (enable the forum tab under Settings → Navigation)
-- **Is something down?**: the [status page](https://www.whu.sb/status/), checked
+- Is something down?: the [status page](https://www.whu.sb/status/), checked
   every 5 minutes
 
 ## More
