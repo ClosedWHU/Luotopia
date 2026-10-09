@@ -1,0 +1,141 @@
+{
+  "id": "mdq",
+  "name": "心境障碍问卷",
+  "nameEn": "Mood Disorder Questionnaire",
+  "abbreviation": "MDQ",
+  "category": "双相/心境",
+  "year": 2024,
+  "instructions": "请回忆您一生中是否曾有过以下一段时间（而非现在），并据实回答。",
+  "instructionsEn": "Please recall whether you have ever had a period of time in your life (not now) when you felt the following ways, and answer honestly.",
+  "license": "Hirschfeld 等编制，可免费使用，使用时请注明出处。",
+  "options": [
+    {
+      "value": 0,
+      "label": "否",
+      "labelEn": "No"
+    },
+    {
+      "value": 1,
+      "label": "是",
+      "labelEn": "Yes"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "您是否曾感到自己过于兴奋，或感觉“特别棒”，与平常的自己判若两人？",
+      "textEn": "Have you ever felt overly excited, or felt so good that you seemed like a completely different person than usual?"
+    },
+    {
+      "index": 2,
+      "text": "您是否曾异常急躁易怒，向别人大喊大叫，甚至挑起争吵或打架？",
+      "textEn": "Have you ever been so unusually irritable or short-tempered that you shouted at others, or even started arguments or fights?"
+    },
+    {
+      "index": 3,
+      "text": "您是否曾比平时自信得多？",
+      "textEn": "Have you ever been much more self-confident than usual?"
+    },
+    {
+      "index": 4,
+      "text": "您是否曾比平时睡得少很多，却不觉得困？",
+      "textEn": "Have you ever slept much less than usual without feeling tired?"
+    },
+    {
+      "index": 5,
+      "text": "您是否曾比平时健谈得多，或说话速度明显加快？",
+      "textEn": "Have you ever been much more talkative than usual, or spoken noticeably faster?"
+    },
+    {
+      "index": 6,
+      "text": "您是否曾思维跳跃、想法一个接一个，脑子里慢不下来？",
+      "textEn": "Have you ever had racing thoughts, one idea after another, unable to slow your mind down?"
+    },
+    {
+      "index": 7,
+      "text": "您是否曾很容易被周围事物分散注意力，难以集中？",
+      "textEn": "Have you ever been easily distracted by things around you, so that it was hard to concentrate?"
+    },
+    {
+      "index": 8,
+      "text": "您是否曾比平时精力充沛得多？",
+      "textEn": "Have you ever had much more energy than usual?"
+    },
+    {
+      "index": 9,
+      "text": "您是否曾比平时活跃得多，做了比平常多很多的事情？",
+      "textEn": "Have you ever been much more active than usual, doing many more things than usual?"
+    },
+    {
+      "index": 10,
+      "text": "您是否曾比平时更爱交际或更外向（例如半夜给朋友打电话）？",
+      "textEn": "Have you ever been more social or outgoing than usual (for example, telephoning friends in the middle of the night)?"
+    },
+    {
+      "index": 11,
+      "text": "您是否曾对性的兴趣比平时大得多？",
+      "textEn": "Have you ever been much more interested in sex than usual?"
+    },
+    {
+      "index": 12,
+      "text": "您是否曾做过一些与您平时不同、别人可能认为是过分、愚蠢或冒险的事情？",
+      "textEn": "Have you ever done things that were different from your usual self and that others might have considered excessive, foolish, or risky?"
+    },
+    {
+      "index": 13,
+      "text": "您是否曾因乱花钱使您或您的家人陷入困境？",
+      "textEn": "Have you ever put yourself or your family in trouble by spending money recklessly?"
+    },
+    {
+      "index": 14,
+      "text": "上述这些情况是否曾在同一时期内同时出现？",
+      "textEn": "Have all of these situations ever happened during the same period of time?"
+    },
+    {
+      "index": 15,
+      "text": "这些问题给您造成多大程度的困扰？",
+      "textEn": "To what extent have these problems bothered you?",
+      "options": [
+        {
+          "value": 0,
+          "label": "没有困扰",
+          "labelEn": "No distress"
+        },
+        {
+          "value": 1,
+          "label": "轻度困扰",
+          "labelEn": "Mild distress"
+        },
+        {
+          "value": 2,
+          "label": "中度困扰",
+          "labelEn": "Moderate distress"
+        },
+        {
+          "value": 3,
+          "label": "严重困扰",
+          "labelEn": "Severe distress"
+        }
+      ]
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "阳性条目数（1-13题）",
+    "totalBands": [],
+    "screenGate": {
+      "yesCountThroughIndex": 13,
+      "yesCountThreshold": 7,
+      "coOccurrenceItemIndex": 14,
+      "coOccurrenceValue": 1,
+      "impactItemIndex": 15,
+      "impactThreshold": 2,
+      "positiveLevel": "筛查阳性",
+      "positiveDescription": "结果提示双相谱系障碍的可能性，建议进一步接受专业精神科评估。",
+      "negativeLevel": "筛查阴性",
+      "negativeDescription": "结果未提示双相谱系障碍的典型特征。本问卷仅用于筛查，不能替代专业诊断。"
+    }
+  }
+}

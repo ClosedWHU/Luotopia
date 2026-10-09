@@ -1,0 +1,81 @@
+{
+  "id": "asrs",
+  "name": "成人ADHD自评量表",
+  "nameEn": "Adult ADHD Self-Report Scale v1.1",
+  "abbreviation": "ASRS v1.1",
+  "category": "注意力",
+  "year": 2026,
+  "instructions": "请根据过去六个月里你对以下情况的感受和表现，选择最符合的一项。",
+  "instructionsEn": "Please choose the option that best matches how you have felt and behaved over the past six months.",
+  "license": "世界卫生组织（WHO）复合性国际诊断访谈（CIDI）编制，可免费使用，使用时请注明出处。",
+  "note": "标准筛查规则：6题中有4题及以上选择“有时”（2分）或更频繁，提示可能存在成人注意缺陷多动障碍（ADHD），建议进一步专业评估。本结果页的总分为参考性分档，不能替代该标准规则。",
+  "options": [
+    {
+      "value": 0,
+      "label": "从不",
+      "labelEn": "Never"
+    },
+    {
+      "value": 1,
+      "label": "很少",
+      "labelEn": "Rarely"
+    },
+    {
+      "value": 2,
+      "label": "有时",
+      "labelEn": "Sometimes"
+    },
+    {
+      "value": 3,
+      "label": "经常",
+      "labelEn": "Often"
+    },
+    {
+      "value": 4,
+      "label": "非常频繁",
+      "labelEn": "Very often"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "在需要坐下来完成任务时，你多久一次因难以保持专注而难以完成？",
+      "textEn": "How often do you have problems finishing the final details of a task once you have to sit down and complete it, because you struggle to stay focused?"
+    },
+    {
+      "index": 2,
+      "text": "在做需要条理的事情时，你多久一次难以有序地组织？",
+      "textEn": "How often do you have difficulty putting things in order when you have to do a task that requires organization?"
+    },
+    {
+      "index": 3,
+      "text": "你多久一次忘记约会或该履行的约定？",
+      "textEn": "How often do you forget appointments or the commitments you have made?"
+    },
+    {
+      "index": 4,
+      "text": "当一项任务需要大量思考时，你多久一次回避或拖延开始？",
+      "textEn": "How often do you avoid or delay starting a task that requires a lot of thinking?"
+    },
+    {
+      "index": 5,
+      "text": "坐着时，你多久一次手脚不停地动或坐立不安？",
+      "textEn": "When sitting, how often do you fidget or squirm with your hands or feet, or feel restless?"
+    },
+    {
+      "index": 6,
+      "text": "你多久一次感觉自己过度活跃、被迫不停活动，好像被发动机驱动一样？",
+      "textEn": "How often do you feel overly active and driven to keep doing things, as if you were driven by a motor?"
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 0, "max": 9, "level": "低风险", "description": "总分较低，未提示明显注意力问题。请注意：标准筛查规则以“4题及以上选择‘有时’或更频繁”为准。" },
+      { "min": 9, "level": "建议进一步评估", "description": "总分偏高，提示可能存在成人ADHD，建议进一步专业评估。请注意：标准筛查规则以“4题及以上选择‘有时’或更频繁”为准。" }
+    ]
+  }
+}

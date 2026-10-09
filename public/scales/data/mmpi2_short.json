@@ -1,0 +1,1538 @@
+{
+  "id": "mmpi2_short",
+  "name": "明尼苏达多项人格测验第二版（短卷）",
+  "nameEn": "MMPI-2 Short Form",
+  "abbreviation": "MMPI-2短卷",
+  "category": "人格",
+  "year": 1989,
+  "instructions": "下面每一句话都描述一种情况或感受。请根据你最近一段时间的实际状况，对每一句选择“是”或“否”。请逐题作答，不要跳过任何一题；如果一句话只有一部分符合你，也请按更符合你的那种情况作答。题目没有对错之分，答案也没有好坏之分，请如实反映你自己的情况。本测验共 370 题，请在状态平稳、时间充裕时完成。",
+  "instructionsEn": "Each statement below describes a situation or a feeling. Read it and choose Yes or No according to how things have been for you over the recent period. Answer every item and do not skip any; if a statement is only partly true for you, answer according to what is more characteristic of you. There are no right or wrong answers and no good or bad answers - answer as honestly as you can. This form has 370 items; please complete it when you are settled and have enough time.",
+  "license": "条目英文文本源自 Kevin Timmerman 于 2008 年以 GPLv3 许可发布的 MMPI-2 实现；中文译文与计分数据整理自开源项目 MMPI-CHN（https://github.com/MMPI-CHN/MMPI-CHN.github.io），并非官方《MMPI-2 中文简体字版》。MMPI 与 MMPI-2 量表本身的版权及发行权归明尼苏达大学出版社（University of Minnesota Press）与 Pearson 临床评估部门所有。中国常模参数取自 Cheung, Song & Zhang (1996) 表 6-3（载于 Butcher 主编 International Adaptations of the MMPI-2, pp. 137-161）。",
+  "note": "一、本版本使用自行整理的中文译文，与正版中文简体字版不同，题目等价性未经验证；二、中国常模建立于 1990 年代（对标 1990 年人口普查），且完整原始分分布未公开，本项目采用双参数近似换算 T_中国 = 50 + (T_美国 − M_T) × 10 / S_T，只校正位置与离散度，不是官方中国一致性 T 分；三、结果中的 T 分以中国近似 T 分为主、美国查表 T 分为辅，中国区分点为 60T（美国为 65T）；查表空洞与超范围处按就近取值／端点钳位处理；四、VRIN／TRIN 应答一致性指标只在完整卷（567 题）计算：本短卷缺少部分题对所需的题目，不可计算，也不应由短卷推算（完整卷采用 MMPI-2 通行读法 T≥80 为作答不一致）；五、5 组关键题（题目全部落在前 370 题内者；完整卷共 17 组）以「肯定回答的题目数」报告，不是 T 分，也不构成诊断；六、Mf 按性别使用各自的题键与常模表；七、数据勘误: 上游 D1 量表把第 223 题同时列入正反两个方向（会恒定加 1 分），已从正向键移除; 依据英文原文对 18 处中文译文做了订正，其中第 184 题原为语义反转（会直接导致计分方向错误），第 501 题原译方向正确但表述含混、已按英文原文改写，并清除了残留的译者按语; 八、本结果仅供自我了解与和专业人士讨论之用，不能作为诊断依据。",
+  "options": [
+    { "value": 1, "label": "是", "labelEn": "Yes" },
+    { "value": 0, "label": "否", "labelEn": "No" }
+  ],
+  "items": [
+    { "index": 1, "text": "我对机械工程相关的内容感兴趣。", "textEn": "I like mechanics magazines." },
+    { "index": 2, "text": "通常，我的食欲不错。", "textEn": "I have a good appetite." },
+    { "index": 3, "text": "通常，我在早上醒来时精神状态不错。", "textEn": "I wake up fresh and rested most mornings." },
+    { "index": 4, "text": "我能从图书管理员的工作中找到乐趣。", "textEn": "I think I would enjoy the work of a librarian." },
+    { "index": 5, "text": "我容易在睡梦中被噪音吵醒。", "textEn": "I am easily awakened by noise." },
+    { "index": 6, "text": "我父亲是个好人（若父亲已去世，则指我父亲生前是个好人）。", "textEn": "My father is a good man (or if your father is dead) my father was a good man." },
+    { "index": 7, "text": "在阅读新闻时，我喜欢读有关犯罪事件的内容。", "textEn": "I like to read newspaper articles on crime." },
+    { "index": 8, "text": "我很少觉得手脚发冷。", "textEn": "My hands and feet are usually warm enough." },
+    { "index": 9, "text": "我的生活中充满令我感兴趣的事物。", "textEn": "My daily life is full of things that keep me interested." },
+    { "index": 10, "text": "我认为我现在学习、工作的能力不比从前差。", "textEn": "I am about as able to work as I ever was." },
+    { "index": 11, "text": "很多时候，我感到如鲠在喉。", "textEn": "There seems to be a lump in my throat much of the time." },
+    { "index": 12, "text": "我对我的性生活很满意。", "textEn": "My sex life is satisfactory." },
+    { "index": 13, "text": "我认为人们应该认真思考他们的梦境，从中得到启示或是警告。", "textEn": "People should try to understand their dreams and be guided by or take warning from them." },
+    { "index": 14, "text": "我喜欢侦探或悬疑相关的故事。", "textEn": "I enjoy detective or mystery stories." },
+    { "index": 15, "text": "我在很大的紧张压力下工作。", "textEn": "I work under a great deal of tension." },
+    { "index": 16, "text": "有时我会幻想一些极为恶劣的事情。", "textEn": "Once in a while I think of things too bad to talk about." },
+    { "index": 17, "text": "我认为我在生活中遭受了（许多）不公正。", "textEn": "I am sure I get a raw deal from life." },
+    { "index": 18, "text": "我经常恶心想吐。", "textEn": "I am troubled by attacks of nausea and vomiting." },
+    { "index": 19, "text": "如果我得到一份新工作，我乐于去寻找应该套近乎的对象。", "textEn": "When I take a new job, I like to find out whom it is important to be nice to." },
+    { "index": 20, "text": "我很少便秘。", "textEn": "I am very seldom bothered by constipation." },
+    { "index": 21, "text": "有时我非常想离开原生家庭。", "textEn": "At times I have very much wanted to leave home." },
+    { "index": 22, "text": "我觉得几乎没有人能理解我。", "textEn": "No one seems to understand me." },
+    { "index": 23, "text": "有时我会难以控制地哭或笑。", "textEn": "At times I have fits of laughing and crying that I cannot control." },
+    { "index": 24, "text": "我觉得有时被超自然力量控制。", "textEn": "Evil spirits possess me at times." },
+    { "index": 25, "text": "我愿意成为一名歌手。", "textEn": "I would like to be a singer." },
+    { "index": 26, "text": "我认为当我遇到困难时，最好不要和他人谈起。", "textEn": "I feel that it is certainly best to keep my mouth shut when I am in trouble." },
+    { "index": 27, "text": "如果有人对我不利，我认为我应该报复回去。", "textEn": "When people do me wrong, I feel I should pay them back, just for the principle of the thing." },
+    { "index": 28, "text": "我每周都有几次觉得胃部不适。", "textEn": "I am bothered by an upset stomach several times a week." },
+    { "index": 29, "text": "有时我很想说脏话来发泄。", "textEn": "At times I feel like swearing." },
+    { "index": 30, "text": "我每隔几晚就至少会做一次噩梦。", "textEn": "I have nightmares every few nights." },
+    { "index": 31, "text": "我很难集中注意力做一件事。", "textEn": "I find it hard to keep my mind on a task or job." },
+    { "index": 32, "text": "我认为我曾经有过非常奇异的经历。", "textEn": "I have had very peculiar and strange experiences." },
+    { "index": 33, "text": "我很少担忧我的健康情况。", "textEn": "I seldom worry about my health." },
+    { "index": 34, "text": "我从未因性生活感到困扰或陷入麻烦。", "textEn": "I have never been in trouble because of my sexual behavior." },
+    { "index": 35, "text": "我小时候偷过东西。", "textEn": "Sometimes when I was young I stole things." },
+    { "index": 36, "text": "我总是在咳嗽。", "textEn": "I have a cough most of the time." },
+    { "index": 37, "text": "有时我很想砸东西来发泄。", "textEn": "At times I feel like smashing things." },
+    { "index": 38, "text": "我曾有过超过一天的时间无法处理事情，因为没有力气“开始”。", "textEn": "I have had periods of days, weeks, or months when I couldn't take care of things because I couldn't “get going”." },
+    { "index": 39, "text": "我经常睡眠不深，易被干扰。", "textEn": "My sleep is fitful and disturbed." },
+    { "index": 40, "text": "很多时候，我感到头痛。", "textEn": "Much of the time, my head seems to hurt all over." },
+    { "index": 41, "text": "我不总是在说实话。", "textEn": "I do not always tell the truth." },
+    { "index": 42, "text": "如果没有那些曾经对我不利的人存在，我将明显地更成功。", "textEn": "If people had not had it in for me, I would have been much more successful." },
+    { "index": 43, "text": "我的判断力比以前更好。", "textEn": "My judgment is better than it ever was." },
+    { "index": 44, "text": "我每周都有一会儿感到没有理由地全身发热。", "textEn": "Once a week (or more often) I suddenly feel hot all over, for no reason." },
+    { "index": 45, "text": "我的身体健康状况和朋友们一样好。", "textEn": "I am in just as good physical health as most of my friends." },
+    { "index": 46, "text": "遇到学校的朋友或很长时间没见过的熟人时，如果他们不主动和我说话，我会沉默地走过。", "textEn": "I prefer to pass by school friends, or people I know but have not seen for a long time, unless they speak to me first." },
+    { "index": 47, "text": "我几乎从未因心脏疼痛感到困扰。", "textEn": "I am almost never bothered by pains over my heart or in my chest." },
+    { "index": 48, "text": "大多数时候我宁愿坐下来做白日梦也不愿做其他任何事情。", "textEn": "Most anytime I would rather sit and daydream than do anything else." },
+    { "index": 49, "text": "我认为我善于社交。", "textEn": "I am a very sociable person." },
+    { "index": 50, "text": "我经常需要听从我认为能力不如我的人的命令。", "textEn": "I have often had to take orders from someone who did not know as much as I did." },
+    { "index": 51, "text": "我不是每天都读新闻上的各种社论。", "textEn": "I do not read every editorial in the newspaper every day." },
+    { "index": 52, "text": "我认为我没有过正当的生活。", "textEn": "I have not lived the right kind of life." },
+    { "index": 53, "text": "我经常感到身体的某些部位不对劲，或痛、或痒、或不灵敏。", "textEn": "Parts of my body often have feelings like burning, tingling, crawling, or like “going to sleep”." },
+    { "index": 54, "text": "我的家庭不认可我的工作（或我期望的工作）", "textEn": "My family does not like the work I have chosen (or the work I intend to choose for my lifework)." },
+    { "index": 55, "text": "有时我会一直做一件事，直到他人对我失去耐心。", "textEn": "I sometimes keep on at a thing until others lose their patience with me." },
+    { "index": 56, "text": "我希望我能像其他人那么开心。", "textEn": "I wish I could be as happy as others seem to be." },
+    { "index": 57, "text": "我几乎从未感到后颈部不适。", "textEn": "I hardly ever feel pain in the back of my neck." },
+    { "index": 58, "text": "我认为有非常多的人为了获得别人的同情和帮助而夸大了他们的不幸。", "textEn": "I think a great many people exaggerate their misfortunes in order to gain the sympathy and help of others." },
+    { "index": 59, "text": "我每隔几天就会觉得胃部不适。", "textEn": "I am troubled by discomfort in the pit of my stomach every few days or so." },
+    { "index": 60, "text": "我和人们在一起的时候，时常因为听到奇怪的声音而困扰。", "textEn": "When I am with people I am bothered by hearing very strange things." },
+    { "index": 61, "text": "我认为我是一个重要的人。", "textEn": "I am an important person." },
+    { "index": 62, "text": "我经常想成为女孩子，或我不因自己的指派性别为女而感到难过。", "textEn": "I have often wished I were a girl. (or if you are a girl) I have never been sorry that I am a girl." },
+    { "index": 63, "text": "我不容易在情感方面受到伤害。", "textEn": "My feelings are not easily hurt." },
+    { "index": 64, "text": "我喜欢读爱情相关的读物，或是与爱情相关的章节。", "textEn": "I enjoy reading love stories." },
+    { "index": 65, "text": "我总是感到忧郁。", "textEn": "Most of the time I feel blue." },
+    { "index": 66, "text": "我认为如果不存在法律，事情会变得更好。", "textEn": "It would be better if almost all laws were thrown away." },
+    { "index": 67, "text": "我对诗歌感兴趣。", "textEn": "I like poetry." },
+    { "index": 68, "text": "我有时会逗弄动物。", "textEn": "I sometimes tease animals." },
+    { "index": 69, "text": "我认为我会喜欢类似护林员的工作。", "textEn": "I think I would like the kind of work a forest ranger does." },
+    { "index": 70, "text": "我容易在争论中被说服。", "textEn": "I am easily downed in an argument." },
+    { "index": 71, "text": "最近，我感到坚持有所作为的目标是很困难的。", "textEn": "These days I find it hard not to give up hope of amounting to something." },
+    { "index": 72, "text": "我觉得有时灵魂离开了我的身体。", "textEn": "My soul sometimes leaves my body." },
+    { "index": 73, "text": "我认为我缺乏自信。", "textEn": "I am certainly lacking in self-confidence." },
+    { "index": 74, "text": "我认为我会喜欢成为一名园丁。", "textEn": "I would like to be a florist." },
+    { "index": 75, "text": "通常，我觉得活着是值得的。", "textEn": "I usually feel that life is worthwhile." },
+    { "index": 76, "text": "我认为说服大多数人相信真理需要大量的争论。", "textEn": "It takes a lot of argument to convince most people of the truth." },
+    { "index": 77, "text": "有时我会把今天应该做的事情拖延到明天去做。", "textEn": "Once in a while I put off until tomorrow what I ought to do today." },
+    { "index": 78, "text": "大多数认识我的人都喜欢我。", "textEn": "Most people that know me like me." },
+    { "index": 79, "text": "我不介意成为他人取乐的对象。", "textEn": "I do not mind being made fun of." },
+    { "index": 80, "text": "我认为我会喜欢成为一名护士。", "textEn": "I would like to be a nurse." },
+    { "index": 81, "text": "我认为大多数人都会为了成功而撒谎。", "textEn": "I think most people would lie to get ahead." },
+    { "index": 82, "text": "我做过很多后悔的事情，且我认为我比其他人在类似情况下感到更加后悔。", "textEn": "I do many things that I regret afterwards.  (I regret things more than others seem to.)" },
+    { "index": 83, "text": "我很少和家人发生不应当发生的争吵。", "textEn": "I have very few quarrels with members of my family." },
+    { "index": 84, "text": "我曾因为不良行为被学校勒令停课或留校察看。", "textEn": "I was suspended from school one or more times for bad behavior." },
+    { "index": 85, "text": "有时我有强烈的冲动，想要做一些有害的或是使人震惊的事情。", "textEn": "At times, I have a strong urge to do something harmful or shocking." },
+    { "index": 86, "text": "我喜欢参加聚会或其它喧闹的场合。", "textEn": "I like to go to parties and other affairs where there is a lot of loud fun." },
+    { "index": 87, "text": "我遇到过许多充满各种可能性的问题，以至于我难以做出抉择。", "textEn": "I have met problems so full of possibilities that I have been unable to make up my mind about them." },
+    { "index": 88, "text": "我认为不同性别的人应该拥有同样的性自由。", "textEn": "I believe that women ought to have as much sexual freedom as men." },
+    { "index": 89, "text": "我认为我面对的最大的困难来源于自身。", "textEn": "My hardest battles are with myself." },
+    { "index": 90, "text": "我爱我的父亲（若父亲已去世，则指我过去爱我的父亲）。", "textEn": "I love my father, or (if your father is dead) I loved my father." },
+    { "index": 91, "text": "我几乎没有肌肉抽搐或莫名跳动的问题。", "textEn": "I have little or no trouble with my muscles twitching or jumping." },
+    { "index": 92, "text": "我似乎并不关心发生在自己身上的事情。", "textEn": "I don't seem to care what happens to me." },
+    { "index": 93, "text": "当我身体不适时，有时我会感到烦躁。", "textEn": "Sometimes when I am not well I am irritable." },
+    { "index": 94, "text": "很多时候，我感觉自己做了错事或坏事。", "textEn": "Much of the time I feel as if I have done something wrong or evil." },
+    { "index": 95, "text": "我总是很开心。", "textEn": "I am happy most of the time." },
+    { "index": 96, "text": "我能看到其他人看不到的人、事、物。", "textEn": "I see things or animals or people around me that others do not see." },
+    { "index": 97, "text": "我总是觉得头胀鼻塞。", "textEn": "There seems to be a fullness in my head or nose most of the time." },
+    { "index": 98, "text": "有些人虽然是正确的，但他们过于专横，所以我想和他们对着干。", "textEn": "Some people are so bossy that I feel like doing the opposite of what they request, even though I know they are right." },
+    { "index": 99, "text": "有些人在对我不利。", "textEn": "Someone has it in for me." },
+    { "index": 100, "text": "我从未为了寻求刺激而做危险的事情。", "textEn": "I have never done anything dangerous just for the thrill of it." },
+    { "index": 101, "text": "我常常感觉头上好像有一条紧绷的带子。", "textEn": "Often I feel as if there is a tight band around my head." },
+    { "index": 102, "text": "有时我会生气。", "textEn": "I get angry sometimes." },
+    { "index": 103, "text": "如果我能下注，我会对一场比赛更感兴趣。", "textEn": "I enjoy a race or game more when I bet on it." },
+    { "index": 104, "text": "我认为大多数人诚实的主要原因是害怕被戳穿。", "textEn": "Most people are honest chiefly because they are afraid of being caught." },
+    { "index": 105, "text": "我曾因为不良行为在学校里被领导约谈。", "textEn": "In school I was sometimes sent to the principal for bad behavior." },
+    { "index": 106, "text": "我的说话方式和以前一样，没有加快或减慢，没有口齿不清或嘶哑。", "textEn": "My speech is the same as always (not faster or slower, no slurring or hoarseness)." },
+    { "index": 107, "text": "我在家的餐桌礼仪不像在外面一样好。", "textEn": "My table manners are not quite as good at home as when I am out in company." },
+    { "index": 108, "text": "我认为任何有能力并愿意努力工作的人都有机会成功。", "textEn": "Anyone who is able and willing to work hard has a good chance of succeeding." },
+    { "index": 109, "text": "我认为我的聪慧和能力不比身边大多数人差。", "textEn": "I seem to be about as capable and smart as most others around me." },
+    { "index": 110, "text": "我认为大多数人在面对好处时，如有必要，都会使用不公正的手段来获得它，而不是放弃利益。", "textEn": "Most people will use somewhat unfair means to gain profit or an advantage rather than to lose it." },
+    { "index": 111, "text": "我有很多的胃部问题。", "textEn": "I have a great deal of stomach trouble." },
+    { "index": 112, "text": "我对戏剧感兴趣。", "textEn": "I like dramatics." },
+    { "index": 113, "text": "我知道我的大多数麻烦是谁造成的。", "textEn": "I know who is responsible for most of my troubles." },
+    { "index": 114, "text": "有时我被别人的私人物品，如鞋子、手套等强烈吸引，以至于我想去摸弄甚至偷走它们，尽管它们对我毫无用处。", "textEn": "Sometimes I am so strongly attracted by the personal articles of others, such as shoes, gloves, etc., that I want to handle or steal them, even though I have no use for them." },
+    { "index": 115, "text": "血不会让我感到恐惧或恶心。", "textEn": "The sight of blood does not frighten me or make me sick." },
+    { "index": 116, "text": "我经常不理解我为什么变得一直如此烦躁。", "textEn": "Often I can't understand why I have been so irritable or grouchy." },
+    { "index": 117, "text": "我从未吐血或呕血。", "textEn": "I have never vomited blood or coughed up blood." },
+    { "index": 118, "text": "我不担心会患上重病。", "textEn": "I do not worry about catching diseases." },
+    { "index": 119, "text": "我喜欢采花或者种植室内植物。", "textEn": "I like collecting flowers or growing houseplants." },
+    { "index": 120, "text": "我经常觉得我有必要为了我认为正确的事情站出来。", "textEn": "I frequently find it necessary to stand up for what I think is right." },
+    { "index": 121, "text": "我从未沉迷于在传统意义上不寻常的性行为。", "textEn": "I have never indulged in unusual sex practices." },
+    { "index": 122, "text": "有时我思绪奔涌，超过我说话的速度。", "textEn": "At times my thoughts have raced ahead faster than I could speak them." },
+    { "index": 123, "text": "如果我在电影院能不付钱地看一场电影，且不会被他人发现，我会这么做。", "textEn": "If I could get into the movies without paying and be sure I was not seen, I would probably do it." },
+    { "index": 124, "text": "当其他人对我很好时，我经常会想他是否有其他的目的。", "textEn": "I often wonder what hidden reason another person may have for doing something nice for me." },
+    { "index": 125, "text": "我认为我的家庭和大多数我认识的人的家庭一样幸福。", "textEn": "I believe that my home life is as pleasant as that of most people I know." },
+    { "index": 126, "text": "我信任执法部门。", "textEn": "I believe in law enforcement." },
+    { "index": 127, "text": "批评或责骂会对我造成很大的伤害。", "textEn": "Criticism or scolding hurts me terribly." },
+    { "index": 128, "text": "我对烹饪感兴趣。", "textEn": "I like to cook." },
+    { "index": 129, "text": "我的举止很大程度上受到周边人的行为的影响。", "textEn": "My conduct is largely controlled by the behavior of those around me." },
+    { "index": 130, "text": "有时我感觉自己没有用。", "textEn": "I certainly feel useless at times." },
+    { "index": 131, "text": "我小时候曾经加入过能够有难同当的小团体。", "textEn": "When I was a child, I belonged to a group of friends that tried to be loyal through all kinds of trouble." },
+    { "index": 132, "text": "我相信有来生。", "textEn": "I believe in life hereafter." },
+    { "index": 133, "text": "我愿意成为一名士兵。", "textEn": "I would like to be a soldier." },
+    { "index": 134, "text": "有时，我想要挑衅他人。", "textEn": "At times I feel like picking a fistfight with someone." },
+    { "index": 135, "text": "我经常因为不能很快下定决心而错过一些事情。", "textEn": "I have often lost out on things because I couldn't make my mind up soon enough." },
+    { "index": 136, "text": "如果他人在我做重要的事情时打扰我，我会感到很不耐烦。", "textEn": "It makes me impatient to have people ask my advice or otherwise interrupt me when I am working on something important." },
+    { "index": 137, "text": "我曾经记日记。", "textEn": "I used to keep a diary." },
+    { "index": 138, "text": "我认为我被他人暗算。", "textEn": "I believe I am being plotted against." },
+    { "index": 139, "text": "在比赛中，我想赢而不是输。", "textEn": "I would rather win than lose in a game." },
+    { "index": 140, "text": "我总能不受思绪和想法的困扰而安然入睡。", "textEn": "Most nights I go to sleep without thoughts or ideas bothering me." },
+    { "index": 141, "text": "在过去的几年里，我的身体大部分时间都很好。", "textEn": "During the past few years I have been well most of the time." },
+    { "index": 142, "text": "我从未痉挛或抽搐过。", "textEn": "I have never had a fit or convulsion." },
+    { "index": 143, "text": "我的体重很稳定。", "textEn": "I am neither gaining nor losing weight." },
+    { "index": 144, "text": "我经常认为我被跟踪。", "textEn": "I believe I am being followed." },
+    { "index": 145, "text": "我经常感到无缘无故地承担后果。", "textEn": "I feel that I have often been punished without cause." },
+    { "index": 146, "text": "我很容易哭。", "textEn": "I cry easily." },
+    { "index": 147, "text": "我不能像以前一样容易地理解我读的东西。", "textEn": "I cannot understand what I read as often as I used to." },
+    { "index": 148, "text": "我的生活从未像现在一样好。", "textEn": "I have never felt better in my life than I do now." },
+    { "index": 149, "text": "有时我感到头顶触痛。", "textEn": "The top of my head sometimes feels tender." },
+    { "index": 150, "text": "有时我感到必须伤害自己或是他人。", "textEn": "Sometimes I feel as if I must injure either myself or someone else." },
+    { "index": 151, "text": "我讨厌承认自己被十分精明的人欺骗了。", "textEn": "I resent having anyone trick me so cleverly that I have to admit that I was fooled." },
+    { "index": 152, "text": "我不是很容易疲倦。", "textEn": "I do not tire quickly." },
+    { "index": 153, "text": "我喜欢结识重要人物，因为这能让我觉得自己同样重要。", "textEn": "I like to know some important people because it makes me feel important." },
+    { "index": 154, "text": "当我从高处向下看时，我感到害怕。", "textEn": "I am afraid when I look down from a high place." },
+    { "index": 155, "text": "我的家人触犯了法律不会让我感到紧张。", "textEn": "It wouldn't make me nervous if any members of my family got into trouble with the law." },
+    { "index": 156, "text": "我只有在漫步或是旅行时感到快乐。", "textEn": "I am never happy unless I am roaming or traveling around." },
+    { "index": 157, "text": "他人对我的看法不会使我感到困扰。", "textEn": "What others think of me does not bother me." },
+    { "index": 158, "text": "即使其他人也在做同样的事情，在聚会上表演特技让我感到不舒服。", "textEn": "It makes me uncomfortable to pull a stunt at a party even when others are doing the same sort of things." },
+    { "index": 159, "text": "我从未昏厥过。", "textEn": "I have never had a fainting spell." },
+    { "index": 160, "text": "我喜欢上学。", "textEn": "I liked school." },
+    { "index": 161, "text": "我经常需要避免表现出我的腼腆。", "textEn": "I frequently have to fight against showing that I am bashful." },
+    { "index": 162, "text": "我认为有人一直在试图毒害我。", "textEn": "Someone has been trying to poison me." },
+    { "index": 163, "text": "我不是很怕蛇。", "textEn": "I do not have a great fear of snakes." },
+    { "index": 164, "text": "我几乎不头晕。", "textEn": "I seldom or never have dizzy spells." },
+    { "index": 165, "text": "我的记忆力正常。", "textEn": "My memory seems to be all right." },
+    { "index": 166, "text": "有关性（生活）方面的问题，使我烦恼。", "textEn": "I am worried about sex." },
+    { "index": 167, "text": "我觉得和陌生人闲聊是困难的。", "textEn": "I find it hard to make small talk when I meet new people." },
+    { "index": 168, "text": "我曾有过一段时间，参与的事情结束后就忘记自己做了什么。", "textEn": "I have had periods in which I carried on activities without knowing later what I had been doing." },
+    { "index": 169, "text": "无聊的时候，我喜欢找点刺激。", "textEn": "When I get bored I like to stir up some excitement." },
+    { "index": 170, "text": "我感到我可能会失去理智。", "textEn": "I am afraid of losing my mind." },
+    { "index": 171, "text": "我反对给乞丐钱。", "textEn": "I am against giving money to beggars." },
+    { "index": 172, "text": "我经常发现我会手抖。", "textEn": "I frequently notice my hand shakes when I try to do something." },
+    { "index": 173, "text": "我可以阅读很长时间而不感到眼睛疲劳。", "textEn": "I can read a long while without tiring my eyes." },
+    { "index": 174, "text": "我喜欢阅读、研究与我正在进行的工作或学习相关的内容。", "textEn": "I like to study and read about things that I am working at." },
+    { "index": 175, "text": "很多时候，我感到极度虚弱。", "textEn": "I feel weak all over much of the time." },
+    { "index": 176, "text": "我几乎从不头痛。", "textEn": "I have very few headaches." },
+    { "index": 177, "text": "我的手并没有变得笨拙或别扭。", "textEn": "My hands have not become clumsy or awkward." },
+    { "index": 178, "text": "我对在尴尬时的流汗等生理反应感到恼火。", "textEn": "Sometimes, when embarrassed, I break out in a sweat, which annoys me greatly." },
+    { "index": 179, "text": "通常，我在走路时可以很好地保持平衡。", "textEn": "I have had no difficulty in keeping my balance while walking." },
+    { "index": 180, "text": "我认为我的思维不正常。", "textEn": "There is something wrong with my mind." },
+    { "index": 181, "text": "我没有过气喘或花粉过敏的症状。", "textEn": "I do not have spells of hay fever or asthma." },
+    { "index": 182, "text": "我曾在保持清晰认知的情况下无法控制自己的行为或言语。", "textEn": "I have had attacks in which I could not control my movements or speech, but in which I knew what was going on around me." },
+    { "index": 183, "text": "不是所有我认识的人我都喜欢。", "textEn": "I do not like everyone I know." },
+    { "index": 184, "text": "我很少做白日梦。", "textEn": "I daydream very little." },
+    { "index": 185, "text": "我希望我不是如此害羞。", "textEn": "I wish I were not so shy." },
+    { "index": 186, "text": "我不恐惧持有较多的金钱。", "textEn": "I am not afraid to handle money." },
+    { "index": 187, "text": "如果我是一个记者，我会喜欢报道有关剧院的新闻。", "textEn": "If I were a reporter, I would very much like to report news of the theatre." },
+    { "index": 188, "text": "我喜欢许多不同种类的娱乐活动。", "textEn": "I enjoy many different kinds of play and recreation." },
+    { "index": 189, "text": "我喜欢言语调戏他人。", "textEn": "I like to flirt." },
+    { "index": 190, "text": "我认为许多人用对待小孩子的方式对待我，而不是将我视作能独立自主的人。", "textEn": "Many people treat me more like a child than a grown-up." },
+    { "index": 191, "text": "我愿意成为一名新闻工作者。", "textEn": "I would like to be a journalist." },
+    { "index": 192, "text": "我母亲是个好人（若母亲已去世，则指我母亲生前是个好人）。", "textEn": "My mother is a good woman, or (if your mother is dead) my mother was a good woman." },
+    { "index": 193, "text": "通常，我走路时很小心地避开地砖的缝隙。", "textEn": "In walking, I am very careful to step over sidewalk cracks." },
+    { "index": 194, "text": "我从未因皮肤情况而感到担忧。", "textEn": "I have never had any breaking out on my skin that has worried me." },
+    { "index": 195, "text": "与其他家庭相比，我的家庭中缺乏爱与陪伴。", "textEn": "There is very little love and companionship in my family as compared to other homes." },
+    { "index": 196, "text": "我经常担忧一些事情。", "textEn": "I frequently find myself worrying about something." },
+    { "index": 197, "text": "我认为我会喜欢类似建筑承包商的工作。", "textEn": "I think I would like the work of a building contractor." },
+    { "index": 198, "text": "我经常听见不知道源于何处的声音。", "textEn": "I often hear voices without knowing where they come from." },
+    { "index": 199, "text": "我对自然科学感兴趣。", "textEn": "I like science." },
+    { "index": 200, "text": "当我知道自己无法回报时，我也能自然地向朋友寻求帮助。", "textEn": "It is not hard for me to ask for help from my friends even though I cannot return the favor." },
+    { "index": 201, "text": "我很热爱打猎。", "textEn": "I very much like hunting." },
+    { "index": 202, "text": "我的父母经常反对我身边的人。", "textEn": "My parents often objected to the kind of people I went around with." },
+    { "index": 203, "text": "有时我也会说人闲话。", "textEn": "I gossip a little at times." },
+    { "index": 204, "text": "我认为我的听力和大多数人一样好。", "textEn": "My hearing is apparently as good as that of most people." },
+    { "index": 205, "text": "我的一些家庭成员有着令我烦恼或厌恶的习惯。", "textEn": "Some members of my family have habits that bother and annoy me very much." },
+    { "index": 206, "text": "有时我发现我异常轻松地做出了决定。", "textEn": "At times I feel that I can make up my mind with unusually great ease." },
+    { "index": 207, "text": "我愿意加入一些社团或组织。", "textEn": "I would like to belong to several clubs." },
+    { "index": 208, "text": "我的心脏几乎从未有过异常的跳动，我也少有气短的感受。", "textEn": "I hardly ever notice my heart pounding and I am seldom short of breath." },
+    { "index": 209, "text": "我喜欢谈论和性相关的问题。", "textEn": "I like to talk about sex." },
+    { "index": 210, "text": "我喜欢去我没去过的地方。", "textEn": "I like to visit places where I have never been before." },
+    { "index": 211, "text": "我一直将某种责任作为生活目标。", "textEn": "I have been inspired to a program of life based on duty which I have since carefully followed." },
+    { "index": 212, "text": "我有时会因原则问题阻拦他人，尽管对方要做的事不会造成严重后果。", "textEn": "I have, at times stood in the way of people who were trying to do something, not because it amounted to much, but because of the principle of the thing." },
+    { "index": 213, "text": "我很容易生气，也很容易释怀。", "textEn": "I get mad easily and then get over it soon." },
+    { "index": 214, "text": "我一直很独立，不受到原生家庭的影响。", "textEn": "I have been quite independent and free from family rule." },
+    { "index": 215, "text": "我经常陷入沉思。", "textEn": "I brood a great deal." },
+    { "index": 216, "text": "我认为有人一直想抢劫我。", "textEn": "Someone has been trying to rob me." },
+    { "index": 217, "text": "我大多数亲戚都很关心同情我。", "textEn": "My relatives are nearly all in sympathy with me." },
+    { "index": 218, "text": "我曾有过一段时间十分烦躁不安，例如不能安心地坐在椅子上很长时间。", "textEn": "I have periods of such great restlessness that I cannot sit long in a chair." },
+    { "index": 219, "text": "我曾对爱情失望。", "textEn": "I have been disappointed in love." },
+    { "index": 220, "text": "我从不担心我的外貌与穿着打扮。", "textEn": "I never worry about my looks." },
+    { "index": 221, "text": "我经常梦到一些最好不让别人知道的事情。", "textEn": "I dream frequently about things that are best kept to myself." },
+    { "index": 222, "text": "我认为青少年的性教育是必要的。", "textEn": "Children should be taught all the main facts of sex." },
+    { "index": 223, "text": "我认为我不比大多数人更容易紧张。", "textEn": "I believe I am no more nervous that most others." },
+    { "index": 224, "text": "我几乎没有痛苦。", "textEn": "I have few or no pains." },
+    { "index": 225, "text": "我的做事方式容易引起他人的误解。", "textEn": "My way of doing things is apt to be misunderstood by others." },
+    { "index": 226, "text": "有时（甚至事情出了差错时），我莫名地感到兴奋。", "textEn": "Sometimes without any reason or even when things are going wrong, I feel excitedly happy or “on top of the world”." },
+    { "index": 227, "text": "我不责怪贪婪的人。", "textEn": "I don't blame people for trying to grab everything they can get in this world." },
+    { "index": 228, "text": "我认为有人想偷走我的想法和主意。", "textEn": "There are persons who are trying to steal my thoughts and ideas." },
+    { "index": 229, "text": "我曾经有过思维空白，不知道该做什么，也不知道周围在发生什么。", "textEn": "I have had blank spells in which my activities were interrupted and I did not know what was going on around me." },
+    { "index": 230, "text": "我可以和做了我认为不正确的事情的人友好相处。", "textEn": "I can be friendly with people who do things that I consider wrong." },
+    { "index": 231, "text": "我喜欢和互相开玩笑的人在一起。", "textEn": "I like to be with a crowd who play jokes on one another." },
+    { "index": 232, "text": "在选举中，有时我会把票投给我不熟悉的人。", "textEn": "Sometimes in elections, I vote for people about whom I know very little." },
+    { "index": 233, "text": "开始去做一件事情对我来说是困难的。", "textEn": "I have difficulty in starting to do things." },
+    { "index": 234, "text": "我认为我是一个被谴责的人。", "textEn": "I believe I am a condemned person." },
+    { "index": 235, "text": "我在学校学东西很慢。", "textEn": "I was a slow learner in school." },
+    { "index": 236, "text": "如果我是一个艺术家，我愿意画花草。", "textEn": "If I were an artist, I would like to draw flowers." },
+    { "index": 237, "text": "我不因容貌而烦恼。", "textEn": "It does not bother me that I am not better looking." },
+    { "index": 238, "text": "我即使在天气凉爽时也容易出汗。", "textEn": "I sweat very easily, even on cool days." },
+    { "index": 239, "text": "我非常自信。", "textEn": "I'm entirely self-confident." },
+    { "index": 240, "text": "有时我实在无法控制自己，会去偷东西或在商店顺手牵羊。", "textEn": "At times it has been impossible for me to stop from stealing or shoplifting something." },
+    { "index": 241, "text": "我认为不信任他人会使我更安全。", "textEn": "It is safer to trust nobody." },
+    { "index": 242, "text": "每周一次或多次，我会变得非常兴奋。", "textEn": "Once a week or more, I become very excited." },
+    { "index": 243, "text": "在人群中时，我很难想出该说什么话。", "textEn": "When in a group of people, I have trouble thinking of the right thing to say." },
+    { "index": 244, "text": "我情绪低落时，总有令人兴奋的事情使我心情好转。", "textEn": "Something exciting will almost always pull me out of it when I am feeling low." },
+    { "index": 245, "text": "我不会在出门时担心门窗是否锁好。", "textEn": "When I leave home, I do not worry about whether the door is locked and the windows are closed." },
+    { "index": 246, "text": "我认为我有难以饶恕的过错。", "textEn": "I believe my sins are unpardonable." },
+    { "index": 247, "text": "我的皮肤有部分麻木。", "textEn": "I have numbness in one or more places on my skin." },
+    { "index": 248, "text": "我不责怪利用轻信他人者的人。", "textEn": "I do not blame a person for taking advantage of people who leave themselves open to it." },
+    { "index": 249, "text": "在过去的几年里，我的视力变化不大。", "textEn": "My eyesight is as good as it has been for years." },
+    { "index": 250, "text": "有时我对罪犯的精明很有兴趣，以至于希望看到他们成功逃脱。", "textEn": "At times I have been so entertained by the cleverness of some criminals that I have hopes they would get away with it." },
+    { "index": 251, "text": "我经常觉得陌生人用苛责的眼神看我。", "textEn": "I have often felt that strangers were looking at me critically." },
+    { "index": 252, "text": "我觉得所有食物尝起来都一样。", "textEn": "Everything tastes the same." },
+    { "index": 253, "text": "我每天喝格外多的水。", "textEn": "I drink an unusually large amount of water every day." },
+    { "index": 254, "text": "我认为大多数人交朋友是因为朋友很可能对他们有用。", "textEn": "Most people make friends because friends are likely to be useful to them." },
+    { "index": 255, "text": "我并不经常感到耳鸣。", "textEn": "I do not often notice my ears ringing or buzzing." },
+    { "index": 256, "text": "有时我也会讨厌我平时爱的家人。", "textEn": "Once in a while I feel hate toward members of my family whom I usually love." },
+    { "index": 257, "text": "如果我是一个记者，我会喜欢报道有关体育的新闻。", "textEn": "If I were a reporter I would very much like to report sporting news." },
+    { "index": 258, "text": "我经常能在白天睡着，但在晚上很难入睡。", "textEn": "I can sleep during the day, but not at night." },
+    { "index": 259, "text": "我确信有人在谈论我。", "textEn": "I am sure I am being talked about." },
+    { "index": 260, "text": "我曾因低俗的笑话发笑。", "textEn": "Once in a while, I laugh at a dirty joke." },
+    { "index": 261, "text": "通常，我比我的朋友更不容易害怕。", "textEn": "I have very few fears compared to my friends." },
+    { "index": 262, "text": "在一群人中，如果有人要求我对我熟悉的事情进行讨论或发表意见，我不会感到尴尬。", "textEn": "In a group of people, I would not be embarrassed to be called upon to start a discussion or give an opinion about something I know well." },
+    { "index": 263, "text": "当一个罪犯通过聪明的律师逃避了罪责时，我会对现行的法律感到厌恶。", "textEn": "I am always disgusted with the law when a criminal is freed through the arguments of a smart lawyer." },
+    { "index": 264, "text": "我有过酗酒的经历。", "textEn": "I have used alcohol excessively." },
+    { "index": 265, "text": "我不愿意和人对话，除非他人主动找我说话。", "textEn": "I am likely not to speak to people until they speak to me." },
+    { "index": 266, "text": "我从未因法律而陷入麻烦。", "textEn": "I have never been in trouble with the law." },
+    { "index": 267, "text": "我曾有过一段时间莫名地格外高兴。", "textEn": "I have periods in which I feel unusually cheerful without any special reason." },
+    { "index": 268, "text": "我希望我能不受到“性”带来的困扰。", "textEn": "I wish I were not bothered by thoughts about sex." },
+    { "index": 269, "text": "我认为如果几个人犯了事，他们最好提前设计好一套说辞并坚持下去。", "textEn": "If several people find themselves in trouble, the best thing for them to do is agree upon a story and stick to it." },
+    { "index": 270, "text": "看到动物受苦不会使我难受。", "textEn": "It does not bother me particularly to see animals suffer." },
+    { "index": 271, "text": "我认为我的情感比他人更强烈。", "textEn": "I think that I feel more intensely than most people do." },
+    { "index": 272, "text": "我从未喜欢过毛绒玩具或是抱枕（洋娃娃）。", "textEn": "There was never a time in my life when I liked to play with dolls." },
+    { "index": 273, "text": "很多时候，生活令我感到压抑。", "textEn": "Life is a strain for me much of the time." },
+    { "index": 274, "text": "我对一些话题很敏感，以至于无法谈论它们。", "textEn": "I am so touchy on some subjects that I can't talk about them." },
+    { "index": 275, "text": "在学校时，我觉得在班级面前讲话十分困难。", "textEn": "In school I found it very hard to talk in front of the class." },
+    { "index": 276, "text": "我爱我的母亲（若母亲已去世，则指我过去爱我的母亲）。", "textEn": "I love my mother, or (if your mother is dead) I loved my mother." },
+    { "index": 277, "text": "很多时候，即使我和他人在一起，也仍然感到孤单。", "textEn": "Even when I am with people I feel lonely much of the time." },
+    { "index": 278, "text": "我认为我已经得到了应得的同情。", "textEn": "I get all the sympathy I should." },
+    { "index": 279, "text": "我拒绝玩我不擅长的游戏。", "textEn": "I refuse to play some games because I am not good at them." },
+    { "index": 280, "text": "我能和其他人一样容易地交到朋友。", "textEn": "I seem to make friends about as quickly as others do." },
+    { "index": 281, "text": "我不喜欢身边有人。", "textEn": "I dislike having people around me." },
+    { "index": 282, "text": "我有过梦游的经历。", "textEn": "I have been told that I walk during sleep." },
+    { "index": 283, "text": "我认为不保护好自己的财产而产生诱惑，从而被盗的人，应当和偷盗者承担相同的责任。", "textEn": "The person who provides temptation by leaving valuable property unprotected is about as much to blame for its theft as the one who steals it." },
+    { "index": 284, "text": "我认为几乎所有人都会说谎从而规避麻烦。", "textEn": "I think nearly anyone would tell a lie to keep out of trouble." },
+    { "index": 285, "text": "我比大多数人更敏感。", "textEn": "I am more sensitive than most people." },
+    { "index": 286, "text": "我认为大多数人实际上并不想尽力地帮助别人。", "textEn": "Most people inwardly dislike putting themselves out to help other people." },
+    { "index": 287, "text": "我经常做和性行为有关的梦。", "textEn": "Many of my dreams are about sex." },
+    { "index": 288, "text": "我的父母和家人对我过分苛责。", "textEn": "My parents and family find more fault with me than they should." },
+    { "index": 289, "text": "我很容易感到尴尬。", "textEn": "I am easily embarrassed." },
+    { "index": 290, "text": "我为自己的经济状况担忧。", "textEn": "I worry over money and business." },
+    { "index": 291, "text": "我从未真正爱上过任何人。", "textEn": "I have never been in love with anyone." },
+    { "index": 292, "text": "我的家人曾经做过令我恐惧的事情。", "textEn": "The things that some of my family have done have frightened me." },
+    { "index": 293, "text": "我几乎从不做梦。", "textEn": "I almost never dream." },
+    { "index": 294, "text": "我的脖子经常出现红斑。", "textEn": "My neck spots with red often." },
+    { "index": 295, "text": "我从未瘫痪或感到异常的肌肉虚弱。", "textEn": "I have never been paralyzed or had any unusual weakness of any of my muscles." },
+    { "index": 296, "text": "即使没有感冒，我有时也会难以发声或是声音改变。", "textEn": "Sometimes my voice leaves me or changes even though I have no cold." },
+    { "index": 297, "text": "我的父母经常让我听从他们不合理的意见。", "textEn": "My mother or father often made me obey even when I thought it was unreasonable." },
+    { "index": 298, "text": "我有时闻到特殊的气味。", "textEn": "Peculiar odors come to me at times." },
+    { "index": 299, "text": "我难以将注意力集中在一件事上。", "textEn": "I cannot keep my mind on one thing." },
+    { "index": 300, "text": "我有理由嫉妒我的一些家庭成员。", "textEn": "I have reason for feeling jealous of one or more members of my family." },
+    { "index": 301, "text": "我总是对某物或某人感到焦虑。", "textEn": "I feel anxiety about something or someone almost all the time." },
+    { "index": 302, "text": "我很容易对他人不耐烦。", "textEn": "I easily become impatient with people." },
+    { "index": 303, "text": "我总是希望我能死掉。", "textEn": "Most of the time I wish I were dead." },
+    { "index": 304, "text": "有时我非常兴奋以至于难以入睡。", "textEn": "Sometimes I become so excited that I find it hard to get to sleep." },
+    { "index": 305, "text": "我担心的事确实比我应该担心的多（超出了我应该担心的范围）。", "textEn": "I have certainly had more than my share of things to worry about." },
+    { "index": 306, "text": "我认为没有人关心我经历了什么。", "textEn": "No one cares much about what happens to you." },
+    { "index": 307, "text": "有时我的听力格外好，这令我感到困扰。", "textEn": "At times I hear so well that it bothers me." },
+    { "index": 308, "text": "我很快就会忘记人们刚才对我说的话。", "textEn": "I forget right away what people say to me." },
+    { "index": 309, "text": "通常，即使是小事，我也要停下来仔细思考后再做。", "textEn": "I usually have to stop and think before I act, even in small matters." },
+    { "index": 310, "text": "我经常绕路以避免遇到认识的人。", "textEn": "Often I cross the street in order not to meet someone I see." },
+    { "index": 311, "text": "我经常感觉事物不真切。", "textEn": "I often feel as if things are not real." },
+    { "index": 312, "text": "如果我读报纸，唯一能吸引我的内容是上面的漫画、插画。", "textEn": "The only interesting part of newspapers is the comic strips." },
+    { "index": 313, "text": "我经常想无意义地数一些东西，例如灯牌上的灯数。", "textEn": "I have a habit of counting things that are not important, such as bulbs on electric signs and so forth." },
+    { "index": 314, "text": "我并不存在这样的敌人：他真正的想要伤害我。", "textEn": "I have no enemies who really wish to harm me." },
+    { "index": 315, "text": "面对比我预期中更友好的人时，我往往会保持警惕。", "textEn": "I tend to be on my guard with people who are somewhat friendlier than I had expected." },
+    { "index": 316, "text": "我有一些奇怪的独特想法。", "textEn": "I have strange and peculiar thoughts." },
+    { "index": 317, "text": "当我需要离家旅行时，我会感到焦虑不安。", "textEn": "I get anxious and upset when I have to make a short trip away from home." },
+    { "index": 318, "text": "通常，我期望在事情上取得成功。", "textEn": "I usually expect to succeed in things I do." },
+    { "index": 319, "text": "当我独自一人时，我经常觉得听到奇怪的声音。", "textEn": "I hear strange things when I am alone." },
+    { "index": 320, "text": "我一直害怕一些尽管我知道不可能对我造成伤害的人或物。", "textEn": "I have been afraid of things or people that I knew could not hurt me." },
+    { "index": 321, "text": "我不对进入一个已经有他人在交谈的场合感到恐惧不适。", "textEn": "I have no dread of going into a room by myself where other people have already gathered and are talking." },
+    { "index": 322, "text": "我害怕锋利、尖锐的物品，例如刀。", "textEn": "I am afraid of a knife or anything very sharp or pointed." },
+    { "index": 323, "text": "有时我会享受伤害我所爱的人。", "textEn": "Sometimes I enjoy hurting persons I love." },
+    { "index": 324, "text": "我很容易让他人害怕我，并且有时为了取乐故意这样做。", "textEn": "I can easily make other people afraid of me, and sometimes do it for the fun of it." },
+    { "index": 325, "text": "我似乎比其他人更难以集中注意力。", "textEn": "I have more trouble concentrating than others seem to have." },
+    { "index": 326, "text": "我曾多次放弃自己能做好的事情，因为我低估了自己的能力。", "textEn": "I have several times given up doing a thing because I thought too little of my ability." },
+    { "index": 327, "text": "我的脑海里回绕着可怕的言语，且我难以摆脱。", "textEn": "Bad words, often terrible words, come into my mind and I cannot get rid of them." },
+    { "index": 328, "text": "有时一些无意义的想法会在我的脑海中困扰我好几天。", "textEn": "Sometimes some unimportant thought will run through my mind and bother me for days." },
+    { "index": 329, "text": "几乎每天都有使我害怕的事情发生。", "textEn": "Almost every day something happens to frighten me." },
+    { "index": 330, "text": "有时我充满活力。", "textEn": "At times I am all full of energy." },
+    { "index": 331, "text": "我倾向于把事情看得很重。", "textEn": "I am inclined to take things hard." },
+    { "index": 332, "text": "有时我会享受被我所爱的人伤害。", "textEn": "At times I have enjoyed being hurt by someone I loved." },
+    { "index": 333, "text": "经常有人对我说侮辱性的话语。", "textEn": "People say insulting and vulgar things about me." },
+    { "index": 334, "text": "我在室内会感到不适。", "textEn": "I feel uneasy indoors." },
+    { "index": 335, "text": "我通常不会感到不自在", "textEn": "I am not usually self-conscious." },
+    { "index": 336, "text": "我认为有人控制了我的思绪。", "textEn": "Someone has control over my mind." },
+    { "index": 337, "text": "在聚会上，我倾向于自己坐着，而不是加入到喧闹之中。", "textEn": "At parties I am more likely to sit by myself or with just one other person than to join in with the crowd." },
+    { "index": 338, "text": "人们常常让我失望。", "textEn": "People often disappoint me." },
+    { "index": 339, "text": "我有时觉得自己难以克服如此多的困难。", "textEn": "I have sometimes felt that difficulties were piling up so high that I could not overcome them." },
+    { "index": 340, "text": "我喜欢参与舞会。", "textEn": "I love to go to dances." },
+    { "index": 341, "text": "有时，我的思维似乎不如平时敏捷。", "textEn": "At periods, my mind seems to work more slowly than usual." },
+    { "index": 342, "text": "我经常在公共交通工具上与陌生人交谈。", "textEn": "While in trains, busses, etc., I often talk with strangers." },
+    { "index": 343, "text": "我喜欢小孩子。", "textEn": "I enjoy children." },
+    { "index": 344, "text": "我喜欢参与赌注小的赌博。", "textEn": "I enjoy gambling for small stakes." },
+    { "index": 345, "text": "如果有机会，我会做一些对世界有益的事情。", "textEn": "If given the chance, I could do some things that would be of great benefit to the world." },
+    { "index": 346, "text": "我经常遇到一些被认为是专家的人，但他们的能力不如我。", "textEn": "I have often met people who were supposed to be experts who were no better than I." },
+    { "index": 347, "text": "我听说熟人很成功时，就感觉自己很失败。", "textEn": "It makes me feel like a failure when I hear of the success of someone I know well." },
+    { "index": 348, "text": "我经常想回到小时候。", "textEn": "I often think: “I wish I were a child again.”" },
+    { "index": 349, "text": "我身处独自一人的环境时最开心。", "textEn": "I am never happier than when alone." },
+    { "index": 350, "text": "如果有机会，我会成为一个好的领导者。", "textEn": "If given the chance I would make a good leader of people." },
+    { "index": 351, "text": "我对低俗的故事感到尴尬。", "textEn": "I am embarrassed by dirty stories." },
+    { "index": 352, "text": "我认为人们通常更多地要求得到自己的权利，而不为他人发声。", "textEn": "People generally demand more respect for their own rights than they are willing to allow for others." },
+    { "index": 353, "text": "我喜欢社交聚会，只是为了和他人在一起。", "textEn": "I enjoy social gatherings just to be with people." },
+    { "index": 354, "text": "我努力记下有趣的故事，为了把它们讲给别人听。", "textEn": "I try to remember good stories to pass them on to other people." },
+    { "index": 355, "text": "我曾不止一次觉得有人用催眠操纵我做一些事情。", "textEn": "At one or more times in my life I felt that someone was making me do things by hypnotizing me." },
+    { "index": 356, "text": "我很难在完成自己承担的任务前把它放在一边，即使只是一小会儿。", "textEn": "I find it hard to set aside a task that I have undertaken, even for a short time." },
+    { "index": 357, "text": "我很少参与我所属团体的八卦讨论。", "textEn": "I am quite often not in on the gossip and talk of the group that I belong to." },
+    { "index": 358, "text": "我经常发现他人嫉妒我的好主意，只因他们没有第一个想出来。", "textEn": "I have often found people jealous of my good ideas, just because they had not thought of them first." },
+    { "index": 359, "text": "我喜欢在人群中的兴奋感。", "textEn": "I enjoy the excitement of a crowd." },
+    { "index": 360, "text": "我不介意与陌生人见面。", "textEn": "I do not mind meeting strangers." },
+    { "index": 361, "text": "我认为有人一直试图影响我的思想。", "textEn": "Someone has been trying to influence my mind." },
+    { "index": 362, "text": "我曾为了逃避一些事情而装病。", "textEn": "I can remember “playing sick” to get out of something." },
+    { "index": 363, "text": "我的担忧会在身处许多积极的朋友中时消失。", "textEn": "My worries seem to disappear when I get into a crowd of lively friends." },
+    { "index": 364, "text": "当事情出了差错时，我会很想放弃。", "textEn": "I feel like giving up quickly when things go wrong." },
+    { "index": 365, "text": "我喜欢让别人知道我的观点和立场。", "textEn": "I like to let people know where I stand on things." },
+    { "index": 366, "text": "我曾有过一段时间觉得自己似乎充满活力，以至于似乎几天都不用睡觉。", "textEn": "I have had periods when I felt so full of pep that sleep did not seem necessary for days at a time." },
+    { "index": 367, "text": "我会尽可能避免身处人群中。", "textEn": "Whenever possible I avoid being in a crowd." },
+    { "index": 368, "text": "我在面对危险或困难时退缩。", "textEn": "I shrink from facing a crisis or difficulty." },
+    { "index": 369, "text": "当别人认为我做的事情不值得时，我很容易放弃。", "textEn": "I am apt to pass up something I want to do when others feel that it isn't worth doing." },
+    { "index": 370, "text": "我喜欢聚会等社交活动。", "textEn": "I like parties and socials." }
+  ],
+  "scoring": {
+    "kind": "tScore",
+    "decimals": 0,
+    "hasTotal": false,
+    "totalLabel": "",
+    "totalBands": [],
+    "summaryFactorId": "D",
+    "factors": [
+      {
+        "id": "F",
+        "name": "诈病 (F)",
+        "itemIndexes": [18,24,30,36,42,48,54,60,66,72,84,96,114,138,144,150,156,162,168,180,198,216,228,234,240,246,252,258,264,270,282,288,294,300,306,312,324,336,349,355,361],
+        "falseItemIndexes": [6,12,78,90,102,108,120,126,132,174,186,192,204,210,222,276,318,330,343],
+        "normTable": {
+          "startRaw": 0,
+          "male": [36,39,42,45,48,51,55,58,61,64,67,70,73,76,79,82,85,89,92,95,98,101,104,107,110,113,116,119,120],
+          "female": [37,41,44,48,51,55,58,61,65,68,72,75,79,82,85,89,92,96,99,103,106,109,113,116,120]
+        },
+        "cnNorm": {
+          "male": { "meanT": 64.8, "sdT": 13.9 },
+          "female": { "meanT": 68.3, "sdT": 15.2 }
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "稀有回答很少，作答方式常规；在极端情况下也可能反映回避自我暴露。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "稀有回答量处于常见范围，本次作答的有效性大体可以接受。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "稀有回答偏多，可能反映明显的困扰或求助愿望，也可能反映夸大症状、随机作答或理解题目有困难。" },
+          { "min": 70, "level": "显著偏高", "description": "稀有回答很多，本次结果的有效性存疑，建议核对作答状态后与专业人士讨论。" }
+        ]
+      },
+      {
+        "id": "L",
+        "name": "说谎 (L)",
+        "itemIndexes": [],
+        "falseItemIndexes": [16,29,41,51,77,93,102,107,123,139,153,183,203,232,260],
+        "normTable": {
+          "startRaw": 0,
+          "male": [35,39,43,48,52,56,61,65,70,74,78,83,87,91,96,100],
+          "female": [33,38,42,47,52,57,62,66,71,76,81,86,90,95,100,105]
+        },
+        "cnNorm": {
+          "male": { "meanT": 60.6, "sdT": 12.6 },
+          "female": { "meanT": 60.9, "sdT": 13.9 }
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "很少给出社会赞许性的回答，作答较为坦率；也可能是对自己要求不严或不太在意自我呈现。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "社会赞许性回答处于常见水平，作答态度大体坦率。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "社会赞许性回答偏多，可能有意呈现良好形象，也可能反映较为拘谨、道德要求严格的作答风格。" },
+          { "min": 70, "level": "显著偏高", "description": "社会赞许性回答明显偏多，提示作答可能不够坦率，其余量表的结果需要谨慎解释。" }
+        ]
+      },
+      {
+        "id": "K",
+        "name": "校正 (K)",
+        "itemIndexes": [83],
+        "falseItemIndexes": [29,37,58,76,110,116,122,127,130,136,148,157,158,167,171,196,213,243,267,284,290,330,338,339,341,346,348,356,365],
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,null,null,null,null,null,30,33,35,37,39,41,43,45,47,49,51,54,56,58,60,62,64,66,68,70,72,75,77,79,81],
+          "female": [null,null,null,null,null,null,30,32,35,37,39,41,43,46,48,50,52,54,56,59,61,63,65,67,70,72,74,76,78,81,83]
+        },
+        "cnNorm": {
+          "male": { "meanT": 47.3, "sdT": 11.2 },
+          "female": { "meanT": 45.6, "sdT": 12.1 }
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "对自身心理资源与应对能力的自评较低，倾向于坦承缺点，也可能反映当前支持感不足。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "心理防御与自我强度处于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "对心理资源与自我控制的自评较高，倾向于以成熟方式应对，也可能带有一定防御性。" },
+          { "min": 70, "level": "显著偏高", "description": "明显倾向于呈现良好适应的形象，可能回避暴露困扰，解释其他量表结果时需要留意作答态度。" }
+        ]
+      },
+      {
+        "id": "Hs",
+        "name": "疑病 (Hs)",
+        "itemIndexes": [18,28,39,53,59,97,101,111,149,175,247],
+        "falseItemIndexes": [2,3,8,10,20,45,47,57,91,117,141,143,152,164,173,176,179,208,224,249,255],
+        "kCorrection": { "factorId": "K", "weight": 0.5 },
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,null,30,31,31,32,33,35,37,39,42,45,48,51,54,57,59,62,64,66,68,70,73,75,77,79,81,84,86,88,90,92,94,97,99,101,103,105,108,110,112,114,116,119,120],
+          "female": [null,null,null,null,null,null,30,33,35,38,40,43,46,49,51,54,56,59,61,63,65,67,69,71,73,76,78,80,82,84,86,88,90,92,94,97,99,101,103,105,107,109,111,113,115,117,120]
+        },
+        "cnNorm": {
+          "male": { "meanT": 56.1, "sdT": 12.0 },
+          "female": { "meanT": 55.3, "sdT": 12.2 }
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "很少报告躯体不适，对健康状况的担忧较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "躯体关注程度处于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "躯体不适主诉或对健康的担忧偏多，常与压力、焦虑或对身体感受的过度留意有关。" },
+          { "min": 70, "level": "显著偏高", "description": "躯体主诉很多，可能以身体不适的方式表达心理困扰，建议结合医学检查与专业评估来理解。" }
+        ]
+      },
+      {
+        "id": "D",
+        "name": "抑郁 (D)",
+        "itemIndexes": [5,15,18,31,38,39,46,56,73,92,117,127,130,146,147,170,175,181,215,233],
+        "falseItemIndexes": [2,9,10,20,29,33,37,43,45,49,55,68,75,76,95,109,118,134,140,141,142,143,148,165,178,188,189,212,221,223,226,238,245,248,260,267,330],
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,null,null,null,null,null,null,null,null,30,32,34,36,38,40,42,45,47,50,52,54,57,59,61,62,64,66,68,70,72,74,76,78,80,81,83,85,87,89,91,93,95,97,98,100,102,104,106,108,110,112,114,115,117,119,120],
+          "female": [null,null,null,null,null,null,null,null,null,null,30,32,34,36,38,40,42,44,46,47,49,51,53,55,57,59,62,64,66,68,70,72,75,77,79,81,83,86,88,90,92,94,96,99,101,103,105,107,109,112,114,116,118,120]
+        },
+        "cnNorm": {
+          "male": { "meanT": 62.8, "sdT": 10.0 },
+          "female": { "meanT": 63.0, "sdT": 10.7 }
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "情绪低落、无望、缺乏动力的报告很少，主观情绪状态较好。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "抑郁相关体验处于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "情绪低落、兴趣减退、无望感等体验偏多，反映当前心理负担较重。" },
+          { "min": 70, "level": "显著偏高", "description": "抑郁相关体验很多，可能伴有明显的情绪痛苦与动力下降，建议尽快寻求专业支持。" }
+        ]
+      },
+      {
+        "id": "Hy",
+        "name": "癔症 (Hy)",
+        "itemIndexes": [11,18,31,39,40,44,65,101,166,172,175,218,230],
+        "falseItemIndexes": [2,3,7,8,9,10,14,26,29,45,47,58,76,81,91,95,98,110,115,116,124,125,129,135,141,148,151,152,157,159,161,164,167,173,176,179,185,193,208,213,224,241,243,249,253,263,265],
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,null,null,null,null,null,null,null,30,31,32,33,34,35,37,39,40,42,43,45,47,50,52,54,57,59,61,64,66,69,71,74,76,79,81,84,86,89,91,94,96,99,101,104,106,109,111,114,116,119,120],
+          "female": [null,null,null,null,null,null,null,null,null,30,31,32,32,34,35,36,38,39,41,43,45,47,49,51,54,56,58,61,63,65,68,70,73,75,77,80,82,84,87,89,90,92,94,96,99,101,104,106,108,111,113,115,118,120]
+        },
+        "cnNorm": {
+          "male": { "meanT": 53.2, "sdT": 12.6 },
+          "female": { "meanT": 52.7, "sdT": 12.8 }
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "很少以躯体方式应对压力，情绪表达较为直接。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "应对方式与情绪表达处于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "倾向以躯体不适应对压力，同时可能否认心理困扰，人际上可能较为依赖或幼稚。" },
+          { "min": 70, "level": "显著偏高", "description": "此类应对方式很明显，心理冲突可能主要以身体症状呈现，建议与专业人士讨论。" }
+        ]
+      },
+      {
+        "id": "Pd",
+        "name": "精神病态偏离 (Pd)",
+        "itemIndexes": [17,21,22,31,32,35,42,52,54,56,71,82,89,94,99,105,113,195,202,219,225,259,264,288],
+        "falseItemIndexes": [9,12,34,70,79,83,95,122,125,129,143,157,158,160,167,171,185,209,214,217,226,243,261,263,266,267],
+        "kCorrection": { "factorId": "K", "weight": 0.4 },
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,null,null,null,null,null,null,null,null,null,null,30,31,33,34,35,37,39,40,42,44,46,48,50,52,54,57,59,62,64,67,69,72,74,77,79,82,84,87,90,92,95,97,100,102,105,107,110,112,115,117,120],
+          "female": [null,null,null,null,null,null,null,null,null,null,null,null,30,32,34,36,37,39,41,43,45,47,49,51,53,55,58,60,63,66,68,71,73,76,79,81,84,87,89,92,94,97,100,102,105,107,110,113,115,118,120]
+        },
+        "cnNorm": {
+          "male": { "meanT": 52.5, "sdT": 10.1 },
+          "female": { "meanT": 51.3, "sdT": 10.0 }
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "与家庭和社会规范的冲突较少，行为较为循规蹈矩。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "对社会规范的态度处于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "对权威与规范的不满、家庭关系紧张或冲动倾向偏多。" },
+          { "min": 70, "level": "显著偏高", "description": "明显的规范冲突、疏离感或冲动倾向，可能伴随行为方面的现实困难，建议进行专业评估。" }
+        ]
+      },
+      {
+        "id": "Mf",
+        "name": "男性化-女性化（男式） (Mf)",
+        "itemIndexes": [4,25,62,64,67,74,80,112,119,122,128,137,166,177,187,191,196,205,209,219,236,251,256,268,271],
+        "falseItemIndexes": [1,19,26,27,63,68,69,76,86,103,104,107,120,121,132,133,163,184,193,194,197,199,201,207,231,235,237,239,254,257,272],
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,72,76,78,79,81,83,85,87,89,91,93,95,97,99,101,103,105,107,109],
+          "female": []
+        },
+        "cnNorm": {
+          "male": { "meanT": 46.9, "sdT": 8.3 },
+          "female": { "meanT": 64.5, "sdT": 9.2 }
+        },
+        "appliesToGender": "male",
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "兴趣与态度较为传统，接近同性别常模中的传统取向。此量表描述个人风格，不是病理指标。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "兴趣与态度的分布处于常见范围。此量表高低本身不代表存在问题。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "兴趣与态度偏离传统性别角色取向，可能表现为审美与情感表达方面的敏感性较高。" },
+          { "min": 70, "level": "显著偏高", "description": "兴趣与态度明显偏离传统性别角色取向，属于个人风格与兴趣的描述，不宜作病理理解。" }
+        ]
+      },
+      {
+        "id": "Mf",
+        "name": "男性化-女性化（女式） (Mf)",
+        "itemIndexes": [4,25,62,64,67,74,80,112,119,121,122,128,137,177,187,191,196,205,219,236,251,256,271],
+        "falseItemIndexes": [1,19,26,27,63,68,69,76,86,103,104,107,120,132,133,163,166,184,193,194,197,199,201,207,209,231,235,237,239,254,257,268,272],
+        "normTable": {
+          "startRaw": 0,
+          "male": [],
+          "female": [null,null,null,null,null,null,null,120,118,116,114,111,109,106,104,101,99,96,94,92,89,87,84,82,79,77,74,72,69,67,65,62,60,57,55,52,50,47,45,43,40,38,35,33,30]
+        },
+        "cnNorm": {
+          "male": { "meanT": 46.9, "sdT": 8.3 },
+          "female": { "meanT": 64.5, "sdT": 9.2 }
+        },
+        "appliesToGender": "female",
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "兴趣与态度较为传统，接近同性别常模中的传统取向。此量表描述个人风格，不是病理指标。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "兴趣与态度的分布处于常见范围。此量表高低本身不代表存在问题。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "兴趣与态度偏离传统性别角色取向，可能表现为审美与情感表达方面的敏感性较高。" },
+          { "min": 70, "level": "显著偏高", "description": "兴趣与态度明显偏离传统性别角色取向，属于个人风格与兴趣的描述，不宜作病理理解。" }
+        ]
+      },
+      {
+        "id": "Pa",
+        "name": "妄想 (Pa)",
+        "itemIndexes": [16,17,22,23,24,42,99,113,138,144,145,146,162,234,259,271,277,285,305,307,333,334,336,355,361],
+        "falseItemIndexes": [81,95,98,100,104,110,244,255,266,283,284,286,297,314,315],
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,null,30,31,32,34,37,39,42,46,49,53,57,61,64,68,72,75,79,83,86,90,94,97,101,105,108,112,116,119,120],
+          "female": [null,null,30,31,32,34,37,39,42,45,49,52,56,59,63,67,70,74,78,81,85,89,92,96,100,103,107,111,114,118,120]
+        },
+        "cnNorm": {
+          "male": { "meanT": 55.9, "sdT": 13.0 },
+          "female": { "meanT": 57.0, "sdT": 13.6 }
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "较少怀疑他人意图，人际信任度较高，也可能对他人的态度不够敏感。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "人际信任与敏感程度处于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "对他人的戒备、被误解感或委屈感偏多。" },
+          { "min": 70, "level": "显著偏高", "description": "明显的多疑、被害感或关系观念，可能影响人际功能，建议尽快进行专业评估。" }
+        ]
+      },
+      {
+        "id": "Pt",
+        "name": "精神衰弱 (Pt)",
+        "itemIndexes": [11,16,23,31,38,56,65,73,82,89,94,130,147,170,175,196,218,242,273,275,277,285,289,301,302,304,308,309,310,313,316,317,320,325,326,327,328,329,331],
+        "falseItemIndexes": [3,9,33,109,140,165,174,293,321],
+        "kCorrection": { "factorId": "K", "weight": 1 },
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,null,null,null,null,null,null,null,null,null,null,null,null,null,30,31,32,33,34,36,37,39,41,43,44,47,49,51,53,55,57,59,62,64,66,68,70,72,74,77,79,81,83,85,87,89,91,94,96,98,100,102,104,106,109,111,113,115,117,119,120],
+          "female": [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,30,31,32,33,35,37,38,40,42,44,47,49,51,53,55,57,59,61,62,64,66,68,70,72,73,75,77,79,81,83,84,86,88,90,92,94,95,97,99,101,103,105,106,108,110,112,114,116,117,119,120]
+        },
+        "cnNorm": {
+          "male": { "meanT": 57.2, "sdT": 12.0 },
+          "female": { "meanT": 55.8, "sdT": 11.4 }
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "焦虑、强迫与自责的体验较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "焦虑与强迫相关体验处于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "紧张、担忧、反复思虑与自我怀疑偏多。" },
+          { "min": 70, "level": "显著偏高", "description": "焦虑、强迫或自责体验很突出，可能明显影响日常功能，建议寻求专业帮助。" }
+        ]
+      },
+      {
+        "id": "Sc",
+        "name": "精神分裂 (Sc)",
+        "itemIndexes": [16,17,21,22,23,31,32,35,38,42,44,46,48,65,85,92,138,145,147,166,168,170,180,182,190,218,221,229,233,234,242,247,252,256,268,273,274,277,279,281,287,291,292,296,298,299,303,307,311,316,319,320,322,323,325,329,332,333,355],
+        "falseItemIndexes": [6,9,12,34,90,91,106,165,177,179,192,210,255,276,278,280,290,295,343],
+        "kCorrection": { "factorId": "K", "weight": 1 },
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,null,null,null,null,null,null,null,null,null,null,null,30,31,32,33,34,35,36,37,39,41,42,44,45,47,49,51,53,55,56,58,60,62,63,65,67,69,70,72,74,75,77,79,81,82,84,86,87,89,91,93,94,96,98,99,101,103,105,106,108,110,111,113,115,117,118,120],
+          "female": [null,null,null,null,null,null,null,null,null,null,null,null,null,30,31,32,33,34,36,37,39,41,42,44,46,48,50,52,53,55,57,59,60,62,63,65,66,67,69,70,72,73,75,76,78,79,81,82,84,85,87,88,90,91,93,94,96,97,99,100,102,103,105,106,108,109,111,112,114,115,116,118,119,120]
+        },
+        "cnNorm": {
+          "male": { "meanT": 62.7, "sdT": 12.1 },
+          "female": { "meanT": 62.3, "sdT": 11.7 }
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "思维与感知体验较为常规，社会疏离感少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "相关体验处于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "疏离感、怪异思维或感知体验偏多，也可能反映明显的困惑与压力。" },
+          { "min": 70, "level": "显著偏高", "description": "此类体验很突出，可能伴有现实检验方面的困难，建议尽快由专业人士评估。" }
+        ]
+      },
+      {
+        "id": "Ma",
+        "name": "轻躁狂 (Ma)",
+        "itemIndexes": [13,15,21,23,50,55,61,85,87,98,113,122,131,145,155,168,169,182,190,200,205,206,211,212,218,220,227,229,238,242,244,248,250,253,269],
+        "falseItemIndexes": [88,93,100,106,107,136,154,158,167,243,263],
+        "kCorrection": { "factorId": "K", "weight": 0.2 },
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,null,null,null,null,null,null,null,null,30,31,33,35,36,38,39,41,43,45,47,49,51,53,56,59,62,65,68,72,75,78,81,82,88,91,94,98,101,104,107,110,114,117,120],
+          "female": [null,null,null,null,null,null,null,null,null,30,31,33,35,37,39,41,43,45,47,49,51,53,56,59,62,65,68,71,74,76,79,82,85,88,91,94,97,100,103,106,109,112,115,118,120]
+        },
+        "cnNorm": {
+          "male": { "meanT": 51.0, "sdT": 11.5 },
+          "female": { "meanT": 49.7, "sdT": 10.7 }
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "活动水平与心境较为平和，也可能反映精力不足、兴趣减少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "精力与活动水平处于常见范围。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "精力旺盛、思维与活动加快、易激惹或计划过多的倾向偏多。" },
+          { "min": 70, "level": "显著偏高", "description": "明显的活动与心境加速，可能伴随冲动与注意力分散，建议进行专业评估。" }
+        ]
+      },
+      {
+        "id": "Si",
+        "name": "社会内向 (Si)",
+        "itemIndexes": [31,56,70,100,104,110,127,135,158,161,167,185,215,243,251,265,275,284,289,296,302,308,326,337,338,347,348,351,352,357,364,367,368,369],
+        "falseItemIndexes": [25,32,49,79,86,106,112,131,181,189,207,209,231,237,255,262,267,280,321,328,335,340,342,344,345,350,353,354,358,359,360,362,363,366,370],
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,null,null,null,null,null,null,null,null,30,31,33,34,35,36,37,38,40,41,42,43,44,45,47,48,49,50,51,52,54,55,56,57,58,59,61,62,63,64,65,66,68,69,70,71,72,73,75,76,77,78,79,80,82,83,84,85,86,87,89,90,91,92,93,94,96,97,98,99,100],
+          "female": [null,null,null,null,null,null,null,null,30,31,32,33,34,35,36,37,38,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,95]
+        },
+        "cnNorm": {
+          "male": { "meanT": 57.4, "sdT": 8.6 },
+          "female": { "meanT": 58.1, "sdT": 8.2 }
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "社交主动、乐于与人相处，可能偏好热闹的环境。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "社交倾向处于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "偏好独处，在社交场合中较为拘谨或害羞。" },
+          { "min": 70, "level": "显著偏高", "description": "明显的社交回避与孤独倾向，可能影响人际支持，建议关注并在必要时与专业人士讨论。" }
+        ]
+      },
+      {
+        "id": "D1",
+        "name": "主观抑郁 (D1)",
+        "itemIndexes": [31,38,39,46,56,73,92,127,130,146,147,170,175,215],
+        "falseItemIndexes": [2,9,43,49,75,95,109,118,140,148,178,188,189,223,260,267,330],
+        "normTable": {
+          "startRaw": 0,
+          "male": [32,35,37,40,42,45,48,50,53,56,58,61,64,66,69,71,74,77,79,82,85,87,90,93,95,98,100,103,106,108,111,114,116],
+          "female": [32,34,37,39,41,44,46,48,51,53,56,58,60,63,65,67,70,72,75,77,79,82,84,86,89,91,94,96,98,101,103,105,108]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "主观抑郁方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "主观抑郁方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "主观抑郁方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "主观抑郁方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "D2",
+        "name": "精神运动性迟滞 (D2)",
+        "itemIndexes": [38,46,170,233],
+        "falseItemIndexes": [9,29,37,49,55,76,134,188,189,212],
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,30,32,37,43,48,54,59,65,70,76,81,87,92,98],
+          "female": [null,null,30,35,41,46,51,57,62,68,73,79,84,90,95]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "精神运动性迟滞方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "精神运动性迟滞方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "精神运动性迟滞方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "精神运动性迟滞方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "D3",
+        "name": "躯体功能障碍 (D3)",
+        "itemIndexes": [18,117,175,181],
+        "falseItemIndexes": [2,20,45,141,142,143,148],
+        "normTable": {
+          "startRaw": 0,
+          "male": [30,35,43,51,59,67,75,83,91,100,108,116],
+          "female": [30,34,41,48,56,63,70,78,85,93,100,107]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "躯体功能障碍方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "躯体功能障碍方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "躯体功能障碍方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "躯体功能障碍方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "D4",
+        "name": "思维迟钝 (D4)",
+        "itemIndexes": [15,31,38,73,92,147,170,233],
+        "falseItemIndexes": [9,10,43,75,109,165,188],
+        "normTable": {
+          "startRaw": 0,
+          "male": [38,43,48,53,58,62,67,72,77,82,86,91,96,101,105,110],
+          "female": [38,43,48,52,57,61,66,70,75,79,84,88,93,97,102,106]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "思维迟钝方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "思维迟钝方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "思维迟钝方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "思维迟钝方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "D5",
+        "name": "忧思反刍 (D5)",
+        "itemIndexes": [38,56,92,127,130,146,170,215],
+        "falseItemIndexes": [75,95],
+        "normTable": {
+          "startRaw": 0,
+          "male": [40,45,51,57,62,68,74,79,85,91,96],
+          "female": [37,42,47,53,58,63,68,73,78,83,89]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "忧思反刍方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "忧思反刍方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "忧思反刍方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "忧思反刍方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Hy1",
+        "name": "否认社交焦虑 (Hy1)",
+        "itemIndexes": [],
+        "falseItemIndexes": [129,161,167,185,243,265],
+        "normTable": {
+          "startRaw": 0,
+          "male": [30,34,40,45,51,56,61],
+          "female": [30,35,40,45,51,56,61]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "否认社交焦虑方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "否认社交焦虑方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "否认社交焦虑方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "否认社交焦虑方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Hy2",
+        "name": "对关爱的需求 (Hy2)",
+        "itemIndexes": [230],
+        "falseItemIndexes": [26,58,76,81,98,110,124,151,213,241,263],
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,30,32,36,40,43,47,51,55,59,63,67,71],
+          "female": [null,null,30,34,38,42,46,50,55,59,63,67,71]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "对关爱的需求方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "对关爱的需求方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "对关爱的需求方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "对关爱的需求方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Hy3",
+        "name": "倦怠与不适 (Hy3)",
+        "itemIndexes": [31,39,65,175,218],
+        "falseItemIndexes": [2,3,9,10,45,95,125,141,148,152],
+        "normTable": {
+          "startRaw": 0,
+          "male": [38,43,48,52,57,61,66,70,75,79,84,88,93,97,102,106],
+          "female": [39,43,47,51,55,59,63,67,71,75,79,83,87,91,95,99]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "倦怠与不适方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "倦怠与不适方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "倦怠与不适方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "倦怠与不适方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Hy4",
+        "name": "躯体主诉 (Hy4)",
+        "itemIndexes": [11,18,40,44,101,172],
+        "falseItemIndexes": [8,47,91,159,164,173,176,179,208,224,249],
+        "normTable": {
+          "startRaw": 0,
+          "male": [38,43,48,52,57,62,67,72,77,82,86,91,96,101,106,111,115,120],
+          "female": [37,41,45,49,53,57,61,65,69,73,77,81,85,89,93,97,101,105]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "躯体主诉方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "躯体主诉方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "躯体主诉方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "躯体主诉方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Hy5",
+        "name": "攻击性的抑制 (Hy5)",
+        "itemIndexes": [],
+        "falseItemIndexes": [7,14,29,115,116,135,157],
+        "normTable": {
+          "startRaw": 0,
+          "male": [30,33,40,48,55,63,71,78],
+          "female": [30,31,39,46,54,62,70,77]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "攻击性的抑制方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "攻击性的抑制方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "攻击性的抑制方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "攻击性的抑制方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Pd1",
+        "name": "家庭不和 (Pd1)",
+        "itemIndexes": [21,54,195,202,288],
+        "falseItemIndexes": [83,125,214,217],
+        "normTable": {
+          "startRaw": 0,
+          "male": [38,45,51,58,65,71,78,84,91,98],
+          "female": [38,44,50,56,62,68,74,80,86,92]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "家庭不和方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "家庭不和方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "家庭不和方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "家庭不和方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Pd2",
+        "name": "与权威的冲突 (Pd2)",
+        "itemIndexes": [35,105],
+        "falseItemIndexes": [34,70,129,160,263,266],
+        "normTable": {
+          "startRaw": 0,
+          "male": [30,35,42,48,55,61,68,74,81],
+          "female": [30,38,46,53,61,69,77,84,92]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "与权威的冲突方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "与权威的冲突方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "与权威的冲突方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "与权威的冲突方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Pd3",
+        "name": "社交泰然 (Pd3)",
+        "itemIndexes": [],
+        "falseItemIndexes": [70,129,158,167,185,243],
+        "normTable": {
+          "startRaw": 0,
+          "male": [30,35,40,46,52,58,64],
+          "female": [30,35,41,47,52,58,64]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "社交泰然方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "社交泰然方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "社交泰然方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "社交泰然方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Pd4",
+        "name": "社会疏离 (Pd4)",
+        "itemIndexes": [17,22,42,56,82,99,113,219,225,259],
+        "falseItemIndexes": [12,129,157],
+        "normTable": {
+          "startRaw": 0,
+          "male": [30,36,41,46,51,57,62,67,73,78,83,88,94,99],
+          "female": [30,33,38,44,49,54,60,65,70,75,81,86,91,97]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "社会疏离方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "社会疏离方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "社会疏离方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "社会疏离方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Pd5",
+        "name": "自我疏离 (Pd5)",
+        "itemIndexes": [31,32,52,56,71,82,89,94,113,264],
+        "falseItemIndexes": [9,95],
+        "normTable": {
+          "startRaw": 0,
+          "male": [34,38,43,48,53,58,63,67,72,77,82,87,91],
+          "female": [34,39,43,48,53,58,63,68,72,77,82,87,92]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "自我疏离方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "自我疏离方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "自我疏离方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "自我疏离方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Pa1",
+        "name": "被害观念 (Pa1)",
+        "itemIndexes": [17,22,42,99,113,138,144,145,162,234,259,305,333,336,355,361],
+        "falseItemIndexes": [314],
+        "normTable": {
+          "startRaw": 0,
+          "male": [40,46,52,58,64,70,76,82,88,94,100,106,112,118,120],
+          "female": [39,45,51,57,63,69,75,81,87,93,99,105,111,117,120]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "被害观念方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "被害观念方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "被害观念方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "被害观念方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Pa2",
+        "name": "辛酸感 (Pa2)",
+        "itemIndexes": [22,146,271,277,285,307,334],
+        "falseItemIndexes": [100,244],
+        "normTable": {
+          "startRaw": 0,
+          "male": [34,41,48,55,62,69,76,82,89,96],
+          "female": [34,40,46,53,59,65,72,78,84,91]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "辛酸与委屈感方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "辛酸与委屈感方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "辛酸与委屈感方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "辛酸与委屈感方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Pa3",
+        "name": "天真 (Pa3)",
+        "itemIndexes": [16],
+        "falseItemIndexes": [81,98,104,110,283,284,286,315],
+        "normTable": {
+          "startRaw": 0,
+          "male": [30,32,36,41,46,51,56,60,65,70],
+          "female": [30,31,36,41,45,50,55,60,65,69]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "天真方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "天真方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "天真方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "天真方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Sc1",
+        "name": "社会疏离 (Sc1)",
+        "itemIndexes": [17,21,22,42,46,138,145,190,221,256,277,281,291,292,320,333],
+        "falseItemIndexes": [90,276,278,280,343],
+        "normTable": {
+          "startRaw": 0,
+          "male": [39,43,47,51,55,59,64,68,72,76,80,84,88,92,97,101,105,109,113,117,120],
+          "female": [38,42,46,50,53,57,61,65,69,73,77,81,84,88,92,96,100,104,108,111,115,119]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "社会疏离方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "社会疏离方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "社会疏离方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "社会疏离方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Sc2",
+        "name": "情感疏离 (Sc2)",
+        "itemIndexes": [65,92,234,273,303,323,329,332],
+        "falseItemIndexes": [9,210,290],
+        "normTable": {
+          "startRaw": 0,
+          "male": [40,50,59,69,78,88,98,107,117,120],
+          "female": [40,49,58,67,76,86,95,104,113,120]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "情感疏离方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "情感疏离方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "情感疏离方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "情感疏离方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Sc3",
+        "name": "认知层面的自我掌控缺乏 (Sc3)",
+        "itemIndexes": [31,32,147,170,180,299,311,316,325],
+        "falseItemIndexes": [165],
+        "normTable": {
+          "startRaw": 0,
+          "male": [42,48,54,60,66,72,78,84,90,96,103],
+          "female": [43,49,55,61,67,74,80,86,92,98,104]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "认知层面的自我掌控缺乏方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "认知层面的自我掌控缺乏方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "认知层面的自我掌控缺乏方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "认知层面的自我掌控缺乏方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Sc4",
+        "name": "意志层面的自我掌控缺乏 (Sc4)",
+        "itemIndexes": [31,38,48,65,92,233,234,273,299,303,325],
+        "falseItemIndexes": [9,210,290],
+        "normTable": {
+          "startRaw": 0,
+          "male": [39,44,49,55,60,65,71,76,82,87,92,98,103,109,114],
+          "female": [39,44,49,54,59,65,70,75,80,85,90,95,100,106,111]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "意志层面的自我掌控缺乏方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "意志层面的自我掌控缺乏方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "意志层面的自我掌控缺乏方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "意志层面的自我掌控缺乏方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Sc5",
+        "name": "抑制缺陷层面的自我掌控缺乏 (Sc5)",
+        "itemIndexes": [23,85,168,182,218,242,274,320,322,329,355],
+        "normTable": {
+          "startRaw": 0,
+          "male": [40,47,54,61,68,75,82,89,96,103,110,117],
+          "female": [40,46,53,59,65,72,78,85,91,97,104,110]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "抑制缺陷层面的自我掌控缺乏方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "抑制缺陷层面的自我掌控缺乏方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "抑制缺陷层面的自我掌控缺乏方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "抑制缺陷层面的自我掌控缺乏方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Sc6",
+        "name": "古怪的感知体验 (Sc6)",
+        "itemIndexes": [23,32,44,168,182,229,247,252,296,298,307,311,319,355],
+        "falseItemIndexes": [91,106,177,179,255,295],
+        "normTable": {
+          "startRaw": 0,
+          "male": [41,46,51,55,60,65,70,75,80,85,90,95,99,104,109,114,119,120],
+          "female": [41,45,50,54,59,63,68,72,77,81,86,91,95,100,104,109,113,118,120]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "古怪的感知体验方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "古怪的感知体验方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "古怪的感知体验方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "古怪的感知体验方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Ma1",
+        "name": "道德感薄弱 (Ma1)",
+        "itemIndexes": [131,227,248,250,269],
+        "falseItemIndexes": [263],
+        "normTable": {
+          "startRaw": 0,
+          "male": [35,42,50,58,66,74,81],
+          "female": [37,45,54,62,70,79,87]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "道德感薄弱方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "道德感薄弱方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "道德感薄弱方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "道德感薄弱方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Ma2",
+        "name": "精神运动性加速 (Ma2)",
+        "itemIndexes": [15,85,87,122,169,206,218,242,244],
+        "falseItemIndexes": [100,106],
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,30,34,39,44,49,53,58,63,68,73,78],
+          "female": [null,30,35,40,45,50,55,60,65,70,75,80]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "精神运动性加速方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "精神运动性加速方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "精神运动性加速方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "精神运动性加速方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Ma3",
+        "name": "泰然自若 (Ma3)",
+        "itemIndexes": [155,200,220],
+        "falseItemIndexes": [93,136,158,167,243],
+        "normTable": {
+          "startRaw": 0,
+          "male": [30,35,41,47,53,59,65,71,77],
+          "female": [30,37,43,50,56,62,69,75,82]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "泰然自若方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "泰然自若方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "泰然自若方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "泰然自若方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Ma4",
+        "name": "自我膨胀 (Ma4)",
+        "itemIndexes": [13,50,55,61,98,145,190,211,212],
+        "normTable": {
+          "startRaw": 0,
+          "male": [30,37,43,50,56,63,69,76,82,89],
+          "female": [31,37,43,49,56,62,68,74,80,86]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "自我膨胀方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "自我膨胀方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "自我膨胀方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "自我膨胀方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Si1",
+        "name": "害羞与自我意识 (Si1)",
+        "itemIndexes": [158,161,167,185,243,265,275,289],
+        "falseItemIndexes": [49,262,280,321,342,360],
+        "normTable": {
+          "startRaw": 0,
+          "male": [36,39,42,45,48,51,53,56,59,62,65,68,71,74,77],
+          "female": [36,38,41,44,46,49,52,55,57,60,63,65,68,71,74]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "害羞与自我意识方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "害羞与自我意识方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "害羞与自我意识方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "害羞与自我意识方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Si2",
+        "name": "社交回避 (Si2)",
+        "itemIndexes": [337,367],
+        "falseItemIndexes": [86,340,353,359,363,370],
+        "normTable": {
+          "startRaw": 0,
+          "male": [37,41,45,49,54,58,62,67,71],
+          "female": [37,42,47,51,56,60,65,69,74]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "社交回避方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "社交回避方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "社交回避方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "社交回避方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Si3",
+        "name": "自我与他人疏离 (Si3)",
+        "itemIndexes": [31,56,104,110,135,284,302,308,326,328,338,347,348,358,364,368,369],
+        "normTable": {
+          "startRaw": 0,
+          "male": [35,38,41,44,47,50,53,56,59,62,65,68,71,74,77,80,83,86],
+          "female": [35,38,41,44,47,49,52,55,58,61,63,66,69,72,74,77,80,83]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "自我与他人疏离方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "自我与他人疏离方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "自我与他人疏离方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "自我与他人疏离方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "PK",
+        "name": "创伤后应激（Keane 版） (PK)",
+        "itemIndexes": [16,17,22,23,30,31,32,37,39,48,52,56,59,65,82,85,92,94,101,135,150,168,170,196,221,274,277,302,303,305,316,319,327,328,339,347,349,367],
+        "falseItemIndexes": [2,3,9,49,75,95,125,140],
+        "normTable": {
+          "startRaw": 0,
+          "male": [37,38,40,42,43,45,47,48,50,52,53,55,57,58,60,62,63,65,67,68,70,72,73,75,77,78,80,82,83,85,87,88,90,92,93,95,97,98,100,102,103,105,107,108,110,112,113],
+          "female": [37,39,40,42,43,45,46,48,49,51,52,54,55,57,58,60,61,63,64,66,67,69,71,72,74,75,77,78,80,81,83,84,86,88,90,92,93,95,96,98,99,101,103,104,106,107]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "创伤后应激（Keane 版）方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "创伤后应激（Keane 版）方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "创伤后应激（Keane 版）方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "创伤后应激（Keane 版）方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "D-O",
+        "name": "抑郁的显性成分 (D-O)",
+        "itemIndexes": [15,18,31,38,39,46,56,73,92,127,130,146,147,170,175,215,233],
+        "falseItemIndexes": [2,9,10,20,33,43,45,49,75,95,109,118,140,141,142,165,188,223,245,248,260,330],
+        "normTable": {
+          "startRaw": 0,
+          "male": [32,34,37,39,41,44,46,48,51,53,55,58,60,62,65,67,69,72,74,76,79,81,83,86,88,90,93,95,97,100,102,104,107,109,111,114,116,118,120],
+          "female": [32,34,36,38,40,42,44,46,48,51,53,55,57,59,61,63,65,67,69,71,73,75,77,79,81,83,85,87,89,92,94,96,98,100,102,104,106,108,110,112]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "抑郁的显性成分方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "抑郁的显性成分方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "抑郁的显性成分方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "抑郁的显性成分方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "D-S",
+        "name": "抑郁的隐性成分 (D-S)",
+        "itemIndexes": [5,117,282],
+        "falseItemIndexes": [29,37,55,68,76,134,143,148,178,189,212,221,226,238,267],
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,null,null,null,null,null,32,36,40,44,48,52,55,59,63,67,71,75,78],
+          "female": [null,null,null,null,null,null,null,32,36,40,44,48,53,57,61,65,69,73,77]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "抑郁的隐性成分方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "抑郁的隐性成分方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "抑郁的隐性成分方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "抑郁的隐性成分方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Hy-O",
+        "name": "癔症的显性成分 (Hy-O)",
+        "itemIndexes": [11,18,31,39,40,44,65,101,166,172,175,218],
+        "falseItemIndexes": [2,3,8,9,10,45,47,91,95,115,125,141,152,159,164,173,179,208,224,249],
+        "normTable": {
+          "startRaw": 0,
+          "male": [37,40,42,45,48,51,53,56,59,62,64,67,70,73,76,78,81,84,87,89,92,95,98,100,103,106,109,111,114,117,120],
+          "female": [37,39,41,44,46,48,51,53,56,58,60,63,65,67,70,72,75,77,79,82,84,86,89,91,93,96,98,101,103,105,108,110,112]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "癔症的显性成分方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "癔症的显性成分方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "癔症的显性成分方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "癔症的显性成分方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Hy-S",
+        "name": "癔症的隐性成分 (Hy-S)",
+        "itemIndexes": [230],
+        "falseItemIndexes": [7,14,26,29,58,76,81,98,110,116,124,129,135,148,151,157,161,167,176,185,193,213,241,243,253,263,265],
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,null,null,null,null,null,null,null,31,34,36,38,41,43,45,47,50,52,54,57,59,61,64,66,68,71,73,75,78],
+          "female": [null,null,null,null,null,null,null,null,null,32,34,37,39,42,44,47,49,51,54,56,59,61,64,66,69,71,73,76,78]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "癔症的隐性成分方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "癔症的隐性成分方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "癔症的隐性成分方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "癔症的隐性成分方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Pd-O",
+        "name": "精神病态偏离的显性成分 (Pd-O)",
+        "itemIndexes": [17,22,31,32,35,42,52,54,56,71,82,94,99,105,195,202,225,259,264,288],
+        "falseItemIndexes": [9,12,34,79,95,125,261,266],
+        "normTable": {
+          "startRaw": 0,
+          "male": [34,36,39,42,44,47,50,52,55,58,60,63,66,68,71,74,76,79,82,84,87,90,92,95,98,100,103,106,108],
+          "female": [35,38,41,44,46,49,52,54,57,60,62,65,68,70,73,76,79,81,84,87,89,92,95,97,100,103,105,108,111]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "精神病态偏离的显性成分方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "精神病态偏离的显性成分方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "精神病态偏离的显性成分方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "精神病态偏离的显性成分方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Pd-S",
+        "name": "精神病态偏离的隐性成分 (Pd-S)",
+        "itemIndexes": [21,89,113,219],
+        "falseItemIndexes": [70,83,122,129,143,157,158,160,167,171,185,209,214,217,226,243,263,267],
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,null,null,null,null,null,33,37,41,45,48,52,56,60,64,68,72,76,79,83,87,91,95],
+          "female": [null,null,null,null,null,null,31,35,39,43,47,51,55,59,63,67,71,75,79,83,87,91,95]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "精神病态偏离的隐性成分方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "精神病态偏离的隐性成分方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "精神病态偏离的隐性成分方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "精神病态偏离的隐性成分方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Pa-O",
+        "name": "妄想的显性成分 (Pa-O)",
+        "itemIndexes": [17,22,23,24,42,99,138,144,146,162,234,259,277,285,305,307,333,336,355,361],
+        "falseItemIndexes": [255,266,314],
+        "normTable": {
+          "startRaw": 0,
+          "male": [38,43,47,52,57,61,66,70,75,80,84,89,93,98,102,107,112,116],
+          "female": [38,42,47,51,55,60,64,68,72,77,81,85,90,94,98,103,107,111,115,120]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "妄想的显性成分方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "妄想的显性成分方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "妄想的显性成分方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "妄想的显性成分方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Pa-S",
+        "name": "妄想的隐性成分 (Pa-S)",
+        "itemIndexes": [16,113,145,271,334],
+        "falseItemIndexes": [81,95,98,100,104,110,244,283,284,286,297,315],
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,null,null,31,35,39,43,48,52,56,60,65,69,73,77,82,86,90],
+          "female": [null,null,null,31,35,39,44,48,52,57,61,65,69,74,78,82,87,91]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "妄想的隐性成分方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "妄想的隐性成分方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "妄想的隐性成分方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "妄想的隐性成分方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Ma-O",
+        "name": "轻躁狂的显性成分 (Ma-O)",
+        "itemIndexes": [15,23,50,61,85,87,145,155,168,182,190,205,218,227,229,238,242,250,253,269],
+        "falseItemIndexes": [100,106,107],
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,30,34,37,40,44,47,51,54,57,61,64,67,71,74,78,81,84,88,91,95,98,101,105],
+          "female": [null,32,35,39,42,45,49,52,55,59,62,66,69,72,76,79,82,86,89,92,96,99,103,106]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "轻躁狂的显性成分方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "轻躁狂的显性成分方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "轻躁狂的显性成分方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "轻躁狂的显性成分方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "Ma-S",
+        "name": "轻躁狂的隐性成分 (Ma-S)",
+        "itemIndexes": [13,21,55,98,113,122,131,169,200,206,211,212,220,244,248],
+        "falseItemIndexes": [88,93,136,154,158,167,243,263],
+        "normTable": {
+          "startRaw": 0,
+          "male": [null,null,null,null,null,31,35,39,42,46,50,54,57,61,65,69,72,76,80,83,87,91,95,98],
+          "female": [null,null,null,null,null,32,36,40,44,47,51,55,59,63,67,70,74,78,82,86,90,93,97,101]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "轻躁狂的隐性成分方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "轻躁狂的隐性成分方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "轻躁狂的隐性成分方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "轻躁狂的隐性成分方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "HEA1",
+        "name": "胃肠道症状 (HEA1)",
+        "itemIndexes": [18,59,111],
+        "falseItemIndexes": [20,47],
+        "normTable": {
+          "startRaw": 0,
+          "male": [44,57,70,83,96,109],
+          "female": [43,54,64,75,86,97]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "胃肠道症状方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "胃肠道症状方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "胃肠道症状方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "胃肠道症状方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "HEA2",
+        "name": "神经系统症状 (HEA2)",
+        "itemIndexes": [44,53,101,149,247],
+        "falseItemIndexes": [91,142,159,164,179,255,295],
+        "normTable": {
+          "startRaw": 0,
+          "male": [40,47,54,60,67,74,80,87,94,100,107,114,120],
+          "female": [39,45,50,56,61,67,72,78,83,89,94,99,105]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "神经系统症状方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "神经系统症状方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "神经系统症状方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "神经系统症状方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "HEA3",
+        "name": "一般健康关注 (HEA3)",
+        "itemIndexes": [175],
+        "falseItemIndexes": [33,45,118,141,224],
+        "normTable": {
+          "startRaw": 0,
+          "male": [40,48,56,64,72,81,89],
+          "female": [40,48,56,64,71,79,87]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "一般健康关注方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "一般健康关注方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "一般健康关注方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "一般健康关注方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "SOD2",
+        "name": "害羞 (SOD2)",
+        "itemIndexes": [158,167,185,275],
+        "falseItemIndexes": [262,321,360],
+        "normTable": {
+          "startRaw": 0,
+          "male": [36,41,47,52,58,63,68,74],
+          "female": [35,40,45,50,55,60,65,69]
+        },
+        "bands": [
+          { "min": 0, "max": 40, "level": "偏低", "description": "害羞方面的得分低于常模，反映该维度上相关特征较少。" },
+          { "min": 40, "max": 60, "level": "常模范围", "description": "害羞方面的得分处于常模范围内，属于常见水平。" },
+          { "min": 60, "max": 70, "level": "偏高", "description": "害羞方面的得分高于常模，反映该维度上相关特征较多。" },
+          { "min": 70, "level": "显著偏高", "description": "害羞方面的得分明显高于常模。建议结合整体剖面与专业人士讨论，本结果不构成诊断。" }
+        ]
+      },
+      {
+        "id": "KB5",
+        "name": "思维混乱 (KB5)",
+        "itemIndexes": [24,31,32,72,96,180,198,299,311,316,325],
+        "scoreIsRaw": true,
+        "bands": [
+          { "min": 0, "max": 1, "level": "未提示", "description": "本次作答中，本组「思维混乱」相关的题目没有一题被计分，即没有一题的回答方向提示这方面的内容。这只是对本次答卷中若干题目的归类统计，不是诊断，也不能据此排除任何情况。" },
+          { "min": 1, "level": "需关注", "description": "本次作答中，有一题或多题在「思维混乱」相关内容上被计分（涉及思路混乱、看不懂事物、难以理解周围发生的事）。这类内容值得在安全、保密的环境里与心理咨询师或医生聊一聊，看看它对你现在的生活意味着什么。这里的数字只是被计分题目的数量，不是严重程度评分，不构成诊断，也不代表你就是这样的人。" }
+        ]
+      },
+      {
+        "id": "KB6",
+        "name": "被害观念 (KB6)",
+        "itemIndexes": [17,42,99,124,138,144,145,162,216,228,241,251,259,333,361],
+        "falseItemIndexes": [314],
+        "scoreIsRaw": true,
+        "bands": [
+          { "min": 0, "max": 1, "level": "未提示", "description": "本次作答中，本组「被害观念」相关的题目没有一题被计分，即没有一题的回答方向提示这方面的内容。这只是对本次答卷中若干题目的归类统计，不是诊断，也不能据此排除任何情况。" },
+          { "min": 1, "level": "需关注", "description": "本次作答中，有一题或多题在「被害观念」相关内容上被计分（涉及觉得被人监视、跟踪、陷害或议论）。这类内容值得在安全、保密的环境里与心理咨询师或医生聊一聊，看看它对你现在的生活意味着什么。这里的数字只是被计分题目的数量，不是严重程度评分，不构成诊断，也不代表你就是这样的人。" }
+        ]
+      },
+      {
+        "id": "LW7",
+        "name": "反社会态度 (LW7)",
+        "itemIndexes": [27,35,84,105,227,240,254,324],
+        "falseItemIndexes": [266],
+        "scoreIsRaw": true,
+        "bands": [
+          { "min": 0, "max": 1, "level": "未提示", "description": "本次作答中，本组「反社会态度」相关的题目没有一题被计分，即没有一题的回答方向提示这方面的内容。这只是对本次答卷中若干题目的归类统计，不是诊断，也不能据此排除任何情况。" },
+          { "min": 1, "level": "需关注", "description": "本次作答中，有一题或多题在「反社会态度」相关内容上被计分（涉及对规则与他人权益的轻视态度）。这类内容值得在安全、保密的环境里与心理咨询师或医生聊一聊，看看它对你现在的生活意味着什么。这里的数字只是被计分题目的数量，不是严重程度评分，不构成诊断，也不代表你就是这样的人。" }
+        ]
+      },
+      {
+        "id": "LW8",
+        "name": "家庭冲突 (LW8)",
+        "itemIndexes": [21,288],
+        "falseItemIndexes": [83,125],
+        "scoreIsRaw": true,
+        "bands": [
+          { "min": 0, "max": 1, "level": "未提示", "description": "本次作答中，本组「家庭冲突」相关的题目没有一题被计分，即没有一题的回答方向提示这方面的内容。这只是对本次答卷中若干题目的归类统计，不是诊断，也不能据此排除任何情况。" },
+          { "min": 1, "level": "需关注", "description": "本次作答中，有一题或多题在「家庭冲突」相关内容上被计分（涉及与家人之间的冲突、疏离或难以相处）。这类内容值得在安全、保密的环境里与心理咨询师或医生聊一聊，看看它对你现在的生活意味着什么。这里的数字只是被计分题目的数量，不是严重程度评分，不构成诊断，也不代表你就是这样的人。" }
+        ]
+      },
+      {
+        "id": "LW10",
+        "name": "性方面的困扰与偏离 (LW10)",
+        "itemIndexes": [62,166,268],
+        "falseItemIndexes": [12,34,121],
+        "scoreIsRaw": true,
+        "bands": [
+          { "min": 0, "max": 1, "level": "未提示", "description": "本次作答中，本组「性方面的困扰与偏离」相关的题目没有一题被计分，即没有一题的回答方向提示这方面的内容。这只是对本次答卷中若干题目的归类统计，不是诊断，也不能据此排除任何情况。" },
+          { "min": 1, "level": "需关注", "description": "本次作答中，有一题或多题在「性方面的困扰与偏离」相关内容上被计分（涉及性方面的困扰或与常态不同的性体验）。这类内容值得在安全、保密的环境里与心理咨询师或医生聊一聊，看看它对你现在的生活意味着什么。这里的数字只是被计分题目的数量，不是严重程度评分，不构成诊断，也不代表你就是这样的人。" }
+        ]
+      }
+    ],
+    "consistency": []
+  },
+  "crisis": {
+    "itemIndexes": [38,65,71,92,130,146,215,233,273,303,306],
+    "threshold": 1,
+    "message": "你在这次作答中，对若干与自我伤害或自杀意念有关的关键内容回答了“是”，这提示你可能正处于急性痛苦之中。请不要独自承担：现在就联系一位你信任的人，或学校、单位的心理咨询师，或拨打当地的心理援助热线；如果你觉得自己可能马上做出伤害自己的事，请立即前往最近的医院急诊，或拨打当地急救电话。痛苦是可以被帮助的，寻求支持是有效且值得的一步。"
+  }
+}

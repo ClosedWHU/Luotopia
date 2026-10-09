@@ -1,0 +1,90 @@
+{
+  "id": "stai",
+  "name": "状态-特质焦虑量表",
+  "nameEn": "State-Trait Anxiety Inventory",
+  "abbreviation": "STAI",
+  "category": "焦虑",
+  "year": 2024,
+  "instructions": "以下是一些描述人们感受的陈述。请根据您当前的状态和一贯的感受分别作答。第一部分评估您此刻的感受，第二部分评估您平时的感受。",
+  "instructionsEn": "The following are statements describing how people feel. Please answer separately according to your current state and your usual feelings. The first part assesses how you feel right now, and the second part assesses how you usually feel.",
+  "license": "Spielberger 编制，可免费用于非商业用途，使用时请注明出处。",
+  "options": [
+    { "value": 1, "label": "完全没有", "labelEn": "Not at all" },
+    { "value": 2, "label": "有些", "labelEn": "A little" },
+    { "value": 3, "label": "中等程度", "labelEn": "Moderately" },
+    { "value": 4, "label": "非常明显", "labelEn": "Very much" }
+  ],
+  "items": [
+    { "index": 1, "text": "我感到心情平静（状态焦虑）", "textEn": "I feel calm", "reverse": true },
+    { "index": 2, "text": "我感到安全（状态焦虑）", "textEn": "I feel secure", "reverse": true },
+    { "index": 3, "text": "我感到紧张（状态焦虑）", "textEn": "I am tense" },
+    { "index": 4, "text": "我感到被束缚（状态焦虑）", "textEn": "I feel strained" },
+    { "index": 5, "text": "我感到轻松自在（状态焦虑）", "textEn": "I feel at ease", "reverse": true },
+    { "index": 6, "text": "我感到心烦意乱（状态焦虑）", "textEn": "I feel upset" },
+    { "index": 7, "text": "我正在为一些不好的事情担忧（状态焦虑）", "textEn": "I am worrying about possible misfortunes" },
+    { "index": 8, "text": "我感到满意（状态焦虑）", "textEn": "I feel satisfied", "reverse": true },
+    { "index": 9, "text": "我感到恐惧（状态焦虑）", "textEn": "I feel frightened" },
+    { "index": 10, "text": "我感到舒适（状态焦虑）", "textEn": "I feel comfortable", "reverse": true },
+    { "index": 11, "text": "我感到自信（状态焦虑）", "textEn": "I feel self-confident", "reverse": true },
+    { "index": 12, "text": "我感到不安（状态焦虑）", "textEn": "I feel nervous" },
+    { "index": 13, "text": "我感到坐立不安（状态焦虑）", "textEn": "I am jittery" },
+    { "index": 14, "text": "我感到犹豫不决（状态焦虑）", "textEn": "I feel indecisive" },
+    { "index": 15, "text": "我感到放松（状态焦虑）", "textEn": "I am relaxed", "reverse": true },
+    { "index": 16, "text": "我感到知足（状态焦虑）", "textEn": "I am content", "reverse": true },
+    { "index": 17, "text": "我感到忧虑（状态焦虑）", "textEn": "I am worried" },
+    { "index": 18, "text": "我感到困惑（状态焦虑）", "textEn": "I feel confused" },
+    { "index": 19, "text": "我感到沉稳（状态焦虑）", "textEn": "I feel steady and composed", "reverse": true },
+    { "index": 20, "text": "我感到愉快（状态焦虑）", "textEn": "I am happy", "reverse": true },
+    { "index": 21, "text": "我平时感到愉快（特质焦虑）", "textEn": "I feel pleasant", "reverse": true },
+    { "index": 22, "text": "我平时感到神经过敏和紧张（特质焦虑）", "textEn": "I feel nervous and restless" },
+    { "index": 23, "text": "我平时对自己感到满意（特质焦虑）", "textEn": "I feel satisfied with myself", "reverse": true },
+    { "index": 24, "text": "我平时希望自己能像别人一样快乐（特质焦虑）", "textEn": "I wish I could be as happy as others seem to be" },
+    { "index": 25, "text": "我平时觉得自己是个失败者（特质焦虑）", "textEn": "I feel like a failure" },
+    { "index": 26, "text": "我平时休息得很好（特质焦虑）", "textEn": "I feel rested", "reverse": true },
+    { "index": 27, "text": "我平时沉着冷静（特质焦虑）", "textEn": "I am calm, cool, and collected", "reverse": true },
+    { "index": 28, "text": "我平时觉得困难重重，难以克服（特质焦虑）", "textEn": "I feel that difficulties are piling up so that I cannot overcome them" },
+    { "index": 29, "text": "我平时会为无关紧要的事担心（特质焦虑）", "textEn": "I worry too much over something that doesn't matter" },
+    { "index": 30, "text": "我平时感到快乐（特质焦虑）", "textEn": "I am happy", "reverse": true },
+    { "index": 31, "text": "我平时常有令自己不安的念头（特质焦虑）", "textEn": "I am often bothered by upsetting thoughts" },
+    { "index": 32, "text": "我平时缺乏自信（特质焦虑）", "textEn": "I lack self-confidence" },
+    { "index": 33, "text": "我平时感到安全（特质焦虑）", "textEn": "I feel that I am secure", "reverse": true },
+    { "index": 34, "text": "我平时做决定很容易（特质焦虑）", "textEn": "I make decisions easily", "reverse": true },
+    { "index": 35, "text": "我平时觉得自己能力不足（特质焦虑）", "textEn": "I feel inadequate" },
+    { "index": 36, "text": "我平时感到满足（特质焦虑）", "textEn": "I feel content", "reverse": true },
+    { "index": 37, "text": "我平时会被无关紧要的念头缠住（特质焦虑）", "textEn": "I am preoccupied with unimportant thoughts" },
+    { "index": 38, "text": "我平时对挫折感受特别强烈，难以释怀（特质焦虑）", "textEn": "I react strongly to setbacks and find it hard to let them go" },
+    { "index": 39, "text": "我平时是个情绪稳定的人（特质焦虑）", "textEn": "I am emotionally stable", "reverse": true },
+    { "index": 40, "text": "我平时一想到最近的烦心事就会紧张不安（特质焦虑）", "textEn": "I become tense and uneasy when I think about my recent troubles" }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": false,
+    "totalLabel": "",
+    "totalBands": [],
+    "factors": [
+      {
+        "id": "state_anxiety",
+        "name": "状态焦虑",
+        "itemIndexes": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
+        "bands": [
+          { "min": 20, "max": 35, "level": "低焦虑", "description": "状态焦虑水平较低，当前情绪状态较为平稳。" },
+          { "min": 35, "max": 45, "level": "中等焦虑", "description": "状态焦虑处于中等水平，可能存在一定程度的紧张情绪。" },
+          { "min": 45, "max": 60, "level": "高焦虑", "description": "状态焦虑水平较高，当前情绪状态较为紧张，建议进行放松训练。" },
+          { "min": 60, "max": 81, "level": "极高焦虑", "description": "状态焦虑水平极高，可能存在明显的急性焦虑反应，建议寻求专业帮助。" }
+        ]
+      },
+      {
+        "id": "trait_anxiety",
+        "name": "特质焦虑",
+        "itemIndexes": [21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40],
+        "bands": [
+          { "min": 20, "max": 35, "level": "低焦虑", "description": "特质焦虑水平较低，性格中焦虑倾向不明显。" },
+          { "min": 35, "max": 45, "level": "中等焦虑", "description": "特质焦虑处于中等水平，有一定的焦虑倾向。" },
+          { "min": 45, "max": 60, "level": "高焦虑", "description": "特质焦虑水平较高，性格中焦虑倾向较明显，可能容易感到紧张。" },
+          { "min": 60, "max": 81, "level": "极高焦虑", "description": "特质焦虑水平极高，性格中焦虑倾向非常显著，建议关注心理健康。" }
+        ]
+      }
+    ]
+  }
+}

@@ -59,8 +59,8 @@ functions/        # Cloudflare Pages Functions
   api/            # /api/releases、/api/appstore、/api/status
   lib/            # 运行时无关的核心逻辑（可被 Node 直接 import）
   _middleware.ts  # 域名白名单、深链域名重写、404 的表示形式
-public/           # 静态资源、.well-known、hot-update
-tools/            # 构建脚本（热更新清单生成、AASA 校验）
+public/           # 静态资源、.well-known、hot-update、scales
+tools/            # 构建脚本（热更新清单生成、量表清单生成、AASA 校验）
 ```
 
 内容改动优先落在 `src/config/` 而不是页面里 —— 功能列表、下载平台、友链、法律
@@ -90,7 +90,7 @@ Cloudflare 运行时的东西），本地访问 `/api/status` 会 404。这个�
 内存 Map。凭据按 wrangler 的顺序读：`.dev.vars` → `.env.local` → `.env` →
 真实环境变量；没有 key 时返回 503 `not_configured`，和生产一致。
 
-其它 `/api/*`（releases、appstore）本地没有对应中间件，`/download` 会退回静态占位
+其他 `/api/*`（releases、appstore）本地没有对应中间件，`/download` 会退回静态占位
 文案 —— 要验证它们得用 `npm run build && npx wrangler pages dev dist`。
 
 ## 构建目标：Chrome 66
@@ -226,6 +226,28 @@ npm run hot-update:verify
 
 `prebuild` 还会跑 `check:aasa`（`tools/verify-aasa.mjs`），校验
 `apple-app-site-association` 的格式。
+
+## 量表清单
+
+App 的心理量表数据放在 `public/scales/data/`，清单是
+`public/scales/manifest.json`。与热更新不同，**这份清单不签名，也不需要任何密钥**
+—— 量表是数据而不是可执行代码，完整性由 HTTPS 加每文件 sha256 保证，客户端下载
+后逐个校验摘要。所以它在本地、PR Preview 和生产构建里的生成结果完全一致，不存在
+「Preview 拿不到密钥」的问题。
+
+```sh
+npm run scales:generate   # 扫描 data/ 重新生成 manifest.json
+npm run scales:check      # 只校验已提交的清单是否最新，不写文件（CI 用）
+```
+
+生成器（`tools/generate-scale-manifest.mjs`）在以下情况直接失败：文件不是合法
+JSON、文件内 `id` 与文件名不符、缺 `name` 或 `abbreviation`、单文件超过 4 MB、
+或生成的清单为空。`updatedAt` 与两个 `version` 只在内容真的变了时才动，因此重复
+运行是幂等的 —— 这正是 `scales:check` 能用来卡住「改了数据忘了重新生成清单」的
+前提。
+
+字段含义、客户端的缓存与校验流程，以及**量表数据的版权与许可**（MMPI-2 上游为
+GPLv3，需要单独评估），见 [public/scales/README.md](../public/scales/README.md)。
 
 ## 提交前
 

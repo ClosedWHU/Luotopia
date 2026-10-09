@@ -1,0 +1,82 @@
+{
+  "id": "gad7",
+  "name": "广泛性焦虑障碍量表",
+  "nameEn": "Generalized Anxiety Disorder-7",
+  "abbreviation": "GAD-7",
+  "category": "焦虑",
+  "year": 2024,
+  "instructions": "在过去的两周里，你有多频繁地被以下问题所困扰？请根据实际情况选择最符合的一项。",
+  "instructionsEn": "Over the last two weeks, how often have you been bothered by the following problems? Please choose the option that best matches your actual situation.",
+  "license": "Spitzer 等开发，可免费使用，使用时请注明出处。",
+  "options": [
+    {
+      "value": 0,
+      "label": "完全没有",
+      "labelEn": "Not at all"
+    },
+    {
+      "value": 1,
+      "label": "有几天",
+      "labelEn": "Several days"
+    },
+    {
+      "value": 2,
+      "label": "一半以上的天数",
+      "labelEn": "More than half the days"
+    },
+    {
+      "value": 3,
+      "label": "几乎每天",
+      "labelEn": "Nearly every day"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "感觉紧张、焦虑或急切",
+      "textEn": "Feeling nervous, anxious, or on edge"
+    },
+    {
+      "index": 2,
+      "text": "不能停止或控制担忧",
+      "textEn": "Not being able to stop or control worrying"
+    },
+    {
+      "index": 3,
+      "text": "对各种各样的事情担忧过多",
+      "textEn": "Worrying too much about different things"
+    },
+    {
+      "index": 4,
+      "text": "很难放松下来",
+      "textEn": "Trouble relaxing"
+    },
+    {
+      "index": 5,
+      "text": "由于不安而无法静坐",
+      "textEn": "Being so restless that it is hard to sit still"
+    },
+    {
+      "index": 6,
+      "text": "变得容易烦恼或急躁",
+      "textEn": "Becoming easily annoyed or irritable"
+    },
+    {
+      "index": 7,
+      "text": "感到似乎将有可怕的事情发生而害怕",
+      "textEn": "Feeling afraid as if something awful might happen"
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 0, "max": 5, "level": "无焦虑", "description": "目前没有明显的焦虑症状。" },
+      { "min": 5, "max": 10, "level": "轻度焦虑", "description": "存在轻度焦虑症状，建议关注并适时自我调节。" },
+      { "min": 10, "max": 15, "level": "中度焦虑", "description": "存在中度焦虑症状，建议寻求专业心理评估。" },
+      { "min": 15, "max": 22, "level": "重度焦虑", "description": "存在重度焦虑症状，请尽快寻求专业医疗帮助。" }
+    ]
+  }
+}

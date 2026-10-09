@@ -1,0 +1,59 @@
+{
+  "id": "hcl32",
+  "name": "轻躁狂检测清单",
+  "nameEn": "Hypomania Checklist-32",
+  "abbreviation": "HCL-32",
+  "category": "双相/心境",
+  "year": 2024,
+  "instructions": "请回忆您处于“情绪高涨”或精力特别充沛的一段时期，您当时是否比平时更频繁地出现以下体验？请据实回答。",
+  "instructionsEn": "Please recall a period when you felt “high” or especially full of energy. Did you experience the following more often than usual during that time? Please answer honestly.",
+  "license": "Angst 等编制，可免费使用，使用时请注明出处。",
+  "options": [
+    { "value": 0, "label": "否", "labelEn": "No" },
+    { "value": 1, "label": "是", "labelEn": "Yes" }
+  ],
+  "items": [
+    { "index": 1, "text": "我需要的睡眠更少", "textEn": "I need less sleep than other people (for example, I only need 3 hours of sleep)" },
+    { "index": 2, "text": "我感到精力更加充沛、活动更多", "textEn": "I feel more energetic and more active" },
+    { "index": 3, "text": "我更加自信", "textEn": "I am more self-confident than usual" },
+    { "index": 4, "text": "我更加喜欢我的工作", "textEn": "I enjoy my work much more than usual" },
+    { "index": 5, "text": "我更加爱交际（打电话更多、外出更多）", "textEn": "I am more sociable (I make more phone calls and go out more)" },
+    { "index": 6, "text": "我想去旅行，或真的去旅行更多", "textEn": "I want to travel, or actually travel more" },
+    { "index": 7, "text": "我开车更快，或开车时更爱冒险", "textEn": "I drive faster/more riskily than usual" },
+    { "index": 8, "text": "我花钱更多、太多", "textEn": "I spend money more freely than usual" },
+    { "index": 9, "text": "我在日常生活中（工作或其他活动中）更爱冒险", "textEn": "I take more risks in my daily life (at work or in other activities)" },
+    { "index": 10, "text": "我体力上更活跃（运动等）", "textEn": "I am physically more active (sport, shopping, sex)" },
+    { "index": 11, "text": "我计划了更多活动或项目", "textEn": "I plan more activities or projects" },
+    { "index": 12, "text": "我有更多想法、更有创造力", "textEn": "I have more ideas and am more creative than usual" },
+    { "index": 13, "text": "我不那么害羞或拘谨", "textEn": "I am less shy or reserved" },
+    { "index": 14, "text": "我穿更鲜艳、更夸张的衣服或化妆", "textEn": "I wear brighter or more extravagant clothes or makeup" },
+    { "index": 15, "text": "我想见或真的去见更多的人", "textEn": "I want to see, or actually see, more people" },
+    { "index": 16, "text": "我对性更感兴趣，或性欲增强", "textEn": "I am more interested in sex than usual, or my libido increases" },
+    { "index": 17, "text": "我更爱调情，或性生活更频繁", "textEn": "I flirt more, or have sex more often" },
+    { "index": 18, "text": "我说话更多", "textEn": "I talk more than usual" },
+    { "index": 19, "text": "我思维更快", "textEn": "I feel that my thoughts come faster" },
+    { "index": 20, "text": "我说话时开更多玩笑或双关语", "textEn": "I make more jokes or puns when I talk" },
+    { "index": 21, "text": "我更容易分心", "textEn": "I am more easily distracted and it is hard to stay focused on one thing" },
+    { "index": 22, "text": "我从事很多新的事情", "textEn": "I take on many new things" },
+    { "index": 23, "text": "我的思绪从一个话题跳到另一个话题", "textEn": "My thoughts jump from one topic to another" },
+    { "index": 24, "text": "我做事更快、更容易", "textEn": "I do things faster and more easily" },
+    { "index": 25, "text": "我更没耐心，或更容易烦躁", "textEn": "I have less patience, or become irritated more easily" },
+    { "index": 26, "text": "我可能让别人精疲力尽或感到厌烦", "textEn": "I may exhaust or bore other people" },
+    { "index": 27, "text": "我更多与人争吵", "textEn": "I am more prone to getting into arguments" },
+    { "index": 28, "text": "我的情绪更高涨、更乐观", "textEn": "I am naturally more cheerful and optimistic than most people" },
+    { "index": 29, "text": "我喝更多咖啡", "textEn": "I drink more coffee" },
+    { "index": 30, "text": "我抽更多烟", "textEn": "I smoke more" },
+    { "index": 31, "text": "我喝更多酒", "textEn": "I drink more alcohol" },
+    { "index": 32, "text": "我服用更多药物（镇静剂、抗焦虑药、兴奋剂等）", "textEn": "I take more medications (sedatives, anti-anxiety drugs, stimulants, etc.)" }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "阳性条目数",
+    "totalBands": [
+      { "min": 0, "max": 14, "level": "未提示轻躁狂倾向", "description": "阳性条目数少于14条，未提示轻躁狂倾向。" },
+      { "min": 14, "max": 33, "level": "提示可能轻躁狂", "description": "阳性条目数达到14条及以上，提示可能存在轻躁狂倾向，建议进一步专业评估。" }
+    ]
+  }
+}

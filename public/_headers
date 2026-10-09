@@ -20,6 +20,17 @@
 /hot-update/*
   Cache-Control: no-cache
 
+# Scale library fetched and cached by the mobile client. The manifest is the
+# only mutable part, so it revalidates on every check (same reasoning as
+# /hot-update/*). The data files are checksum-pinned by that manifest - a client
+# only re-downloads one when its sha256 changed - so a short max-age is safe
+# and saves a round trip for the ~270 KB MMPI-2 files on a fresh install.
+/scales/manifest.json
+  Cache-Control: no-cache
+
+/scales/data/*
+  Cache-Control: public, max-age=300
+
 # Apple fetches the AASA through its own CDN and requires JSON; Pages would
 # otherwise guess application/octet-stream from the missing extension.
 /.well-known/apple-app-site-association

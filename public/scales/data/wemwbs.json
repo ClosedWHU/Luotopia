@@ -1,0 +1,121 @@
+{
+  "id": "wemwbs",
+  "name": "沃里克-爱丁堡心理健康量表",
+  "nameEn": "Warwick-Edinburgh Mental Well-Being Scale",
+  "abbreviation": "WEMWBS",
+  "category": "幸福感",
+  "year": 2024,
+  "instructions": "以下问题涉及您过去两周的感受。请根据实际情况作答。",
+  "instructionsEn": "The following questions concern how you have been feeling over the past two weeks. Please answer according to your actual experience.",
+  "license": "Tennant 等编制，可免费用于非商业用途，使用时请注明出处。",
+  "options": [
+    {
+      "value": 1,
+      "label": "从未",
+      "labelEn": "None of the time"
+    },
+    {
+      "value": 2,
+      "label": "很少",
+      "labelEn": "Rarely"
+    },
+    {
+      "value": 3,
+      "label": "有时",
+      "labelEn": "Sometimes"
+    },
+    {
+      "value": 4,
+      "label": "经常",
+      "labelEn": "Often"
+    },
+    {
+      "value": 5,
+      "label": "始终",
+      "labelEn": "All of the time"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "我对未来感到乐观。",
+      "textEn": "I've been feeling optimistic about the future"
+    },
+    {
+      "index": 2,
+      "text": "我感到有用。",
+      "textEn": "I've been feeling useful"
+    },
+    {
+      "index": 3,
+      "text": "我感到放松。",
+      "textEn": "I've been feeling relaxed"
+    },
+    {
+      "index": 4,
+      "text": "我能够处理问题。",
+      "textEn": "I've been able to deal with problems"
+    },
+    {
+      "index": 5,
+      "text": "我思考清晰。",
+      "textEn": "I've been thinking clearly"
+    },
+    {
+      "index": 6,
+      "text": "我对自己有信心。",
+      "textEn": "I've been feeling confident in myself"
+    },
+    {
+      "index": 7,
+      "text": "我能做决定。",
+      "textEn": "I've been able to make up my mind about things"
+    },
+    {
+      "index": 8,
+      "text": "我感到被爱。",
+      "textEn": "I've been feeling loved"
+    },
+    {
+      "index": 9,
+      "text": "我对新事物感兴趣。",
+      "textEn": "I've been interested in new things"
+    },
+    {
+      "index": 10,
+      "text": "我感到开心。",
+      "textEn": "I've been feeling happy"
+    },
+    {
+      "index": 11,
+      "text": "我能够面对困难。",
+      "textEn": "I've been able to face up to my problems"
+    },
+    {
+      "index": 12,
+      "text": "我感到满足。",
+      "textEn": "I've been feeling satisfied"
+    },
+    {
+      "index": 13,
+      "text": "我感到与他人关系密切。",
+      "textEn": "I've been feeling close to other people"
+    },
+    {
+      "index": 14,
+      "text": "我感到精力充沛。",
+      "textEn": "I've been feeling energetic"
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 14, "max": 35, "level": "低心理健康", "description": "总分低于35，心理健康水平较低，建议关注心理健康。" },
+      { "min": 35, "max": 50, "level": "中等心理健康", "description": "总分35-50，心理健康处于中等水平。" },
+      { "min": 50, "max": 71, "level": "高心理健康", "description": "总分50及以上，心理健康水平较高。" }
+    ]
+  }
+}

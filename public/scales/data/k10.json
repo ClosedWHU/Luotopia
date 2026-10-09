@@ -1,0 +1,102 @@
+{
+  "id": "k10",
+  "name": "Kessler心理困扰量表",
+  "nameEn": "Kessler Psychological Distress Scale-10",
+  "abbreviation": "K10",
+  "category": "综合症状",
+  "year": 2024,
+  "instructions": "以下问题涉及您过去四周的感受。请根据实际情况作答。",
+  "instructionsEn": "The following questions concern how you have been feeling over the past four weeks. Please answer according to your actual experience.",
+  "license": "Kessler 等编制，可免费用于非商业用途，使用时请注明出处。",
+  "options": [
+    {
+      "value": 1,
+      "label": "从未",
+      "labelEn": "None of the time"
+    },
+    {
+      "value": 2,
+      "label": "偶尔",
+      "labelEn": "A little of the time"
+    },
+    {
+      "value": 3,
+      "label": "有时",
+      "labelEn": "Some of the time"
+    },
+    {
+      "value": 4,
+      "label": "大部分时间",
+      "labelEn": "Most of the time"
+    },
+    {
+      "value": 5,
+      "label": "始终",
+      "labelEn": "All of the time"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "您感到疲倦，并非因为工作或运动的原因？",
+      "textEn": "Feeling tired out for no good reason, not because of work or exercise?"
+    },
+    {
+      "index": 2,
+      "text": "您感到紧张？",
+      "textEn": "Feeling nervous?"
+    },
+    {
+      "index": 3,
+      "text": "您感到非常紧张，以至于无法安静地坐着？",
+      "textEn": "Feeling so nervous that you could not sit quietly?"
+    },
+    {
+      "index": 4,
+      "text": "您感到无望？",
+      "textEn": "Feeling hopeless?"
+    },
+    {
+      "index": 5,
+      "text": "您感到坐立不安或烦躁？",
+      "textEn": "Feeling restless or fidgety?"
+    },
+    {
+      "index": 6,
+      "text": "您感到非常坐立不安，以至于需要不断走动？",
+      "textEn": "Feeling so restless that you needed to keep moving around?"
+    },
+    {
+      "index": 7,
+      "text": "您感到情绪低落？",
+      "textEn": "Feeling depressed?"
+    },
+    {
+      "index": 8,
+      "text": "您觉得做任何事情都很费力？",
+      "textEn": "Feeling that everything was an effort?"
+    },
+    {
+      "index": 9,
+      "text": "您感到沮丧，以至于没有什么能让您高兴起来？",
+      "textEn": "Feeling so sad that nothing could cheer you up?"
+    },
+    {
+      "index": 10,
+      "text": "您感到自己毫无价值？",
+      "textEn": "Feeling worthless?"
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 10, "max": 16, "level": "低困扰", "description": "总分低于16，心理困扰水平较低。" },
+      { "min": 16, "max": 22, "level": "中等困扰", "description": "总分16-22，存在中等程度的心理困扰。" },
+      { "min": 22, "max": 28, "level": "高困扰", "description": "总分22-28，心理困扰水平较高，建议关注。" },
+      { "min": 28, "max": 51, "level": "极高困扰", "description": "总分28及以上，心理困扰水平极高，建议尽快寻求专业帮助。" }
+    ]
+  }
+}

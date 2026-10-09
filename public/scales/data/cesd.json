@@ -1,0 +1,151 @@
+{
+  "id": "cesd",
+  "name": "流调中心抑郁量表",
+  "nameEn": "Center for Epidemiologic Studies Depression Scale",
+  "abbreviation": "CES-D",
+  "category": "抑郁",
+  "year": 2026,
+  "instructions": "以下是一些你可能有过或正在经历的感受。请根据过去一周内你出现这些感受的频率，选择最符合的一项。",
+  "instructionsEn": "Below are some feelings you may have had or may be experiencing. Based on how often you have felt these ways during the past week, choose the option that fits you best.",
+  "license": "Radloff 编制，公领域，可自由使用，使用时请注明出处。",
+  "options": [
+    {
+      "value": 0,
+      "label": "没有或很少（少于1天）",
+      "labelEn": "Rarely or none of the time (less than 1 day)"
+    },
+    {
+      "value": 1,
+      "label": "偶尔（1-2天）",
+      "labelEn": "Some or a little of the time (1-2 days)"
+    },
+    {
+      "value": 2,
+      "label": "时常（3-4天）",
+      "labelEn": "Occasionally or a moderate amount of the time (3-4 days)"
+    },
+    {
+      "value": 3,
+      "label": "大多数（5-7天）",
+      "labelEn": "Most or all of the time (5-7 days)"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "我因一些平常不太在意的事情而烦恼。",
+      "textEn": "I was bothered by things that don't usually bother me."
+    },
+    {
+      "index": 2,
+      "text": "我不想吃东西，胃口不好。",
+      "textEn": "I did not feel like eating; my appetite was poor."
+    },
+    {
+      "index": 3,
+      "text": "即使有家人和朋友的帮助，我也无法摆脱低落的情绪。",
+      "textEn": "I felt that I could not shake off the blues even with help from my family or friends."
+    },
+    {
+      "index": 4,
+      "text": "我觉得自己和别人一样好。",
+      "textEn": "I felt that I was just as good as other people.",
+      "reverse": true
+    },
+    {
+      "index": 5,
+      "text": "我很难集中注意力做正在做的事。",
+      "textEn": "I had trouble keeping my mind on what I was doing."
+    },
+    {
+      "index": 6,
+      "text": "我感到情绪低落。",
+      "textEn": "I felt depressed."
+    },
+    {
+      "index": 7,
+      "text": "我觉得做任何事都很费劲。",
+      "textEn": "I felt that everything I did was an effort."
+    },
+    {
+      "index": 8,
+      "text": "我对未来充满希望。",
+      "textEn": "I felt hopeful about the future.",
+      "reverse": true
+    },
+    {
+      "index": 9,
+      "text": "我觉得自己的人生很失败。",
+      "textEn": "I felt my life had been a failure."
+    },
+    {
+      "index": 10,
+      "text": "我感到害怕。",
+      "textEn": "I felt fearful."
+    },
+    {
+      "index": 11,
+      "text": "我睡不安稳。",
+      "textEn": "My sleep was restless."
+    },
+    {
+      "index": 12,
+      "text": "我感到快乐。",
+      "textEn": "I was happy.",
+      "reverse": true
+    },
+    {
+      "index": 13,
+      "text": "我比以前话少了。",
+      "textEn": "I talked less than usual."
+    },
+    {
+      "index": 14,
+      "text": "我感到孤独。",
+      "textEn": "I felt lonely."
+    },
+    {
+      "index": 15,
+      "text": "我觉得别人不太友好。",
+      "textEn": "I felt that people were unfriendly."
+    },
+    {
+      "index": 16,
+      "text": "我享受生活。",
+      "textEn": "I enjoyed life.",
+      "reverse": true
+    },
+    {
+      "index": 17,
+      "text": "我曾哭过。",
+      "textEn": "I had crying spells."
+    },
+    {
+      "index": 18,
+      "text": "我感到悲伤。",
+      "textEn": "I felt sad."
+    },
+    {
+      "index": 19,
+      "text": "我觉得别人不喜欢我。",
+      "textEn": "I felt that people disliked me."
+    },
+    {
+      "index": 20,
+      "text": "我提不起劲来做事。",
+      "textEn": "I could not get “going”."
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 0, "max": 16, "level": "无抑郁", "description": "未提示明显抑郁症状。" },
+      { "min": 16, "max": 21, "level": "轻度抑郁倾向", "description": "达到筛查阳性线，提示可能存在轻度抑郁情绪，建议关注。" },
+      { "min": 21, "max": 26, "level": "中度抑郁", "description": "提示存在较明显的抑郁症状，建议寻求专业评估。" },
+      { "min": 26, "level": "重度抑郁", "description": "提示存在明显的抑郁症状，请尽快寻求专业帮助。" }
+    ]
+  }
+}

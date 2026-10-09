@@ -1,0 +1,122 @@
+{
+  "id": "phq15",
+  "name": "患者健康问卷躯体症状量表",
+  "nameEn": "Patient Health Questionnaire-15",
+  "abbreviation": "PHQ-15",
+  "category": "躯体症状",
+  "year": 2024,
+  "instructions": "在过去四周里，您有多少时间被以下问题所困扰？请根据实际情况选择最符合的一项。",
+  "instructionsEn": "Over the past four weeks, how often have you been bothered by the following problems? Please choose the option that best matches your actual situation.",
+  "license": "Kroenke 等开发，可免费使用，使用时请注明出处。",
+  "options": [
+    {
+      "value": 0,
+      "label": "完全没有",
+      "labelEn": "Not at all"
+    },
+    {
+      "value": 1,
+      "label": "有几天",
+      "labelEn": "Several days"
+    },
+    {
+      "value": 2,
+      "label": "一半以上的天数",
+      "labelEn": "More than half the days"
+    },
+    {
+      "value": 3,
+      "label": "几乎每天",
+      "labelEn": "Nearly every day"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "胃痛",
+      "textEn": "Stomach pain"
+    },
+    {
+      "index": 2,
+      "text": "背痛",
+      "textEn": "Back pain"
+    },
+    {
+      "index": 3,
+      "text": "手臂或腿痛",
+      "textEn": "Pain in your arms or legs"
+    },
+    {
+      "index": 4,
+      "text": "关节痛",
+      "textEn": "Joint pain"
+    },
+    {
+      "index": 5,
+      "text": "经期疼痛（仅女性）",
+      "textEn": "Menstrual cramps (women only)"
+    },
+    {
+      "index": 6,
+      "text": "头痛",
+      "textEn": "Headaches"
+    },
+    {
+      "index": 7,
+      "text": "胸痛",
+      "textEn": "Chest pain"
+    },
+    {
+      "index": 8,
+      "text": "头晕",
+      "textEn": "Dizziness"
+    },
+    {
+      "index": 9,
+      "text": "心悸",
+      "textEn": "Feeling your heart pound or race"
+    },
+    {
+      "index": 10,
+      "text": "气短",
+      "textEn": "Shortness of breath"
+    },
+    {
+      "index": 11,
+      "text": "便秘或腹泻",
+      "textEn": "Constipation or diarrhea"
+    },
+    {
+      "index": 12,
+      "text": "恶心、胀气或消化不良",
+      "textEn": "Nausea, gas, or indigestion"
+    },
+    {
+      "index": 13,
+      "text": "疲劳或精力不足",
+      "textEn": "Feeling tired or having little energy"
+    },
+    {
+      "index": 14,
+      "text": "睡眠问题",
+      "textEn": "Trouble sleeping"
+    },
+    {
+      "index": 15,
+      "text": "记忆力问题",
+      "textEn": "Problems with memory"
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 0, "max": 6, "level": "轻度", "description": "总分低于6，躯体症状较轻。" },
+      { "min": 6, "max": 11, "level": "中度", "description": "总分6-11，存在中度躯体症状，建议关注。" },
+      { "min": 11, "max": 16, "level": "中重度", "description": "总分11-16，存在较明显的躯体症状，建议寻求专业评估。" },
+      { "min": 16, "max": 46, "level": "重度", "description": "总分16及以上，存在重度躯体症状，建议尽快寻求专业医疗帮助。" }
+    ]
+  }
+}

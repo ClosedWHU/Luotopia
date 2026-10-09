@@ -1,0 +1,102 @@
+{
+  "id": "rses",
+  "name": "罗森伯格自尊量表",
+  "nameEn": "Rosenberg Self-Esteem Scale",
+  "abbreviation": "RSES",
+  "category": "自尊",
+  "year": 2026,
+  "instructions": "以下是一组关于你对自己的看法的描述，请根据你的真实感受选择最符合的一项。",
+  "instructionsEn": "Below is a set of statements about how you view yourself. Please choose the option that best matches your true feelings.",
+  "license": "Rosenberg 编制，可免费使用，使用时请注明出处。",
+  "options": [
+    {
+      "value": 1,
+      "label": "非常不同意",
+      "labelEn": "Strongly disagree"
+    },
+    {
+      "value": 2,
+      "label": "不同意",
+      "labelEn": "Disagree"
+    },
+    {
+      "value": 3,
+      "label": "同意",
+      "labelEn": "Agree"
+    },
+    {
+      "value": 4,
+      "label": "非常同意",
+      "labelEn": "Strongly agree"
+    }
+  ],
+  "items": [
+    {
+      "index": 1,
+      "text": "总的来说，我对自己是满意的。",
+      "textEn": "On the whole, I am satisfied with myself."
+    },
+    {
+      "index": 2,
+      "text": "有时我觉得自己一无是处。",
+      "textEn": "At times I think I am no good at all.",
+      "reverse": true
+    },
+    {
+      "index": 3,
+      "text": "我觉得自己有不少优点。",
+      "textEn": "I feel that I have a number of good qualities."
+    },
+    {
+      "index": 4,
+      "text": "我能像大多数人一样把事情做好。",
+      "textEn": "I am able to do things as well as most other people."
+    },
+    {
+      "index": 5,
+      "text": "我觉得自己没什么值得自豪的。",
+      "textEn": "I feel I do not have much to be proud of.",
+      "reverse": true
+    },
+    {
+      "index": 6,
+      "text": "有时我确实感到自己很没用。",
+      "textEn": "At times I really feel I am useless.",
+      "reverse": true
+    },
+    {
+      "index": 7,
+      "text": "我觉得自己是个有价值的人，至少与别人不相上下。",
+      "textEn": "I feel that I am a person of worth, at least on an equal plane with others."
+    },
+    {
+      "index": 8,
+      "text": "我希望自己能得到更多尊重。",
+      "textEn": "I wish I could have more respect for myself.",
+      "reverse": true
+    },
+    {
+      "index": 9,
+      "text": "总的来说，我倾向于觉得自己是个失败者。",
+      "textEn": "All in all, I am inclined to feel that I am a failure.",
+      "reverse": true
+    },
+    {
+      "index": 10,
+      "text": "我对自己持积极的态度。",
+      "textEn": "I take a positive attitude toward myself."
+    }
+  ],
+  "scoring": {
+    "kind": "sum",
+    "decimals": 0,
+    "hasTotal": true,
+    "totalLabel": "总分",
+    "totalBands": [
+      { "min": 10, "max": 15, "level": "自尊过低", "description": "自尊水平明显偏低，可能伴随较低的自我价值感，建议关注并寻求支持。" },
+      { "min": 15, "max": 20, "level": "自尊偏低", "description": "自尊水平偏低，建议关注自我肯定与自我接纳。" },
+      { "min": 20, "max": 30, "level": "正常", "description": "自尊水平处于正常范围。" },
+      { "min": 30, "level": "高自尊", "description": "自尊水平较高，自我评价积极。" }
+    ]
+  }
+}
