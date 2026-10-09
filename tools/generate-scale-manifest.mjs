@@ -92,9 +92,21 @@ async function collectScales(previous) {
     if (scale.id !== id) {
       throw new Error(`${file} declares id ${JSON.stringify(scale.id)} but must be ${JSON.stringify(id)}`);
     }
-    for (const field of ['name', 'abbreviation']) {
+    for (const field of ['name', 'abbreviation', 'category']) {
       if (typeof scale[field] !== 'string' || !scale[field].trim()) {
         throw new Error(`${file} is missing a usable "${field}" string`);
+      }
+    }
+    // The app renders the scale list grouped by category with an item count in
+    // each card subtitle before any definition file is downloaded, so both must
+    // come from the manifest — and a wrong count is worse than none, hence the
+    // strict validation of every item index rather than just the array length.
+    if (!Array.isArray(scale.items) || scale.items.length === 0) {
+      throw new Error(`${file} is missing a non-empty "items" array`);
+    }
+    for (const [position, item] of scale.items.entries()) {
+      if (!item || typeof item !== 'object' || !Number.isInteger(item.index) || item.index < 1) {
+        throw new Error(`${file} items[${position}] is missing a positive integer "index"`);
       }
     }
     const checksum = `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
@@ -108,6 +120,8 @@ async function collectScales(previous) {
       id,
       label: scale.name,
       abbreviation: scale.abbreviation,
+      category: scale.category,
+      itemCount: scale.items.length,
       version,
       url: `/scales/data/${file}`,
       checksum,
