@@ -7,10 +7,17 @@ The source, Fastlane lanes, signing, and artifact checks live in the private
 ## Signing
 
 Existing Apple Distribution material is reused, the Mac Installer identity
-is stored in encrypted Match storage, and five manual Store profiles cover
-Runner, Watch, Widget, Packet Tunnel, and macOS. CI installs them readonly.
-Original Xcode-managed profiles remain on the Apple portal. Initialization
-has completed; no separate signing workflow is needed.
+is stored in encrypted Match storage, and six manual Store profiles cover
+Runner, Watch, Widget, the iOS Packet Tunnel, macOS, and the macOS Packet
+Tunnel. CI installs them readonly. Original Xcode-managed profiles remain on
+the Apple portal.
+
+After entitlement or target changes (e.g. a new capability in an entitlements
+file, or a new embedded extension), dispatch **Apple signing repair**
+(`apple-signing-repair.yml`). It runs the app's `signing_repair` lane, which
+syncs the portal-side bundle-id capabilities over the App Store Connect API
+and then regenerates the manual Store profiles with forced Match. Routine
+builds never mutate the portal; they use readonly Match.
 
 The `testflight` environment contains `MATCH_PASSWORD` and toolchain variables.
 Repository secrets `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8_BASE64`, and the
