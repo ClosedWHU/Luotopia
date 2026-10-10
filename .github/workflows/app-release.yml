@@ -1253,6 +1253,16 @@ jobs:
           GITHUB_TOKEN: ${{ env.APP_TOKEN }}
         run: pwsh -NoProfile -File tool/fetch_prebuilt_natives.ps1
 
+      # fvp's CMake otherwise pulls the MDK SDK from a SourceForge nightly at
+      # configure time - flaky from hosted runners (the arm64 leg timed out)
+      # and unpinned. The mirror lives in the private app repo, sha256-pinned
+      # out of band in scripts/mdk-sdk-digests.json.
+      - name: Stage fvp MDK SDK archives
+        env:
+          GITHUB_TOKEN: ${{ env.APP_TOKEN }}
+        shell: pwsh
+        run: ./scripts/stage_mdk_sdk.ps1
+
       - name: Patch Windows plugin source encoding
         shell: pwsh
         run: ./scripts/patch_whisper_utf8.ps1; ./scripts/patch_no_screenshot_utf8.ps1; ./scripts/patch_windows_deps.ps1
