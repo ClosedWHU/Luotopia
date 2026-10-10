@@ -52,40 +52,38 @@ import { platforms, testFlightUrl } from "../config/downloads";
         <div class="space-y-4 text-body-medium text-on-surface-variant">
           <div>
             <h3 class="text-title-small text-on-surface mb-1">Android</h3>
-            <p>按 ABI 分发包（与 <code class="text-on-surface">build-release.bat --split-per-abi</code> 一致）：优先选标有「推荐」的 <strong class="text-on-surface">arm64-v8a</strong>（近年金属机）；老设备用 armeabi-v7a。下载 APK 后直接安装；如提示「未知来源」，请在系统设置中允许安装。</p>
+            <p>按 ABI 分发包，安卓机/卓易通优先选标有「推荐」的 <strong class="text-on-surface">arm64-v8a</strong>；如果老设备无法安装推荐版本再尝试安装 <strong class="text-on-surface">armeabi-v7a</strong>；如果使用安卓模拟器则使用 <strong class="text-on-surface">x86_64</strong>。下载 APK 后直接安装；如提示「未知来源」、「存在风险」，请在系统设置中允许安装并选择「忽略风险继续安装」。</p>
           </div>
           <div>
             <h3 class="text-title-small text-on-surface mb-1">Apple</h3>
             <p><strong class="text-on-surface">iOS / iPadOS / macOS：</strong>统一通过 TestFlight 分发。打开
               <a href={testFlightUrl} target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">TestFlight 加入链接</a>
-              即可在 iPhone、iPad 或 Apple 芯片 Mac（macOS 13.5+）上申请内测。由于 Apple 政策限制，非越狱设备需通过 TestFlight 安装；TestFlight 构建有效期为 90 天，保持应用更新即可。</p>
-            <p class="mt-2 text-body-small text-outline">早期版本的 macOS arm64 DMG 仍可在对应历史 Release 的资产中找到，新版本不再随 Release 发布 DMG。</p>
+              即可在 iPhone、iPad 或 Apple 芯片 Mac（macOS 13.5+）上申请内测。TestFlight 构建有效期为 90 天，一般每 1~2 周发一次新版，保持应用更新即可，建议开启自动更新。</p>
           </div>
           <div>
             <h3 class="text-title-small text-on-surface mb-1">Linux</h3>
-            <p>每个 Release 按<strong class="text-on-surface">架构</strong>（x64 / arm64）与<strong class="text-on-surface">格式</strong>发布（均为 <code class="text-on-surface">--release</code>，无 debug 符号）：</p>
-            <ul class="mt-2 list-disc pl-5 space-y-1">
-              <li><strong class="text-on-surface">tar.gz</strong> — 便携目录，推荐通用；标「推荐」的多为 x64/amd64</li>
-              <li><strong class="text-on-surface">AppImage</strong> — 单文件运行（需 FUSE 或直接可执行）</li>
-              <li><strong class="text-on-surface">deb</strong> — Debian/Ubuntu：<code class="text-on-surface">sudo apt install ./luotopia-*-linux-*.deb</code></li>
-              <li><strong class="text-on-surface">flatpak</strong> — 本地 bundle（若 CI 成功生成）：<code class="text-on-surface">flatpak install --user ./luotopia-*-linux-*.flatpak</code></li>
-            </ul>
-            <pre data-lenis-prevent-horizontal class="mt-2 overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>tar -xzf luotopia-*-linux-x64.tar.gz &amp;&amp; ./luotopia/luotopia
-# 或
-chmod +x luotopia-*-linux-x64.AppImage &amp;&amp; ./luotopia-*-linux-x64.AppImage</code></pre>
-            <p class="mt-2 text-body-small text-outline">依赖较新 glibc + GTK3。arm64 在 GitHub ARM runner 上原生构建。手动重跑 CI 可选架构（x64/arm64/both）与格式（tar,appimage,deb,flatpak）。</p>
+            <p>分<strong class="text-on-surface">架构</strong>（x64 / arm64）与<strong class="text-on-surface">文件格式</strong>发布。安装示例：</p>
+            <pre data-lenis-prevent-horizontal class="mt-2 overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># .tar.gz
+tar -xzf luotopia-*-linux-x64.tar.gz &amp;&amp; ./luotopia/luotopia
+# .AppImage
+chmod +x luotopia-*-linux-x64.AppImage &amp;&amp; ./luotopia-*-linux-x64.AppImage
+# .deb
+sudo apt install ./luotopia-*-linux-*.deb
+# .flatpak
+flatpak install --user ./luotopia-*-linux-*.flatpak</code></pre>
+            <p class="mt-2 text-body-small text-outline">依赖较新 glibc + GTK3。</p>
           </div>
           <div>
             <h3 class="text-title-small text-on-surface mb-1">HarmonyOS</h3>
-            <p>HarmonyOS NEXT 工程随客户端维护，但 <code class="text-on-surface">.hap</code> 不随每个 Release 发布。若 Release 资产中包含 <code class="text-on-surface">luotopia-*-harmonyos-arm64-signed.hap</code>，请按照同版本的 <code class="text-on-surface">HARMONYOS-SIDELOAD.txt</code> 侧载安装。</p>
-            <p class="mt-2 text-body-small text-outline">受平台能力限制，WebView 密集型校园服务会在 HarmonyOS 上隐藏或降级。</p>
+            <p>HarmonyOS NEXT 侧载困难，暂无积极维护，因此 <code class="text-on-surface">.hap</code> 不随每个 Release 发布。若 Release 资产中包含 <code class="text-on-surface">luotopia-*-harmonyos-arm64-signed.hap</code>，可按照同版本的 <code class="text-on-surface">HARMONYOS-SIDELOAD.txt</code> 侧载安装。</p>
+            <p class="mt-2 text-body-small text-outline">受平台能力限制，部分功能会在 HarmonyOS 上隐藏或降级。</p>
           </div>
         </div>
       </div>
 
       <div class="lt-reveal-lift mt-8 rounded-card glass p-6 sm:p-8">
         <h2 class="text-title-medium text-on-surface mb-2">高级用户 / 包管理器</h2>
-        <p class="text-body-medium text-on-surface-variant mb-4">面向喜欢 CLI 安装、可复现升级的用户。资产随每个 GitHub Release 发布（含 prerelease）。</p>
+        <p class="text-body-medium text-on-surface-variant mb-4">面向喜欢 CLI 安装、可复现升级的用户。资产随每个 GitHub Release 发布。</p>
         <div class="space-y-5 text-body-medium text-on-surface-variant">
           <div>
             <h3 class="text-title-small text-on-surface mb-1">Scoop</h3>
@@ -106,21 +104,13 @@ chmod +x luotopia-*-linux-x64.AppImage &amp;&amp; ./luotopia-*-linux-x64.AppImag
 winget install --manifest .\path\to\manifests\folder</code></pre>
             <p class="mt-2">合并到 <a href="https://github.com/microsoft/winget-pkgs" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">microsoft/winget-pkgs</a> 之后：</p>
             <pre data-lenis-prevent-horizontal class="mt-2 overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>winget install ClosedWHU.Luotopia</code></pre>
-            <p class="mt-2 text-body-small text-outline">当前清单默认指向 zip 便携包；有签名 MSIX 后再可改为 MSIX 安装器以改善 SmartScreen 体验。</p>
+            <p class="mt-2 text-body-small text-outline">当前清单默认指向 zip 便携包；有签名 MSIX 后会改为 MSIX 安装器以改善 SmartScreen 体验。</p>
           </div>
           <div>
             <h3 class="text-title-small text-on-surface mb-1">MSIX 旁加载</h3>
             <p>下载 <code class="text-on-surface">*-windows-x64.msix</code> 后双击安装，或：</p>
             <pre data-lenis-prevent-horizontal class="mt-2 overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>Add-AppxPackage .\luotopia-*-windows-x64.msix</code></pre>
-            <p class="mt-2 text-body-small text-outline">未提供 Windows 代码签名证书时为未签名包。可选在仓库配置 <code class="text-on-surface">WINDOWS_PFX_BASE64</code> / <code class="text-on-surface">WINDOWS_PFX_PASSWORD</code> 以在 CI 中签名。传统 WiX MSI 暂不维护。</p>
-          </div>
-          <div>
-            <h3 class="text-title-small text-on-surface mb-1">Linux 包格式速查</h3>
-            <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># 架构：x64 或 arm64（文件名含 linux-x64 / linux-arm64）
-sudo apt install ./luotopia-*-linux-x64.deb
-chmod +x ./luotopia-*-linux-x64.AppImage &amp;&amp; ./luotopia-*-linux-x64.AppImage
-flatpak install --user ./luotopia-*-linux-x64.flatpak</code></pre>
-            <p class="mt-2 text-body-small text-outline">deb 控制字段 Architecture 为 amd64/arm64；Release 文件名用 <code class="text-on-surface">x64</code>/<code class="text-on-surface">arm64</code> 以便官网识别。</p>
+            <p class="mt-2 text-body-small text-outline">暂时未获得 Windows 代码签名证书时，仅提供未签名包。传统 WiX MSI 暂不维护。</p>
           </div>
         </div>
       </div>
