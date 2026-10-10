@@ -47,7 +47,7 @@ env:
   ANDROID_NDK_VERSION: 28.2.13676358
   # Every asset the lock file expects from a rebuild (SHA256SUMS is added last
   # and doubles as the "this generation is complete" marker).
-  EXPECTED_ASSETS: key_obfuscator-ios.a key_obfuscator-ios-simulator.a key_obfuscator-macos.a key_obfuscator-android-arm64-v8a.so key_obfuscator-android-armeabi-v7a.so key_obfuscator-android-x86_64.so key_obfuscator-linux.so key_obfuscator-linux-arm64.so key_obfuscator-windows.dll
+  EXPECTED_ASSETS: key_obfuscator-ios.a key_obfuscator-ios-simulator.a key_obfuscator-macos.a key_obfuscator-android-arm64-v8a.so key_obfuscator-android-armeabi-v7a.so key_obfuscator-android-x86_64.so key_obfuscator-linux.so key_obfuscator-linux-arm64.so key_obfuscator-windows.dll key_obfuscator-windows-arm64.dll
 
 jobs:
   plan:
@@ -289,8 +289,13 @@ jobs:
           workspaces: native/key_obfuscator
           cache-on-failure: 'true'
 
-      - name: Build Windows DLL
-        run: cargo build --release --manifest-path "$env:CRATE_DIR\Cargo.toml" --target x86_64-pc-windows-msvc
+      - name: Build Windows DLLs
+        run: |
+          rustup target add aarch64-pc-windows-msvc
+          cargo build --release --manifest-path "$env:CRATE_DIR\Cargo.toml" --target x86_64-pc-windows-msvc
+          # Cross-compiled from the x64 host: the runner image ships the MSVC
+          # ARM64 cross linker and libraries, and the crate is pure Rust.
+          cargo build --release --manifest-path "$env:CRATE_DIR\Cargo.toml" --target aarch64-pc-windows-msvc
 
       - name: Publish windows prebuilt to the private release
         shell: pwsh
@@ -301,6 +306,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
           New-Item -ItemType Directory -Force stage | Out-Null
           Copy-Item "$env:CRATE_DIR\target\x86_64-pc-windows-msvc\release\key_obfuscator.dll" stage\key_obfuscator-windows.dll
+          Copy-Item "$env:CRATE_DIR\target\aarch64-pc-windows-msvc\release\key_obfuscator.dll" stage\key_obfuscator-windows-arm64.dll
           # `<lowercase hex>  <name>` — byte-identical to `sha256sum` output, so
           # SHA256SUMS stays comparable across the three platforms.
           $lines = Get-ChildItem stage -File | ForEach-Object {
