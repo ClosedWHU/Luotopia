@@ -32,7 +32,7 @@ export const platforms: PlatformDownload[] = [
     id: "windows",
     name: "Windows",
     icon: "windows",
-    desc: "zip / MSIX / Scoop 清单",
+    desc: "x64 / arm64 · zip / MSIX",
     note: "Windows 10+ 兼容",
   },
   {

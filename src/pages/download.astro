@@ -108,7 +108,7 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
           </div>
           <div>
             <h3 class="text-title-small text-on-surface mb-1">MSIX 旁加载</h3>
-            <p>下载 <code class="text-on-surface">*-windows-x64.msix</code> 后双击安装，或：</p>
+            <p>下载 <code class="text-on-surface">*-windows-x64.msix</code>（ARM 设备用 <code class="text-on-surface">*-windows-arm64.msix</code>）后双击安装，或：</p>
             <pre data-lenis-prevent-horizontal class="mt-2 overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>Add-AppxPackage .\luotopia-*-windows-x64.msix</code></pre>
             <p class="mt-2 text-body-small text-outline">暂时未获得 Windows 代码签名证书时，仅提供未签名包。传统 WiX MSI 暂不维护。</p>
           </div>
@@ -377,6 +377,82 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
       }
     }
 
+    /* ── Per-arch filtering for the desktop cards ──
+     * Windows and Linux ship x64 and arm64 builds of every format; without a
+     * filter the cards list eight links and bury the one the visitor wants.
+     * A segmented pill (inset container + raised active segment, per the glass
+     * rules — no nested backdrop-filter) narrows the list to one arch.
+     * Arch-less assets (universal/unknown) stay visible in both segments so
+     * nothing ever disappears. Cards whose release only spans one arch render
+     * no switcher at all.
+     */
+    const ARCH_FILTER_DEFAULT = { windows: "x64", linux: "x64" };
+    const archChoice = {};
+    const cardAssetState = {};
+
+    function archBucketOf(a) {
+      if (a.arch === "amd64") return "x64";
+      if (a.arch === "arm64") return "arm64";
+      return null;
+    }
+
+    function assetLinkHtml(a) {
+      const title =
+        a.label ||
+        [a.archLabel || a.arch, a.formatLabel].filter(Boolean).join(" · ") ||
+        a.name;
+      const rec = a.recommended
+        ? `<span class="shrink-0 px-1.5 py-0.5 rounded-sm bg-primary-container text-on-primary-container text-label-small leading-none">推荐</span>`
+        : "";
+      const { base, ext } = splitFilename(a.name);
+      return `<a href="${escapeHtml(a.url)}" title="${escapeHtml(a.name)}" class="flex items-start gap-1.5 text-body-small text-primary hover:underline no-underline" download>
+          ${assetDownloadIcon}
+          <span class="min-w-0 flex-1">
+            <span class="flex flex-wrap items-center gap-1.5">
+              <span class="font-medium text-on-surface">${escapeHtml(title)}</span>
+              ${rec}
+            </span>
+            <span class="flex min-w-0 items-baseline text-outline text-[11px] mt-0.5">
+              <span class="truncate min-w-0">${escapeHtml(base)}</span>
+              <span class="shrink-0">${escapeHtml(ext)}</span>
+              <span class="shrink-0"> · ${formatSize(a.size)}</span>
+            </span>
+          </span>
+        </a>`;
+    }
+
+    function archSwitcherHtml(id) {
+      const seg = (key) => {
+        const active = archChoice[id] === key;
+        return `<button type="button" data-arch="${key}" aria-pressed="${active ? "true" : "false"}" class="state-layer rounded-full px-2.5 py-0.5 text-label-medium cursor-pointer ${active ? "lt-inset-raised text-primary" : "bg-transparent text-on-surface-variant"}">${key}</button>`;
+      };
+      return `<div class="inline-flex items-center gap-0.5 rounded-full lt-inset p-0.5" role="group" aria-label="架构筛选">${seg("x64")}${seg("arm64")}</div>`;
+    }
+
+    function cardAssetsHtml(id, installers, externalLink) {
+      let switcher = "";
+      let list = installers;
+      if (Object.prototype.hasOwnProperty.call(ARCH_FILTER_DEFAULT, id)) {
+        let hasX64 = false;
+        let hasArm64 = false;
+        for (const a of installers) {
+          const bucket = archBucketOf(a);
+          if (bucket === "x64") hasX64 = true;
+          if (bucket === "arm64") hasArm64 = true;
+        }
+        if (hasX64 && hasArm64) {
+          if (!archChoice[id]) archChoice[id] = ARCH_FILTER_DEFAULT[id];
+          switcher = archSwitcherHtml(id);
+          const choice = archChoice[id];
+          list = installers.filter((a) => {
+            const bucket = archBucketOf(a);
+            return bucket === null || bucket === choice;
+          });
+        }
+      }
+      return externalLink + switcher + list.map(assetLinkHtml).join("");
+    }
+
     /**
      * The navigation signal plus a timeout, combined by hand: `AbortSignal.any`
      * is Chrome 116+ and `AbortSignal.timeout` 103+, far above this bundle's
@@ -465,36 +541,42 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
 
         const installers = (byPlatform[id] || []).filter((a) => !a.meta);
         const externalLink = externalLinkHtml(card);
-        paintAssets(
-          assetsEl,
-          externalLink +
-            installers
-              .map((a) => {
-                const title =
-                  a.label ||
-                  [a.archLabel || a.arch, a.formatLabel].filter(Boolean).join(" · ") ||
-                  a.name;
-                const rec = a.recommended
-                  ? `<span class="shrink-0 px-1.5 py-0.5 rounded-sm bg-primary-container text-on-primary-container text-label-small leading-none">推荐</span>`
-                  : "";
-                const { base, ext } = splitFilename(a.name);
-                return `<a href="${escapeHtml(a.url)}" title="${escapeHtml(a.name)}" class="flex items-start gap-1.5 text-body-small text-primary hover:underline no-underline" download>
-                  ${assetDownloadIcon}
-                  <span class="min-w-0 flex-1">
-                    <span class="flex flex-wrap items-center gap-1.5">
-                      <span class="font-medium text-on-surface">${escapeHtml(title)}</span>
-                      ${rec}
-                    </span>
-                    <span class="flex min-w-0 items-baseline text-outline text-[11px] mt-0.5">
-                      <span class="truncate min-w-0">${escapeHtml(base)}</span>
-                      <span class="shrink-0">${escapeHtml(ext)}</span>
-                      <span class="shrink-0"> · ${formatSize(a.size)}</span>
-                    </span>
-                  </span>
-                </a>`;
-              })
-              .join(""),
-        );
+        cardAssetState[id] = { installers, externalLink, assetsEl };
+        paintAssets(assetsEl, cardAssetsHtml(id, installers, externalLink));
+
+        if (Object.prototype.hasOwnProperty.call(ARCH_FILTER_DEFAULT, id)) {
+          // Delegated: the switcher buttons live in innerHTML that is replaced
+          // on every toggle, while assetsEl itself is static Astro markup.
+          assetsEl.addEventListener(
+            "click",
+            (ev) => {
+              const btn =
+                ev.target && ev.target.closest
+                  ? ev.target.closest("button[data-arch]")
+                  : null;
+              if (!btn || !assetsEl.contains(btn)) return;
+              const state = cardAssetState[id];
+              if (!state) return;
+              const nextArch = btn.getAttribute("data-arch");
+              // Replacing innerHTML detaches the focused segment and drops
+              // focus to <body>; park it back on the same segment (the
+              // changelog pager does the same with its list).
+              const hadFocus = assetsEl.contains(document.activeElement);
+              archChoice[id] = nextArch;
+              paintAssets(
+                state.assetsEl,
+                cardAssetsHtml(id, state.installers, state.externalLink),
+              );
+              if (hadFocus) {
+                const restored = state.assetsEl.querySelector(
+                  `button[data-arch="${nextArch}"]`,
+                );
+                if (restored) restored.focus({ preventScroll: true });
+              }
+            },
+            { signal },
+          );
+        }
       });
 
       void loadTestFlightVersion();

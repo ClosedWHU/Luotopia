@@ -172,6 +172,11 @@
   --lt-glass-edge: hsl(215 40% 30% / 0.12);
   --lt-glass-divider: hsl(215 40% 30% / 0.09);
 
+  /* Translucent thumb for the slim scrollbars inside insets (code blocks,
+     other overflow-x content); see "Horizontal scrollers" below. */
+  --lt-scrollbar-thumb: hsl(220 15% 40% / 0.3);
+  --lt-scrollbar-thumb-hover: hsl(220 15% 40% / 0.48);
+
   --lt-glass-blur: 10px;
   --lt-glass-blur-control: 8px;
   --lt-glass-blur-overlay: 20px;
@@ -320,6 +325,9 @@
   --lt-glass-edge: hsl(0 0% 100% / 0.09);
   --lt-glass-divider: hsl(0 0% 100% / 0.08);
   --lt-glass-saturate: 150%;
+
+  --lt-scrollbar-thumb: hsl(220 15% 78% / 0.26);
+  --lt-scrollbar-thumb-hover: hsl(220 15% 78% / 0.42);
 
   --lt-shadow-glass:
     var(--lt-glass-optics),
@@ -651,6 +659,61 @@
   box-shadow:
     inset 0 1px 0 0 var(--lt-glass-rim),
     inset 0 0 0 0.6px var(--lt-glass-edge);
+}
+
+/* ── Horizontal scrollers ──
+ *
+ * Code blocks and other overflow-x content ship the native horizontal bar:
+ * ~15px of opaque OS chrome under a hairline-edged glass inset. Slim it to a
+ * rounded translucent thumb on a transparent track.
+ *
+ * The standards pair is gated behind `@supports not selector(...)`: Chromium
+ * 121+ implements scrollbar-width/color and, once they are non-auto, DROPS
+ * ::-webkit-scrollbar styling for that scroller — the rounded thumb would
+ * degrade to the square standard one. Firefox never matches
+ * selector(::-webkit-scrollbar), so it takes the standard pair; WebKit and
+ * older Chromium take the pseudo-elements above it. Kernels that cannot parse
+ * `@supports selector()` skip the block entirely and keep the WebKit rules.
+ *
+ * Root/vertical bars stay native on purpose: `scrollbar-gutter: stable` on
+ * <html> reserves that exact width (see the comment there), and re-theming
+ * the root scrollbar would change the gutter and reintroduce the layout
+ * shift that reservation exists to prevent.
+ */
+pre::-webkit-scrollbar,
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+  background: transparent;
+}
+
+pre::-webkit-scrollbar-track,
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+pre::-webkit-scrollbar-thumb,
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background-color: var(--lt-scrollbar-thumb);
+  border-radius: 9999px;
+}
+
+pre::-webkit-scrollbar-thumb:hover,
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background-color: var(--lt-scrollbar-thumb-hover);
+}
+
+pre::-webkit-scrollbar-corner,
+.overflow-x-auto::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  pre,
+  .overflow-x-auto {
+    scrollbar-width: thin;
+    scrollbar-color: var(--lt-scrollbar-thumb) transparent;
+  }
 }
 
 /*
