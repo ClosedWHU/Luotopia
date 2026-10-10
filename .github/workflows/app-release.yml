@@ -45,10 +45,19 @@ on:
         type: boolean
         default: true
       build_windows:
-        description: Build Windows x64 portable zip + MSIX
+        description: Build Windows portable zip + MSIX
         required: false
         type: boolean
         default: true
+      windows_arch:
+        description: Windows arch (x64, arm64, or both)
+        required: false
+        type: choice
+        options:
+          - both
+          - x64
+          - arm64
+        default: both
       build_macos:
         description: Build macOS release DMG (opt-in; macOS normally ships via TestFlight)
         required: false
@@ -146,6 +155,7 @@ jobs:
       build_number: ${{ steps.ctx.outputs.build_number }}
       build_android: ${{ steps.ctx.outputs.build_android }}
       build_windows: ${{ steps.ctx.outputs.build_windows }}
+      windows_archs: ${{ steps.ctx.outputs.windows_archs }}
       build_macos: ${{ steps.ctx.outputs.build_macos }}
       build_ios_testflight: ${{ steps.ctx.outputs.build_ios_testflight }}
       build_macos_testflight: ${{ steps.ctx.outputs.build_macos_testflight }}
@@ -178,6 +188,7 @@ jobs:
             TARGET='${{ github.repository }}'
             BUILD_ANDROID=true
             BUILD_WINDOWS=true
+            WINDOWS_ARCH=both
             BUILD_LINUX=true
             # macOS ships through TestFlight like iOS/iPadOS; the DMG job is
             # opt-in by editing the release workflow inputs (manual dispatch).
@@ -197,6 +208,7 @@ jobs:
             TARGET='${{ github.repository }}'
             BUILD_ANDROID='${{ inputs.build_android }}'
             BUILD_WINDOWS='${{ inputs.build_windows }}'
+            WINDOWS_ARCH='${{ inputs.windows_arch }}'
             BUILD_MACOS='${{ inputs.build_macos }}'
             BUILD_IOS_TESTFLIGHT='${{ inputs.build_ios_testflight }}'
             BUILD_MACOS_TESTFLIGHT='${{ inputs.build_macos_testflight }}'
@@ -215,6 +227,16 @@ jobs:
           LINUX_ARCH="${LINUX_ARCH:-both}"
           LINUX_FORMATS="${LINUX_FORMATS:-all}"
           BUILD_OHOS="${BUILD_OHOS:-false}"
+          WINDOWS_ARCH="${WINDOWS_ARCH:-both}"
+          case "$WINDOWS_ARCH" in
+            both) WINDOWS_ARCHS='["x64","arm64"]' ;;
+            x64) WINDOWS_ARCHS='["x64"]' ;;
+            arm64) WINDOWS_ARCHS='["arm64"]' ;;
+            *)
+              echo "::warning::Unknown windows_arch=$WINDOWS_ARCH, building both"
+              WINDOWS_ARCHS='["x64","arm64"]'
+              ;;
+          esac
           APPLE_ACTION="${APPLE_ACTION:-build}"
           case "$APPLE_ACTION" in build|distribute|status) ;; *) echo "::error::Unknown Apple action"; exit 1 ;; esac
           STRIPPED="${TAG#v}"
@@ -262,6 +284,7 @@ jobs:
           echo "build_number=$BUILD_NUMBER" >> "$GITHUB_OUTPUT"
           echo "build_android=$BUILD_ANDROID" >> "$GITHUB_OUTPUT"
           echo "build_windows=$BUILD_WINDOWS" >> "$GITHUB_OUTPUT"
+          echo "windows_archs=$WINDOWS_ARCHS" >> "$GITHUB_OUTPUT"
           echo "build_macos=$BUILD_MACOS" >> "$GITHUB_OUTPUT"
           echo "build_ios_testflight=$BUILD_IOS_TESTFLIGHT" >> "$GITHUB_OUTPUT"
           echo "build_macos_testflight=$BUILD_MACOS_TESTFLIGHT" >> "$GITHUB_OUTPUT"
@@ -270,7 +293,7 @@ jobs:
           echo "build_ohos=$BUILD_OHOS" >> "$GITHUB_OUTPUT"
           echo "linux_arch=$LINUX_ARCH" >> "$GITHUB_OUTPUT"
           echo "linux_formats=$LINUX_FORMATS" >> "$GITHUB_OUTPUT"
-          echo "Resolved tag=$TAG android=$BUILD_ANDROID windows=$BUILD_WINDOWS macos=$BUILD_MACOS linux=$BUILD_LINUX ohos=$BUILD_OHOS arch=$LINUX_ARCH formats=$LINUX_FORMATS"
+          echo "Resolved tag=$TAG android=$BUILD_ANDROID windows=$BUILD_WINDOWS($WINDOWS_ARCH) macos=$BUILD_MACOS linux=$BUILD_LINUX ohos=$BUILD_OHOS arch=$LINUX_ARCH formats=$LINUX_FORMATS"
 
       # Resolve which commit of the PRIVATE app repo to build. Normally its
       # default branch HEAD whose pubspec version matches the tag. For
@@ -1123,10 +1146,17 @@ jobs:
         run: rm -rf build/debug-info dist
 
   windows:
-    name: Windows x64 zip + MSIX + package manifests
+    name: Windows ${{ matrix.arch }} zip + MSIX
     needs: context
     if: needs.context.outputs.build_windows == 'true'
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: ${{ fromJSON(needs.context.outputs.windows_archs) }}
+    # Flutter publishes no windows-arm64 SDK archive, so the ARM leg boots the
+    # pinned SDK from git; its native arm64 Dart makes the tool target
+    # windows-arm64 from the host (Flutter has no Windows cross-compile).
+    runs-on: ${{ matrix.arch == 'arm64' && 'windows-11-arm' || 'windows-latest' }}
     permissions:
       contents: write
     env:
@@ -1159,11 +1189,38 @@ jobs:
         run: git submodule update --init --depth 1 lib/core/l10n/arb
 
       - name: Set up Flutter
+        if: matrix.arch == 'x64'
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
+
+      - name: Set up Flutter (arm64 via git)
+        if: matrix.arch == 'arm64'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git clone https://github.com/flutter/flutter.git -b "$env:FLUTTER_VERSION" --depth 1 "$env:USERPROFILE\flutter"
+          Add-Content -Path $env:GITHUB_PATH -Value "$env:USERPROFILE\flutter\bin"
+          $env:PATH = "$env:USERPROFILE\flutter\bin;$env:PATH"
+          flutter --version
+          # A tag clone cannot float like `channel: stable` did, but assert it
+          # anyway: silent drift here would ship an arm64 binary built by a
+          # different toolchain than the x64 one published next to it.
+          $machine = flutter --version --machine | ConvertFrom-Json
+          if ($machine.frameworkVersion -ne $env:FLUTTER_VERSION) {
+            throw "arm64 Flutter reports $($machine.frameworkVersion), expected the pinned $env:FLUTTER_VERSION"
+          }
+          # A git clone lacks the `version` stamp file the hosted toolcache
+          # ships; flutter_oss_licenses reads it for the SDK's own pubspec.lock
+          # entry. Materialize it from the JSON the tool writes on first run.
+          if (-not (Test-Path "$env:USERPROFILE\flutter\version") -and (Test-Path "$env:USERPROFILE\flutter\bin\cache\flutter.version.json")) {
+            (Get-Content "$env:USERPROFILE\flutter\bin\cache\flutter.version.json" -Raw | ConvertFrom-Json).frameworkVersion |
+              Set-Content "$env:USERPROFILE\flutter\version" -NoNewline
+          }
+          flutter config --no-analytics
+          flutter precache --windows
 
       - name: Enable Windows desktop
         run: flutter config --enable-windows-desktop
@@ -1220,7 +1277,11 @@ jobs:
           }
           & flutter @arguments
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          ./scripts/stage_wintun.ps1
+          if ('${{ matrix.arch }}' -eq 'arm64') {
+            ./scripts/stage_wintun.ps1 -OutputPath 'build\windows\arm64\runner\Release' -Architecture arm64
+          } else {
+            ./scripts/stage_wintun.ps1
+          }
 
       - name: Publish Dart obfuscation symbols (private app release)
         shell: pwsh
@@ -1234,7 +1295,7 @@ jobs:
           if (-not (Test-Path "build/debug-info")) {
             throw "build/debug-info directory not found"
           }
-          $OUT = "$env:RUNNER_TEMP/dart-symbols-windows.tar.gz"
+          $OUT = "$env:RUNNER_TEMP/dart-symbols-windows-${{ matrix.arch }}.tar.gz"
           Compress-Archive -Path "build/debug-info/*" -DestinationPath $OUT -Force
           # The context job normally creates this release; re-check here so a
           # hiccup there cannot silently drop the only copy of the symbols — an
@@ -1257,7 +1318,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          REL_DIR="build/windows/x64/runner/Release"
+          REL_DIR="build/windows/${{ matrix.arch }}/runner/Release"
           if [ ! -d "$REL_DIR" ]; then
             REL_DIR="$(find build/windows -type d -path '*/runner/Release' | head -n1 || true)"
           fi
@@ -1279,7 +1340,7 @@ jobs:
           esac
           echo "rel_dir=$REL_DIR" >> "$GITHUB_OUTPUT"
 
-      - name: Package portable zip (x64)
+      - name: Package portable zip (${{ matrix.arch }})
         id: zip
         shell: bash
         run: |
@@ -1288,8 +1349,9 @@ jobs:
           TAG='${{ needs.context.outputs.tag }}'
           SAFE_TAG="${TAG#v}"
           SAFE_TAG="${SAFE_TAG//+/-}"
+          ARCH='${{ matrix.arch }}'
           mkdir -p dist
-          ZIP_NAME="luotopia-${SAFE_TAG}-windows-x64.zip"
+          ZIP_NAME="luotopia-${SAFE_TAG}-windows-${ARCH}.zip"
           STAGE="dist/stage"
           rm -rf "$STAGE"
           mkdir -p "$STAGE/luotopia"
@@ -1323,6 +1385,7 @@ jobs:
           TAG='${{ needs.context.outputs.tag }}'
           SAFE_TAG="${TAG#v}"
           SAFE_TAG="${SAFE_TAG//+/-}"
+          ARCH='${{ matrix.arch }}'
           BN='${{ needs.context.outputs.build_name }}'
           BC='${{ needs.context.outputs.build_number }}'
           # MSIX requires four-part version A.B.C.D
@@ -1341,7 +1404,7 @@ jobs:
           MSIX_ARGS=(
             --build-windows=false
             --install-certificate=false
-            --architecture=x64
+            --architecture="$ARCH"
             --version="$MSIX_VER"
           )
           if [ -n "${WINDOWS_PFX_BASE64:-}" ] && [ -n "${WINDOWS_PFX_PASSWORD:-}" ]; then
@@ -1354,11 +1417,11 @@ jobs:
 
           dart run msix:create "${MSIX_ARGS[@]}"
 
-          # msix package writes to build/windows/x64/runner/Release/*.msix (depth > 3)
+          # msix package writes to build/windows/<arch>/runner/Release/*.msix (depth > 3)
           MSIX_SRC=""
           for candidate in \
-            "build/windows/x64/runner/Release/luotopia.msix" \
-            "build/windows/x64/runner/Release/"*.msix
+            "build/windows/$ARCH/runner/Release/luotopia.msix" \
+            "build/windows/$ARCH/runner/Release/"*.msix
           do
             if [ -f "$candidate" ]; then
               MSIX_SRC="$candidate"
@@ -1374,7 +1437,7 @@ jobs:
             exit 1
           fi
           echo "MSIX source: ${MSIX_SRC}"
-          MSIX_NAME="luotopia-${SAFE_TAG}-windows-x64.msix"
+          MSIX_NAME="luotopia-${SAFE_TAG}-windows-${ARCH}.msix"
           mkdir -p dist
           cp -v "$MSIX_SRC" "dist/${MSIX_NAME}"
           rm -f windows/codesign.pfx
@@ -1382,6 +1445,7 @@ jobs:
           ls -la dist
 
       - name: Generate Scoop + winget manifests
+        if: matrix.arch == 'x64'
         shell: bash
         env:
           TAG: ${{ needs.context.outputs.tag }}
@@ -1433,14 +1497,21 @@ jobs:
           set -euo pipefail
           gh release view "$TAG" --repo "$TARGET_REPO" >/dev/null
           shopt -s nullglob
+          ARCH='${{ matrix.arch }}'
           files=(
-            dist/*-windows-x64.zip
-            dist/*-windows-x64.msix
-            dist/scoop-luotopia.json
-            dist/winget-ClosedWHU.Luotopia.yaml
-            dist/winget-ClosedWHU.Luotopia.installer.yaml
-            dist/winget-ClosedWHU.Luotopia.locale.zh-CN.yaml
+            dist/*-windows-"$ARCH".zip
+            dist/*-windows-"$ARCH".msix
           )
+          # The Scoop/winget manifests point at the x64 zip and only ride the
+          # x64 leg; arm64 installs through them run the x64 build emulated.
+          if [ "$ARCH" = "x64" ]; then
+            files+=(
+              dist/scoop-luotopia.json
+              dist/winget-ClosedWHU.Luotopia.yaml
+              dist/winget-ClosedWHU.Luotopia.installer.yaml
+              dist/winget-ClosedWHU.Luotopia.locale.zh-CN.yaml
+            )
+          fi
           if [ "${#files[@]}" -eq 0 ]; then
             echo "::error::No Windows artifacts to upload"
             exit 1

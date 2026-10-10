@@ -35,6 +35,7 @@ class ReleaseContextTest(unittest.TestCase):
             "inputs.apple_only": "false", "inputs.build_android": "true",
             "inputs.apple_action": "build", "inputs.distribute_apple_external": "true",
             "inputs.build_windows": "true", "inputs.build_macos": "false",
+            "inputs.windows_arch": "both",
             "inputs.build_ios_testflight": "false", "inputs.build_macos_testflight": "false",
             "inputs.upload_apple_testflight": "true", "inputs.build_linux": "true",
             "inputs.build_ohos": "false", "inputs.linux_arch": "both",
@@ -75,6 +76,16 @@ class ReleaseContextTest(unittest.TestCase):
         self.assertEqual(outputs["build_windows"], "true")
         self.assertEqual(outputs["build_linux"], "true")
         self.assertEqual(json.loads(outputs["apple_platforms"]), [])
+
+    def test_windows_arch_selection_maps_to_the_job_matrix(self):
+        outputs = self.resolve()
+        self.assertEqual(json.loads(outputs["windows_archs"]), ["x64", "arm64"])
+        outputs = self.resolve(**{"inputs.windows_arch": "arm64"})
+        self.assertEqual(json.loads(outputs["windows_archs"]), ["arm64"])
+        outputs = self.resolve(**{"inputs.windows_arch": "x64"})
+        self.assertEqual(json.loads(outputs["windows_archs"]), ["x64"])
+        outputs = self.resolve(event="release")
+        self.assertEqual(json.loads(outputs["windows_archs"]), ["x64", "arm64"])
 
     def test_published_regular_release_includes_both_apple_platforms(self):
         outputs = self.resolve(event="release")
