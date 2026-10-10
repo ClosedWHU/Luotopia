@@ -661,25 +661,54 @@
     inset 0 0 0 0.6px var(--lt-glass-edge);
 }
 
-/* ── Horizontal scrollers ──
+/* ── Scrollbars ──
  *
- * Code blocks and other overflow-x content ship the native horizontal bar:
- * ~15px of opaque OS chrome under a hairline-edged glass inset. Slim it to a
- * rounded translucent thumb on a transparent track.
+ * Two scopes, one look: a rounded translucent thumb on a transparent track.
+ *
+ * Horizontal scrollers — code blocks and other overflow-x content ship the
+ * native bar by default: ~15px of opaque OS chrome under a hairline-edged
+ * glass inset.
+ *
+ * The root vertical bar — the native one is OS-designed (arrows, opaque
+ * track) against an aurora-and-glass page. Theming it does NOT disturb the
+ * `scrollbar-gutter: stable` reservation on <html>: the gutter is reserved
+ * identically whether or not the page scrolls, which is the shift the
+ * reservation exists to prevent; a custom width only changes how much is
+ * reserved/drawn, consistently in both states. Accepted trade-off: on macOS
+ * a styled root scrollbar opts out of overlay auto-hide, so the slim
+ * translucent thumb stays visible — deliberate, it reads as part of the
+ * design rather than OS furniture.
  *
  * The standards pair is gated behind `@supports not selector(...)`: Chromium
  * 121+ implements scrollbar-width/color and, once they are non-auto, DROPS
  * ::-webkit-scrollbar styling for that scroller — the rounded thumb would
  * degrade to the square standard one. Firefox never matches
  * selector(::-webkit-scrollbar), so it takes the standard pair; WebKit and
- * older Chromium take the pseudo-elements above it. Kernels that cannot parse
+ * older Chromium take the pseudo-elements. Kernels that cannot parse
  * `@supports selector()` skip the block entirely and keep the WebKit rules.
- *
- * Root/vertical bars stay native on purpose: `scrollbar-gutter: stable` on
- * <html> reserves that exact width (see the comment there), and re-theming
- * the root scrollbar would change the gutter and reintroduce the layout
- * shift that reservation exists to prevent.
  */
+html::-webkit-scrollbar {
+  width: 12px;
+  background: transparent;
+}
+
+html::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html::-webkit-scrollbar-thumb {
+  background-color: var(--lt-scrollbar-thumb);
+  border-radius: 9999px;
+  /* Transparent border + padding-box clip: the thumb floats with 2px of
+     breathing room instead of filling the 12px strip edge to edge. */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background-color: var(--lt-scrollbar-thumb-hover);
+}
+
 pre::-webkit-scrollbar,
 .overflow-x-auto::-webkit-scrollbar {
   height: 8px;
@@ -709,6 +738,11 @@ pre::-webkit-scrollbar-corner,
 }
 
 @supports not selector(::-webkit-scrollbar) {
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--lt-scrollbar-thumb) transparent;
+  }
+
   pre,
   .overflow-x-auto {
     scrollbar-width: thin;
