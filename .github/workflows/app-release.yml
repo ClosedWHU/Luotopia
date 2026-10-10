@@ -1253,11 +1253,13 @@ jobs:
       # Windows implementations and the Dart telemetry gate excludes Windows,
       # so firebase_core's native side is dead weight - and on arm64 it breaks
       # the link, because the Firebase C++ SDK ships no arm64 Windows libraries.
-      # The build runs with --no-pub and regenerates the plugin cmake and the
-      # registrant from .flutter-plugins-dependencies, so stripping it here
-      # holds through the build.
+      # The build runs with --no-pub and trusts the committed plugin cmake and
+      # registrant, so pub get must run again after the strip to regenerate
+      # them from the patched firebase_core pubspec.
       - name: Strip firebase_core from the Windows plugin set
-        run: dart run tool/strip_windows_firebase.dart
+        run: |
+          dart run tool/strip_windows_firebase.dart
+          flutter pub get
 
       - name: Patch liquid_glass_easy shaders (remove main() early return)
         shell: pwsh
