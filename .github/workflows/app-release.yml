@@ -683,6 +683,21 @@ jobs:
           restore-keys: |
             Android-fjs-precompiled-
 
+      # Warm the Gradle dependency cache across releases. The build resolves
+      # through a Tencent mirror that intermittently serves metadata without
+      # artifacts (the v1.1.0+16 attempt 2 died exactly there: a
+      # fingerprint-android POM resolved, its AAR 404'd); a warm cache skips
+      # that network round-trip entirely and shaves the resolution minutes.
+      - name: Cache Gradle
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: Android-gradle-${{ hashFiles('android/settings.gradle.kts', 'android/gradle.properties', 'android/app/build.gradle.kts', 'pubspec.lock') }}
+          restore-keys: |
+            Android-gradle-
+
       - name: Free disk space for Android build
         run: bash scripts/free_android_runner_space.sh
 
