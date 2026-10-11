@@ -91,6 +91,17 @@ class ReleaseContextTest(unittest.TestCase):
         outputs = self.resolve(event="release")
         self.assertEqual(json.loads(outputs["apple_platforms"]), ["ios", "macos"])
         self.assertEqual(outputs["build_android"], "true")
+        # Release events ship the DMG to the release alongside TestFlight.
+        self.assertEqual(outputs["build_macos"], "true")
+
+    def test_dmg_only_dispatch_skips_testflight_and_public_linux(self):
+        outputs = self.resolve(**{
+            "inputs.build_macos": "true", "inputs.build_android": "false",
+            "inputs.build_windows": "false", "inputs.build_linux": "false",
+        })
+        self.assertEqual(outputs["build_macos"], "true")
+        self.assertEqual(json.loads(outputs["apple_platforms"]), [])
+        self.assertEqual(outputs["build_windows"], "false")
 
     def test_build_only_mode_does_not_enable_upload(self):
         outputs = self.resolve(**{"inputs.apple_only": "true", "inputs.upload_apple_testflight": "false"})
