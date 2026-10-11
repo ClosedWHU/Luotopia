@@ -50,9 +50,11 @@ astro dev stop
 ```
 src/
   components/     # 复用的 Astro 组件（Navbar / Footer / PageHeader / …）
+    pages/        # 整页正文（HomePage / FeaturesPage），被各语种的路由共用
   config/         # 内容即数据：features / downloads / friendLinks / legal / deeplinkRoutes
+  i18n/           # 多语言：语种表 / 发布集 / 词典 / 查表 / 路由表，见下
   layouts/        # BaseLayout.astro —— 全站外壳
-  pages/          # 路由。legal/ 下有 [slug].astro 动态路由
+  pages/          # 路由。legal/ 下有 [slug].astro 动态路由，[lang]/ 下是每个语种的副本
   scripts/        # 客户端运行时：page-lifecycle、icon-svg、icon-source.server
   styles/         # global.css —— 设计 token 的唯一来源
 functions/        # Cloudflare Pages Functions
@@ -66,16 +68,27 @@ tools/            # 构建脚本（热更新清单生成、量表清单生成、
 内容改动优先落在 `src/config/` 而不是页面里 —— 功能列表、下载平台、友链、法律
 文档都是数据驱动的。
 
-## astro.config.mjs 里的三件事
+## astro.config.mjs 里的四件事
 
-配置里除了 Tailwind 还有三个自定义 Vite 插件，每个都对应一个不写下来就会被人
-「顺手优化掉」的坑：
+配置里除了 Tailwind 和 i18n 还有四个自定义 Vite 插件，每个都对应一个不写下来就会
+被人「顺手优化掉」的坑：
 
 **`misansWeights()`** —— MiSans 自带的 `@font-face` 声明的是小米切字体时用的字重
 （Regular 330 / Medium 380 / Bold 630），不是本站请求的值。不重写的话
 `font-weight: 400` 和 `500` 都会落到 Medium 380，MD3 字阶里 body 与 label 的区别
 就没了。插件在 import 时把每个 face 的 descriptor 改写成标准字重，字形数据和
 unicode-range 分片都不动。
+
+**`pruneFontSubsets()`** —— MiSans 按字符簇切成 56 个 `unicode-range` 分片（每个
+字重一份），172 条 `@font-face` 规则占了 293 KB 共享样式表的 81%，而全站十二个页面
+一共只用到 1038 个字形。插件扫 `src/**` 的**源码文本**收集字符集，把覆盖不到任何
+一个字符的分片连同规则一起删掉，对应的 woff2 也就根本不会产出。
+
+必须在 `transform` 阶段做而不是 `generateBundle`：Vite 是在 transform **之后**算 CSS
+哈希的，晚剪会让剪完的字节顶着剪前的文件名发出，而那个名字是 `immutable`、缓存一年。
+只在构建时生效，dev 下始终提供完整字族（否则改一个字要重启服务器才看得到，很难查）。
+
+**扫的是文本，注释也算。** 这条会咬到 i18n，见[多语言](#多语言i18n)。
 
 **`flattenCssLayers()`** —— Tailwind v4 把所有产物塞进
 `@layer properties/theme/base/utilities`，而级联层是 Chromium 99+ 的特性。更老的
@@ -249,6 +262,88 @@ JSON、文件内 `id` 与文件名不符、缺 `name` 或 `abbreviation`、单�
 字段含义、客户端的缓存与校验流程，以及**量表数据的版权与许可**（MMPI-2 上游为
 GPLv3，需要单独评估），见 [public/scales/README.md](../public/scales/README.md)。
 
+## 多语言（i18n）
+
+站点是**纯静态**的：没有 adapter，没有 SSR。所以 `Astro.preferredLocale` 恒为
+`undefined`，Astro 自带的 i18n 中间件也只在构建期跑一次。分工因此是固定的：
+
+| 层 | 文件 | 职责 |
+|----|------|------|
+| 配置 | `astro.config.mjs` 的 `i18n` | 声明语种、决定 URL 形状（`prefixDefaultLocale: false`，默认语种留在 `/`） |
+| 语种表 | `src/i18n/locales.ts` | code → URL 段 / 本地名 / hreflang / og:locale，以及 `Accept-Language` 的折叠规则 |
+| 发布集 | `src/i18n/published.json` | 真正构建的语种。配置文件、语种表、校验脚本三方共读这一份 |
+| 词典 | `src/i18n/<code>.json` | 扁平点号 key；默认语种那份定义 key 集 |
+| 查表 | `src/i18n/ui.ts` | `useTranslations()`、`routeUrl()`、`hreflangAlternates()` |
+| 路由表 | `src/i18n/routes.ts` | `ROUTES` 与 `TRANSLATED_ROUTES`：哪个语种翻了哪个页面 |
+| 路由 | `src/pages/[lang]/*.astro` | 每个已发布语种一份，正文共用 `src/components/pages/*.astro` |
+| 首访识别 | `functions/_middleware.ts` | `Accept-Language` → 302，见[部署文档](./deployment.md#语言协商) |
+
+页面组件里**不传 locale**，一律读 `Astro.currentLocale`（Astro 按路由填：`/en/features`
+→ `en`，`/features` → 默认语种）。这样路由文件只是壳，两份实现不可能对不上。
+
+### 加一个语种
+
+1. 写 `src/i18n/<code>.json` —— key 集必须与默认语种**完全一致**，占位符也要一致，
+   `npm run i18n:check` 会卡住缺漏与多余
+2. 在 `src/i18n/locales.ts` 的 `LOCALES` 里加一行
+3. 把 code 加进 `src/i18n/published.json`
+4. 在 `src/i18n/routes.ts` 的 `TRANSLATED_ROUTES` 里登记翻了哪些页面
+
+页面文件不用动：`src/pages/[lang]/*.astro` 由 `PREFIXED_LOCALES` 驱动，自动多出一份。
+
+只翻一部分页面是可以的，登记没翻的那部分留给默认语种即可。
+
+### 部分翻译时各处怎么表现
+
+`TRANSLATED_ROUTES` 是唯一的事实来源。某个语种没登记的页面：
+
+- 导航与页脚由 `routeUrl()` 生成链接，**直接指向默认语种的 URL**，不经过重定向
+- 切换器由 `pathInLocale()` 决定目标，切到没有译文的页面时停在原页——但 cookie 会
+  记住这次选择，之后有译文的页面就是那个语种
+- `hreflang` 不声明该语种有这个页面。声明一个会 404 的 alternate 比不声明更糟：
+  搜索引擎会校验整个 cluster，有一个成员不回应就整组作废
+- 中间件**不会**把首访者重定向到该路径的语种版本。否则会先 404、再被 404 回退弹回
+  原路径、然后又被识别一次——死循环
+
+手输或过期的 `/en/status` 由中间件 302 回 `/status`。
+
+Astro 自带的 `i18n.fallback` **不要用**：它认不出 `src/pages/[lang]/*` 建出来的路由，
+会把 `/en` 当成一个待翻译的普通页面，在 `/en/en` 生成跳转壳，而且它给 `/en/features`
+生成的壳优先级**高于**真正的英文页——真的译文会被直接丢掉，构建只报一条 warning。
+它产出的壳还是 2 秒 meta refresh、canonical 指向裸域，等于两跳重定向。
+
+### 两个会咬人的地方
+
+**字体裁剪把注释也算进去。** `pruneFontSubsets()` 扫的是 `src/**` 的源码文本，数据和
+注释一视同仁。所以：
+
+- `src/i18n/locales.ts` 只列**已发布**的语种，路线图写在注释里。把十种语言的本地名
+  一次写全，实测多留 6 个 MiSans `@font-face` 分片、6,893 字节共享 CSS，而这些字形
+  当前没有任何页面渲染
+- i18n 相关模块的注释一律英文；要引用中文原文时改成转述，别照抄
+
+本地名（endonym）是例外，也是唯一必要的开销：切换器必须在任何语种下都能让看不懂当前
+页面的人找到自己的语言，所以它按各自文字渲染，不能翻译成本地语的说法。
+
+**`transition:persist` 会把旧语言的导航栏带到新语言的页面上。** 持久化元素不参与
+swap，所以 `Navbar.astro` 的 persist 名带语种（`lt-navbar-${locale}`）：同语种导航照旧
+走持久化，跨语种导航重新渲染一份。`<html lang>` 不用管，Astro 会从新文档同步根元素
+属性（`BaseLayout` 的 `preserveRootState` 只负责 theme 与 kiosk 这两个纯客户端状态）。
+
+切换器的链接带 `data-astro-reload`：`?lang=` 要靠中间件 302 换 cookie，而 Client Router
+用 fetch 导航时会透明跟随 302、再 `pushState` 到带参数的那个 URL，地址栏就脏了。同理带
+`data-astro-prefetch={false}`——`prefetchAll: true` 会让鼠标划过就把十个语种的整页文档
+全预取一遍。
+
+### 校验
+
+```sh
+npm run i18n:check        # 源码层：词典、语种表、配置、路由表互相一致
+npm run i18n:check:dist   # 构建后：TRANSLATED_ROUTES 与 dist/ 双向对齐
+```
+
+`i18n:check` 已挂进 `prebuild`。`--dist` 那半边需要产物，所以是单独一条命令，改了路由
+登记之后要手动跑一次。
 ## 提交前
 
 仓库没有测试套件，也没有 lint 脚本。最低要求是构建能过：
@@ -260,3 +355,7 @@ npm run build
 `onBrokenLinks: 'throw'` 是文档站的设置，本站没有等价物 —— 改了路由记得手动点一遍
 导航和页脚链接。涉及老 WebView 的改动（CSS 层、语法降级）必须用
 `build && preview` 验证，dev server 看不到。
+
+`functions/` 也一样，`astro dev` 不跑它。语言协商、404 的表示形式、深链域名改写都要
+用 `npm run build && npx wrangler pages dev dist` 才看得到；本地 workerd 的兼容日期可能
+落后于当天，报 `requires compatibility date` 时加 `--compatibility-date <它支持的那天>`。

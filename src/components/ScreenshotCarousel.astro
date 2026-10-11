@@ -7,24 +7,54 @@ import weatherDetailShot from "../assets/screenshots/weather-detail.png";
 import weatherAqiShot from "../assets/screenshots/weather-aqi.png";
 import busShot from "../assets/screenshots/bus.png";
 import wallpaperShot from "../assets/screenshots/wallpaper.png";
+import { resolveLocale, useTranslations } from "../i18n/ui";
+
+const t = useTranslations(resolveLocale(Astro.currentLocale));
 
 const slides = [
-  { label: "课程表", src: scheduleShot },
-  { label: "校园应用", src: campusShot },
-  { label: "AI 助手", src: aiAssistantShot },
-  { label: "天气详情", src: weatherDetailShot },
-  { label: "空气质量", src: weatherAqiShot },
-  { label: "校车", src: busShot },
-  { label: "壁纸中心", src: wallpaperShot },
+  { label: t("carousel.slide.timetable"), src: scheduleShot },
+  { label: t("carousel.slide.campus"), src: campusShot },
+  { label: t("carousel.slide.ai"), src: aiAssistantShot },
+  { label: t("carousel.slide.weather"), src: weatherDetailShot },
+  { label: t("carousel.slide.aqi"), src: weatherAqiShot },
+  { label: t("carousel.slide.bus"), src: busShot },
+  { label: t("carousel.slide.wallpaper"), src: wallpaperShot },
 ];
+
+/*
+ * The strings the *script* needs, carried on data attributes.
+ *
+ * Not `define:vars`: that inlines the script and takes it out of the bundle,
+ * which is exactly the tradeoff the slide-label comment below already rejected.
+ * Everything the client says out loud is rendered here as a template with `{name}`
+ * placeholders, so the announcement grammar lives in the dictionaries alongside
+ * the words — and a translator can reorder `{span}` and `{labels}` freely, which
+ * string concatenation in the script never allowed.
+ */
+const i18n = {
+  pause: t("carousel.pause"),
+  play: t("carousel.play"),
+  announceRange: t("carousel.announce.range"),
+  announceSingle: t("carousel.announce.single"),
+  announceWithLabels: t("carousel.announce.withLabels"),
+  announceBare: t("carousel.announce.bare"),
+  separator: t("carousel.announce.separator"),
+};
 ---
 
 <div
   class="lt-carousel glass relative overflow-hidden rounded-group pb-10"
   role="group"
-  aria-roledescription="轮播"
-  aria-label="应用界面截图"
+  aria-roledescription={t("carousel.roleDescription")}
+  aria-label={t("carousel.label")}
   data-carousel-root
+  data-i18n-pause={i18n.pause}
+  data-i18n-play={i18n.play}
+  data-i18n-announce-range={i18n.announceRange}
+  data-i18n-announce-single={i18n.announceSingle}
+  data-i18n-announce-with-labels={i18n.announceWithLabels}
+  data-i18n-announce-bare={i18n.announceBare}
+  data-i18n-separator={i18n.separator}
 >
   <div id="carousel-track" class="flex transition-transform duration-500 ease-out">
     {slides.map((slide) => (
@@ -73,10 +103,10 @@ const slides = [
     ))}
   </div>
 
-  <button id="carousel-prev" class="lt-arrow absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full cursor-pointer" aria-label="上一张">
+  <button id="carousel-prev" class="lt-arrow absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full cursor-pointer" aria-label={t("carousel.prev")}>
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
   </button>
-  <button id="carousel-next" class="lt-arrow absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full cursor-pointer" aria-label="下一张">
+  <button id="carousel-next" class="lt-arrow absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full cursor-pointer" aria-label={t("carousel.next")}>
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
   </button>
 
@@ -99,7 +129,7 @@ const slides = [
         // right if it never does.
         tabindex={i === 0 ? 0 : -1}
         aria-current={i === 0 ? "true" : undefined}
-        aria-label={`第 ${i + 1} 张截图：${slides[i].label}`}
+        aria-label={t("carousel.dot", { index: i + 1, label: slides[i].label })}
       ></button>
     ))}
     <!--
@@ -107,7 +137,7 @@ const slides = [
       hover-only pause fails keyboard and touch users outright. Hidden under
       reduced motion, where autoplay never starts (see script).
     -->
-    <button id="carousel-pause" class="lt-pause" type="button" aria-label="暂停自动轮播">
+    <button id="carousel-pause" class="lt-pause" type="button" aria-label={i18n.pause}>
       <svg data-glyph="pause" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
       <svg data-glyph="play" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l10.5-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z"/></svg>
     </button>
@@ -312,6 +342,41 @@ const slides = [
     const labels = Array.from(track.children).map(
       (child) => child.querySelector("figcaption")?.textContent?.trim() ?? "",
     );
+
+    /*
+     * The strings this script speaks, read back off the root element.
+     *
+     * Same reasoning as `labels` above: a `<script>` is its own module, and
+     * `define:vars` would inline it and drop it out of the bundle. The templates
+     * are rendered into `data-i18n-*` by the frontmatter, so the announcement
+     * grammar is translated along with the words instead of being baked into
+     * concatenation here.
+     */
+    const root = container as HTMLElement | null;
+    const dataset = root?.dataset ?? {};
+    const copy = {
+      pause: dataset.i18nPause ?? "",
+      play: dataset.i18nPlay ?? "",
+      announceRange: dataset.i18nAnnounceRange ?? "",
+      announceSingle: dataset.i18nAnnounceSingle ?? "",
+      announceWithLabels: dataset.i18nAnnounceWithLabels ?? "",
+      announceBare: dataset.i18nAnnounceBare ?? "",
+      separator: dataset.i18nSeparator ?? "",
+    };
+
+    /**
+     * `{name}` substitution.
+     *
+     * `String.prototype.replaceAll` is Chrome 85 and the bundle's floor is 66, so
+     * this is a global regex instead. Unknown placeholders are left alone rather
+     * than blanked, so a typo in a dictionary shows up in the announcement
+     * instead of silently deleting part of the sentence.
+     */
+    function fill(template: string, vars: Record<string, string | number>): string {
+      return template.replace(/\{([a-zA-Z][a-zA-Z0-9]*)\}/g, (match, name: string) =>
+        Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : match,
+      );
+    }
     // Live read, not a snapshot: an OS reduced-motion flip mid-session has to
     // stop (or restart) autoplay — same contract as the hero rotator and the
     // dialog close timing.
@@ -405,7 +470,7 @@ const slides = [
       if (paused) stopAutoplay();
       else startAutoplay();
       if (pauseBtn) {
-        pauseBtn.setAttribute("aria-label", paused ? "继续自动轮播" : "暂停自动轮播");
+        pauseBtn.setAttribute("aria-label", paused ? copy.play : copy.pause);
         const play = pauseBtn.querySelector<SVGElement>('[data-glyph="play"]');
         const pause = pauseBtn.querySelector<SVGElement>('[data-glyph="pause"]');
         if (play) play.hidden = !paused;
@@ -429,8 +494,17 @@ const slides = [
       const shown = labels.slice(current, current + cols).filter(Boolean);
       const from = current + 1;
       const to = Math.min(current + cols, total);
-      const span = to > from ? `第 ${from} 到 ${to} 张` : `第 ${from} 张`;
-      status.textContent = shown.length > 0 ? `${span}，共 ${total} 张：${shown.join("、")}` : `${span}，共 ${total} 张`;
+      const span = to > from
+        ? fill(copy.announceRange, { from, to })
+        : fill(copy.announceSingle, { from });
+      status.textContent =
+        shown.length > 0
+          ? fill(copy.announceWithLabels, {
+              span,
+              total,
+              labels: shown.join(copy.separator),
+            })
+          : fill(copy.announceBare, { span, total });
     }
 
     // A manual control should also restart the 5s clock, otherwise the next

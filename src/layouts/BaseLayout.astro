@@ -13,6 +13,12 @@
   import Footer from "../components/Footer.astro";
   import AuroraBackground from "../components/AuroraBackground.astro";
   import plusJakartaSansLatin from "@fontsource-variable/plus-jakarta-sans/files/plus-jakarta-sans-latin-wght-normal.woff2";
+  import {
+    hreflangAlternates,
+    localeMeta,
+    resolveLocale,
+    useTranslations,
+  } from "../i18n/ui";
 
   export interface Props {
     title: string;
@@ -26,21 +32,45 @@
   }
 
   const { title, description, bare = false, noindex = false } = Astro.props;
+
+  /*
+   * `Astro.currentLocale` is the only locale input: Astro sets it from the route
+   * (`/en/features` → `en`, `/features` → the default), so nothing has to be
+   * threaded down from the page and a page cannot get it wrong. `resolveLocale`
+   * folds anything unexpected back onto the default rather than throwing.
+   */
+  const locale = resolveLocale(Astro.currentLocale);
+  const meta = localeMeta(locale);
+  const t = useTranslations(locale);
+  const alternates = hreflangAlternates(Astro.url.pathname);
+  const resolvedDescription = description ?? t("meta.default.description");
+  const resolvedOgDescription = description ?? t("meta.default.ogDescription");
 ---
 
 <!doctype html>
-<html lang="zh-Hans">
+<html lang={meta.hreflang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
     <ClientRouter fallback="swap" />
-    <meta name="description" content={description ?? "Luotopia —— 整合校园服务，构建开放生态"} />
+    <meta name="description" content={resolvedDescription} />
     {noindex && <meta name="robots" content="noindex" />}
     <meta property="og:title" content={title} />
-    <meta property="og:description" content={description ?? "校园服务一站式平台，开放社区驱动"} />
+    <meta property="og:description" content={resolvedOgDescription} />
     <meta property="og:image" content="/img/app-icon.png" />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content={meta.ogLocale} />
+    {
+      /*
+       * The alternate-language cluster. Emitted for every locale that really has
+       * this page plus `x-default`; see `hreflangAlternates` for why claiming a
+       * locale that 404s is worse than claiming none.
+       */
+      alternates.map((alternate) => (
+        <link rel="alternate" hreflang={alternate.hreflang} href={alternate.href} />
+      ))
+    }
     <!-- SVG follows OS color scheme: transparent plate in light, white plate in dark. -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" media="(prefers-color-scheme: light)" />
@@ -160,7 +190,7 @@
       Not rendered on `bare` pages: those drop the navbar, so the page *is* the
       single CTA and there is no chrome to skip past.
     -->
-    {!bare && <a href="#lt-main" class="lt-skip text-label-large">跳到主要内容</a>}
+    {!bare && <a href="#lt-main" class="lt-skip text-label-large">{t("a11y.skipToContent")}</a>}
     {!bare && <Navbar />}
     <!--
       `tabindex="-1"` is what makes the skip link actually move focus rather

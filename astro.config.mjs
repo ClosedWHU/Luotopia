@@ -335,11 +335,58 @@ function statusDevApi() {
   };
 }
 
+/**
+ * The locales the site builds, shared with `src/i18n/locales.ts` and
+ * `tools/check-i18n.mjs`.
+ *
+ * Read as JSON rather than imported from the TypeScript module because this file
+ * is plain ESM and cannot resolve `.ts`. One file feeding all three consumers is
+ * the point: a locale named here but not built would make every auto-detected
+ * redirect from that language land on a 404.
+ */
+const PUBLISHED = JSON.parse(
+  readFileSync(new URL('./src/i18n/published.json', import.meta.url), 'utf8'),
+);
+
 export default defineConfig({
   site: 'https://whu.sb',
   prefetch: {
     prefetchAll: true,
     defaultStrategy: 'hover',
+  },
+  /*
+   * Routing, not detection.
+   *
+   * Astro's i18n layer is build-time: it decides which URLs exist, sets
+   * `Astro.currentLocale`, and hands the `astro:i18n` helpers their locale→path
+   * mapping. It cannot see request headers, because there is no server — `output`
+   * is static and there is no adapter. First-visit language detection therefore
+   * lives in `functions/_middleware.ts`, which is the only thing in this
+   * deployment that runs per request.
+   *
+   * `prefixDefaultLocale: false` keeps the default locale at `/`, so every URL
+   * that already exists keeps working: no redirect for existing backlinks, no
+   * sitemap churn, and no change to the `luotopia.whu.sb` → `/open/` rewrite.
+   * It also means `redirectToDefaultLocale` must stay unset — Astro rejects the
+   * combination, since the default locale's prefixed URL would then redirect to
+   * itself.
+   *
+   * `i18n.fallback` is deliberately *not* configured. It looks like the right
+   * tool for the untranslated half of a partly-localised site, but it does not
+   * understand routes built by `src/pages/[lang]/*`: it treats `/en` as an
+   * ordinary page needing an English version, emits a redirect stub at `/en/en`,
+   * and — worse — its stub for `/en/features` outranks the real route, so the
+   * actual translated page is dropped from the build with only a warning. The
+   * stubs it does emit are also 2-second meta-refresh pages canonicalising to the
+   * apex domain, which is a two-hop redirect chain. `functions/_middleware.ts`
+   * does the same job with a single 302 and no build output.
+   */
+  i18n: {
+    defaultLocale: PUBLISHED.default,
+    locales: PUBLISHED.locales,
+    routing: {
+      prefixDefaultLocale: false,
+    },
   },
   vite: {
     plugins: [misansWeights(), pruneFontSubsets(), flattenCssLayers(), statusDevApi(), tailwindcss()],
