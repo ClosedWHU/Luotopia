@@ -1,0 +1,117 @@
+name: Play signing key verification
+
+# Produces the ownership-proof APK for Google Play's developer-verification
+# flow ("sign and upload an APK"). It is a minimal, manifest-only package
+# carrying assets/adi-registration.properties, signed with the release
+# keystore whose certificate fingerprint was registered in Play Console.
+# Dispatch-only: no fork-supplied code runs with the signing secrets, matching
+# the app-release.yml posture.
+
+on:
+  workflow_dispatch:
+    inputs:
+      registration_id:
+        description: "Play Console account-specific ID (content of adi-registration.properties)"
+        required: true
+        type: string
+      package_name:
+        description: "Registered Android package name"
+        required: false
+        type: string
+        default: sb.whu.luotopia
+
+permissions:
+  contents: read
+
+jobs:
+  verify-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+    steps:
+      - name: Write the release keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > keystore.jks
+          test -s keystore.jks
+          {
+            echo "ANDROID_KEY_ALIAS=$ANDROID_KEY_ALIAS"
+            echo "ANDROID_KEYSTORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD"
+            echo "ANDROID_KEY_PASSWORD=$ANDROID_KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+
+      - name: Ensure Android build-tools
+        run: |
+          set -euo pipefail
+          # The hosted image carries the SDK; pin the two pieces the minimal
+          # build needs, mirroring app-release.yml's install pattern.
+          MIRROR="https://mirrors.cloud.tencent.com/AndroidSDK"
+          install_zip() {
+            local url="$1" dest="$2"
+            if [ -d "$dest" ]; then echo "skip $dest"; return; fi
+            mkdir -p "$dest"
+            curl -fsSL -o /tmp/sdk.zip "$url"
+            unzip -q /tmp/sdk.zip -d /tmp/sdk-extract
+            mv /tmp/sdk-extract/* "$dest"/ 2>/dev/null || true
+            rm -rf /tmp/sdk.zip /tmp/sdk-extract
+          }
+          install_zip "$MIRROR/platform-35_r01.zip" "$ANDROID_HOME/platforms/android-35"
+          install_zip "$MIRROR/build-tools_r35_linux.zip" "$ANDROID_HOME/build-tools/35.0.0"
+          test -s "$ANDROID_HOME/platforms/android-35/android.jar"
+          ls "$ANDROID_HOME/build-tools/35.0.0/"aapt2 "$ANDROID_HOME/build-tools/35.0.0/"apksigner "$ANDROID_HOME/build-tools/35.0.0/"zipalign
+
+      - name: Build and sign the verification APK
+        env:
+          PACKAGE: ${{ inputs.package_name }}
+          REGISTRATION_ID: ${{ inputs.registration_id }}
+        run: |
+          set -euo pipefail
+          BT="$ANDROID_HOME/build-tools/35.0.0"
+          AAPT2="$BT/aapt2"
+          APKSIGNER="$BT/apksigner"
+          ZIPALIGN="$BT/zipalign"
+          ANDROID_JAR="$ANDROID_HOME/platforms/android-35/android.jar"
+
+          mkdir -p work/assets
+          cat > work/AndroidManifest.xml <<EOF
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+              package="${PACKAGE}" android:versionCode="1" android:versionName="1.0">
+            <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="36" />
+            <application android:label="Luotopia" />
+          </manifest>
+          EOF
+          printf '%s' "$REGISTRATION_ID" > work/assets/adi-registration.properties
+
+          "$AAPT2" link \
+            -o unsigned.apk \
+            -I "$ANDROID_JAR" \
+            --manifest work/AndroidManifest.xml \
+            -A work/assets \
+            --min-sdk-version 26 --target-sdk-version 36 \
+            --version-code 1 --version-name "1.0"
+          "$ZIPALIGN" -f 4 unsigned.apk aligned.apk
+          "$APKSIGNER" sign \
+            --ks keystore.jks \
+            --ks-pass "env:ANDROID_KEYSTORE_PASSWORD" \
+            --ks-key-alias "$ANDROID_KEY_ALIAS" \
+            --key-pass "env:ANDROID_KEY_PASSWORD" \
+            --out luotopia-verification.apk aligned.apk
+
+          echo "--- signing certificate ---"
+          "$APKSIGNER" verify --print-certs luotopia-verification.apk
+          echo "--- apk contents ---"
+          unzip -l luotopia-verification.apk | grep -Ei "adi-registration|AndroidManifest" || true
+
+      - name: Upload the verification APK
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: play-key-verification-apk
+          path: luotopia-verification.apk
+          if-no-files-found: error
+          retention-days: 7
