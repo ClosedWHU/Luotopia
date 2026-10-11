@@ -361,19 +361,36 @@ documents canonicalising to the apex domain, which is a two-hop chain.
 
 ### Two things that bite
 
-**The font pruning counts comments.** `pruneFontSubsets()` scans the source *text*
-under `src/`, data and comments alike. So:
+**The font pruning counts comments, and ten languages mostly defeat it.**
+`pruneFontSubsets()` scans the source *text* under `src/`, data and comments alike.
+Covering all ten locales means the charset has to include traditional-only hanzi,
+kana, hangul, Cyrillic and Vietnamese Latin Extended Additional. Measured on the
+built stylesheet: MiSans subsets kept go 50 → 102 of 112, its `@font-face` text
+goes 71 KB → 148 KB raw (25 → 52 KB gzip, 8 → 17 KB brotli), and the whole shared
+file goes 133 KB → 210 KB raw, 38 → 66 KB gzip, 19.0 → 27.9 KB brotli. Font
+subsets are 70% of the shared CSS by raw bytes and essentially all of the growth.
+That is the inherent cost of being multilingual, not waste to be optimised away.
+The number that transfers is the brotli delta, **+8.8 KB** on a render-blocking
+file; the +77 KB raw mostly costs parse time, and it is almost entirely
+`unicode-range` hex lists, which is why it compresses so well.
 
-- `src/i18n/locales.ts` lists **published** locales only, with the roadmap in a
-  comment. Carrying all ten endonyms up front measured +6 surviving MiSans
-  `@font-face` subsets and +6,893 raw bytes of shared CSS, for glyphs no shipped
-  page renders
-- Comments in the i18n modules are English. Where they would otherwise quote
-  Chinese source text, they paraphrase instead
+Three things worth knowing before trying:
 
-Endonyms are the exception, and the one unavoidable cost: the switcher has to be
-readable by someone who cannot read the page they landed on, so each language is
-listed in its own script and never translated.
+- The subsets are **lazy**. `unicode-range` means a browser only downloads the woff2
+  behind a rule when a rendered character falls in it, so a Spanish visitor never
+  fetches the hangul faces. What grew is the CSS, not the font traffic
+- MiSans is only reached for CJK and Cyrillic: `--font-sans` puts Plus Jakarta Sans
+  ahead of it, so Latin copy never touches MiSans. If the CSS size ever needs to
+  come back down, that is the lever — load MiSans only on the locales whose content
+  needs it. It has not been done because it would make the switcher's own endonyms
+  render in a different face on different pages
+- Comments in the i18n modules are English, and where they would otherwise quote
+  Chinese source text they paraphrase instead. A comment quoting all ten endonyms
+  measured +6 surviving subsets and +6,893 raw bytes on its own
+
+Endonyms cannot be dropped: the switcher has to be readable by someone who cannot
+read the page they landed on, so each language is listed in its own script and never
+translated.
 
 **`transition:persist` carries the old language's navbar onto the new language's
 page.** Persisted elements are not part of the swap, so `Navbar.astro` keys its

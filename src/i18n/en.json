@@ -17,7 +17,6 @@
 
   "lang.switcher.label": "Choose language",
   "lang.switcher.summary": "Language: {label}",
-  "lang.switcher.current": "Current language",
 
   "footer.tagline": "Campus services in one place, built on an open ecosystem.",
   "footer.navHeading": "Navigate",
@@ -122,7 +121,7 @@
   "features.item.courseReviews.summary": "Grade distributions, course reviews and anonymous submission.",
   "features.item.courseReviews.description": "See how a course's grades are distributed and read its reviews, or submit your own anonymously. Small samples are aggregated to protect privacy, continuing the data lineage of WHU.sb and WHUCourses.cn.",
 
-  "features.item.xuexitong.title": "Xuexitong account",
+  "features.item.xuexitong.title": "Chaoxing account",
   "features.item.xuexitong.summary": "Bind your Xuexitong account; credentials stay in on-device secure storage.",
   "features.item.xuexitong.description": "Bind Xuexitong (Chaoxing) by password or SMS code. Credentials are kept in this device's secure storage and isolated per WHU account, laying the groundwork for course and check-in features later on.",
 

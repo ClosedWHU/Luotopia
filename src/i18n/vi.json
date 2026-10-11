@@ -1,0 +1,247 @@
+{
+  "meta.default.description": "Luotopia — tích hợp dịch vụ học đường, xây dựng hệ sinh thái mở",
+  "meta.default.ogDescription": "Nền tảng dịch vụ học đường tất cả trong một, do cộng đồng mở dẫn dắt",
+
+  "a11y.skipToContent": "Chuyển đến nội dung chính",
+
+  "nav.home": "Trang chủ",
+  "nav.features": "Tính năng",
+  "nav.download": "Tải về",
+  "nav.community": "Cộng đồng",
+  "nav.status": "Trạng thái",
+  "nav.brand": "Thương hiệu",
+  "nav.legal": "Pháp lý",
+  "nav.menu": "Menu",
+  "nav.themeToggle.aria": "Bật/tắt chế độ tối",
+  "nav.themeToggle.label": "Chuyển chế độ tối / sáng",
+
+  "lang.switcher.label": "Chọn ngôn ngữ",
+  "lang.switcher.summary": "Ngôn ngữ: {label}",
+
+  "footer.tagline": "Tích hợp dịch vụ học đường, xây dựng hệ sinh thái mở.",
+  "footer.navHeading": "Điều hướng",
+  "footer.resourcesHeading": "Tài nguyên",
+  "footer.nav.features": "Tổng quan tính năng",
+  "footer.nav.download": "Tải về",
+  "footer.nav.community": "Cộng đồng",
+  "footer.nav.brand": "Tài nguyên thương hiệu",
+  "footer.nav.legal": "Thông tin pháp lý",
+  "footer.resources.status": "Trạng thái dịch vụ",
+  "footer.resources.docs": "Tài liệu cho nhà phát triển",
+  "footer.resources.github": "Tổ chức GitHub",
+  "footer.resources.repo": "Kho mã nguồn mở của trang này",
+
+  "cta.download": "Tải ứng dụng",
+  "cta.features": "Tìm hiểu tính năng",
+
+  "home.title": "Trang chủ",
+  "home.hero.srPrefix": "",
+  "home.hero.words": ["Trí tuệ", "Rộng mở", "Chia sẻ", "Hiệu quả", "Tiện lợi"],
+  "home.hero.tail": "Luotopia",
+  "home.hero.subtitleLine1": "Tích hợp dịch vụ học đường, xây dựng hệ sinh thái mở.",
+  "home.hero.subtitleLine2": "Nền tảng số học đường tất cả trong một của Đại học Vũ Hán.",
+  "home.hero.platforms": "Hỗ trợ Android / iOS / macOS / Windows / Linux; HarmonyOS đi kèm một số phiên bản",
+  "home.hero.scrollHint": "Cuộn xuống",
+  "home.features.title": "Tính năng chính",
+  "home.features.subtitle": "Thời khóa biểu, lịch trình, đặt chỗ, thẻ E, xe buýt, bản đồ, diễn đàn và AI — mọi thứ của đời sống học đường, ở một nơi.",
+  "home.preview.title": "Xem trước ứng dụng",
+  "home.preview.subtitle": "Giao diện thật, không phải ảnh dựng.",
+  "home.cta.title": "Trải nghiệm ngay",
+  "home.cta.subtitle": "Miễn phí, mở và tinh gọn — đời sống học đường đơn giản hơn.",
+
+  "carousel.roleDescription": "băng chuyền",
+  "carousel.label": "Ảnh chụp giao diện ứng dụng",
+  "carousel.prev": "Ảnh trước",
+  "carousel.next": "Ảnh tiếp theo",
+  "carousel.pause": "Tạm dừng tự động chuyển ảnh",
+  "carousel.play": "Tiếp tục tự động chuyển ảnh",
+  "carousel.dot": "Ảnh {index}: {label}",
+  "carousel.slide.timetable": "Thời khóa biểu",
+  "carousel.slide.campus": "Ứng dụng học đường",
+  "carousel.slide.ai": "Trợ lý AI",
+  "carousel.slide.weather": "Chi tiết thời tiết",
+  "carousel.slide.aqi": "Chất lượng không khí",
+  "carousel.slide.bus": "Xe buýt khuôn viên",
+  "carousel.slide.wallpaper": "Trung tâm hình nền",
+  "carousel.announce.range": "Ảnh {from} đến {to}",
+  "carousel.announce.single": "Ảnh {from}",
+  "carousel.announce.withLabels": "{span} trong tổng số {total}: {labels}",
+  "carousel.announce.bare": "{span} trong tổng số {total}",
+  "carousel.announce.separator": ", ",
+
+  "features.title": "Tính năng",
+  "features.header": "Toàn bộ tính năng",
+  "features.subtitle": "Những gì đã phát hành, các cập nhật sắp tới và những hướng đang phát triển",
+  "features.status.upcoming": "Sắp ra mắt",
+  "features.status.development": "Đang phát triển",
+
+  "features.category.coursework": "Môn học và học tập",
+  "features.category.campus": "Dịch vụ học đường",
+  "features.category.smart": "Công cụ thông minh",
+  "features.category.crossDevice": "Đa thiết bị và tài khoản",
+  "features.category.inDevelopment": "Đang phát triển",
+
+  "features.item.timetable.title": "Thời khóa biểu",
+  "features.item.timetable.summary": "Nhập từ nhiều nguồn, quản lý nhiều thời khóa biểu, xem tuần/tháng và nhắc lịch học.",
+  "features.item.timetable.description": "Hỗ trợ hệ thống đào tạo đại học, newyjs sau đại học, tệp/mã chia sẻ WakeUp, thời khóa biểu của bên thứ ba và chỉnh sửa thủ công; quản lý nhiều thời khóa biểu theo nhóm, xem tuần/tháng, nhắc lịch học và liên kết với tiện ích màn hình chính.",
+
+  "features.item.agenda.title": "Lịch trình và việc cần làm",
+  "features.item.agenda.summary": "Môn học, công việc và ghi chú ở một nơi, có lặp lại và nhắc nhở.",
+  "features.item.agenda.description": "Các mục chia thành lịch trình, công việc và ghi chú; hỗ trợ quy tắc lặp lại, độ ưu tiên, nhóm danh sách, thao tác vuốt, nhắc lịch học và đồng bộ với tiện ích widget.",
+
+  "features.item.freeClassrooms.title": "Phòng trống",
+  "features.item.freeClassrooms.summary": "Tra cứu phòng trống đa tiêu chí, tự động tránh trùng thời khóa biểu.",
+  "features.item.freeClassrooms.description": "Tra cứu phòng trống theo ngày, cơ sở, tòa nhà và tiết học; hệ thống tự đối chiếu xung đột với thời khóa biểu của bạn và có thể tạo mục lịch trình chỉ với một chạm.",
+
+  "features.item.librarySeats.title": "Đặt chỗ tự học thư viện",
+  "features.item.librarySeats.summary": "Tra cứu, đặt chỗ và hủy chỗ ngồi thư viện qua giao diện gốc.",
+  "features.item.librarySeats.description": "Tra cứu không gian, ngày, khung giờ và chỗ ngồi của thư viện qua API gốc; hỗ trợ tạo/hủy lịch đặt, danh sách lịch đặt của bạn và nhắc nhở trong lịch trình.",
+
+  "features.item.sportsVenues.title": "Đặt sân thể thao",
+  "features.item.sportsVenues.summary": "Đặt sân, môn và khung giờ, kèm quản lý đơn đặt.",
+  "features.item.sportsVenues.description": "Tra cứu các sân bãi thể thao và khung giờ còn trống, hoàn tất đặt chỗ, thanh toán, hủy và xem đơn đặt; có thể ghi lịch đặt thẳng vào lịch trình.",
+
+  "features.item.universityTimetable.title": "Thời khóa biểu toàn trường và ghép môn học ké",
+  "features.item.universityTimetable.summary": "Xem thời khóa biểu của toàn trường và lọc các môn không trùng lịch.",
+  "features.item.universityTimetable.description": "Xem thời khóa biểu toàn trường theo năm học và học kỳ, tìm môn học rồi đối chiếu với thời khóa biểu của bạn để lọc ra những môn không trùng lịch, thuận tiện cho việc học ké hoặc đăng ký bổ sung.",
+
+  "features.item.academicProgress.title": "Tiến độ học tập",
+  "features.item.academicProgress.summary": "Chương trình đào tạo, tiến độ và thống kê tín chỉ.",
+  "features.item.academicProgress.description": "Hiển thị thông tin ngành học của trường, chương trình đào tạo, số tín chỉ đã tích lũy và các học phần chưa học, giúp bạn theo dõi tiến độ của mình.",
+
+  "features.item.grades.title": "Điểm",
+  "features.item.grades.summary": "Nhập đa kênh, thuật toán GPA và xu hướng điểm.",
+  "features.item.grades.description": "Hỗ trợ nhập từ hệ thống đào tạo đại học, chứng chỉ điện tử đáng tin cậy và hệ thống hướng dẫn phát triển chuyên môn; chuyển đổi thuật toán GPA, xu hướng điểm, bảng điểm PDF, lọc theo học kỳ và khóa bằng sinh trắc học.",
+
+  "features.item.universityCalendar.title": "Lịch học vụ",
+  "features.item.universityCalendar.summary": "Lịch năm học và thời gian học kỳ của WHU, xem bất cứ lúc nào.",
+  "features.item.universityCalendar.description": "Hiển thị dữ liệu lịch học vụ của WHU qua các năm: ngày bắt đầu và kết thúc học kỳ, các kỳ nghỉ và kế hoạch giảng dạy, tất cả rõ ràng trong một lần xem.",
+
+  "features.item.courseReviews.title": "Điểm và đánh giá học phần",
+  "features.item.courseReviews.summary": "Phân bố điểm, đánh giá học phần và gửi ẩn danh.",
+  "features.item.courseReviews.description": "Xem phân bố điểm và đánh giá theo từng học phần, hỗ trợ gửi ẩn danh; các mẫu nhỏ được gộp lại để bảo vệ quyền riêng tư, tiếp nối mạch dữ liệu của WHU.sb / WHUCourses.cn.",
+
+  "features.item.xuexitong.title": "Tài khoản Chaoxing",
+  "features.item.xuexitong.summary": "Liên kết tài khoản Chaoxing, thông tin đăng nhập lưu an toàn trên máy.",
+  "features.item.xuexitong.description": "Hỗ trợ liên kết Chaoxing (Xuexitong) bằng mật khẩu hoặc mã SMS; thông tin đăng nhập được lưu trong bộ nhớ an toàn của thiết bị và cách ly theo tài khoản WHU, tạo nền tảng cho các tính năng môn học và điểm danh sau này.",
+
+  "features.item.ecard.title": "Thẻ E và mã thanh toán",
+  "features.item.ecard.summary": "Mã thanh toán gốc tự động làm mới, dùng được cả trên đồng hồ.",
+  "features.item.ecard.description": "Lối vào Thẻ E cùng tra cứu số dư và lịch sử giao dịch; mã thanh toán gốc tự làm mới mỗi phút, có bản web dự phòng, hỗ trợ Apple Watch và lối tắt màn hình chính.",
+
+  "features.item.shuttleBus.title": "Xe buýt khuôn viên",
+  "features.item.shuttleBus.summary": "Vị trí thời gian thực, tra cứu tuyến và nhắc đến trạm.",
+  "features.item.shuttleBus.description": "Tra cứu tuyến xe buýt và vị trí thời gian thực, chồng lớp xe trực tiếp lên bản đồ trường, nhắc đến trạm chạy nền, đồng bộ với Hoạt động trực tiếp trên iOS và ảnh chụp nhanh trên đồng hồ.",
+
+  "features.item.campusMap.title": "Bản đồ trường",
+  "features.item.campusMap.summary": "Bản đồ gốc, tìm kiếm địa điểm và các lớp tiện ích.",
+  "features.item.campusMap.description": "Bản đồ triển khai gốc, không nhúng trang web; hỗ trợ tìm kiếm địa điểm tổng hợp, các lớp bãi đỗ xe/cổng ra vào/AED/tiện ích của trường, cùng chuyển đổi giữa bản đồ vectơ và ảnh vệ tinh.",
+
+  "features.item.hospital.title": "Dịch vụ y tế",
+  "features.item.hospital.summary": "Thẻ khám bệnh, đăng ký, xếp hàng, hóa đơn và kết quả.",
+  "features.item.hospital.description": "Quản lý thẻ khám bệnh, xem lịch sử đăng ký và hủy đăng ký, theo dõi gọi số thứ tự khám ngoại trú, giờ làm việc, hóa đơn đã đóng/chưa đóng cùng các kết quả xét nghiệm và chẩn đoán hình ảnh.",
+
+  "features.item.utilities.title": "Tiền nước, điện và mã lấy nước",
+  "features.item.utilities.summary": "Tra cứu và đóng tiền nước, điện ký túc xá cùng mã lấy nước nóng.",
+  "features.item.utilities.description": "Tra cứu lượng nước và điện tiêu thụ của ký túc xá rồi đóng tiền trực tuyến, có nhắc khi số dư thấp; mã lấy nước nóng dùng được ngay khi bạn cần.",
+
+  "features.item.notifications.title": "Tin nhắn campus",
+  "features.item.notifications.summary": "Tổng hợp thông báo và việc cần làm từ trung tâm tin nhắn của WHU.",
+  "features.item.notifications.description": "Tổng hợp trung tâm tin nhắn của WHU, xem theo tất cả / thông báo / việc cần làm, hỗ trợ phần chi tiết và huy hiệu chưa đọc.",
+
+  "features.item.smartLuojia.title": "Zhihui Luojia",
+  "features.item.smartLuojia.summary": "Vào thẳng cổng chính thức, tự động mang theo danh tính học đường.",
+  "features.item.smartLuojia.description": "Nhúng cổng Zhihui Luojia, dùng lại phiên đăng nhập danh tính học đường, các dịch vụ thường dùng của trường không phải đăng nhập lại nhiều lần.",
+
+  "features.item.campusNetwork.title": "Mạng trường",
+  "features.item.campusNetwork.summary": "Gói cước, thiết bị, nạp tiền, tạm dừng và khôi phục.",
+  "features.item.campusNetwork.description": "Tra cứu trạng thái gói cước, tạm dừng/khôi phục (số ngày được cộng dồn), tự động xác thực qua cổng thông tin, đổi nhà mạng, quản lý thiết bị đang kết nối và nạp tiền mạng; trên iOS hỗ trợ kết nối cấp hệ thống.",
+
+  "features.item.campusVpn.title": "VPN trường",
+  "features.item.campusVpn.summary": "Chia luồng VPN aTrust và kiểm tra kết nối.",
+  "features.item.campusVpn.description": "Kết nối VPN aTrust của WHU, hỗ trợ proxy trong ứng dụng hoặc TUN cấp hệ thống, quy tắc chia luồng, thử thách hai yếu tố và kiểm tra kết nối web.",
+
+  "features.item.forum.title": "Diễn đàn: Nơi trú ẩn không kích Luojia",
+  "features.item.forum.summary": "Bài viết, bình luận, tệp đính kèm, uy tín và quản trị diễn đàn.",
+  "features.item.forum.description": "Diễn đàn cộng đồng hỗ trợ bài viết, bình luận, chuyên mục, tệp đính kèm, tìm kiếm, uy tín, bảng xếp hạng và nhật ký quản trị công khai; tab mặc định ẩn, có thể bật trong Cài đặt → Điều hướng.",
+
+  "features.item.aiAssistant.title": "Trợ lý AI",
+  "features.item.aiAssistant.summary": "Agent đa mô hình, có thể thao tác các dịch vụ học đường.",
+  "features.item.aiAssistant.description": "Hỗ trợ nhiều mô hình tích hợp và tùy chỉnh, tệp đính kèm đa phương thức, nhập giọng nói/đọc to, tạo ảnh, tìm kiếm trên mạng, MCP, kỹ năng và trợ lý; cầu nối xác nhận có ba mức thủ công / bán tự động / hoàn toàn tự động, các công cụ có thể tra cứu và quản lý thời khóa biểu, điểm, hộp thư và dữ liệu dịch vụ học đường, đồng thời có thể khởi động thanh toán tiền điện nước và tiền mạng sau khi bạn xác nhận.",
+
+  "features.item.weather.title": "Thời tiết",
+  "features.item.weather.summary": "Dự báo đa nguồn, AQI, lượng mưa và cảnh báo.",
+  "features.item.weather.description": "Mi Weather / Open-Meteo / AccuWeather được gọi trực tiếp theo thế mạnh của từng nguồn, cung cấp dự báo theo giờ, chất lượng không khí, nồng độ phấn hoa và báo cáo tuần chính thức, lượng mưa, cảnh báo, bộ nhớ đệm và cơ chế thử lại; mọi thay thế hoặc dự phòng nguồn đều truy vết được, có hỗ trợ chế độ nghiêm ngặt.",
+
+  "features.item.coremail.title": "Hộp thư Coremail",
+  "features.item.coremail.summary": "Gửi nhận thư của trường, chi tiết thư và huy hiệu chưa đọc.",
+  "features.item.coremail.description": "Ứng dụng khách Coremail gốc hỗ trợ đăng nhập SSO, mật khẩu dành riêng cho ứng dụng khách, hộp thư đến, soạn và gửi thư, hiển thị chi tiết an toàn cùng huy hiệu chưa đọc; hộp thư cũng mở cho Agent AI để tìm kiếm, sắp xếp, soạn thảo và gửi.",
+
+  "features.item.wallpapers.title": "Trung tâm hình nền",
+  "features.item.wallpapers.summary": "Hình nền cục bộ, URL trực tuyến, Bing mỗi ngày và cấu hình theo trang.",
+  "features.item.wallpapers.description": "Hỗ trợ không dùng hình nền, ảnh cục bộ, URL ảnh trực tuyến và ảnh Bing ngẫu nhiên mỗi ngày; các trang thời khóa biểu, campus, cài đặt, danh sách công việc, diễn đàn và AI có thể cấu hình riêng, lớp phủ tối điều chỉnh được.",
+
+  "features.item.hotUpdate.title": "Cập nhật nóng kịch bản",
+  "features.item.hotUpdate.summary": "Kịch bản phân tích có chữ ký, API thay đổi không cần phát hành bản mới.",
+  "features.item.hotUpdate.description": "Trang web chính thức phân phối các kịch bản phân tích QuickJS có chữ ký Ed25519; khi API của trường thay đổi, bộ phân tích có thể được cập nhật nóng, giảm thời gian chờ ứng dụng phát hành phiên bản mới.",
+
+  "features.item.appUpdate.title": "Cập nhật trong ứng dụng",
+  "features.item.appUpdate.summary": "Kiểm tra phiên bản mới và hướng dẫn cài đặt.",
+  "features.item.appUpdate.description": "Kiểm tra cập nhật từ GitHub Releases; trên Android có gợi ý nâng cấp ABI và hướng dẫn cài đặt, trên các nền tảng desktop sẽ nhắc tải phiên bản mới.",
+
+  "features.item.appleShortcuts.title": "Phím tắt Apple",
+  "features.item.appleShortcuts.summary": "Phím tắt gọi các công cụ đã được kiểm duyệt của ứng dụng.",
+  "features.item.appleShortcuts.description": "Phím tắt trên macOS có thể gọi các công cụ đã kiểm duyệt như lịch học vụ, thời khóa biểu, điểm, phòng trống; các thao tác ghi cần được xác nhận.",
+
+  "features.item.widgets.title": "Tiện ích màn hình chính",
+  "features.item.widgets.summary": "Bốn tiện ích widget cho Android, iOS và macOS.",
+  "features.item.widgets.description": "Bốn tiện ích widget — danh sách công việc, lớp học hôm nay, sắp bắt đầu và lớp học tuần này — phủ khắp Android, iOS và thanh menu của macOS.",
+
+  "features.item.watch.title": "Liên kết đồng hồ",
+  "features.item.watch.summary": "Đồng bộ với Apple Watch và đồng hồ Huawei/HarmonyOS.",
+  "features.item.watch.description": "Apple Watch có thể hiển thị mã thanh toán Thẻ E; đồng hồ Huawei/HarmonyOS đồng bộ ảnh chụp nhanh của lịch trình, xe buýt và thời tiết.",
+
+  "features.item.appShortcuts.title": "Lối tắt ứng dụng",
+  "features.item.appShortcuts.summary": "Nhấn giữ biểu tượng để vào ngay các lối vào thường dùng.",
+  "features.item.appShortcuts.description": "App Shortcuts trên Android và Quick Actions trên iOS đưa bạn thẳng tới mã thanh toán Thẻ E, đặt chỗ tự học, AI và các lối vào khác, đồng thời hiển thị theo trạng thái đăng nhập.",
+
+  "features.item.accountSecurity.title": "Tài khoản và bảo mật",
+  "features.item.accountSecurity.summary": "CAS, tài khoản Luotopia, Passkeys và niềm tin thiết bị.",
+  "features.item.accountSecurity.description": "CAS của WHU và tài khoản Luotopia tách biệt nhau; hỗ trợ Passkeys, nhiều phiên đăng nhập, niềm tin thiết bị, thông tin xác thực API, khóa điểm bằng sinh trắc học, và có thể tắt thu thập dữ liệu chẩn đoán.",
+
+  "features.item.languages.title": "Đa ngôn ngữ",
+  "features.item.languages.summary": "12 ngôn ngữ và định dạng giờ theo khu vực.",
+  "features.item.languages.description": "Hỗ trợ tiếng Trung giản thể, tiếng Trung phồn thể, tiếng Quảng Đông, tiếng Anh, tiếng Nhật, tiếng Hàn, tiếng Pháp, tiếng Tây Ban Nha, tiếng Bồ Đào Nha, tiếng Nga và tiếng Việt, tổng cộng 12 ngôn ngữ.",
+
+  "features.item.multiAccount.title": "Chuyển đổi nhiều tài khoản",
+  "features.item.multiAccount.summary": "Thông tin đăng nhập cách ly theo tài khoản WHU và có thể chuyển đổi.",
+  "features.item.multiAccount.description": "Thiết bị có thể ghi nhớ nhiều tài khoản WHU và chuyển đổi nhanh; thông tin đăng nhập của VPN, hộp thư, Chaoxing... được cách ly theo từng tài khoản, không dùng lẫn nhau.",
+
+  "features.item.thirdPartyAccounts.title": "Liên kết tài khoản bên thứ ba",
+  "features.item.thirdPartyAccounts.summary": "Liên kết ủy quyền các tài khoản bên thứ ba như Ham.",
+  "features.item.thirdPartyAccounts.description": "Quản lý tập trung các tài khoản bên ngoài trong mục \"Tài khoản khác\"; việc liên kết ủy quyền với bên thứ ba như Ham vẫn đang được hoàn thiện.",
+
+  "features.item.libraryLoans.title": "Mượn sách thư viện",
+  "features.item.libraryLoans.summary": "Mượn sách trong kho, gia hạn và nhắc đến hạn.",
+  "features.item.libraryLoans.description": "Dự kiến tích hợp API mượn sách của kho sách, hiển thị các cuốn đang mượn, thời hạn trả, trạng thái gia hạn và hỗ trợ nhắc khi đến hạn.",
+
+  "features.item.studyMaterials.title": "Chia sẻ tài liệu học tập",
+  "features.item.studyMaterials.summary": "Tìm tài liệu theo môn học, giảng viên và học kỳ.",
+  "features.item.studyMaterials.description": "Dự kiến tích hợp tìm kiếm, tải lên, tải xuống, yêu thích và trạng thái duyệt ở phía máy chủ, tổ chức tài liệu theo môn học, giảng viên và học kỳ.",
+
+  "features.item.gradeEnhancements.title": "Nâng cao tính năng điểm",
+  "features.item.gradeEnhancements.summary": "So sánh học kỳ, xuất tóm tắt và liên kết mã môn học.",
+  "features.item.gradeEnhancements.description": "Trên nền xu hướng điểm hiện có, tiếp tục hoàn thiện việc so sánh giữa các học kỳ, xuất tóm tắt và liên kết với mã môn học.",
+
+  "features.item.recurrenceEnhancements.title": "Nâng cao mục lặp lại",
+  "features.item.recurrenceEnhancements.summary": "Hoàn thiện việc triển khai và thao tác trên cả nhóm mục lặp lại.",
+  "features.item.recurrenceEnhancements.description": "Hoàn thiện việc triển khai từng lần của mục lặp lại, hoàn thành, khôi phục và thao tác trên toàn bộ nhóm.",
+
+  "features.item.widgetEnhancements.title": "Nâng cao tiện ích widget",
+  "features.item.widgetEnhancements.summary": "Tăng cường cho Android và tìm thêm điểm vào trên nền tảng khác.",
+  "features.item.widgetEnhancements.description": "Tiếp tục tăng cường tiện ích widget trên Android và khám phá thêm điểm vào trên các nền tảng desktop.",
+
+  "features.item.standaloneWeb.title": "Bản web độc lập",
+  "features.item.standaloneWeb.summary": "Flutter Web ngừng bảo trì, lên kế hoạch cho bản web độc lập.",
+  "features.item.standaloneWeb.description": "Lớp tương thích Flutter Web và các tệp phát hành kèm theo đã ngừng bảo trì; sản phẩm web độc lập sẽ được khởi động khi yêu cầu và năng lực proxy phía máy chủ đã rõ ràng."
+}
