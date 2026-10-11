@@ -59,7 +59,7 @@ on:
           - arm64
         default: both
       build_macos:
-        description: Build macOS release DMG (opt-in; macOS normally ships via TestFlight)
+        description: Build macOS release DMG (on by default for release events; for a DMG-only run dispatch with just this switch on)
         required: false
         type: boolean
         default: false
@@ -190,9 +190,11 @@ jobs:
             BUILD_WINDOWS=true
             WINDOWS_ARCH=both
             BUILD_LINUX=true
-            # macOS ships through TestFlight like iOS/iPadOS; the DMG job is
-            # opt-in by editing the release workflow inputs (manual dispatch).
-            BUILD_MACOS=false
+            # macOS ships through TestFlight AND as an unsigned DMG on the
+            # release, for users outside the beta circle. Dispatch runs opt in
+            # per platform instead; build_macos=true with both TestFlight
+            # switches off is the DMG-only recipe.
+            BUILD_MACOS=true
             BUILD_IOS_TESTFLIGHT=true
             BUILD_MACOS_TESTFLIGHT=true
             UPLOAD_APPLE_TESTFLIGHT=true
@@ -2082,6 +2084,136 @@ jobs:
       - name: Scrub AUR key
         if: always() && steps.aur.outputs.enabled == 'true'
         run: rm -f /home/aurbuilder/.ssh/id_ed25519
+
+  # Pushes the package-manager manifests for a complete desktop release to the
+  # two dist repos: ClosedWHU/Luotopia-Dist (Scoop bucket, Nix flake, winget
+  # archive) and ClosedWHU/homebrew-luotopia (Formula, and a Cask once the tag
+  # carries a DMG). Runs only when both Windows legs and both Linux legs built,
+  # so the manifests never point at half a release. Requires the DIST_REPO_TOKEN
+  # secret (contents:write on both dist repos).
+  publish-dist:
+    name: Publish package-manager manifests
+    needs: [context, macos, windows, linux]
+    # `macos` is optional (DMG-only opt-in): skipped counts as pass so the
+    # cask is simply left out. `!cancelled()` is required for the result
+    # checks to run at all past a skipped need. The windows/linux success
+    # gates keep the manifests from pointing at half a release.
+    if: >-
+      !cancelled() &&
+      needs.context.result == 'success' &&
+      (needs.macos.result == 'success' || needs.macos.result == 'skipped') &&
+      needs.windows.result == 'success' &&
+      needs.linux.result == 'success' &&
+      needs.context.outputs.build_windows == 'true' &&
+      needs.context.outputs.build_linux == 'true' &&
+      needs.context.outputs.windows_archs == '["x64","arm64"]' &&
+      needs.context.outputs.linux_arch == 'both'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      DIST_TOKEN: ${{ secrets.DIST_REPO_TOKEN }}
+      DIST_REPO: ClosedWHU/Luotopia-Dist
+      BREW_REPO: ClosedWHU/homebrew-luotopia
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Require dist token
+        run: |
+          if [ -z "$DIST_TOKEN" ]; then
+            echo "::error::Missing DIST_REPO_TOKEN with contents:write on ${DIST_REPO} and ${BREW_REPO}."
+            exit 1
+          fi
+
+      - name: Download release archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.context.outputs.tag }}
+          TARGET_REPO: ${{ needs.context.outputs.target_repo }}
+        run: |
+          set -euo pipefail
+          SAFE_TAG="${TAG#v}"
+          SAFE_TAG="${SAFE_TAG//+/-}"
+          mkdir -p assets
+          gh release download "$TAG" --repo "$TARGET_REPO" --dir assets \
+            --pattern "luotopia-${SAFE_TAG}-windows-x64.zip" \
+            --pattern "luotopia-${SAFE_TAG}-windows-arm64.zip" \
+            --pattern "luotopia-${SAFE_TAG}-linux-x64.tar.gz" \
+            --pattern "luotopia-${SAFE_TAG}-linux-arm64.tar.gz" \
+            --pattern "winget-ClosedWHU.Luotopia*.yaml"
+          # The DMG exists only when the macOS release job ran for this tag;
+          # the Cask is rendered only from a real hash, never a stale one.
+          if gh release download "$TAG" --repo "$TARGET_REPO" --dir assets \
+               --pattern "luotopia-${SAFE_TAG}-macos-arm64.dmg"; then
+            echo "DMG present; the cask will be rendered"
+          else
+            echo "::warning::no DMG on ${TAG}; publishing without the cask"
+          fi
+          ls -la assets
+
+      - name: Hash and render manifests
+        env:
+          TAG: ${{ needs.context.outputs.tag }}
+          TARGET_REPO: ${{ needs.context.outputs.target_repo }}
+        run: |
+          set -euo pipefail
+          SAFE_TAG="${TAG#v}"
+          SAFE_TAG="${SAFE_TAG//+/-}"
+          h() { sha256sum "assets/$1" | awk '{print $1}'; }
+          ARGS=(
+            --tag "$TAG" --target-repo "$TARGET_REPO"
+            --dist-out render/dist --brew-out render/brew
+            --windows-x64-sha "$(h "luotopia-${SAFE_TAG}-windows-x64.zip")"
+            --windows-arm64-sha "$(h "luotopia-${SAFE_TAG}-windows-arm64.zip")"
+            --linux-x64-sha "$(h "luotopia-${SAFE_TAG}-linux-x64.tar.gz")"
+            --linux-arm64-sha "$(h "luotopia-${SAFE_TAG}-linux-arm64.tar.gz")"
+          )
+          if [ -f "assets/luotopia-${SAFE_TAG}-macos-arm64.dmg" ]; then
+            ARGS+=(--macos-arm64-sha "$(h "luotopia-${SAFE_TAG}-macos-arm64.dmg")")
+          fi
+          python3 .github/scripts/render_dist_manifests.py "${ARGS[@]}"
+
+      - name: Push to the dist repos
+        env:
+          TAG: ${{ needs.context.outputs.tag }}
+        run: |
+          set -euo pipefail
+          echo "::add-mask::$DIST_TOKEN"
+          push_repo() {
+            local repo="$1" work="$2"
+            rm -rf "$work"
+            git clone --depth 1 "https://x-access-token:${DIST_TOKEN}@github.com/${repo}.git" "$work"
+            git -C "$work" checkout -B main
+          }
+          commit_push() {
+            local repo="$1" work="$2"
+            git -C "$work" add -A
+            if git -C "$work" diff --cached --quiet; then
+              echo "${repo} already current for ${TAG}"
+              return
+            fi
+            git -C "$work" \
+              -c "user.name=ClosedWHU Release Bot" \
+              -c "user.email=noreply@whu.sb" \
+              commit -m "luotopia ${TAG#v}"
+            git -C "$work" push origin main
+            echo "Published ${TAG} manifests to ${repo}"
+          }
+
+          push_repo "$DIST_REPO" dist-checkout
+          cp -a render/dist/. dist-checkout/
+          mkdir -p dist-checkout/winget
+          cp -a assets/winget-ClosedWHU.Luotopia*.yaml dist-checkout/winget/
+          commit_push "$DIST_REPO" dist-checkout
+
+          push_repo "$BREW_REPO" brew-checkout
+          cp -a render/brew/. brew-checkout/
+          commit_push "$BREW_REPO" brew-checkout
+
+      - name: Cleanup
+        if: always()
+        run: rm -rf assets render dist-checkout brew-checkout
 
   # HarmonyOS HAP for user sideload (hdc install).
   # Self-hosted Ubuntu + ErBWs/setup-ohos (CLI/SDK mirror) + OH Flutter clone.
