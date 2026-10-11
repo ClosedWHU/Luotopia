@@ -445,7 +445,34 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
       return `<div class="inline-flex items-center gap-0.5 rounded-full lt-inset p-0.5" role="group" aria-label="架构筛选">${seg("x64")}${seg("arm64")}</div>`;
     }
 
+    /**
+     * The Apple card carries two different distribution channels - the
+     * TestFlight link and (since DMGs ship on releases) direct-download
+     * assets - which read as one confusing pile when listed flat. Split them
+     * into labeled sections; the outer .platform-assets space-y then spaces
+     * the sections, and each section keeps the tight link rhythm.
+     * The asset label says macOS because DMGs are the only public Apple
+     * asset; IPAs stay TestFlight-only.
+     */
+    function appleCardHtml(installers, externalLink) {
+      let html = "";
+      if (externalLink) {
+        html += `<div class="space-y-1.5">
+          <p class="text-label-medium text-outline">TestFlight 内测 · iOS / iPadOS / macOS</p>
+          ${externalLink}
+        </div>`;
+      }
+      if (installers.length > 0) {
+        html += `<div class="space-y-1.5 ${externalLink ? "pt-2 border-t border-outline-variant" : ""}">
+          <p class="text-label-medium text-outline">macOS 直装 · DMG（未签名）</p>
+          ${installers.map(assetLinkHtml).join("")}
+        </div>`;
+      }
+      return html;
+    }
+
     function cardAssetsHtml(id, installers, externalLink) {
+      if (id === "apple") return appleCardHtml(installers, externalLink);
       let switcher = "";
       let list = installers;
       if (Object.prototype.hasOwnProperty.call(ARCH_FILTER_DEFAULT, id)) {
