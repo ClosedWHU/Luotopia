@@ -69,5 +69,10 @@ GPA
 ## 추가 라이선스 조항
 본 앱은 MIT 라이선스로 배포됩니다. 사용된 서드파티 오픈소스 구성 요소의 라이선스는 앱 내 "정보 → 오픈소스 라이선스"에서 확인할 수 있습니다.
 
+본 앱 사용 시 '이용약관'에 동의한 것으로 간주됩니다: https://www.whu.sb/legal/terms
+'개인정보처리방침': https://www.whu.sb/legal/privacy
+'국경 간 데이터 이전 안내': https://www.whu.sb/legal/cross-border
+Luotopia(珞家)는 ClosedWHU 팀이 독립 개발한 서드파티 클라이언트이며 우한대학교 공식 앱이 아닙니다.
+
 ## 개발자
 Hsukqi Lee

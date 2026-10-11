@@ -69,5 +69,10 @@ GPA
 ## 其他许可条款
 本应用以 MIT 许可证分发。所用第三方开源组件的许可信息可在应用内「关于 → 开源许可」中查看。
 
+使用本应用即视为同意《用户协议》：https://www.whu.sb/legal/terms
+《隐私政策》：https://www.whu.sb/legal/privacy
+《跨境数据传输说明》：https://www.whu.sb/legal/cross-border
+珞家（Luotopia）为 ClosedWHU 团队独立开发的第三方客户端，并非武汉大学官方应用。
+
 ## 开发者
 Hsukqi Lee

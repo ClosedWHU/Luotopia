@@ -69,5 +69,10 @@ Các tên gọi và nhãn hiệu "Đại học Vũ Hán" (Wuhan University), "Lu
 ## Điều khoản cấp phép bổ sung
 Ứng dụng này được phân phối theo Giấy phép MIT. Giấy phép của các thành phần mã nguồn mở của bên thứ ba được sử dụng có thể xem trong ứng dụng tại Giới thiệu → Giấy phép mã nguồn mở.
 
+Sử dụng ứng dụng này đồng nghĩa với việc bạn đồng ý với "Điều khoản dịch vụ": https://www.whu.sb/legal/terms
+"Chính sách bảo mật": https://www.whu.sb/legal/privacy
+"Giải thích về truyền dữ liệu xuyên biên giới": https://www.whu.sb/legal/cross-border
+Luotopia là ứng dụng khách của bên thứ ba do đội ngũ ClosedWHU phát triển độc lập, không phải ứng dụng chính thức của Đại học Vũ Hán.
+
 ## Nhà phát triển
 Hsukqi Lee

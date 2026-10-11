@@ -6,7 +6,7 @@ Luotopia
 > Remarque : réservez d'abord le nom « Luotopia » dans Partner Center.
 
 ## Description *
-Luotopia (珞家) est un client numérique tout-en-un du campus destiné aux étudiants et au personnel de l'Université de Wuhan. Il réunit les études, les services du campus et les outils intelligents dans une application de bureau unique et soignée.
+Luotopia est un client numérique tout-en-un du campus destiné aux étudiants et au personnel de l'Université de Wuhan. Il réunit les études, les services du campus et les outils intelligents dans une application de bureau unique et soignée.
 
 ÉTUDES
 Importez votre emploi du temps depuis plusieurs sources (systèmes de licence et de master, etc.), gérez plusieurs emplois du temps avec vues hebdomadaire et mensuelle et rappels de cours ; rassemblez cours, tâches et notes dans un agenda avec récurrences et alertes ; trouvez des salles libres en excluant automatiquement les conflits avec votre emploi du temps ; réservez des places de travail à la bibliothèque et des installations sportives ; consultez l'emploi du temps de toute l'université pour trouver des cours auditeurs sans conflit ; importez vos notes depuis plusieurs canaux avec calcul du GPA et tendances ; sans oublier le suivi académique, le calendrier universitaire, la distribution des notes et les évaluations anonymes de cours.
@@ -68,6 +68,11 @@ gpa
 
 ## Conditions de licence supplémentaires
 Cette application est distribuée sous licence MIT. Les licences des composants open source tiers utilisés sont consultables dans l'application, sous À propos → Licences open source.
+
+En utilisant cette application, vous acceptez les Conditions d'utilisation : https://www.whu.sb/legal/terms
+Politique de confidentialité : https://www.whu.sb/legal/privacy
+Avis relatif au transfert transfrontalier de données : https://www.whu.sb/legal/cross-border
+Luotopia est un client tiers indépendant développé par l'équipe ClosedWHU et n'est pas une application officielle de l'Université de Wuhan.
 
 ## Développeur
 Hsukqi Lee

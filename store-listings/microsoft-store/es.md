@@ -6,7 +6,7 @@ Luotopia
 > Nota: reserve antes el nombre "Luotopia" en Partner Center.
 
 ## Descripción *
-Luotopia (珞家) es un cliente digital integral del campus para estudiantes y personal de la Universidad de Wuhan, que reúne en una única aplicación de escritorio pulida los estudios, los servicios del campus y las herramientas inteligentes.
+Luotopia es un cliente digital integral del campus para estudiantes y personal de la Universidad de Wuhan, que reúne en una única aplicación de escritorio pulida los estudios, los servicios del campus y las herramientas inteligentes.
 
 ESTUDIOS
 Importa tu horario desde varias fuentes (sistemas de grado y posgrado, entre otras), gestiona varios horarios con vistas semanal y mensual y recordatorios de clase; reúne cursos, tareas y notas en una agenda con repeticiones y avisos; encuentra aulas libres excluyendo automáticamente los choques con tu horario; reserva puestos de estudio en la biblioteca e instalaciones deportivas; consulta el horario de toda la universidad para encontrar asignaturas auditables sin conflictos; importa calificaciones desde varios canales con cálculo de GPA y tendencias; además de progreso académico, calendario universitario, distribución de notas y reseñas anónimas de cursos.
@@ -68,6 +68,11 @@ gpa
 
 ## Términos de licencia adicionales
 Esta aplicación se distribuye bajo la licencia MIT. Las licencias de los componentes de código abierto de terceros utilizados pueden consultarse en la aplicación, en Acerca de → Licencias de código abierto.
+
+Al usar esta aplicación aceptas las Condiciones del servicio: https://www.whu.sb/legal/terms
+Política de privacidad: https://www.whu.sb/legal/privacy
+Aviso de transferencia transfronteriza de datos: https://www.whu.sb/legal/cross-border
+Luotopia es un cliente independiente de terceros desarrollado por el equipo ClosedWHU y no es una aplicación oficial de la Universidad de Wuhan.
 
 ## Desarrollador
 Hsukqi Lee
