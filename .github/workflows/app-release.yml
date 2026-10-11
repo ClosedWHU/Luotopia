@@ -1078,15 +1078,15 @@ jobs:
 
       # Google Play forbids self-update, so the play flavor's manifest overlay
       # must have stripped REQUEST_INSTALL_PACKAGES. Fail loudly if not.
+      # apkanalyzer `manifest permissions` shells out to `aapt dump badging`,
+      # which cannot parse a bundle, so grep the merged protobuf manifest's
+      # string pool directly (permission names live there as UTF-8).
       - name: Verify the Play manifest drops REQUEST_INSTALL_PACKAGES
         if: matrix.package == 'aab'
         run: |
           set -euo pipefail
-          APKANALYZER="${ANDROID_HOME:-/usr/local/lib/android/sdk}/cmdline-tools/latest/bin/apkanalyzer"
           AAB="$(find build/app/outputs/bundle -type f -name '*.aab' -print -quit)"
-          "$APKANALYZER" manifest permissions "$AAB" > /tmp/perms.txt
-          cat /tmp/perms.txt
-          if grep -qi "REQUEST_INSTALL_PACKAGES" /tmp/perms.txt; then
+          if unzip -p "$AAB" base/manifest/AndroidManifest.xml | grep -qi "REQUEST_INSTALL_PACKAGES"; then
             echo "::error::REQUEST_INSTALL_PACKAGES still present in the Play AAB"
             exit 1
           fi
