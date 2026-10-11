@@ -77,6 +77,11 @@ on:
           - x64
           - arm64
         default: both
+      submit_store:
+        description: "Submit the MSIX to the Microsoft Store (needs STORE_* + ENTRA_* secrets; uploads and commits a new submission)"
+        required: false
+        type: boolean
+        default: false
       build_macos:
         description: Build macOS release DMG (on by default for release events; for a DMG-only run dispatch with just this switch on)
         required: false
@@ -1644,11 +1649,39 @@ jobs:
           # a Store package cannot be signed locally anyway, because the
           # manifest Publisher CN is issued by Microsoft's Store CA and its
           # private key is unobtainable.
-          dart run msix:create \
-            --build-windows=false \
-            --install-certificate=false \
-            --architecture="$ARCH" \
+          #
+          # msix:build and msix:pack are invoked separately instead of
+          # msix:create so the display-name localization can be injected
+          # between them.
+          MSIX_ARGS=(
+            --build-windows=false
+            --install-certificate=false
+            --architecture="$ARCH"
             --version="$MSIX_VER"
+          )
+          dart run msix:build "${MSIX_ARGS[@]}"
+
+          REL_DIR="build/windows/$ARCH/runner/Release"
+          if [ ! -d "$REL_DIR" ]; then
+            REL_DIR="$(find build/windows -type d -path '*/runner/Release' | head -n1 || true)"
+          fi
+          if [ -z "${REL_DIR:-}" ] || [ ! -d "$REL_DIR" ]; then
+            echo "::error::Windows Release folder not found; cannot localize the MSIX"
+            exit 1
+          fi
+
+          # Rewrites resources.pri so <DisplayName>ms-resource:... resolves per
+          # OS language. msix:build's own MakePri run uses `createconfig`, whose
+          # <autoResourcePackage qualifier="Language"/> splits every non-default
+          # language out into a resources.language-*.pri side file and leaves
+          # resources.pri holding en-US alone -- nine of ten locales would
+          # render the raw "ms-resource:LuotopiaDisplayName" in the Start menu.
+          # Both this and the verify step below assert the outcome, so a MakePri
+          # behaviour change fails the build rather than shipping a broken name.
+          dart run tool/msix_localize_display_name.dart prepare \
+            --build-folder "$REL_DIR"
+
+          dart run msix:pack "${MSIX_ARGS[@]}"
 
           # msix package writes to build/windows/<arch>/runner/Release/*.msix (depth > 3)
           MSIX_SRC=""
@@ -1669,11 +1702,16 @@ jobs:
             find . -name '*.msix' 2>/dev/null || true
             exit 1
           fi
+
+          # Re-checks the packed output, not the folder: makeappx could in
+          # principle drop or replace the regenerated PRI, and the whole point
+          # of the reference is that it resolves once installed.
+          dart run tool/msix_localize_display_name.dart verify --msix "$MSIX_SRC"
+
           echo "MSIX source: ${MSIX_SRC}"
           MSIX_NAME="luotopia-${SAFE_TAG}-windows-${ARCH}.msix"
           mkdir -p dist
           cp -v "$MSIX_SRC" "dist/${MSIX_NAME}"
-          rm -f windows/codesign.pfx
           echo "msix_name=${MSIX_NAME}" >> "$GITHUB_OUTPUT"
           ls -la dist
 
@@ -1787,6 +1825,147 @@ jobs:
         shell: bash
         run: |
           rm -rf build/debug-info dist
+
+  # Microsoft Store submission.
+  #
+  # Off unless `submit_store` is passed to workflow_dispatch. A commit here
+  # publishes to production users, so it is never implied by pushing a tag --
+  # the windows job produces the artifact either way, and submitting stays a
+  # deliberate second action.
+  #
+  # Needs an Entra ID app registration created under Partner Center > Account
+  # settings > User management > Azure AD applications, and associated there
+  # with the account; that association is what authorizes it, not the API
+  # permission alone. Then these repo secrets:
+  #   ENTRA_TENANT_ID      directory (tenant) ID
+  #   ENTRA_CLIENT_ID      the registration's application (client) ID
+  #   ENTRA_CLIENT_SECRET  a client secret for that registration
+  # The product ID is public -- it is in the Store URL -- so it reads from the
+  # STORE_ID repo variable and only falls back to the reserved one, which lets
+  # a throwaway test product be targeted without editing the workflow.
+  #
+  # NOT YET RUN AGAINST THE LIVE API. The sequence below follows the documented
+  # submission flow (clone the current submission, upload to fileUploadUrl,
+  # replace applicationPackages, commit), but the multi-architecture upload in
+  # particular is unverified: Microsoft's samples cover one package, and
+  # whether a second POST to the same SAS URL lands as a second blob or
+  # overwrites the first has to be confirmed on the first opt-in run. Until it
+  # has been, submit with windows_arch=x64 only.
+  store-submit:
+    name: Submit MSIX to the Microsoft Store
+    needs: [context, windows]
+    if: >-
+      needs.context.outputs.build_windows == 'true' &&
+      inputs.submit_store == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      STORE_ID: ${{ vars.STORE_ID || '9P29527S1H0H' }}
+      API: https://manage.devcenter.microsoft.com/v2.0
+    steps:
+      - name: Download the Store MSIX artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: store-msix-windows-*
+          path: msix
+
+      - name: Check the Entra secrets and the packages
+        env:
+          TENANT: ${{ secrets.ENTRA_TENANT_ID }}
+          CLIENT: ${{ secrets.ENTRA_CLIENT_ID }}
+          SECRET: ${{ secrets.ENTRA_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          missing=()
+          [ -n "${TENANT:-}" ] || missing+=(ENTRA_TENANT_ID)
+          [ -n "${CLIENT:-}" ] || missing+=(ENTRA_CLIENT_ID)
+          [ -n "${SECRET:-}" ] || missing+=(ENTRA_CLIENT_SECRET)
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "::error::missing repo secret(s): ${missing[*]}"
+            echo "Create the registration under Partner Center > Account settings > User management > Azure AD applications."
+            exit 1
+          fi
+          shopt -s nullglob
+          packages=(msix/*/*.msix)
+          if [ "${#packages[@]}" -eq 0 ]; then
+            echo "::error::the windows job produced no MSIX artifact"
+            exit 1
+          fi
+          if [ "${#packages[@]}" -gt 1 ]; then
+            echo "::warning::${#packages[@]} packages; the multi-architecture upload path is unverified -- prefer windows_arch=x64 until it has been exercised once"
+          fi
+          printf 'will submit: %s\n' "${packages[@]}"
+
+      - name: Acquire an Entra token
+        id: token
+        env:
+          TENANT: ${{ secrets.ENTRA_TENANT_ID }}
+          CLIENT: ${{ secrets.ENTRA_CLIENT_ID }}
+          SECRET: ${{ secrets.ENTRA_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          body=$(curl -sS -f -X POST \
+            "https://login.microsoftonline.com/$TENANT/oauth2/v2.0/token" \
+            -d "grant_type=client_credentials" \
+            -d "client_id=$CLIENT" \
+            -d "client_secret=$SECRET" \
+            -d "scope=https://manage.devcenter.microsoft.com/.default")
+          token=$(jq -er '.access_token' <<<"$body")
+          # Masked before it is written to the step output, so it is redacted
+          # from every later log line that interpolates it.
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+
+      - name: Clone the submission, upload, commit
+        env:
+          TOKEN: ${{ steps.token.outputs.token }}
+        run: |
+          set -euo pipefail
+          auth="Authorization: Bearer $TOKEN"
+
+          # /update clones the current submission, so the listing text, pricing,
+          # age rating and notes already configured in Partner Center carry over
+          # and only the package list changes here. Creating a submission from
+          # scratch would silently drop all of it.
+          current=$(curl -sS -f -H "$auth" "$API/applications/$STORE_ID/submissions")
+          submission_id=$(jq -er '.value[0].id' <<<"$current")
+          echo "cloning submission $submission_id"
+
+          updated=$(curl -sS -f -X POST -H "$auth" \
+            "$API/applications/$STORE_ID/submissions/$submission_id/update")
+          new_id=$(jq -er '.id' <<<"$updated")
+          upload_url=$(jq -er '.fileUploadUrl' <<<"$updated")
+          echo "new submission $new_id"
+
+          shopt -s nullglob
+          packages=(msix/*/*.msix)
+          uploaded='[]'
+          for p in "${packages[@]}"; do
+            name=$(basename "$p")
+            echo "uploading $name ($(stat -c%s "$p") bytes)"
+            curl -sS -f -X POST \
+              -H "x-ms-blob-type: BlockBlob" \
+              -H "x-ms-date: $(date -u '+%a, %d %b %Y %H:%M:%S GMT')" \
+              -H "Content-Length: 0" \
+              --data-binary "@$p" \
+              "$upload_url"
+            uploaded=$(jq -c --arg fn "$name" \
+              '. + [{fileName: $fn, fileStatus: "PendingUpload"}]' <<<"$uploaded")
+          done
+
+          # Replacing rather than appending: the cloned submission still lists
+          # the previous build, and leaving it there submits both.
+          jq -c --argjson pkgs "$uploaded" \
+            '.applicationPackages = $pkgs' <<<"$updated" > submission.json
+          curl -sS -f -X PUT -H "$auth" -H "Content-Type: application/json" \
+            --data-binary @submission.json \
+            "$API/applications/$STORE_ID/submissions/$new_id" > /dev/null
+          rm -f submission.json
+
+          curl -sS -f -X POST -H "$auth" \
+            "$API/applications/$STORE_ID/submissions/$new_id/commit" > /dev/null
+          echo "::notice::Store submission $new_id committed for product $STORE_ID"
+          echo "Track it at https://partner.microsoft.com/dashboard/products/$STORE_ID/submissions/$new_id"
 
   linux:
     name: Linux ${{ matrix.arch }} packages (release)
