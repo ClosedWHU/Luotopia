@@ -5,10 +5,16 @@
 
 ```
 microsoft-store/   Microsoft Store（Partner Center）10 语言文案 + 填表说明
+google-play/       Google Play（Play Console）10 语言文案 + 送审清单
 ```
 
 之后上架其它商店时新增子目录（如 `apple-app-store/`、`snap-store/`），字段结构按各自
 后台表单组织，一个语言一个文件。
+
+各商店的硬限制不同（Microsoft Store：简短描述 ≤270、关键字 ≤7 个且总词数 ≤21、功能
+≤20 条；Google Play：名称 ≤30、短描述 ≤80、完整描述 ≤4000），改文案时按目标商店的
+README 复核。Play 文案是移动端视角（小组件、手表、通知为一等功能），与 Microsoft
+Store 的桌面视角**不是同一份文本的翻译**，更新功能时两边都要过一遍。
 
 ## 约定
 
