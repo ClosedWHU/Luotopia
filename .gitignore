@@ -4,6 +4,11 @@ dist/
 # generated types
 .astro/
 
+# python bytecode — .github/scripts/test_release_context.py imports its sibling
+# module, so both a CI run and a local one leave a cache directory behind
+__pycache__/
+*.py[cod]
+
 # dependencies
 node_modules/
 
