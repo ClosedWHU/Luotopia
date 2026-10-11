@@ -1600,6 +1600,100 @@ jobs:
           echo "hash_upper=${HASH_UPPER}" >> "$GITHUB_OUTPUT"
           ls -la dist
 
+      - name: Generate Scoop + winget manifests
+        if: matrix.arch == 'x64'
+        shell: bash
+        env:
+          TAG: ${{ needs.context.outputs.tag }}
+          TARGET_REPO: ${{ needs.context.outputs.target_repo }}
+          ZIP_NAME: ${{ steps.zip.outputs.zip_name }}
+          HASH_LOWER: ${{ steps.zip.outputs.hash_lower }}
+          HASH_UPPER: ${{ steps.zip.outputs.hash_upper }}
+          BUILD_NAME: ${{ needs.context.outputs.build_name }}
+        run: |
+          set -euo pipefail
+          ZIP_URL="https://github.com/${TARGET_REPO}/releases/download/${TAG}/${ZIP_NAME}"
+          HTML_URL="https://github.com/${TARGET_REPO}/releases/tag/${TAG}"
+          # Scoop version: strip leading v; keep + if present (Scoop accepts it in version field)
+          VERSION="${TAG#v}"
+          # winget prefers pure semver without build metadata
+          if [ -n "${BUILD_NAME}" ]; then
+            WINGET_VERSION="$BUILD_NAME"
+          else
+            WINGET_VERSION="${VERSION%%+*}"
+          fi
+          RELEASE_DATE="$(date -u +%Y-%m-%d)"
+
+          render() {
+            local src="$1" dst="$2"
+            sed \
+              -e "s|{{VERSION}}|${VERSION}|g" \
+              -e "s|{{WINGET_VERSION}}|${WINGET_VERSION}|g" \
+              -e "s|{{ZIP_URL}}|${ZIP_URL}|g" \
+              -e "s|{{ZIP_HASH}}|${HASH_LOWER}|g" \
+              -e "s|{{ZIP_HASH_UPPER}}|${HASH_UPPER}|g" \
+              -e "s|{{HTML_URL}}|${HTML_URL}|g" \
+              -e "s|{{RELEASE_DATE}}|${RELEASE_DATE}|g" \
+              "$src" > "$dst"
+          }
+
+          render packaging/scoop/luotopia.json.template dist/scoop-luotopia.json
+          render packaging/winget/ClosedWHU.Luotopia.yaml.template dist/winget-ClosedWHU.Luotopia.yaml
+          render packaging/winget/ClosedWHU.Luotopia.installer.yaml.template dist/winget-ClosedWHU.Luotopia.installer.yaml
+          render packaging/winget/ClosedWHU.Luotopia.locale.zh-CN.yaml.template dist/winget-ClosedWHU.Luotopia.locale.zh-CN.yaml
+          ls -la dist
+
+      - name: Upload Windows packages to homepage release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.context.outputs.tag }}
+          TARGET_REPO: ${{ needs.context.outputs.target_repo }}
+        run: |
+          set -euo pipefail
+          gh release view "$TAG" --repo "$TARGET_REPO" >/dev/null
+          shopt -s nullglob
+          ARCH='${{ matrix.arch }}'
+          # The MSIX deliberately stays off the public release: it carries the
+          # Store identity (Publisher CN=910180C7-...), which only Microsoft's
+          # Store CA can sign, so an unsigned copy published here could not be
+          # installed by anyone -- Windows refuses a package whose signing
+          # certificate subject does not match its manifest Publisher. It goes
+          # to the workflow artifacts below for Partner Center upload instead.
+          # Windows sideload keeps using the zip, which is already the format
+          # the download page recommends and that the Scoop/winget manifests
+          # point at.
+          files=(
+            dist/*-windows-"$ARCH".zip
+          )
+          # The Scoop/winget manifests point at the x64 zip and only ride the
+          # x64 leg; arm64 installs through them run the x64 build emulated.
+          if [ "$ARCH" = "x64" ]; then
+            files+=(
+              dist/scoop-luotopia.json
+              dist/winget-ClosedWHU.Luotopia.yaml
+              dist/winget-ClosedWHU.Luotopia.installer.yaml
+              dist/winget-ClosedWHU.Luotopia.locale.zh-CN.yaml
+            )
+          fi
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "::error::No Windows artifacts to upload"
+            exit 1
+          fi
+          for f in "${files[@]}"; do
+            case "$f" in
+              *debug*|*Debug*)
+                echo "::error::Refusing debug path: $f"
+                exit 1
+                ;;
+            esac
+          done
+          gh release upload "$TAG" "${files[@]}" \
+            --repo "$TARGET_REPO" \
+            --clobber
+          echo "Uploaded Windows artifacts to $TARGET_REPO@$TAG"
+          gh release view "$TAG" --repo "$TARGET_REPO"
+
       - name: Build Store MSIX (unsigned; the Store signs on ingestion)
         id: msix
         shell: bash
@@ -1714,100 +1808,6 @@ jobs:
           cp -v "$MSIX_SRC" "dist/${MSIX_NAME}"
           echo "msix_name=${MSIX_NAME}" >> "$GITHUB_OUTPUT"
           ls -la dist
-
-      - name: Generate Scoop + winget manifests
-        if: matrix.arch == 'x64'
-        shell: bash
-        env:
-          TAG: ${{ needs.context.outputs.tag }}
-          TARGET_REPO: ${{ needs.context.outputs.target_repo }}
-          ZIP_NAME: ${{ steps.zip.outputs.zip_name }}
-          HASH_LOWER: ${{ steps.zip.outputs.hash_lower }}
-          HASH_UPPER: ${{ steps.zip.outputs.hash_upper }}
-          BUILD_NAME: ${{ needs.context.outputs.build_name }}
-        run: |
-          set -euo pipefail
-          ZIP_URL="https://github.com/${TARGET_REPO}/releases/download/${TAG}/${ZIP_NAME}"
-          HTML_URL="https://github.com/${TARGET_REPO}/releases/tag/${TAG}"
-          # Scoop version: strip leading v; keep + if present (Scoop accepts it in version field)
-          VERSION="${TAG#v}"
-          # winget prefers pure semver without build metadata
-          if [ -n "${BUILD_NAME}" ]; then
-            WINGET_VERSION="$BUILD_NAME"
-          else
-            WINGET_VERSION="${VERSION%%+*}"
-          fi
-          RELEASE_DATE="$(date -u +%Y-%m-%d)"
-
-          render() {
-            local src="$1" dst="$2"
-            sed \
-              -e "s|{{VERSION}}|${VERSION}|g" \
-              -e "s|{{WINGET_VERSION}}|${WINGET_VERSION}|g" \
-              -e "s|{{ZIP_URL}}|${ZIP_URL}|g" \
-              -e "s|{{ZIP_HASH}}|${HASH_LOWER}|g" \
-              -e "s|{{ZIP_HASH_UPPER}}|${HASH_UPPER}|g" \
-              -e "s|{{HTML_URL}}|${HTML_URL}|g" \
-              -e "s|{{RELEASE_DATE}}|${RELEASE_DATE}|g" \
-              "$src" > "$dst"
-          }
-
-          render packaging/scoop/luotopia.json.template dist/scoop-luotopia.json
-          render packaging/winget/ClosedWHU.Luotopia.yaml.template dist/winget-ClosedWHU.Luotopia.yaml
-          render packaging/winget/ClosedWHU.Luotopia.installer.yaml.template dist/winget-ClosedWHU.Luotopia.installer.yaml
-          render packaging/winget/ClosedWHU.Luotopia.locale.zh-CN.yaml.template dist/winget-ClosedWHU.Luotopia.locale.zh-CN.yaml
-          ls -la dist
-
-      - name: Upload Windows packages to homepage release
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ needs.context.outputs.tag }}
-          TARGET_REPO: ${{ needs.context.outputs.target_repo }}
-        run: |
-          set -euo pipefail
-          gh release view "$TAG" --repo "$TARGET_REPO" >/dev/null
-          shopt -s nullglob
-          ARCH='${{ matrix.arch }}'
-          # The MSIX deliberately stays off the public release: it carries the
-          # Store identity (Publisher CN=910180C7-...), which only Microsoft's
-          # Store CA can sign, so an unsigned copy published here could not be
-          # installed by anyone -- Windows refuses a package whose signing
-          # certificate subject does not match its manifest Publisher. It goes
-          # to the workflow artifacts below for Partner Center upload instead.
-          # Windows sideload keeps using the zip, which is already the format
-          # the download page recommends and that the Scoop/winget manifests
-          # point at.
-          files=(
-            dist/*-windows-"$ARCH".zip
-          )
-          # The Scoop/winget manifests point at the x64 zip and only ride the
-          # x64 leg; arm64 installs through them run the x64 build emulated.
-          if [ "$ARCH" = "x64" ]; then
-            files+=(
-              dist/scoop-luotopia.json
-              dist/winget-ClosedWHU.Luotopia.yaml
-              dist/winget-ClosedWHU.Luotopia.installer.yaml
-              dist/winget-ClosedWHU.Luotopia.locale.zh-CN.yaml
-            )
-          fi
-          if [ "${#files[@]}" -eq 0 ]; then
-            echo "::error::No Windows artifacts to upload"
-            exit 1
-          fi
-          for f in "${files[@]}"; do
-            case "$f" in
-              *debug*|*Debug*)
-                echo "::error::Refusing debug path: $f"
-                exit 1
-                ;;
-            esac
-          done
-          gh release upload "$TAG" "${files[@]}" \
-            --repo "$TARGET_REPO" \
-            --clobber
-          echo "Uploaded Windows artifacts to $TARGET_REPO@$TAG"
-          gh release view "$TAG" --repo "$TARGET_REPO"
 
       # Unsigned, so it is only useful as the Partner Center submission payload.
       # Retained for 14 days by default; download it from the run summary and
