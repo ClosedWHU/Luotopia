@@ -1,0 +1,68 @@
+---
+/**
+ * The `/features` page body.
+ *
+ * Extracted from `src/pages/features.astro` so the route can exist once per
+ * locale without duplicating any markup: `src/pages/features.astro` renders it in
+ * the default locale, `src/pages/[lang]/features.astro` renders it in each
+ * published one. Everything locale-dependent is read from `Astro.currentLocale`
+ * inside here, so neither caller has to pass anything down and the two cannot
+ * drift.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../PageHeader.astro";
+import FeatureCard from "../FeatureCard.astro";
+import { categoryKey, featureCategories, featureKeys } from "../../config/features";
+import { resolveLocale, useTranslations } from "../../i18n/ui";
+
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+---
+
+<BaseLayout title={t("features.title")}>
+  <PageHeader title={t("features.header")} subtitle={t("features.subtitle")} />
+
+  <section class="relative pb-24 px-4">
+    <div class="max-w-content mx-auto">
+      {
+        featureCategories.map((category, ci) => (
+          <div class="mb-14 last:mb-0">
+            <h2 class="lt-reveal text-title-large text-on-surface mb-6 flex items-center gap-2.5">
+              <span class="lt-cat-bar" aria-hidden="true" />
+              {t(categoryKey(category.id))}
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {category.features.map((feature, i) => {
+                const keys = featureKeys(feature.id);
+                return (
+                  <div
+                    class="lt-reveal-lift h-full"
+                    style={`--lt-reveal-delay: ${(i % 3) * 70 + ci * 40}ms`}
+                  >
+                    <FeatureCard
+                      icon={feature.icon}
+                      title={t(keys.title)}
+                      description={t(keys.description)}
+                      status={feature.status}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .lt-cat-bar {
+    display: inline-block;
+    width: 0.25rem;
+    height: 1.15rem;
+    border-radius: 999px;
+    background-image: linear-gradient(to bottom, var(--lt-color-primary), var(--lt-color-tertiary));
+    box-shadow: 0 2px 8px -2px color-mix(in oklab, var(--lt-color-primary) 60%, transparent);
+  }
+</style>

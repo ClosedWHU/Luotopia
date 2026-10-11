@@ -1,0 +1,22 @@
+---
+/**
+ * One home page per published non-default locale.
+ *
+ * `PREFIXED_LOCALES` is derived from `src/i18n/published.json`, so publishing a
+ * language means adding it there and shipping its dictionary — this route file
+ * never changes. Astro builds `dist/<path>/index.html` for each entry; with
+ * `prefixDefaultLocale: false` the default locale keeps the unprefixed `/`.
+ *
+ * Static routes outrank dynamic ones in Astro, and `getStaticPaths` only ever
+ * returns real locale paths, so this cannot shadow `/brand`, `/status` or any
+ * other top-level page.
+ */
+import { PREFIXED_LOCALES } from "../../i18n/locales";
+import HomePage from "../../components/pages/HomePage.astro";
+
+export function getStaticPaths() {
+  return PREFIXED_LOCALES.map((locale) => ({ params: { lang: locale.path } }));
+}
+---
+
+<HomePage />

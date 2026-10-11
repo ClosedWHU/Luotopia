@@ -1,4 +1,148 @@
+import {
+  getLocaleByPathSegment,
+  isPublished,
+  matchLocaleTag,
+} from "../src/i18n/locales";
+import { normalizePath, pathInLocale } from "../src/i18n/routes";
+
 const MAIN_DOMAIN = "www.whu.sb";
+
+/* -------------------------------------------------------------------------- */
+/* Language negotiation                                                        */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * Why this lives here and not in the Astro config: the site is a static build
+ * with no adapter, so there is no server to read request headers on.
+ * `Astro.preferredLocale` is `undefined` in a static output and Astro's own i18n
+ * middleware runs at build time. This Pages Function is the only thing in the
+ * deployment that executes per request, which makes it the only place that can
+ * see `Accept-Language`.
+ *
+ * The locale table is imported from `src/i18n/locales` rather than restated: one
+ * list, and the build config, the switcher and this negotiation cannot disagree
+ * about which languages exist.
+ */
+
+/**
+ * Records an explicit choice, so detection stops overriding it.
+ *
+ * Only the switcher's `?lang=` link ever writes this. Deriving it from "the path
+ * had a locale prefix" would be wrong in the direction that matters: on `/en/`,
+ * the nav link to an untranslated page points at the Chinese original, and
+ * following it would silently flip the visitor's recorded preference to `zh-Hans`
+ * and bounce them back to Chinese on every later visit.
+ */
+const LANG_COOKIE = "luotopia_lang";
+const LANG_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+
+/**
+ * Path prefixes that are endpoints or asset namespaces, never site pages.
+ *
+ * Needed because `prefersHtml()` alone is not enough: typing
+ * `/api/releases/latest` into an address bar *is* an HTML navigation as far as
+ * the headers are concerned, and redirecting it to `/en/api/releases/latest`
+ * would turn a working endpoint into a 404.
+ */
+const NON_PAGE_PREFIXES = [
+  "/api/",
+  "/_astro/",
+  "/scales/",
+  "/hot-update/",
+  "/.well-known/",
+  "/fonts/",
+  "/img/",
+];
+
+/** True for anything that is a file or an endpoint rather than a routable page. */
+function looksLikeAsset(pathname: string): boolean {
+  if (NON_PAGE_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return true;
+  // A dot in the last segment means an extension: `/favicon.svg`,
+  // `/img/app-icon.png`, `/brand/logo.svg`. No page route on this site has one.
+  const last = pathname.slice(pathname.lastIndexOf("/") + 1);
+  return last.indexOf(".") !== -1;
+}
+
+/** True when the first path segment already names a locale we serve. */
+function hasLocalePrefix(pathname: string): boolean {
+  const first = pathname.split("/")[1] ?? "";
+  return first !== "" && getLocaleByPathSegment(first) !== undefined;
+}
+
+interface LanguageRange {
+  tag: string;
+  q: number;
+}
+
+/**
+ * Parse `en-GB,en;q=0.9,zh-CN;q=0.8,*;q=0.1` into ranges, best first.
+ *
+ * Deliberately a hand-rolled parser: Workers has no `Intl.Locale` matcher worth
+ * depending on here, and the grammar is four lines. A malformed range is skipped
+ * rather than throwing — a broken header must cost the visitor their preference,
+ * not the request.
+ */
+function parseAcceptLanguage(header: string): LanguageRange[] {
+  const ranges: LanguageRange[] = [];
+  for (const part of header.split(",")) {
+    const trimmed = part.trim();
+    if (!trimmed) continue;
+    let tag = trimmed;
+    let q = 1;
+    const params = trimmed.split(";");
+    tag = params[0].trim();
+    for (let i = 1; i < params.length; i += 1) {
+      const param = params[i].trim();
+      if (!param.toLowerCase().startsWith("q=")) continue;
+      const parsed = Number.parseFloat(param.slice(2));
+      // `q=0` is an explicit refusal, and NaN means the parameter was junk —
+      // both are kept (as 0 and as the default 1 respectively) rather than
+      // dropped, so the ordering below stays faithful to what was sent.
+      q = Number.isNaN(parsed) ? 1 : parsed;
+    }
+    if (!tag || tag === "*") continue;
+    ranges.push({ tag, q });
+  }
+  // Stable by construction in every runtime that matters, and `sort` is
+  // guaranteed stable since ES2019 — equal-q tags keep their sent order, which
+  // is the tie-break the spec asks for.
+  return ranges.sort((a, b) => b.q - a.q);
+}
+
+/**
+ * The best locale we actually serve for this header.
+ *
+ * `q=0` ranges are skipped: they are a refusal, and honouring one by falling
+ * through to a *lower*-q match would be the opposite of what the client asked
+ * for. `matchLocaleTag` already refuses unpublished locales, so a Japanese
+ * browser is left on the default rather than redirected to a `/ja/` that 404s.
+ */
+function negotiateLocale(header: string | null): string | undefined {
+  if (!header) return undefined;
+  for (const range of parseAcceptLanguage(header)) {
+    if (range.q <= 0) continue;
+    const matched = matchLocaleTag(range.tag);
+    if (matched) return matched;
+  }
+  return undefined;
+}
+
+/** The recorded explicit choice, if it still names a locale we serve. */
+function readLangCookie(request: Request): string | undefined {
+  const header = request.headers.get("cookie");
+  if (!header) return undefined;
+  for (const part of header.split(";")) {
+    const eq = part.indexOf("=");
+    if (eq < 0) continue;
+    if (part.slice(0, eq).trim() !== LANG_COOKIE) continue;
+    const value = part.slice(eq + 1).trim();
+    // A stale value (a locale we later unpublished) counts as no preference, so
+    // detection gets another chance instead of the visitor being pinned to a
+    // language the site no longer builds.
+    return isPublished(value) ? value : undefined;
+  }
+  return undefined;
+}
 
 /**
  * Deep-link host registered by the app as Android App Links (autoVerify) and
@@ -135,6 +279,105 @@ export async function onRequest(context: Context): Promise<Response> {
   }
 
   /*
+   * Language negotiation, in two halves: an explicit choice, then detection.
+   *
+   * Both run only after the host canonicalisation above, so they never fire on a
+   * request that is about to be 302'd to `www.whu.sb` anyway, and never on the
+   * deep-link host — which returned earlier, because `luotopia.whu.sb/*` is
+   * claimed wholesale by the app and its `/open/` landing page is not a place to
+   * be bouncing visitors through a second redirect.
+   */
+  const requestedLang = url.searchParams.get("lang");
+  if (requestedLang) {
+    const chosen = matchLocaleTag(requestedLang);
+    if (chosen) {
+      /*
+       * Land on that locale's copy of *this* page, not merely on the same path
+       * with the parameter removed. `pathInLocale` already falls back to the
+       * default locale's URL when the chosen language has no translation, so
+       * switching to English from `/status` records the preference and leaves the
+       * visitor on the only status page there is — instead of stranding them on a
+       * `/en/status` that does not exist.
+       *
+       * `lang` is stripped, other query parameters survive: the parameter marks
+       * the click as deliberate, and leaving it in the address bar would put it
+       * into every link the visitor subsequently shares.
+       */
+      url.searchParams.delete("lang");
+      const query = url.searchParams.toString();
+      return new Response(null, {
+        status: 302,
+        headers: {
+          location: `${pathInLocale(url.pathname, chosen)}${query ? `?${query}` : ""}`,
+          "set-cookie": `${LANG_COOKIE}=${chosen}; Path=/; Max-Age=${LANG_COOKIE_MAX_AGE}; SameSite=Lax; Secure`,
+          // A redirect that depends on a cookie we just set must not be cached.
+          "cache-control": "no-store",
+          vary: "Accept-Language, Cookie",
+        },
+      });
+    }
+  }
+
+  /*
+   * First-visit detection.
+   *
+   * Four guards, each covering a way this could go wrong:
+   *
+   * - `prefersHtml()` — only real navigations. This is what keeps `_astro`
+   *   bundles, fonts and prefetches out; a prefetched link carries
+   *   `sec-fetch-dest: empty`, so `prefetchAll: true` in the Astro config does
+   *   not turn every hover into a redirect storm.
+   * - `looksLikeAsset()` — because an address-bar visit to `/api/releases/latest`
+   *   *does* look like an HTML navigation, and redirecting it would break it.
+   * - `hasLocalePrefix()` — the visitor is already on a language's copy.
+   * - `readLangCookie()` — they have chosen one before, and detection must not
+   *   overrule a choice.
+   *
+   * Detection writes no cookie. Only the explicit `?lang=` above does. A
+   * detection that persisted itself would freeze a guess made from the OS locale
+   * into a preference the visitor never expressed, and there would be no way to
+   * get back to auto-detection short of clearing site data.
+   */
+  if (
+    prefersHtml(request) &&
+    !looksLikeAsset(url.pathname) &&
+    !hasLocalePrefix(url.pathname) &&
+    readLangCookie(request) === undefined
+  ) {
+    const detected = negotiateLocale(request.headers.get("accept-language"));
+    if (detected) {
+      /*
+       * `pathInLocale` is both the guard and the target.
+       *
+       * It returns the requested path unchanged when that locale has no
+       * translation of it, so comparing against the normalised pathname is what
+       * stops the loop this would otherwise create: `/status` with
+       * `Accept-Language: en` used to redirect to `/en/status`, which does not
+       * exist, which the 404 fallback below sent back to `/status`, which
+       * detected English again. Redirecting only to a page the locale really has
+       * means `/status` simply stays put.
+       *
+       * It also subsumes the "is this the default locale" check — for `zh-Hans`
+       * the target always equals the input, so nothing is emitted.
+       */
+      const target = pathInLocale(url.pathname, detected);
+      if (target !== normalizePath(url.pathname)) {
+        return new Response(null, {
+          status: 302,
+          headers: {
+            location: `${target}${url.search}`,
+            // 302, never 301: a permanent redirect would be cached against the
+            // URL and would keep sending this visitor to English after they
+            // changed their browser language.
+            "cache-control": "no-store",
+            vary: "Accept-Language, Cookie",
+          },
+        });
+      }
+    }
+  }
+
+  /*
    * 404s are the platform's job, and shipping `src/pages/404.astro` is what
    * hands it back to the platform.
    *
@@ -152,6 +395,45 @@ export async function onRequest(context: Context): Promise<Response> {
    * status and the right document, so this only ever swaps the representation.
    */
   const response = await next(request);
+
+  /*
+   * Localised-path fallback.
+   *
+   * A locale translates only part of the site — see `TRANSLATED_ROUTES` in
+   * `src/i18n/routes.ts` — so `/en/status` has no document. Site navigation never
+   * links there (`routeUrl()` sends those links straight to `/status`), but a
+   * hand-typed URL, a stale bookmark or a crawler that spotted the `/en/` pattern
+   * lands here anyway, and a 404 is a dead end when the same content is one hop
+   * away.
+   *
+   * This is what `i18n.fallback` in the Astro config is nominally for, and why it
+   * is not used: it emits 2-second meta-refresh stubs at build time, canonicalises
+   * them to the apex domain, and cannot tell its own stubs apart from the real
+   * `/en/*` routes. A 302 here costs one hop on a path that was already a miss.
+   *
+   * Redirect rather than serve the default-locale document under the prefixed
+   * URL: that document's `<html lang>` and `hreflang` describe the default
+   * locale, so answering 200 at `/en/status` would put a mislabelled duplicate in
+   * the index.
+   *
+   * No loop: the target has no locale prefix, so this branch cannot fire on it.
+   * If the unprefixed path is *also* a miss, the visitor gets the real 404 page.
+   */
+  if (response.status === 404 && prefersHtml(request)) {
+    const segments = url.pathname.split("/").filter(Boolean);
+    if (segments.length > 0 && getLocaleByPathSegment(segments[0])) {
+      const rest = segments.slice(1).join("/");
+      await response.body?.cancel();
+      return new Response(null, {
+        status: 302,
+        headers: {
+          location: `/${rest}${url.search}`,
+          "cache-control": "no-store",
+          vary: "Accept-Language",
+        },
+      });
+    }
+  }
 
   /*
    * The `text/html` guard matters. Pages answers a miss with `404.html`, but a

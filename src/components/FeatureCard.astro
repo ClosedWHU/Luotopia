@@ -1,6 +1,7 @@
 ---
 import Icon from "./Icon.astro";
-import { featureStatusLabels, type FeatureStatus } from "../config/features";
+import type { FeatureStatus } from "../config/features";
+import { resolveLocale, useTranslations, type TranslationKey } from "../i18n/ui";
 
 export interface Props {
   icon: string;
@@ -10,7 +11,26 @@ export interface Props {
 }
 
 const { icon, title, description, status } = Astro.props;
-const badge = status && status !== "released" ? featureStatusLabels[status] : undefined;
+
+/**
+ * An explicit map rather than a `features.status.${status}` template, so the
+ * `satisfies` below fails the build if a fourth status is ever added to
+ * `FeatureStatus` without a label. Building the key by concatenation would
+ * typecheck today and silently render the raw key tomorrow.
+ */
+const STATUS_KEYS = {
+  upcoming: "features.status.upcoming",
+  development: "features.status.development",
+} as const satisfies Record<Exclude<FeatureStatus, "released">, TranslationKey>;
+
+/*
+ * The badge label comes from the dictionary rather than from a constant in
+ * `config/features.ts`: it is chrome around the data, not part of it, and it has
+ * to agree with the language the rest of the card is rendered in. `status` itself
+ * stays a data concern — which features are unreleased is not translatable.
+ */
+const t = useTranslations(resolveLocale(Astro.currentLocale));
+const badge = status && status !== "released" ? t(STATUS_KEYS[status]) : undefined;
 const badgeClass =
   status === "development"
     ? "lt-inset text-on-surface-variant"

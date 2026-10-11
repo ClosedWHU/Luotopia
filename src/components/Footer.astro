@@ -1,7 +1,54 @@
 ---
 import AppIcon from "./AppIcon.astro";
+import { resolveLocale, routeUrl, useTranslations, type RouteKey } from "../i18n/ui";
 
 const year = new Date().getFullYear();
+
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+
+interface NavItem {
+  route: RouteKey;
+  label: string;
+}
+
+interface ResourceItem {
+  href: string;
+  label: string;
+  external?: boolean;
+}
+
+/*
+ * Route keys, not literal paths — see the same note in `Navbar.astro`. On a page
+ * whose locale does not translate a given destination, `routeUrl()` returns the
+ * default-locale URL, so a footer link never points at a redirect stub.
+ */
+const nav: NavItem[] = [
+  { route: "features", label: t("footer.nav.features") },
+  { route: "download", label: t("footer.nav.download") },
+  { route: "community", label: t("footer.nav.community") },
+  { route: "brand", label: t("footer.nav.brand") },
+  { route: "legal", label: t("footer.nav.legal") },
+];
+
+/*
+ * Absolute URLs, identical in every locale: the destination is the same whatever
+ * language you are reading, and translating the label is all that is owed.
+ *
+ * The copyright line below stays English in every locale on purpose:
+ * `store-listings/README.md` requires the attribution to be identical in all of
+ * them.
+ */
+const resources: ResourceItem[] = [
+  { href: routeUrl(locale, "status"), label: t("footer.resources.status") },
+  { href: "https://docs.whu.sb", label: t("footer.resources.docs"), external: true },
+  { href: "https://github.com/ClosedWHU", label: t("footer.resources.github"), external: true },
+  {
+    href: "https://github.com/ClosedWHU/Luotopia",
+    label: t("footer.resources.repo"),
+    external: true,
+  },
+];
 ---
 
 <footer class="relative z-10 mt-auto border-t border-glass-divider">
@@ -12,7 +59,7 @@ const year = new Date().getFullYear();
           <AppIcon class="w-[22px] h-[22px]" size={22} lift alt="" />
           Luotopia
         </div>
-        <p class="text-body-medium text-on-surface-variant">整合校园服务，构建开放生态。</p>
+        <p class="text-body-medium text-on-surface-variant">{t("footer.tagline")}</p>
       </div>
 
       <div class="lt-reveal" style="--lt-reveal-delay: 80ms">
@@ -24,23 +71,40 @@ const year = new Date().getFullYear();
           position: these are site-wide navigation groups, peers of the main
           content sections rather than children of them.
         -->
-        <h2 class="text-title-small text-on-surface mb-3">导航</h2>
+        <h2 class="text-title-small text-on-surface mb-3">{t("footer.navHeading")}</h2>
         <ul class="space-y-2 text-body-medium">
-          <li><a href="/features" class="text-on-surface-variant hover:text-primary no-underline transition-colors">功能概览</a></li>
-          <li><a href="/download" class="text-on-surface-variant hover:text-primary no-underline transition-colors">下载</a></li>
-          <li><a href="/community" class="text-on-surface-variant hover:text-primary no-underline transition-colors">社区</a></li>
-          <li><a href="/brand" class="text-on-surface-variant hover:text-primary no-underline transition-colors">品牌资源</a></li>
-          <li><a href="/legal" class="text-on-surface-variant hover:text-primary no-underline transition-colors">法律信息</a></li>
+          {
+            nav.map((item) => (
+              <li>
+                <a
+                  href={routeUrl(locale, item.route)}
+                  class="text-on-surface-variant hover:text-primary no-underline transition-colors"
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
         </ul>
       </div>
 
       <div class="lt-reveal" style="--lt-reveal-delay: 160ms">
-        <h2 class="text-title-small text-on-surface mb-3">相关资源</h2>
+        <h2 class="text-title-small text-on-surface mb-3">{t("footer.resourcesHeading")}</h2>
         <ul class="space-y-2 text-body-medium">
-          <li><a href="/status" class="text-on-surface-variant hover:text-primary no-underline transition-colors">服务状态</a></li>
-          <li><a href="https://docs.whu.sb" class="text-on-surface-variant hover:text-primary no-underline transition-colors" target="_blank" rel="noopener noreferrer">开发者文档</a></li>
-          <li><a href="https://github.com/ClosedWHU" class="text-on-surface-variant hover:text-primary no-underline transition-colors" target="_blank" rel="noopener noreferrer">GitHub 组织</a></li>
-          <li><a href="https://github.com/ClosedWHU/Luotopia" class="text-on-surface-variant hover:text-primary no-underline transition-colors" target="_blank" rel="noopener noreferrer">本站开源仓库</a></li>
+          {
+            resources.map((item) => (
+              <li>
+                <a
+                  href={item.href}
+                  class="text-on-surface-variant hover:text-primary no-underline transition-colors"
+                  target={item.external ? "_blank" : undefined}
+                  rel={item.external ? "noopener noreferrer" : undefined}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
         </ul>
       </div>
     </div>

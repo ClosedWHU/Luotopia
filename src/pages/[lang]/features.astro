@@ -1,0 +1,13 @@
+---
+/**
+ * One feature list per published non-default locale. See `[lang]/index.astro`.
+ */
+import { PREFIXED_LOCALES } from "../../i18n/locales";
+import FeaturesPage from "../../components/pages/FeaturesPage.astro";
+
+export function getStaticPaths() {
+  return PREFIXED_LOCALES.map((locale) => ({ params: { lang: locale.path } }));
+}
+---
+
+<FeaturesPage />

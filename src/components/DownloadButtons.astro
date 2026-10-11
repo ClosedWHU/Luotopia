@@ -1,5 +1,6 @@
 ---
 import Icon from "./Icon.astro";
+import { resolveLocale, routeUrl, useTranslations } from "../i18n/ui";
 
 export interface Props {
   variant?: "hero" | "default";
@@ -7,8 +8,22 @@ export interface Props {
 
 const { variant = "default" } = Astro.props;
 
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+
 const size = variant === "hero" ? "px-7 py-3 text-[17px]" : "px-6 py-2.5 text-label-large";
 const iconSize = variant === "hero" ? "text-xl" : "text-lg";
+
+/*
+ * Both CTAs go through `routeUrl()`, so on a locale that has no translated
+ * download page the primary button leads to the Chinese one directly. That is
+ * deliberate: the download page is where the conversion happens, and a redirect
+ * stub in front of it is a round trip for no benefit. The label stays in the
+ * visitor's language either way, which is the part that actually reads as broken
+ * if it is wrong.
+ */
+const downloadHref = routeUrl(locale, "download");
+const featuresHref = routeUrl(locale, "features");
 
 /*
  * Two kinds of button, matching the split the app makes in `app_glass.dart`:
@@ -24,12 +39,12 @@ const secondaryClass = `lt-btn glass-control state-layer inline-flex items-cente
 ---
 
 <div class="flex flex-wrap justify-center gap-3">
-  <a href="/download" class={primaryClass}>
+  <a href={downloadHref} class={primaryClass}>
     <Icon name="download" class={iconSize} />
-    下载 App
+    {t("cta.download")}
   </a>
-  <a href="/features" class={secondaryClass}>
-    了解功能
+  <a href={featuresHref} class={secondaryClass}>
+    {t("cta.features")}
   </a>
 </div>
 
