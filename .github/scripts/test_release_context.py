@@ -33,7 +33,7 @@ class ReleaseContextTest(unittest.TestCase):
             "github.event.release.prerelease": "true",
             "inputs.tag": "v1.0.1+15", "inputs.prerelease": "true",
             "inputs.apple_only": "false", "inputs.build_android": "true",
-            "inputs.android_abis": "all",
+            "inputs.android_abis": "all", "inputs.android_packages": "both",
             "inputs.apple_action": "build", "inputs.distribute_apple_external": "true",
             "inputs.build_windows": "true", "inputs.build_macos": "false",
             "inputs.windows_arch": "both",
@@ -87,6 +87,17 @@ class ReleaseContextTest(unittest.TestCase):
         self.assertEqual(json.loads(outputs["windows_archs"]), ["x64"])
         outputs = self.resolve(event="release")
         self.assertEqual(json.loads(outputs["windows_archs"]), ["x64", "arm64"])
+
+    def test_android_package_selection_maps_to_the_job_matrix(self):
+        outputs = self.resolve()
+        self.assertEqual(json.loads(outputs["android_packages"]), ["apk", "aab"])
+        outputs = self.resolve(**{"inputs.android_packages": "aab"})
+        self.assertEqual(json.loads(outputs["android_packages"]), ["aab"])
+        outputs = self.resolve(**{"inputs.android_packages": "apk"})
+        self.assertEqual(json.loads(outputs["android_packages"]), ["apk"])
+        outputs = self.resolve(event="release")
+        self.assertEqual(json.loads(outputs["android_packages"]), ["apk", "aab"])
+        self.assertEqual(outputs["android_abis"], "all")
 
     def test_published_regular_release_includes_both_apple_platforms(self):
         outputs = self.resolve(event="release")
