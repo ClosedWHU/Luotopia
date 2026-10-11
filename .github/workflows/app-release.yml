@@ -1047,10 +1047,16 @@ jobs:
           if [ -n "${{ needs.context.outputs.build_number }}" ]; then
             EXTRA+=(--build-number="${{ needs.context.outputs.build_number }}")
           fi
+          # No --extra-gen-snapshot-options=--strip here, unlike the APK leg:
+          # it strips libapp.so's symtab before AGP can extract it, so the AAB
+          # ends up without libapp.so.dbg and the Flutter tool's release
+          # post-check rejects the bundle ("failed to strip debug symbols").
+          # Letting AGP do the stripping is free at delivery: the shipped lib
+          # is stripped anyway and the symbols move to BUNDLE-METADATA, which
+          # Play consumes for native crash symbolication and never ships.
           flutter build appbundle --release \
             --obfuscate \
             --split-debug-info=build/debug-info-aab \
-            --extra-gen-snapshot-options=--strip \
             "${EXTRA[@]}"
           AAB=build/app/outputs/bundle/release/app-release.aab
           test -s "$AAB"
