@@ -33,6 +33,7 @@ class ReleaseContextTest(unittest.TestCase):
             "github.event.release.prerelease": "true",
             "inputs.tag": "v1.0.1+15", "inputs.prerelease": "true",
             "inputs.apple_only": "false", "inputs.build_android": "true",
+            "inputs.android_abis": "all",
             "inputs.apple_action": "build", "inputs.distribute_apple_external": "true",
             "inputs.build_windows": "true", "inputs.build_macos": "false",
             "inputs.windows_arch": "both",
