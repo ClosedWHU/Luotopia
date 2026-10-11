@@ -957,11 +957,77 @@ jobs:
             --clobber
           echo "Uploaded ${#files[@]} APK(s) to $TARGET_REPO@$TAG"
 
+      # Google Play requires an Android App Bundle. Same release signing config
+      # as the APKs (android/key.properties written from secrets above), so the
+      # CI keystore acts as the Play upload key while Play App Signing holds
+      # the distribution key. Obfuscated separately from the APKs: two
+      # --obfuscate runs do not share a symbol map, so the AAB gets its own
+      # symbols archive in the private symbols release. The bundle keeps
+      # flutter.versionCode (no per-ABI rewrite), which is the axis Play's
+      # monotonic versionCode rule reads.
+      - name: Build Play AAB (signed, obfuscated)
+        id: aab
+        env:
+          ORG_GRADLE_PROJECT_uploadCrashlyticsMapping: "true"
+          JAVA_OPTS: "-Xmx4g -XX:+HeapDumpOnOutOfMemoryError"
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4g -XX:+HeapDumpOnOutOfMemoryError"
+        run: |
+          set -euo pipefail
+          EXTRA=()
+          if [ -n "${{ needs.context.outputs.build_name }}" ]; then
+            EXTRA+=(--build-name="${{ needs.context.outputs.build_name }}")
+          fi
+          if [ -n "${{ needs.context.outputs.build_number }}" ]; then
+            EXTRA+=(--build-number="${{ needs.context.outputs.build_number }}")
+          fi
+          flutter build appbundle --release \
+            --obfuscate \
+            --split-debug-info=build/debug-info-aab \
+            --extra-gen-snapshot-options=--strip \
+            "${EXTRA[@]}"
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          test -s "$AAB"
+          SAFE_TAG='${{ needs.context.outputs.tag }}'
+          SAFE_TAG="${SAFE_TAG#v}"
+          SAFE_TAG="${SAFE_TAG//+/-}"
+          mkdir -p dist
+          cp -v "$AAB" "dist/luotopia-${SAFE_TAG}-android.aab"
+          echo "aab_name=luotopia-${SAFE_TAG}-android.aab" >> "$GITHUB_OUTPUT"
+
+      - name: Publish AAB Dart symbols (private app release)
+        env:
+          GH_TOKEN: ${{ env.APP_TOKEN }}
+          SYM_TAG: ${{ needs.context.outputs.symbols_tag }}
+          TAG: ${{ needs.context.outputs.tag }}
+        run: |
+          set -euo pipefail
+          test -d build/debug-info-aab
+          OUT="$RUNNER_TEMP/dart-symbols-android-aab.tar.gz"
+          tar -czf "$OUT" -C build debug-info-aab
+          gh release view "$SYM_TAG" --repo "$APP_REPO" >/dev/null 2>&1 || true
+          if gh release upload "$SYM_TAG" "$OUT" --repo "$APP_REPO" --clobber; then
+            echo "Published AAB Dart symbols to ${APP_REPO}@${SYM_TAG}"
+          else
+            echo "::warning::AAB Dart symbol upload to ${SYM_TAG} failed; the release still ships, but the Play build's obfuscated crash stacks stay unreadable."
+          fi
+          rm -f "$OUT"
+
+      # Like the Store MSIX, the AAB is a store-submission payload rather than
+      # a user-installable artifact, so it ships as a workflow artifact and
+      # never as a public release asset.
+      - name: Upload Play AAB (workflow artifact)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: play-aab-${{ needs.context.outputs.build_name }}-${{ needs.context.outputs.build_number }}
+          path: dist/${{ steps.aab.outputs.aab_name }}
+          if-no-files-found: error
+          retention-days: 90
+
       - name: Scrub signing material
         if: always()
         run: |
           rm -f android/key.properties android/app/luotopia-key.jks
-          rm -rf build/debug-info dist
+          rm -rf build/debug-info build/debug-info-aab dist
 
   macos:
     name: macOS release DMG
