@@ -7,30 +7,40 @@
  * Keeping this file dependency-free is what lets both sides agree; a second copy
  * here would eventually disagree.
  *
- * The target set is the one `store-listings/README.md` already pins down — it
- * requires the store copy to match the app's `msix_config.languages` / ARB set —
- * so the site, the store listings and the app cannot drift apart. The app ships
- * two more (Cantonese, written and traditional); neither has store copy and
- * neither has a plausible web audience distinct from `zh-Hant`, so the site's
- * target is ten: the two below plus zh-Hant, ja, ko, es, fr, pt, ru, vi.
+ * The set is the one `store-listings/README.md` already pins down — it requires
+ * the store copy to match the app's `msix_config.languages` / ARB set — so the
+ * site, the store listings and the app cannot drift apart. All ten are published.
+ * The app ships two more (Cantonese, written and traditional); neither has store
+ * copy and neither has a plausible web audience distinct from `zh-Hant`.
  *
- * ## This table lists *published* locales only, and that is not an oversight
+ * ## Every row here costs font bytes, and that is now a settled cost
  *
  * `pruneFontSubsets()` in `astro.config.mjs` derives the site charset by scanning
  * source **text** under `src/` — data and comments alike — and drops every MiSans
  * `@font-face` subset whose `unicode-range` covers none of it. That is how 172
- * rules became 56, and 81% of a render-blocking stylesheet disappeared.
+ * rules became 56 and 81% of a render-blocking stylesheet disappeared.
  *
- * So a row here costs bytes even when nothing renders it. Listing all ten target
- * locales up front measured +6 surviving `@font-face` blocks and +6,893 raw bytes
- * of shared CSS, for the endonyms of eight languages no shipped page displays:
- * Cyrillic for the Russian name, hangul for the Korean one, Latin Extended for
- * French and Spanish, Latin Extended Additional for Vietnamese, and
- * traditional-only hanzi for the Traditional Chinese label. The roadmap above
- * spells those out in English for exactly that reason — writing them in their own
- * script here would pay the same cost again, in a comment. Each row moves into
- * the table when its dictionary lands, which is when its glyphs start being
- * needed.
+ * Ten languages mostly undoes that, by design and not by accident. Measured on the
+ * built stylesheet: MiSans subsets kept go 50 → 102 of 112, its `@font-face` text
+ * goes 71 KB → 148 KB raw (25 → 52 KB gzip, 8 → 17 KB brotli), and the whole
+ * shared file goes 133 KB → 210 KB raw, 38 → 66 KB gzip, 19.0 → 27.9 KB brotli.
+ * Font subsets are 70% of the shared CSS by raw bytes and essentially all of the
+ * growth.
+ *
+ * The number that actually transfers is the brotli delta: **+8.8 KB** on a
+ * render-blocking file. The +77 KB raw mostly costs parse time, and it is almost
+ * entirely `unicode-range` hex lists, which is why it compresses so well.
+ *
+ * Two consequences worth knowing before "optimising" this:
+ *
+ * - The subsets are *lazy*. `unicode-range` means a browser only downloads the
+ *   woff2 behind a rule when a rendered character falls in it, so a Spanish
+ *   visitor never fetches the hangul faces. What grew is the CSS, not the fonts.
+ * - MiSans is only reached for CJK and Cyrillic. `--font-sans` puts Plus Jakarta
+ *   Sans ahead of it, so Latin copy never uses MiSans at all. If the CSS size ever
+ *   needs to come back down, that is the lever: load MiSans only on the locales
+ *   whose content needs it. It has not been done because it would make the
+ *   switcher's own endonyms render in a different face per page.
  *
  * The same reasoning is why comments in this file are English: a quoted CJK
  * phrase in a comment retains a subset for a glyph no page renders. The endonyms
@@ -86,16 +96,28 @@ export interface SiteLocale {
 export const DEFAULT_LOCALE: string = published.default;
 
 /*
- * One row per *published* locale — see the header for why the roadmap lives in a
- * comment instead. `tools/check-i18n.mjs` fails the build if a row here has no
- * matching entry in `published.json`, or the other way round.
+ * One row per published locale, in switcher order. `tools/check-i18n.mjs` fails
+ * the build if a row here has no matching entry in `published.json` and no
+ * dictionary, or the other way round.
  *
- * `label` is the endonym, rendered in its own script on every page, and is the
- * only non-Latin text in this file that a visitor actually sees.
+ * `label` is the endonym, rendered in its own script on every page and never
+ * translated: a reader who cannot read the page they landed on has to be able to
+ * find their own language in the list.
+ *
+ * `ogLocale` follows what the store listings use for the same language, so a
+ * shared link previews consistently with the listing it came from.
  */
 export const LOCALES: SiteLocale[] = [
   { code: "zh-Hans", path: "", label: "简体中文", hreflang: "zh-Hans", ogLocale: "zh_CN" },
+  { code: "zh-Hant", path: "zh-hant", label: "繁體中文", hreflang: "zh-Hant", ogLocale: "zh_TW" },
   { code: "en", path: "en", label: "English", hreflang: "en", ogLocale: "en_US" },
+  { code: "ja", path: "ja", label: "日本語", hreflang: "ja", ogLocale: "ja_JP" },
+  { code: "ko", path: "ko", label: "한국어", hreflang: "ko", ogLocale: "ko_KR" },
+  { code: "es", path: "es", label: "Español", hreflang: "es", ogLocale: "es_ES" },
+  { code: "fr", path: "fr", label: "Français", hreflang: "fr", ogLocale: "fr_FR" },
+  { code: "pt", path: "pt", label: "Português", hreflang: "pt", ogLocale: "pt_BR" },
+  { code: "ru", path: "ru", label: "Русский", hreflang: "ru", ogLocale: "ru_RU" },
+  { code: "vi", path: "vi", label: "Tiếng Việt", hreflang: "vi", ogLocale: "vi_VN" },
 ];
 
 const PUBLISHED = new Set<string>(published.locales);
@@ -109,9 +131,9 @@ export function isPublished(code: string): boolean {
  * The locales the site actually serves, in switcher order.
  *
  * This — not `LOCALES` — is what the switcher renders and what the middleware is
- * allowed to redirect to. The two are the same set today, because `LOCALES` only
- * carries published rows; keeping the distinction is what stops a future row being
- * added to the table and immediately becoming reachable before its pages exist.
+ * allowed to redirect to. The two are the same set while every row is published;
+ * keeping the distinction is what lets a row be added ahead of its dictionary
+ * without that language becoming reachable and 404ing in the meantime.
  */
 export const PUBLISHED_LOCALES: SiteLocale[] = LOCALES.filter((locale) =>
   PUBLISHED.has(locale.code),

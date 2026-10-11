@@ -1,0 +1,247 @@
+{
+  "meta.default.description": "Luotopia — les services du campus réunis en un seul endroit, portés par un écosystème ouvert",
+  "meta.default.ogDescription": "La plateforme tout-en-un du campus, portée par une communauté ouverte",
+
+  "a11y.skipToContent": "Passer au contenu principal",
+
+  "nav.home": "Accueil",
+  "nav.features": "Fonctions",
+  "nav.download": "Télécharger",
+  "nav.community": "Communauté",
+  "nav.status": "Statut",
+  "nav.brand": "Marque",
+  "nav.legal": "Légal",
+  "nav.menu": "Menu",
+  "nav.themeToggle.aria": "Activer ou désactiver le mode sombre",
+  "nav.themeToggle.label": "Basculer entre le mode sombre et le mode clair",
+
+  "lang.switcher.label": "Choisir la langue",
+  "lang.switcher.summary": "Langue : {label}",
+
+  "footer.tagline": "Les services du campus réunis en un seul endroit, portés par un écosystème ouvert.",
+  "footer.navHeading": "Navigation",
+  "footer.resourcesHeading": "Ressources",
+  "footer.nav.features": "Aperçu des fonctions",
+  "footer.nav.download": "Télécharger",
+  "footer.nav.community": "Communauté",
+  "footer.nav.brand": "Ressources de marque",
+  "footer.nav.legal": "Mentions légales",
+  "footer.resources.status": "État du service",
+  "footer.resources.docs": "Documentation pour les développeurs",
+  "footer.resources.github": "Organisation GitHub",
+  "footer.resources.repo": "Code source de ce site",
+
+  "cta.download": "Télécharger l'app",
+  "cta.features": "Découvrir les fonctions",
+
+  "home.title": "Accueil",
+  "home.hero.srPrefix": "",
+  "home.hero.words": ["Brillant", "Ouvert", "Partagé", "Efficace", "Simple"],
+  "home.hero.tail": "Luotopia",
+  "home.hero.subtitleLine1": "Les services du campus réunis en un seul endroit, portés par un écosystème ouvert.",
+  "home.hero.subtitleLine2": "La plateforme numérique tout-en-un du campus de l'Université de Wuhan.",
+  "home.hero.platforms": "Android / iOS / macOS / Windows / Linux ; HarmonyOS est disponible dans certaines versions",
+  "home.hero.scrollHint": "Faites défiler vers le bas",
+  "home.features.title": "Fonctions principales",
+  "home.features.subtitle": "Emploi du temps, agenda, réservations, carte E, bus et plan du campus, forum et IA — tout ce qu'il faut pour la vie du campus, au même endroit.",
+  "home.preview.title": "Aperçu de l'application",
+  "home.preview.subtitle": "De vrais écrans, pas des rendus.",
+  "home.cta.title": "Essayez maintenant",
+  "home.cta.subtitle": "Gratuit, ouvert et épuré — la vie du campus, plus simple.",
+
+  "carousel.roleDescription": "carrousel",
+  "carousel.label": "Captures d'écran de l'application",
+  "carousel.prev": "Diapositive précédente",
+  "carousel.next": "Diapositive suivante",
+  "carousel.pause": "Suspendre la lecture automatique",
+  "carousel.play": "Reprendre la lecture automatique",
+  "carousel.dot": "Diapositive {index} : {label}",
+  "carousel.slide.timetable": "Emploi du temps",
+  "carousel.slide.campus": "Apps du campus",
+  "carousel.slide.ai": "Assistant IA",
+  "carousel.slide.weather": "Détail de la météo",
+  "carousel.slide.aqi": "Qualité de l'air",
+  "carousel.slide.bus": "Bus du campus",
+  "carousel.slide.wallpaper": "Centre de fonds d'écran",
+  "carousel.announce.range": "Diapositives {from} à {to}",
+  "carousel.announce.single": "Diapositive {from}",
+  "carousel.announce.withLabels": "{span} sur {total} : {labels}",
+  "carousel.announce.bare": "{span} sur {total}",
+  "carousel.announce.separator": ", ",
+
+  "features.title": "Fonctions",
+  "features.header": "Toutes les fonctions",
+  "features.subtitle": "Ce qui est disponible, ce qui arrive bientôt et ce qui est encore en développement",
+  "features.status.upcoming": "Bientôt",
+  "features.status.development": "En développement",
+
+  "features.category.coursework": "Cours et études",
+  "features.category.campus": "Services du campus",
+  "features.category.smart": "Outils intelligents",
+  "features.category.crossDevice": "Multi-appareils et comptes",
+  "features.category.inDevelopment": "En développement",
+
+  "features.item.timetable.title": "Emploi du temps",
+  "features.item.timetable.summary": "Importation multi-sources, plusieurs emplois du temps, vues hebdomadaire et mensuelle, rappels de cours.",
+  "features.item.timetable.description": "Compatible avec le système de licence, newyjs pour le master, les fichiers et codes de partage WakeUp, les emplois du temps tiers et l'édition manuelle ; plusieurs emplois du temps regroupés, vues hebdomadaire et mensuelle, rappels de cours et synchronisation avec les widgets d'écran d'accueil.",
+
+  "features.item.agenda.title": "Agenda et tâches",
+  "features.item.agenda.summary": "Cours, tâches et notes au même endroit, avec récurrences et alertes.",
+  "features.item.agenda.description": "Les éléments se déclinent en événements, tâches et notes, avec règles de récurrence, priorités, regroupement en listes, actions par balayage, rappels de cours et synchronisation avec les widgets.",
+
+  "features.item.freeClassrooms.title": "Salles libres",
+  "features.item.freeClassrooms.summary": "Recherche multicritère de salles libres, excluant automatiquement les conflits avec votre emploi du temps.",
+  "features.item.freeClassrooms.description": "Consultez les salles libres par date, campus, bâtiment et créneau ; les conflits avec votre emploi du temps sont exclus automatiquement et chaque résultat peut devenir un événement de l'agenda en un seul geste.",
+
+  "features.item.librarySeats.title": "Places de travail en bibliothèque",
+  "features.item.librarySeats.summary": "Consultation, réservation et annulation natives des places de la bibliothèque.",
+  "features.item.librarySeats.description": "Interrogez les espaces, dates, créneaux et places de la bibliothèque via l'API native ; créez ou annulez des réservations, suivez votre liste de réservations et recevez des rappels dans l'agenda.",
+
+  "features.item.sportsVenues.title": "Réservation d'installation sportive",
+  "features.item.sportsVenues.summary": "Réservation d'installations, d'activités et de créneaux, avec gestion des commandes.",
+  "features.item.sportsVenues.description": "Consultez les installations sportives et les créneaux disponibles, réservez, payez, annulez et suivez vos commandes ; les réservations peuvent être enregistrées directement dans l'agenda.",
+
+  "features.item.universityTimetable.title": "Emploi du temps global et auditeur libre",
+  "features.item.universityTimetable.summary": "Parcourez l'emploi du temps global de l'université et filtrez les cours sans conflit.",
+  "features.item.universityTimetable.description": "Parcourez l'emploi du temps global par année universitaire et semestre, recherchez des cours et confrontez-les au vôtre pour ne garder que ceux sans conflit : pratique pour suivre un cours en auditeur libre ou compléter votre inscription.",
+
+  "features.item.academicProgress.title": "Progression académique",
+  "features.item.academicProgress.summary": "Programme d'études, progression et total de crédits.",
+  "features.item.academicProgress.description": "Affiche les informations de votre filière, le programme d'études, les crédits validés et les cours restants, pour suivre votre progression.",
+
+  "features.item.grades.title": "Notes",
+  "features.item.grades.summary": "Importation multicanal, algorithmes de GPA et tendances des notes.",
+  "features.item.grades.description": "Importez depuis le système de licence, les certificats électroniques de confiance et le système d'accompagnement du développement professionnel ; changez d'algorithme de GPA, suivez les tendances, exportez le relevé de notes en PDF, filtrez par semestre et verrouillez l'accès par biométrie.",
+
+  "features.item.universityCalendar.title": "Calendrier académique",
+  "features.item.universityCalendar.summary": "Le calendrier de la WHU et les dates des semestres, à tout moment.",
+  "features.item.universityCalendar.description": "Toutes les années du calendrier de la WHU : début et fin des semestres, vacances et organisation des enseignements, en un coup d'œil.",
+
+  "features.item.courseReviews.title": "Notes et avis sur les cours",
+  "features.item.courseReviews.summary": "Distribution des notes, avis sur les cours et envoi anonyme.",
+  "features.item.courseReviews.description": "Consultez la distribution des notes et les avis de chaque cours, et publiez les vôtres anonymement ; les petits échantillons sont agrégés pour protéger la vie privée, dans la continuité des données de WHU.sb / WHUCourses.cn.",
+
+  "features.item.xuexitong.title": "Compte Chaoxing",
+  "features.item.xuexitong.summary": "Associez votre compte Chaoxing ; les identifiants restent dans le stockage sécurisé de l'appareil.",
+  "features.item.xuexitong.description": "Associez Chaoxing (Xuexitong) par mot de passe ou par code SMS ; les identifiants sont conservés dans le stockage sécurisé de cet appareil et isolés par compte WHU, la base des futures fonctions de cours et de présence.",
+
+  "features.item.ecard.title": "Carte E de Luojia et code de paiement",
+  "features.item.ecard.summary": "Le code de paiement natif s'actualise tout seul et fonctionne aussi depuis la montre.",
+  "features.item.ecard.description": "Accès à la carte E de Luojia avec consultation du solde et des mouvements ; le code de paiement natif s'actualise chaque minute, avec la version web en secours, et reste disponible sur Apple Watch et depuis les raccourcis de l'écran d'accueil.",
+
+  "features.item.shuttleBus.title": "Bus du campus",
+  "features.item.shuttleBus.summary": "Position en temps réel, itinéraires et alertes d'arrivée.",
+  "features.item.shuttleBus.description": "Consultez les itinéraires des bus du campus et leur position en temps réel, avec une couche de véhicules en direct sur le plan du campus, des alertes d'arrivée en arrière-plan et la synchronisation avec les Activités en direct d'iOS et les instantanés de la montre.",
+
+  "features.item.campusMap.title": "Plan du campus",
+  "features.item.campusMap.summary": "Cartes natives, recherche de lieux et couches d'installations.",
+  "features.item.campusMap.description": "Implémentation native de la carte, sans page web intégrée ; recherche de lieux combinée, couches pour les parkings, les accès, les AED et les installations du campus, et bascule entre vue vectorielle et satellite.",
+
+  "features.item.hospital.title": "Service médical",
+  "features.item.hospital.summary": "Carte de patient, rendez-vous, file d'attente, factures et résultats.",
+  "features.item.hospital.description": "Gérez votre carte de patient, consultez et annulez vos rendez-vous, suivez l'appel de la file d'attente des consultations externes, vérifiez les horaires d'ouverture et retrouvez les factures payées et impayées ainsi que les résultats d'analyses et d'examens.",
+
+  "features.item.utilities.title": "Eau, électricité et code d'accès à l'eau",
+  "features.item.utilities.summary": "Consultation et paiement de l'eau et de l'électricité de la résidence, et code d'eau chaude.",
+  "features.item.utilities.description": "Consultez la consommation d'eau et d'électricité de votre résidence, payez en ligne et recevez une alerte de solde bas ; le code d'accès à l'eau chaude est prêt dès que vous en avez besoin.",
+
+  "features.item.notifications.title": "Messages campus",
+  "features.item.notifications.summary": "Avis et tâches agrégés du centre de messages de la WHU.",
+  "features.item.notifications.description": "Regroupe le centre de messages de la WHU avec les vues tous / avis / tâches, le détail des messages et les badges de non-lus.",
+
+  "features.item.smartLuojia.title": "Zhihui Luojia",
+  "features.item.smartLuojia.summary": "Accès direct au portail officiel, avec votre identité du campus.",
+  "features.item.smartLuojia.description": "Le portail Zhihui Luojia intégré, qui réutilise votre session du campus pour que les services universitaires courants ne vous demandent plus de vous reconnecter.",
+
+  "features.item.campusNetwork.title": "Réseau du campus",
+  "features.item.campusNetwork.summary": "Forfaits, appareils, rechargement, pause et reprise.",
+  "features.item.campusNetwork.description": "Consultez l'état de votre forfait, mettez-le en pause et reprenez-le (les jours non utilisés sont reportés), authentifiez-vous automatiquement sur le portail, changez d'opérateur, gérez les appareils connectés et rechargez le réseau ; sur iOS, la connexion peut se faire au niveau du système.",
+
+  "features.item.campusVpn.title": "VPN du campus",
+  "features.item.campusVpn.summary": "Tunnel scindé aTrust avec tests de connectivité.",
+  "features.item.campusVpn.description": "Connectez-vous au VPN aTrust de la WHU avec un proxy dans l'app ou un TUN au niveau du système, des règles de tunnel scindé, des défis à deux facteurs et un test de connectivité web.",
+
+  "features.item.forum.title": "Forum : Abri anti-aérien de Luojia",
+  "features.item.forum.summary": "Publications, commentaires, pièces jointes, réputation et modération.",
+  "features.item.forum.description": "Le forum communautaire prend en charge les publications, les commentaires, les sections, les pièces jointes, la recherche, la réputation, les classements et un journal de modération public ; l'onglet est masqué par défaut et s'active dans Paramètres → Navigation.",
+
+  "features.item.aiAssistant.title": "Assistant IA",
+  "features.item.aiAssistant.summary": "Un agent multi-modèles capable d'opérer les services du campus.",
+  "features.item.aiAssistant.description": "Prend en charge plusieurs modèles intégrés et personnalisés, des pièces jointes multimodales, la saisie et la lecture vocales, la génération d'images, la recherche en ligne, MCP, des compétences et des assistants ; le pont de confirmation propose trois modes (manuel, semi-automatique et entièrement automatique), les outils peuvent consulter et gérer l'emploi du temps, les notes, la messagerie et les données des services du campus, et lancer les paiements d'eau, d'électricité et de réseau après votre confirmation.",
+
+  "features.item.weather.title": "Météo",
+  "features.item.weather.summary": "Prévisions multi-sources, AQI, précipitations et alertes.",
+  "features.item.weather.description": "Mi Weather, Open-Meteo et AccuWeather sont interrogés directement pour ce que chacun fait de mieux : prévisions heure par heure, qualité de l'air, concentrations de pollen et rapports hebdomadaires officiels, précipitations, alertes, cache et nouvelles tentatives ; chaque remplacement ou repli vers une autre source est traçable, et un mode strict est disponible.",
+
+  "features.item.coremail.title": "Messagerie Coremail",
+  "features.item.coremail.summary": "Envoi et réception du courrier du campus, détail des messages et badges de non-lus.",
+  "features.item.coremail.description": "Le client natif Coremail prend en charge la connexion SSO, les mots de passe spécifiques au client, la boîte de réception, la rédaction et l'envoi, le rendu sécurisé du contenu et les badges de non-lus ; la messagerie est également ouverte à l'agent IA pour rechercher, classer, rédiger et envoyer.",
+
+  "features.item.wallpapers.title": "Centre de fonds d'écran",
+  "features.item.wallpapers.summary": "Images locales, URL en ligne, Bing quotidien et configuration des fonds par page.",
+  "features.item.wallpapers.description": "Choisissez aucun fond, une image locale, l'URL d'une image en ligne ou l'image quotidienne de Bing en aléatoire ; les pages Emploi du temps, Campus, Paramètres, Liste de tâches, Forum et IA se configurent séparément, et le voile sombre est réglable.",
+
+  "features.item.hotUpdate.title": "Mise à jour à chaud des scripts",
+  "features.item.hotUpdate.summary": "Scripts d'analyse signés : les changements d'API ne demandent pas de nouvelle version.",
+  "features.item.hotUpdate.description": "Ce site distribue des scripts d'analyse QuickJS signés avec Ed25519 ; lorsqu'une API du campus change, l'analyseur peut être mis à jour à chaud, sans attendre une nouvelle version de l'app.",
+
+  "features.item.appUpdate.title": "Mises à jour dans l'app",
+  "features.item.appUpdate.summary": "Vérifie la présence d'une nouvelle version et guide son installation.",
+  "features.item.appUpdate.description": "Recherche les mises à jour sur GitHub Releases ; sur Android, suggère la bonne mise à niveau d'ABI et guide l'installation, et sur les plateformes de bureau, propose de télécharger la nouvelle version.",
+
+  "features.item.appleShortcuts.title": "Raccourcis Apple",
+  "features.item.appleShortcuts.summary": "Les raccourcis peuvent appeler les outils vérifiés de l'app.",
+  "features.item.appleShortcuts.description": "Les raccourcis macOS peuvent appeler des outils vérifiés comme le calendrier, l'emploi du temps, les notes et les salles libres ; les opérations d'écriture demandent une confirmation.",
+
+  "features.item.widgets.title": "Widgets d'écran d'accueil",
+  "features.item.widgets.summary": "Quatre widgets pour Android, iOS et macOS.",
+  "features.item.widgets.description": "Quatre widgets — liste de l'agenda, cours du jour, commence bientôt et cours de la semaine — couvrant Android, iOS et la barre des menus de macOS.",
+
+  "features.item.watch.title": "Intégration avec les montres",
+  "features.item.watch.summary": "Synchronisation avec Apple Watch et les montres Huawei / HarmonyOS.",
+  "features.item.watch.description": "Apple Watch peut présenter le code de paiement de la carte E ; les montres Huawei et HarmonyOS synchronisent des instantanés de l'agenda, du bus du campus et de la météo.",
+
+  "features.item.appShortcuts.title": "Raccourcis de l'app",
+  "features.item.appShortcuts.summary": "Appuyez longuement sur l'icône pour accéder directement à ce que vous utilisez le plus.",
+  "features.item.appShortcuts.description": "Les App Shortcuts d'Android et les Quick Actions d'iOS mènent directement au code de paiement de la carte E, à la réservation de places de travail et à l'IA, entre autres, et s'affichent selon votre état de connexion.",
+
+  "features.item.accountSecurity.title": "Comptes et sécurité",
+  "features.item.accountSecurity.summary": "CAS, comptes Luotopia, Passkeys et confiance de l'appareil.",
+  "features.item.accountSecurity.description": "Le CAS de la WHU et les comptes Luotopia sont séparés ; Passkeys, sessions multiples, confiance de l'appareil, identifiants d'API et verrou biométrique des notes sont pris en charge, et la télémétrie de diagnostic peut être désactivée.",
+
+  "features.item.languages.title": "Plusieurs langues",
+  "features.item.languages.summary": "12 langues et formats d'heure localisés.",
+  "features.item.languages.description": "Chinois simplifié, chinois traditionnel, cantonais, anglais, japonais, coréen, français, espagnol, portugais, russe et vietnamien — 12 langues au total.",
+
+  "features.item.multiAccount.title": "Changement de comptes multiples",
+  "features.item.multiAccount.summary": "Identifiants isolés par compte WHU, avec passage de l'un à l'autre.",
+  "features.item.multiAccount.description": "L'appareil peut mémoriser plusieurs comptes WHU et passer rapidement de l'un à l'autre ; les identifiants du VPN, de la messagerie et de Chaoxing sont isolés par compte et ne se recoupent jamais.",
+
+  "features.item.thirdPartyAccounts.title": "Association de comptes tiers",
+  "features.item.thirdPartyAccounts.summary": "Association autorisée de comptes tiers comme Ham.",
+  "features.item.thirdPartyAccounts.description": "Gérez les comptes externes au même endroit, sous « Autres comptes » ; l'association autorisée de tiers comme Ham est encore en cours de finalisation.",
+
+  "features.item.libraryLoans.title": "Prêts de la bibliothèque",
+  "features.item.libraryLoans.summary": "Prêts du catalogue, renouvellements et rappels d'échéance.",
+  "features.item.libraryLoans.description": "Prévu : une API de prêts du catalogue affichant vos prêts en cours, les dates de retour et l'état des renouvellements, avec des rappels avant l'échéance.",
+
+  "features.item.studyMaterials.title": "Fichiers de cours",
+  "features.item.studyMaterials.summary": "Recherchez des documents par cours, enseignant et semestre.",
+  "features.item.studyMaterials.description": "Prévu : recherche, envoi, téléchargement, favoris et état de validation côté serveur, avec des documents classés par cours, enseignant et semestre.",
+
+  "features.item.gradeEnhancements.title": "Améliorations des notes",
+  "features.item.gradeEnhancements.summary": "Comparaison entre semestres, export du résumé et liaison avec les identifiants des cours.",
+  "features.item.gradeEnhancements.description": "À partir des tendances de notes existantes, nous continuerons d'affiner la comparaison entre semestres, l'export du résumé et la liaison avec les identifiants des cours.",
+
+  "features.item.recurrenceEnhancements.title": "Améliorations des récurrences",
+  "features.item.recurrenceEnhancements.summary": "Déploiement des éléments récurrents et actions sur toute la série.",
+  "features.item.recurrenceEnhancements.description": "Nous continuerons d'affiner le déploiement d'un élément récurrent en ses occurrences, leur achèvement et leur restauration, ainsi que les actions sur la série entière.",
+
+  "features.item.widgetEnhancements.title": "Améliorations des widgets",
+  "features.item.widgetEnhancements.summary": "Améliorations sur Android et exploration d'autres points d'entrée.",
+  "features.item.widgetEnhancements.description": "Nous continuerons d'améliorer les widgets Android et d'explorer des points d'entrée sur davantage de plateformes de bureau.",
+
+  "features.item.standaloneWeb.title": "Version web autonome",
+  "features.item.standaloneWeb.summary": "Flutter Web n'est plus maintenu ; un produit web autonome est prévu.",
+  "features.item.standaloneWeb.description": "La couche de compatibilité Flutter Web et ses artefacts de publication ne sont plus maintenus ; le produit web autonome démarrera une fois les exigences et les capacités du proxy côté serveur établies."
+}
