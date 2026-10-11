@@ -142,13 +142,17 @@ Therefore:
 - There is also **no** route table to maintain in the middleware. Misses are the
   platform's call, so new pages cannot be left unconfigured.
 
-`functions/_middleware.ts` keeps only the half the platform cannot do: **choosing
-the 404's representation per client**. Browsers get the full `dist/404.html`;
+`functions/_middleware.ts` keeps only what the platform cannot do. For 404s that is
+**choosing the representation per client**: browsers get the full `dist/404.html`;
 `curl`, `wget` and HTTP libraries get one line of `text/plain`
 (`404 Not Found: /path` plus the site root) instead of 34 KB of markup in a
 terminal. The decision reads whether `Accept` explicitly names `text/html`, with
 `Sec-Fetch-Dest` as the tie-breaker. A JSON 404 a Function produced itself (such as
 `/api/*`) is left alone.
+
+That same `prefersHtml()` test is also the first gate of
+[language negotiation](#language-negotiation) — a static build has no SSR, so
+`Accept-Language` is likewise only readable at the edge.
 
 Verify after deploying:
 
@@ -163,6 +167,56 @@ curl -s https://www.whu.sb/404 | head -c 120       # the 404 document itself
 `www.whu.sb`, `whu.sb` and `*.whu.sb` pass through; `*.pages.dev`, `*.workers.dev`
 and any Host not on the list are 302-redirected to `https://www.whu.sb` (path and
 query preserved). A new domain has to be added here or it will be redirected away.
+
+### Language negotiation
+
+The site is purely static, with no SSR, so `Accept-Language` can only be read at the
+edge — `Astro.preferredLocale` is permanently `undefined` in a static build. The
+middleware handles it after host canonicalisation and before `next()`, behind four
+gates, none of which is optional:
+
+| Gate | Condition | What it keeps out |
+|------|-----------|-------------------|
+| Representation | `prefersHtml()` | `_astro` bundles, fonts, `/api/*`, and **prefetches** (`sec-fetch-dest: empty`) |
+| Path shape | `!looksLikeAsset()` | `/api/releases/latest`, `/favicon.svg`, `/scales/manifest.json` opened in an address bar |
+| Already prefixed | `!hasLocalePrefix()` | Requests already on `/en/…` |
+| Already chosen | no `luotopia_lang` cookie | Every visit after the visitor picked a language by hand |
+
+Only then is `Accept-Language` parsed (a hand-rolled q-value parser; Workers has no
+built-in matcher worth depending on) and folded onto our locales one subtag at a
+time: `zh-TW` → `zh-Hant`, `en-GB` → `en`. `q=0` is an explicit refusal and is
+skipped rather than fallen through. The result has to differ from the default locale
+**and** the locale has to actually have that page (`TRANSLATED_ROUTES`) before a 302
+is emitted.
+
+That last condition is not optional either. Without it, `/status` with
+`Accept-Language: en` 302s to `/en/status`, which 404s, whose fallback 302s back to
+`/status`, which detects English again — an infinite loop.
+
+**Detection writes no cookie; only `?lang=` does.** The switcher's links carry
+`?lang=<code>`; the middleware answers with `Set-Cookie: luotopia_lang` (one year,
+`SameSite=Lax`, `Secure`) and a 302 to the same URL without the parameter, and from
+then on detection no longer overrides the choice. Inferring the choice from "the path
+had a locale prefix" instead would get the direction wrong: on `/en/`, clicking a page
+English does not have (the nav points at the Chinese original) would write
+`luotopia_lang=zh-Hans` and silently reverse what the visitor asked for.
+
+`?lang=` lands on where *that page* lives in the chosen locale, not on the same path
+minus the parameter: `/status?lang=en` records `en` and stays on `/status` (English
+has no status page), while `/features?lang=en` lands on `/en/features`. Other query
+parameters survive; an unpublished locale (`?lang=ja`) is ignored entirely.
+
+302 throughout, never 301 — a permanent redirect gets cached against the URL and
+would keep sending the visitor to English after they changed their browser language.
+
+The 404 fallback for untranslated paths lives here too: `/en/status` has no document,
+so it 302s to `/status`. That is nominally Astro's `i18n.fallback`, which is not used
+because it conflicts with `src/pages/[lang]/*` — see
+[development](./development.en.md#what-a-partly-translated-locale-does).
+
+The deep-link host takes no part in negotiation: it returns earlier in the middleware
+as a whole, and `luotopia.whu.sb/*` is claimed by the app, whose landing page should
+not have an extra redirect in front of it.
 
 ### Deep-link host (luotopia.whu.sb)
 
@@ -274,6 +328,27 @@ curl -i  https://www.whu.sb/definitely-not-a-page | head -1     # 404
 curl -s  https://www.whu.sb/api/releases/latest | head -c 200   # release JSON
 curl -sI https://www.whu.sb/api/status | grep -i x-status-source
 curl -sI https://luotopia.whu.sb/.well-known/assetlinks.json    # 200, no redirect
+```
+
+Language negotiation:
+
+```sh
+# First-visit detection: expect a 302 to /en/
+curl -sI -H 'accept: text/html' -H 'accept-language: en' https://www.whu.sb/ | grep -i '^location'
+
+# An untranslated page must not be detected onto, or it loops. Expect Pages' own
+# /status -> /status/ 308 here, not /en/status
+curl -sI -H 'accept: text/html' -H 'accept-language: en' https://www.whu.sb/status | grep -i '^location'
+
+# Explicit choice: expect a 302 to /en/ plus Set-Cookie: luotopia_lang=en
+curl -sI 'https://www.whu.sb/?lang=en' | grep -i '^location\|^set-cookie'
+
+# Once recorded, detection stands down: expect 200
+curl -sI -H 'accept: text/html' -H 'accept-language: en' \
+     -H 'cookie: luotopia_lang=zh-Hans' https://www.whu.sb/ | head -1
+
+# Non-document requests are untouched, prefetches included: expect 200
+curl -sI -H 'accept: */*' -H 'accept-language: en' https://www.whu.sb/ | head -1
 ```
 
 `X-Status-Source` on `/api/status` reads `api` (upstream call), `cache` (snapshot

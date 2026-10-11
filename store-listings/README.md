@@ -18,14 +18,19 @@ Store 的桌面视角**不是同一份文本的翻译**，更新功能时两边�
 
 ## 约定
 
-- **取材来源**：功能描述以 `src/config/features.ts`（官网功能清单）与 app 仓库
-  `README.md` 的定位语为准；「开发中」状态的功能**一律不写**，避免商店审核判定
-  虚假宣传。文案更新应跟随 features.ts 的变化。
+- **取材来源**：功能清单是 `src/config/features.ts`（结构：id、图标、分组、上线状态）
+  加 `src/i18n/<locale>.json`（文案，按 `features.item.<id>.{title,summary,description}`
+  取），定位语以 app 仓库 `README.md` 为准；「开发中」状态的功能**一律不写**，避免商店
+  审核判定虚假宣传。文案更新应跟随这两处的变化。
+  官网自身的英文版已上线（`/en/`），其功能描述与 `google-play/en-us.md` 同源同调，
+  改一边时另一边要过一遍。
 - **合规红线（勿删）**：每份说明必须保留第三方免责声明——本应用是 ClosedWHU 独立
   开发的第三方客户端，非武汉大学官方应用，校园功能需本人账号凭据。校园类客户端
   的商店审核重点核查这一点。
 - **语言集合**：与 app `pubspec.yaml` 的 `msix_config.languages` / ARB 语言集保持
-  一致（当前 10 种：zh-cn、zh-hant、en-us、ja、ko、es、fr、pt、ru、vi）。
+  一致（当前 10 种：zh-cn、zh-hant、en-us、ja、ko、es、fr、pt、ru、vi）。官网以同一份
+  集合为目标（`src/i18n/locales.ts` 的注释里有路线图），但**逐个语种上线**，当前已发布
+  的见 `src/i18n/published.json`；商店文案不受官网进度影响，十种一次交齐。
 - **硬限制自查**：各商店对简短描述、关键字数量/词数、功能条数都有上限，改动文案后
   重新核对（microsoft-store 当前值见其 README）。
 - 版权与开发者署名各语言一致：`© 2026 Hsukqi Lee (ClosedWHU)` / `Hsukqi Lee`。

@@ -52,26 +52,28 @@ React or Vue here. Read [Page conventions](#page-conventions) before adding any.
 ```
 src/
   components/     # Reusable Astro components (Navbar / Footer / PageHeader / …)
+    pages/        # Whole-page bodies (HomePage / FeaturesPage), shared by every locale's route
   config/         # Content as data: features / downloads / friendLinks / legal / deeplinkRoutes
+  i18n/           # Localisation: locale table, published set, dictionaries, lookup, route table
   layouts/        # BaseLayout.astro — the site-wide shell
-  pages/          # Routes. legal/ holds the [slug].astro dynamic route
+  pages/          # Routes. legal/ holds [slug].astro; [lang]/ holds one copy per locale
   scripts/        # Client runtime: page-lifecycle, icon-svg, icon-source.server
   styles/         # global.css — the single source of design tokens
 functions/        # Cloudflare Pages Functions
   api/            # /api/releases, /api/appstore, /api/status
   lib/            # Runtime-agnostic cores (importable from plain Node)
-  _middleware.ts  # Host allowlist, deep-link rewrite, 404 representation
+  _middleware.ts  # Host allowlist, deep-link rewrite, language negotiation, 404 representation
 public/           # Static assets, .well-known, hot-update, scales
-tools/            # Build scripts (hot-update manifest, scale manifest, AASA validation)
+tools/            # Build scripts (hot-update manifest, scale manifest, AASA + i18n validation)
 ```
 
 Prefer changing content in `src/config/` over editing pages: features, download
 platforms, friend links and legal documents are all data-driven.
 
-## The three things in astro.config.mjs
+## The four things in astro.config.mjs
 
-Beyond Tailwind the config carries three custom Vite plugins, each guarding a trap
-that looks like dead weight to anyone who did not hit it:
+Beyond Tailwind and the `i18n` block the config carries four custom Vite plugins,
+each guarding a trap that looks like dead weight to anyone who did not hit it:
 
 **`misansWeights()`** — MiSans ships `@font-face` rules declaring the weights
 Xiaomi used when cutting the family (Regular 330 / Medium 380 / Bold 630), not the
@@ -79,6 +81,22 @@ ones this site asks for. Left alone, both `font-weight: 400` and `500` resolve t
 Medium 380 and the MD3 type scale loses the body/label distinction it is built on.
 The plugin rewrites each face's descriptor to a standard weight at import time;
 glyph data and unicode-range subsets are untouched.
+
+**`pruneFontSubsets()`** — MiSans is cut into 56 `unicode-range` subsets *per
+weight*, by character cluster; 172 `@font-face` rules made up 81% of a 293 KB
+shared stylesheet, while the site's twelve pages use 1038 distinct codepoints
+between them. The plugin collects the charset by scanning the **source text** under
+`src/` and drops every subset covering none of it, so the woff2 files behind those
+rules are never emitted either.
+
+It runs in `transform`, not `generateBundle`, because Vite hashes the CSS *after*
+transform: pruning later would ship post-prune bytes under a pre-prune, `immutable`,
+year-long-cached filename. Build-time only — dev serves the full family, since a
+stale charset that silently falls back to a system face until the server restarts is
+a miserable thing to debug.
+
+**The scan reads text, comments included.** That interacts badly with i18n; see
+[Multiple languages](#multiple-languages-i18n).
 
 **`flattenCssLayers()`** — Tailwind v4 emits everything into
 `@layer properties/theme/base/utilities`, and cascade layers are Chromium 99+.
@@ -280,6 +298,105 @@ Field meanings, the client's cache-and-verify flow, and **the copyright and lice
 of the scale data** (MMPI-2's upstream is GPLv3 and needs separate assessment) are in
 [public/scales/README.md](../public/scales/README.md).
 
+## Multiple languages (i18n)
+
+The site is **purely static**: no adapter, no SSR. `Astro.preferredLocale` is
+therefore always `undefined`, and Astro's own i18n middleware runs once at build
+time. The division of labour is fixed by that:
+
+| Layer | File | Job |
+|-------|------|-----|
+| Config | `i18n` in `astro.config.mjs` | Declares the locales and the URL shape (`prefixDefaultLocale: false`, so the default stays at `/`) |
+| Locale table | `src/i18n/locales.ts` | code → URL segment / endonym / hreflang / og:locale, plus the `Accept-Language` folding rules |
+| Published set | `src/i18n/published.json` | The locales actually built. The config, the locale table and the check script all read this one file |
+| Dictionaries | `src/i18n/<code>.json` | Flat dotted keys; the default locale's file defines the key set |
+| Lookup | `src/i18n/ui.ts` | `useTranslations()`, `routeUrl()`, `hreflangAlternates()` |
+| Route table | `src/i18n/routes.ts` | `ROUTES` and `TRANSLATED_ROUTES`: which locale has which page |
+| Routes | `src/pages/[lang]/*.astro` | One per published locale; the body is shared via `src/components/pages/*.astro` |
+| First-visit detection | `functions/_middleware.ts` | `Accept-Language` → 302, see [deployment](./deployment.en.md#language-negotiation) |
+
+Page components do **not** take a `locale` prop. They read `Astro.currentLocale`,
+which Astro fills from the route (`/en/features` → `en`, `/features` → the
+default). The route files are then pure shells, and the two cannot disagree.
+
+### Adding a locale
+
+1. Write `src/i18n/<code>.json`. The key set must match the default locale
+   *exactly*, placeholders included — `npm run i18n:check` fails on both missing
+   and surplus keys
+2. Add a row to `LOCALES` in `src/i18n/locales.ts`
+3. Add the code to `src/i18n/published.json`
+4. Record which pages you translated in `TRANSLATED_ROUTES` in `src/i18n/routes.ts`
+
+No page files change: `src/pages/[lang]/*.astro` is driven by `PREFIXED_LOCALES`
+and grows a copy on its own. Translating only part of the site is fine — leave the
+rest unclaimed and it stays with the default locale.
+
+### What a partly-translated locale does
+
+`TRANSLATED_ROUTES` is the single source of truth. For a page a locale does not
+claim:
+
+- Navbar and footer links come from `routeUrl()`, which points **straight at the
+  default-locale URL** — no redirect hop
+- The switcher's target comes from `pathInLocale()`, which stays on the current
+  page. The cookie still records the choice, so every page that *does* have a
+  translation is in that language from then on
+- `hreflang` does not claim the locale has that page. Claiming an alternate that
+  404s is worse than claiming none: crawlers validate the cluster and drop the
+  whole set when one member does not reciprocate
+- The middleware will **not** auto-detect a visitor onto that path in that locale.
+  Doing so 404s, the 404 fallback sends them back, and detection fires again — an
+  infinite loop
+
+Hand-typed and stale `/en/status` URLs are 302'd back to `/status` by the
+middleware.
+
+Do **not** reach for Astro's `i18n.fallback` here. It does not understand routes
+built by `src/pages/[lang]/*`: it treats `/en` as an ordinary page needing an
+English version, emits a redirect stub at `/en/en`, and the stub it emits for
+`/en/features` *outranks the real route* — the actual translated page is dropped
+from the build with nothing but a warning. Its stubs are also 2-second meta-refresh
+documents canonicalising to the apex domain, which is a two-hop chain.
+
+### Two things that bite
+
+**The font pruning counts comments.** `pruneFontSubsets()` scans the source *text*
+under `src/`, data and comments alike. So:
+
+- `src/i18n/locales.ts` lists **published** locales only, with the roadmap in a
+  comment. Carrying all ten endonyms up front measured +6 surviving MiSans
+  `@font-face` subsets and +6,893 raw bytes of shared CSS, for glyphs no shipped
+  page renders
+- Comments in the i18n modules are English. Where they would otherwise quote
+  Chinese source text, they paraphrase instead
+
+Endonyms are the exception, and the one unavoidable cost: the switcher has to be
+readable by someone who cannot read the page they landed on, so each language is
+listed in its own script and never translated.
+
+**`transition:persist` carries the old language's navbar onto the new language's
+page.** Persisted elements are not part of the swap, so `Navbar.astro` keys its
+persist name by locale (`lt-navbar-${locale}`): same-locale navigations still get
+the cheap persist, cross-locale ones render fresh. `<html lang>` needs no help —
+Astro syncs root-element attributes from the new document, and `BaseLayout`'s
+`preserveRootState` only has to carry the two client-only states (theme, kiosk).
+
+The switcher's links carry `data-astro-reload`: `?lang=` needs the middleware's 302
+to set the cookie, and Client Router navigating by fetch would follow that 302
+transparently and then `pushState` the *parameterised* URL, leaving the address bar
+dirty. They also carry `data-astro-prefetch={false}` — with `prefetchAll: true` a
+hover would otherwise prefetch a whole document per language.
+
+### Checks
+
+```sh
+npm run i18n:check        # sources: dictionaries, locale table, config and route table agree
+npm run i18n:check:dist   # post-build: TRANSLATED_ROUTES and dist/ match in both directions
+```
+
+`i18n:check` is wired into `prebuild`. The `--dist` half needs build output, so it
+is a separate command — run it after changing what a locale claims.
 ## Before committing
 
 There is no test suite and no lint script. The minimum bar is that the build passes:
@@ -292,3 +409,9 @@ npm run build
 after touching routes click through the navbar and footer by hand. Anything
 affecting old WebViews (CSS layers, syntax lowering) must be verified with
 `build && preview` — the dev server cannot show it.
+
+The same goes for `functions/`, which `astro dev` does not run. Language
+negotiation, the 404 representation and the deep-link rewrite are only visible
+under `npm run build && npx wrangler pages dev dist`; when the local workerd binary
+is older than today's date it refuses to start with `requires compatibility date`,
+and the fix is `--compatibility-date <the newest date it names>`.

@@ -128,11 +128,14 @@ Pages 判断「自定义 404」还是「单页应用」的唯一依据，是产�
   （`assets.directory` + `main`），与 Pages 是两套产品。
 - 也**不需要**在中间件里维护站点路由表。未命中由平台判定，新增页面不会漏配。
 
-`functions/_middleware.ts` 只保留平台做不到的那一半 —— **按客户端选择 404 的表示
-形式**：浏览器拿到完整的 `dist/404.html`，`curl` / `wget` / 各类 HTTP 库拿到一行
+`functions/_middleware.ts` 只保留平台做不到的部分。就 404 而言是**按客户端选择它的
+表示形式**：浏览器拿到完整的 `dist/404.html`，`curl` / `wget` / 各类 HTTP 库拿到一行
 `text/plain`（`404 Not Found: /path` + 站点首页），避免 34 KB 的文档刷满终端。判定
 依据 `Accept` 是否显式包含 `text/html`，并用 `Sec-Fetch-Dest` 兜底；Function 自己
 返回的 JSON 404（如 `/api/*`）不会被改写。
+
+同一个 `prefersHtml()` 判定也是[语言协商](#语言协商)的第一道闸——静态产物没有 SSR，
+`Accept-Language` 同样只有边缘能读到。
 
 部署后验证：
 
@@ -147,6 +150,45 @@ curl -s https://www.whu.sb/404 | head -c 120       # 404 页面本体
 `whu.sb`、`*.whu.sb` 直通；`*.pages.dev` / `*.workers.dev` 以及任何不在名单里的
 Host 一律 302 到 `https://www.whu.sb`（保留 path 与 query）。新增域名要同时改这里，
 否则会被重定向走。
+
+### 语言协商
+
+站点是纯静态的、没有 SSR，所以 `Accept-Language` 只能在边缘读——`Astro.preferredLocale`
+在静态产物里恒为 `undefined`。中间件在域名归一化之后、`next()` 之前处理，四道闸缺一不可：
+
+| 闸 | 条件 | 挡住的是 |
+|----|------|----------|
+| 表示形式 | `prefersHtml()` | `_astro` 资源、字体、`/api/*`，以及 **prefetch**（`sec-fetch-dest: empty`） |
+| 路径形状 | `!looksLikeAsset()` | 地址栏直接打开的 `/api/releases/latest`、`/favicon.svg`、`/scales/manifest.json` |
+| 已有前缀 | `!hasLocalePrefix()` | 已经在 `/en/…` 上的访问 |
+| 已有选择 | 无 `luotopia_lang` cookie | 用户手动选过语言之后的每一次访问 |
+
+四道都过了才解析 `Accept-Language`（自己写的 q 值解析，Workers 没有可靠的内置
+matcher），把标签逐级折叠到本站语种：`zh-TW` → `zh-Hant`、`en-GB` → `en`；`q=0` 是
+明确拒绝，跳过而不是继续往下找。折叠结果不是默认语种，**且该语种真的有这个页面**
+（`TRANSLATED_ROUTES`），才 302 过去。
+
+最后那个条件不是可选的。少了它，`/status` + `Accept-Language: en` 会 302 到
+`/en/status`，那里 404，404 回退再 302 回 `/status`，然后又被识别一次——死循环。
+
+**自动识别不写 cookie，只有 `?lang=` 写。** 切换器的链接带 `?lang=<code>`，中间件据此
+`Set-Cookie: luotopia_lang`（一年、`SameSite=Lax`、`Secure`）并 302 到去掉参数的干净
+URL；此后自动识别不再覆盖这个选择。反过来若按「路径带语种前缀」来记就会记错方向：在
+`/en/` 上点一个没有译文的页面（导航直接指向中文原页），cookie 会被写成 `zh-Hans`，把
+用户的选择悄悄改掉。
+
+`?lang=` 的落点是**该语种下这个页面**的位置，不是原路径去掉参数：`/status?lang=en`
+记下 en 并停在 `/status`（英文没有这一页），`/features?lang=en` 落到 `/en/features`；
+其它查询参数保留，未发布的语种（`?lang=ja`）整个忽略。
+
+一律用 302 而不是 301：永久重定向会被按 URL 缓存，用户改了浏览器语言也回不来。
+
+未翻译路径的 404 回退也在中间件：`/en/status` 没有文档 → 302 到 `/status`。这本是
+Astro `i18n.fallback` 的活，但那个方案与 `src/pages/[lang]/*` 冲突，见
+[开发文档](./development.md#部分翻译时各处怎么表现)。
+
+深链域名不参与语言协商：它在中间件更早的位置就整体返回了，`luotopia.whu.sb/*` 被 App
+认领，落地页不该再多一跳重定向。
 
 ### 深链域名（luotopia.whu.sb）
 
@@ -248,6 +290,27 @@ curl -i  https://www.whu.sb/definitely-not-a-page | head -1     # 404
 curl -s  https://www.whu.sb/api/releases/latest | head -c 200   # Release JSON
 curl -sI https://www.whu.sb/api/status | grep -i x-status-source
 curl -sI https://luotopia.whu.sb/.well-known/assetlinks.json    # 200，无重定向
+```
+
+语言协商：
+
+```sh
+# 首访识别：应 302 到 /en/
+curl -sI -H 'accept: text/html' -H 'accept-language: en' https://www.whu.sb/ | grep -i '^location'
+
+# 未翻译的页面不该被识别过去，否则就是死循环。这里期望 Pages 自己的
+# /status -> /status/ 308，而不是 /en/status
+curl -sI -H 'accept: text/html' -H 'accept-language: en' https://www.whu.sb/status | grep -i '^location'
+
+# 显式选择：应 302 到 /en/ 并带 Set-Cookie: luotopia_lang=en
+curl -sI 'https://www.whu.sb/?lang=en' | grep -i '^location\|^set-cookie'
+
+# 记过选择之后不再自动跳转：应 200
+curl -sI -H 'accept: text/html' -H 'accept-language: en' \
+     -H 'cookie: luotopia_lang=zh-Hans' https://www.whu.sb/ | head -1
+
+# 非文档请求不受影响（含 prefetch）：应 200
+curl -sI -H 'accept: */*' -H 'accept-language: en' https://www.whu.sb/ | head -1
 ```
 
 `/api/status` 的 `X-Status-Source` 会是 `api`（回源）、`cache`（命中缓存）或

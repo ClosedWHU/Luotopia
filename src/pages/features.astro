@@ -1,48 +1,9 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import PageHeader from "../components/PageHeader.astro";
-import FeatureCard from "../components/FeatureCard.astro";
-import { featureCategories } from "../config/features";
+/*
+ * The default locale's feature list. Body shared with `[lang]/features.astro` —
+ * see the same note in `index.astro`.
+ */
+import FeaturesPage from "../components/pages/FeaturesPage.astro";
 ---
 
-<BaseLayout title="功能">
-  <PageHeader title="功能全览" subtitle="已上线能力、即将上线更新与开发中方向" />
-
-  <section class="relative pb-24 px-4">
-    <div class="max-w-content mx-auto">
-      {
-        featureCategories.map((category, ci) => (
-          <div class="mb-14 last:mb-0">
-            <h2 class="lt-reveal text-title-large text-on-surface mb-6 flex items-center gap-2.5">
-              <span class="lt-cat-bar" aria-hidden="true" />
-              {category.title}
-            </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {category.features.map((feature, i) => (
-                <div class="lt-reveal-lift h-full" style={`--lt-reveal-delay: ${(i % 3) * 70 + ci * 40}ms`}>
-                  <FeatureCard
-                    icon={feature.icon}
-                    title={feature.title}
-                    description={feature.description}
-                    status={feature.status}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        ))
-      }
-    </div>
-  </section>
-</BaseLayout>
-
-<style>
-  .lt-cat-bar {
-    display: inline-block;
-    width: 0.25rem;
-    height: 1.15rem;
-    border-radius: 999px;
-    background-image: linear-gradient(to bottom, var(--lt-color-primary), var(--lt-color-tertiary));
-    box-shadow: 0 2px 8px -2px color-mix(in oklab, var(--lt-color-primary) 60%, transparent);
-  }
-</style>
+<FeaturesPage />
