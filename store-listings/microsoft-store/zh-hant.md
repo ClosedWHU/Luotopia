@@ -67,5 +67,10 @@ GPA
 ## 其他授權條款
 本應用以 MIT 授權條款散布。所用第三方開放原始碼元件的授權資訊可在應用內「關於 → 開放原始碼授權」中檢視。
 
+使用本應用即視為同意《使用者協議》：https://www.whu.sb/legal/terms
+《隱私權政策》：https://www.whu.sb/legal/privacy
+《跨境資料傳輸說明》：https://www.whu.sb/legal/cross-border
+珞家（Luotopia）為 ClosedWHU 團隊獨立開發的第三方用戶端，並非武漢大學官方應用。
+
 ## 開發者
 Hsukqi Lee

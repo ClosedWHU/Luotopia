@@ -69,5 +69,10 @@ GPA
 ## その他のライセンス条項
 本アプリは MIT ライセンスの下で配布されます。使用しているサードパーティのオープンソースコンポーネントのライセンスは、アプリ内の「About → オープンソースライセンス」で確認できます。
 
+本アプリの使用により「サービス利用規約」に同意したものとみなされます：https://www.whu.sb/legal/terms
+「プライバシーポリシー」：https://www.whu.sb/legal/privacy
+「越境データ移転に関する説明」：https://www.whu.sb/legal/cross-border
+Luotopia（珞家）は ClosedWHU チームが独立開発したサードパーティ製クライアントであり、武漢大学の公式アプリではありません。
+
 ## 開発者
 Hsukqi Lee

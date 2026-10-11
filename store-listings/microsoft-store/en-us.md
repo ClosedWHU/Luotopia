@@ -69,5 +69,10 @@ gpa
 ## Additional license terms
 This app is distributed under the MIT License. Licenses of the third-party open-source components it uses are viewable in the app under About → Open-source licenses.
 
+By using this app you agree to the Terms of Service: https://www.whu.sb/legal/terms
+Privacy Policy: https://www.whu.sb/legal/privacy
+Cross-border Data Transfer Notice: https://www.whu.sb/legal/cross-border
+Luotopia is an independent third-party client developed by the ClosedWHU team and is not an official Wuhan University app.
+
 ## Developer
 Hsukqi Lee
