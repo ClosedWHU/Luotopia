@@ -886,6 +886,7 @@ jobs:
           # registrant without dev-only plugins (integration_test), which Gradle
           # excludes from the release compile classpath.
           flutter build apk --release \
+            --flavor direct \
             --split-per-abi \
             --obfuscate \
             --split-debug-info=build/debug-info \
@@ -1060,10 +1061,13 @@ jobs:
           # is stripped anyway and the symbols move to BUNDLE-METADATA, which
           # Play consumes for native crash symbolication and never ships.
           flutter build appbundle --release \
+            --flavor play \
+            --dart-define=PLAY_BUILD=true \
             --obfuscate \
             --split-debug-info=build/debug-info-aab \
             "${EXTRA[@]}"
-          AAB=build/app/outputs/bundle/release/app-release.aab
+          # The flavor moves the output into bundle/playRelease/.
+          AAB="$(find build/app/outputs/bundle -type f -name '*.aab' -print -quit)"
           test -s "$AAB"
           SAFE_TAG='${{ needs.context.outputs.tag }}'
           SAFE_TAG="${SAFE_TAG#v}"
@@ -1071,6 +1075,22 @@ jobs:
           mkdir -p dist
           cp -v "$AAB" "dist/luotopia-${SAFE_TAG}-android.aab"
           echo "aab_name=luotopia-${SAFE_TAG}-android.aab" >> "$GITHUB_OUTPUT"
+
+      # Google Play forbids self-update, so the play flavor's manifest overlay
+      # must have stripped REQUEST_INSTALL_PACKAGES. Fail loudly if not.
+      - name: Verify the Play manifest drops REQUEST_INSTALL_PACKAGES
+        if: matrix.package == 'aab'
+        run: |
+          set -euo pipefail
+          APKANALYZER="${ANDROID_HOME:-/usr/local/lib/android/sdk}/cmdline-tools/latest/bin/apkanalyzer"
+          AAB="$(find build/app/outputs/bundle -type f -name '*.aab' -print -quit)"
+          "$APKANALYZER" manifest permissions "$AAB" > /tmp/perms.txt
+          cat /tmp/perms.txt
+          if grep -qi "REQUEST_INSTALL_PACKAGES" /tmp/perms.txt; then
+            echo "::error::REQUEST_INSTALL_PACKAGES still present in the Play AAB"
+            exit 1
+          fi
+          echo "REQUEST_INSTALL_PACKAGES absent from the Play AAB"
 
       # The Flutter tool's release post-check (_isAabStrippedOfDebugSymbols)
       # only printTraces why it rejected the bundle, invisible without
@@ -1084,7 +1104,7 @@ jobs:
           set -x
           SDK="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
           ls -la "$SDK/cmdline-tools" || true
-          AAB=build/app/outputs/bundle/release/app-release.aab
+          AAB="$(find build/app/outputs/bundle -type f -name '*.aab' -print -quit)"
           ls -la "$AAB" || { echo "no AAB on disk"; exit 0; }
           APKANALYZER="$SDK/cmdline-tools/latest/bin/apkanalyzer"
           if [ -x "$APKANALYZER" ]; then
@@ -1104,7 +1124,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: play-aab-rejected-debug
-          path: build/app/outputs/bundle/release/app-release.aab
+          path: build/app/outputs/bundle/playRelease/*.aab
           if-no-files-found: ignore
           retention-days: 7
 
