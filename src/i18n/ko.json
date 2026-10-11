@@ -1,0 +1,247 @@
+{
+  "meta.default.description": "Luotopia — 캠퍼스 서비스를 한곳에, 개방형 생태계를 구축",
+  "meta.default.ogDescription": "원스톱 캠퍼스 플랫폼, 개방형 커뮤니티가 주도",
+
+  "a11y.skipToContent": "본문으로 건너뛰기",
+
+  "nav.home": "홈",
+  "nav.features": "기능",
+  "nav.download": "다운로드",
+  "nav.community": "커뮤니티",
+  "nav.status": "상태",
+  "nav.brand": "브랜드",
+  "nav.legal": "법률 정보",
+  "nav.menu": "메뉴",
+  "nav.themeToggle.aria": "다크 모드 전환",
+  "nav.themeToggle.label": "다크 / 라이트 모드 전환",
+
+  "lang.switcher.label": "언어 선택",
+  "lang.switcher.summary": "언어: {label}",
+
+  "footer.tagline": "캠퍼스 서비스를 한곳에, 개방형 생태계를 구축합니다.",
+  "footer.navHeading": "둘러보기",
+  "footer.resourcesHeading": "관련 리소스",
+  "footer.nav.features": "기능 소개",
+  "footer.nav.download": "다운로드",
+  "footer.nav.community": "커뮤니티",
+  "footer.nav.brand": "브랜드 자료",
+  "footer.nav.legal": "법률 정보",
+  "footer.resources.status": "서비스 상태",
+  "footer.resources.docs": "개발자 문서",
+  "footer.resources.github": "GitHub 조직",
+  "footer.resources.repo": "이 사이트의 오픈소스 저장소",
+
+  "cta.download": "앱 다운로드",
+  "cta.features": "기능 살펴보기",
+
+  "home.title": "홈",
+  "home.hero.srPrefix": "",
+  "home.hero.words": ["스마트", "개방", "공유", "효율", "편리"],
+  "home.hero.tail": "Luotopia",
+  "home.hero.subtitleLine1": "캠퍼스 서비스를 한곳에, 개방형 생태계를 구축합니다.",
+  "home.hero.subtitleLine2": "우한대학교를 위한 원스톱 디지털 캠퍼스 플랫폼.",
+  "home.hero.platforms": "Android / iOS / macOS / Windows / Linux 지원; HarmonyOS는 일부 릴리스에서 제공",
+  "home.hero.scrollHint": "아래로 스크롤",
+  "home.features.title": "핵심 기능",
+  "home.features.subtitle": "시간표, 일정, 예약, E카드, 캠퍼스 버스, 지도, 포럼과 AI — 캠퍼스 생활에 필요한 모든 것을 한곳에.",
+  "home.preview.title": "앱 미리보기",
+  "home.preview.subtitle": "렌더링 이미지가 아닌 실제 화면입니다.",
+  "home.cta.title": "지금 체험하기",
+  "home.cta.subtitle": "무료, 개방, 깔끔함으로 캠퍼스 생활을 더 간단하게.",
+
+  "carousel.roleDescription": "캐러셀",
+  "carousel.label": "앱 스크린샷",
+  "carousel.prev": "이전 슬라이드",
+  "carousel.next": "다음 슬라이드",
+  "carousel.pause": "자동 재생 일시정지",
+  "carousel.play": "자동 재생 다시 시작",
+  "carousel.dot": "{index}번째 스크린샷: {label}",
+  "carousel.slide.timetable": "시간표",
+  "carousel.slide.campus": "캠퍼스 앱",
+  "carousel.slide.ai": "AI 어시스턴트",
+  "carousel.slide.weather": "날씨 상세",
+  "carousel.slide.aqi": "대기질",
+  "carousel.slide.bus": "캠퍼스 버스",
+  "carousel.slide.wallpaper": "배경화면 센터",
+  "carousel.announce.range": "{from}–{to}번째 슬라이드",
+  "carousel.announce.single": "{from}번째 슬라이드",
+  "carousel.announce.withLabels": "{span}, 총 {total}개: {labels}",
+  "carousel.announce.bare": "{span}, 총 {total}개",
+  "carousel.announce.separator": ", ",
+
+  "features.title": "기능",
+  "features.header": "기능 전체 보기",
+  "features.subtitle": "현재 제공 중인 기능, 곧 출시될 업데이트, 개발 중인 방향",
+  "features.status.upcoming": "출시 예정",
+  "features.status.development": "개발 중",
+
+  "features.category.coursework": "수업과 학사",
+  "features.category.campus": "캠퍼스 서비스",
+  "features.category.smart": "스마트 도구",
+  "features.category.crossDevice": "크로스 디바이스와 계정",
+  "features.category.inDevelopment": "개발 중",
+
+  "features.item.timetable.title": "시간표",
+  "features.item.timetable.summary": "다중 소스 가져오기, 다중 시간표 관리, 주/월 보기와 수업 알림.",
+  "features.item.timetable.description": "학부 교무 시스템, 대학원 newyjs, WakeUp 파일/공유 코드, 서드파티 시간표와 수동 편집을 지원합니다. 여러 시간표를 그룹으로 관리하고 주/월 보기와 수업 알림을 홈 화면 위젯과 연동합니다.",
+
+  "features.item.agenda.title": "일정과 할 일",
+  "features.item.agenda.summary": "수업·과제·메모를 한곳에서 관리하며 반복과 알림을 지원합니다.",
+  "features.item.agenda.description": "항목은 일정, 과제, 메모의 세 가지로 나뉩니다. 반복 규칙, 우선순위, 목록 그룹화, 스와이프 조작, 수업 알림과 위젯 동기화를 지원합니다.",
+
+  "features.item.freeClassrooms.title": "빈 강의실",
+  "features.item.freeClassrooms.summary": "여러 조건으로 빈 강의실을 조회하고 시간표 충돌을 자동으로 제외합니다.",
+  "features.item.freeClassrooms.description": "날짜, 캠퍼스, 건물, 교시로 빈 강의실을 조회하면 내 시간표와의 충돌을 자동으로 대조해 걸러냅니다. 검색 결과는 탭 한 번으로 일정 항목을 만들 수 있습니다.",
+
+  "features.item.librarySeats.title": "열람실 좌석 예약",
+  "features.item.librarySeats.summary": "도서관 좌석을 네이티브로 조회·예약·취소합니다.",
+  "features.item.librarySeats.description": "네이티브 API로 도서관의 공간, 날짜, 시간대와 좌석을 조회합니다. 예약 생성/취소, 내 예약 목록과 일정 알림을 지원합니다.",
+
+  "features.item.sportsVenues.title": "운동 시설 예약",
+  "features.item.sportsVenues.summary": "시설·종목·시간대 예약과 주문 관리.",
+  "features.item.sportsVenues.description": "운동 시설과 이용 가능한 시간대를 조회해 예약, 결제, 취소와 주문 확인까지 완료할 수 있으며, 예약을 일정에 기록할 수 있습니다.",
+
+  "features.item.universityTimetable.title": "전체 시간표와 청강 매칭",
+  "features.item.universityTimetable.summary": "전체 시간표를 둘러보고 충돌 없는 과목을 추립니다.",
+  "features.item.universityTimetable.description": "학년·학기별로 전체 시간표를 둘러보고 과목을 검색한 뒤 내 시간표와 대조해 충돌 없는 후보를 추려냅니다. 청강과 추가 수강 신청에 편리합니다.",
+
+  "features.item.academicProgress.title": "학업 상태",
+  "features.item.academicProgress.summary": "이수 계획, 이수 진행 상황과 학점 통계.",
+  "features.item.academicProgress.description": "학교의 전공 정보, 이수 계획, 이수한 학점과 미이수 과목을 보여 주어 이수 진행 상황을 추적할 수 있게 합니다.",
+
+  "features.item.grades.title": "성적 조회",
+  "features.item.grades.summary": "다채널 가져오기, GPA 계산 방식과 성적 추이.",
+  "features.item.grades.description": "학부 교무 시스템, 신뢰할 수 있는 전자 증명서, 전문 발전 지도 시스템에서의 가져오기를 지원합니다. GPA 계산 방식 전환, 성적 추이, 성적증명서 PDF, 학기별 필터와 생체 인식 잠금을 제공합니다.",
+
+  "features.item.universityCalendar.title": "학사 일정",
+  "features.item.universityCalendar.summary": "우한대 학사 일정과 학기 운영을 언제든 확인하세요.",
+  "features.item.universityCalendar.description": "우한대의 역대 학사 일정 데이터를 보여 주며, 학기 시작·종료, 방학과 수업 운영을 한눈에 확인할 수 있습니다.",
+
+  "features.item.courseReviews.title": "과목 성적 및 후기",
+  "features.item.courseReviews.summary": "성적 분포, 과목 후기와 익명 제출.",
+  "features.item.courseReviews.description": "과목별 성적 분포와 후기를 볼 수 있고 익명 제출을 지원합니다. 표본이 작을 때는 집계하여 개인정보를 보호하며, WHU.sb / WHUCourses.cn의 데이터 계보를 이어갑니다.",
+
+  "features.item.xuexitong.title": "Chaoxing 계정",
+  "features.item.xuexitong.summary": "학습통 계정을 연결하며 자격 증명은 기기에 안전하게 저장됩니다.",
+  "features.item.xuexitong.description": "학습통(Chaoxing) 비밀번호 또는 SMS 로그인 연결을 지원합니다. 자격 증명은 이 기기의 보안 저장소에 보관되고 우한대 계정별로 격리되어, 이후 과목과 출석 확인 기능의 기반이 됩니다.",
+
+  "features.item.ecard.title": "뤄자 E카드와 결제 코드",
+  "features.item.ecard.summary": "네이티브 결제 코드가 자동으로 갱신되며 워치에서도 사용할 수 있습니다.",
+  "features.item.ecard.description": "뤄자 E카드 진입과 잔액·이용 내역 조회를 제공합니다. 네이티브 결제 코드는 매분 자동으로 갱신되고 웹 버전이 대체 수단을 제공하며, Apple Watch와 홈 화면 바로가기를 지원합니다.",
+
+  "features.item.shuttleBus.title": "캠퍼스 버스",
+  "features.item.shuttleBus.summary": "실시간 위치, 노선 조회와 도착 알림.",
+  "features.item.shuttleBus.description": "캠퍼스 버스 노선과 실시간 위치를 조회하고 캠퍼스 지도에 차량 실시간 레이어를 겹쳐 표시합니다. 백그라운드 도착 알림과 iOS 라이브 활동, 워치 스냅샷 동기화를 지원합니다.",
+
+  "features.item.campusMap.title": "캠퍼스 지도",
+  "features.item.campusMap.summary": "네이티브 지도, 장소 검색과 시설 레이어.",
+  "features.item.campusMap.description": "웹 페이지를 삽입하지 않는 네이티브 지도 구현입니다. 장소 통합 검색, 주차장/출입구/AED/캠퍼스 시설 레이어와 벡터·위성 지도 전환을 지원합니다.",
+
+  "features.item.hospital.title": "의료 서비스",
+  "features.item.hospital.summary": "진료 카드, 접수, 대기 순번, 영수증과 검사 결과.",
+  "features.item.hospital.description": "진료 카드를 관리하고 접수 내역과 취소, 외래 대기 호출, 진료 시간, 납부/미납 영수증, 검사·검진 결과를 확인할 수 있습니다.",
+
+  "features.item.utilities.title": "수도·전기 요금과 급수 코드",
+  "features.item.utilities.summary": "기숙사 수도·전기 조회와 납부, 온수 급수 코드.",
+  "features.item.utilities.description": "기숙사의 수도·전기 사용량을 조회하고 온라인으로 납부할 수 있으며 잔액 부족 알림을 제공합니다. 온수 급수 코드는 필요할 때 바로 사용할 수 있습니다.",
+
+  "features.item.notifications.title": "캠퍼스 메시지",
+  "features.item.notifications.summary": "우한대 메시지 센터의 알림과 할 일을 집계합니다.",
+  "features.item.notifications.description": "우한대 메시지 센터를 집계하여 전체/알림/할 일로 나눠 볼 수 있으며, 상세 보기와 읽지 않음 배지를 지원합니다.",
+
+  "features.item.smartLuojia.title": "스마트 뤄자",
+  "features.item.smartLuojia.summary": "공식 포털로 바로 이동하며 캠퍼스 신분을 자동으로 전달합니다.",
+  "features.item.smartLuojia.description": "스마트 뤄자 포털을 내장해 캠퍼스 신분 세션을 재사용하므로, 자주 쓰는 학교 서비스에 반복해서 로그인할 필요가 없습니다.",
+
+  "features.item.campusNetwork.title": "캠퍼스 네트워크",
+  "features.item.campusNetwork.summary": "요금제, 기기, 충전과 일시정지/재개.",
+  "features.item.campusNetwork.description": "요금제 상태 조회, 일시정지/재개(남은 일수 이월), 포털 자동 인증, 통신사 전환, 연결된 기기 관리와 네트워크 요금 충전을 지원합니다. iOS에서는 시스템 수준 접속도 가능합니다.",
+
+  "features.item.campusVpn.title": "캠퍼스 VPN",
+  "features.item.campusVpn.summary": "aTrust VPN 분할 터널링과 연결 테스트.",
+  "features.item.campusVpn.description": "WHU aTrust VPN에 연결합니다. 앱 내 프록시 또는 시스템 수준 TUN, 분할 터널링 규칙, 2단계 인증 챌린지와 웹 연결 테스트를 지원합니다.",
+
+  "features.item.forum.title": "포럼 「뤄자 공습 대피소」",
+  "features.item.forum.summary": "게시글, 댓글, 첨부, 평판과 게시판 관리.",
+  "features.item.forum.description": "커뮤니티 포럼은 게시글, 댓글, 게시판, 첨부, 검색, 평판, 순위표와 공개 관리 로그를 지원합니다. 탭은 기본적으로 숨겨져 있으며 설정 → 탐색에서 켤 수 있습니다.",
+
+  "features.item.aiAssistant.title": "AI 어시스턴트",
+  "features.item.aiAssistant.summary": "멀티 모델 에이전트가 캠퍼스 서비스를 조작합니다.",
+  "features.item.aiAssistant.description": "내장 및 사용자 지정 멀티 모델, 멀티모달 첨부, 음성 입력/읽어주기, 이미지 생성, 웹 검색, MCP, 스킬과 어시스턴트를 지원합니다. 확인 브리지는 수동/반자동/전자동의 세 단계를 제공하며, 도구로 시간표·성적·메일·캠퍼스 서비스 데이터를 조회하고 관리할 수 있고 사용자 확인을 거쳐 수도·전기 요금과 네트워크 요금 납부를 시작할 수 있습니다.",
+
+  "features.item.weather.title": "날씨",
+  "features.item.weather.summary": "다중 소스 예보, AQI, 강수와 경보.",
+  "features.item.weather.description": "Mi Weather / Open-Meteo / AccuWeather를 기능별로 직접 호출해 시간별 예보, 대기질, 꽃가루 농도와 공식 주간 보고서, 강수, 경보, 캐시와 재시도를 제공합니다. 데이터 소스 대체/폴백은 전 과정을 추적할 수 있으며 엄격 모드를 지원합니다.",
+
+  "features.item.coremail.title": "Coremail 메일",
+  "features.item.coremail.summary": "캠퍼스 메일 송수신, 상세 보기와 읽지 않음 배지.",
+  "features.item.coremail.description": "네이티브 Coremail 클라이언트는 SSO 로그인, 클라이언트 전용 비밀번호, 받은편지함, 메일 작성과 발송, 상세 보기의 안전한 렌더링과 읽지 않음 배지를 지원합니다. 메일함은 AI 에이전트에도 개방되어 검색, 정리, 초안 작성과 발송에 활용할 수 있습니다.",
+
+  "features.item.wallpapers.title": "배경화면 센터",
+  "features.item.wallpapers.summary": "로컬, 온라인 URL, Bing 데일리와 페이지별 배경화면 설정.",
+  "features.item.wallpapers.description": "배경화면 없음, 로컬 이미지, 온라인 이미지 URL과 Bing 데일리 랜덤을 지원합니다. 시간표, 캠퍼스, 설정, 과제 목록, 포럼, AI 페이지를 각각 설정할 수 있고 어두운 오버레이도 조절할 수 있습니다.",
+
+  "features.item.hotUpdate.title": "스크립트 핫 업데이트",
+  "features.item.hotUpdate.summary": "서명된 파싱 스크립트라 API 변화에 새 버전이 필요 없습니다.",
+  "features.item.hotUpdate.description": "공식 사이트에서 Ed25519로 서명된 QuickJS 파싱 스크립트를 배포합니다. 캠퍼스 API가 바뀌면 파서를 핫 업데이트하여 앱 새 버전을 기다리는 시간을 줄입니다.",
+
+  "features.item.appUpdate.title": "앱 내 업데이트",
+  "features.item.appUpdate.summary": "새 버전을 확인하고 설치를 안내합니다.",
+  "features.item.appUpdate.description": "GitHub Releases에서 업데이트를 확인합니다. Android에서는 ABI 업그레이드 제안과 설치 안내를 제공하고, 데스크톱 플랫폼에서는 새 버전 다운로드를 알려 줍니다.",
+
+  "features.item.appleShortcuts.title": "Apple 단축어",
+  "features.item.appleShortcuts.summary": "단축어에서 검토를 거친 앱 도구를 호출합니다.",
+  "features.item.appleShortcuts.description": "macOS 단축어로 학사 일정, 시간표, 성적, 빈 강의실 등 검토를 거친 도구를 호출할 수 있습니다. 쓰기 작업은 확인이 필요합니다.",
+
+  "features.item.widgets.title": "홈 화면 위젯",
+  "features.item.widgets.summary": "네 가지 위젯이 Android/iOS/macOS를 커버합니다.",
+  "features.item.widgets.description": "항목 목록, 오늘의 수업, 곧 시작, 이번 주 수업의 네 가지 위젯이 Android, iOS와 macOS 메뉴바를 커버합니다.",
+
+  "features.item.watch.title": "워치 연동",
+  "features.item.watch.summary": "Apple Watch, Huawei/HarmonyOS 워치와 동기화.",
+  "features.item.watch.description": "Apple Watch에서 E카드 결제 코드를 제시할 수 있으며, Huawei/HarmonyOS 워치에는 일정, 캠퍼스 버스, 날씨 스냅샷을 동기화합니다.",
+
+  "features.item.appShortcuts.title": "홈 화면 바로가기",
+  "features.item.appShortcuts.summary": "아이콘을 길게 눌러 자주 쓰는 화면으로 바로 이동합니다.",
+  "features.item.appShortcuts.description": "Android App Shortcuts와 iOS Quick Actions로 E카드 결제 코드, 열람실 예약, AI 등 화면에 바로 접근할 수 있으며 로그인 상태에 따라 표시됩니다.",
+
+  "features.item.accountSecurity.title": "계정과 보안",
+  "features.item.accountSecurity.summary": "CAS, Luotopia 계정, Passkeys와 기기 신뢰.",
+  "features.item.accountSecurity.description": "우한대 CAS와 Luotopia 계정은 분리되어 있습니다. Passkeys, 다중 세션, 기기 신뢰, API 자격 증명, 성적 생체 인식 잠금을 지원하며 진단 텔레메트리는 끌 수 있습니다.",
+
+  "features.item.languages.title": "다국어",
+  "features.item.languages.summary": "12개 언어와 현지화된 시간 형식.",
+  "features.item.languages.description": "간체 중국어, 번체 중국어, 광둥어, 영어, 일본어, 한국어, 프랑스어, 스페인어, 포르투갈어, 러시아어, 베트남어의 12개 언어를 지원합니다.",
+
+  "features.item.multiAccount.title": "멀티 계정 전환",
+  "features.item.multiAccount.summary": "우한대 계정별로 자격 증명을 격리하고 전환을 지원합니다.",
+  "features.item.multiAccount.description": "기기에 여러 우한대 계정을 기억해 두고 빠르게 전환할 수 있습니다. VPN, 메일, 학습통 등의 자격 증명은 계정별로 격리되어 서로 섞이지 않습니다.",
+
+  "features.item.thirdPartyAccounts.title": "서드파티 계정 연결",
+  "features.item.thirdPartyAccounts.summary": "Ham 등 서드파티 계정의 인증 기반 연결.",
+  "features.item.thirdPartyAccounts.description": "「기타 계정」에서 외부 계정을 한곳에 관리할 수 있습니다. Ham 등 서드파티 인증 연결은 아직 다듬고 있습니다.",
+
+  "features.item.libraryLoans.title": "도서관 대출",
+  "features.item.libraryLoans.summary": "소장 자료 대출, 연장과 반납 기한 알림.",
+  "features.item.libraryLoans.description": "도서관 대출 API 연동을 계획하고 있습니다. 현재 대출 자료, 반납 기한, 연장 상태를 보여 주고 기한 알림도 지원할 예정입니다.",
+
+  "features.item.studyMaterials.title": "학습 자료 공유",
+  "features.item.studyMaterials.summary": "과목, 교수, 학기별로 자료를 검색합니다.",
+  "features.item.studyMaterials.description": "서버 측 검색, 업로드, 다운로드, 즐겨찾기와 검토 상태의 연동을 계획하고 있으며, 자료는 과목·교수·학기별로 정리됩니다.",
+
+  "features.item.gradeEnhancements.title": "성적 기능 강화",
+  "features.item.gradeEnhancements.summary": "학기 비교, 요약 내보내기와 과목 식별자 연동.",
+  "features.item.gradeEnhancements.description": "현재의 성적 추이를 바탕으로 학기 비교, 요약 내보내기, 과목 식별자 연동을 계속 다듬습니다.",
+
+  "features.item.recurrenceEnhancements.title": "반복 항목 강화",
+  "features.item.recurrenceEnhancements.summary": "반복 항목의 전개와 전체 그룹 조작을 다듬습니다.",
+  "features.item.recurrenceEnhancements.description": "반복 항목의 인스턴스 전개, 완료, 복원과 전체 그룹 조작을 다듬습니다.",
+
+  "features.item.widgetEnhancements.title": "위젯 강화",
+  "features.item.widgetEnhancements.summary": "Android를 강화하고 더 많은 플랫폼 진입점을 살펴봅니다.",
+  "features.item.widgetEnhancements.description": "Android 위젯을 계속 강화하고 더 많은 데스크톱 플랫폼에서의 진입점을 모색합니다.",
+
+  "features.item.standaloneWeb.title": "독립 웹 버전",
+  "features.item.standaloneWeb.summary": "Flutter Web 유지 보수를 종료했으며 독립 웹을 계획하고 있습니다.",
+  "features.item.standaloneWeb.description": "Flutter Web 호환 레이어와 릴리스 산출물은 유지 보수를 종료했습니다. 독립 웹 제품은 요구 사항과 서버 측 프록시 기능이 명확해진 뒤에 착수합니다."
+}

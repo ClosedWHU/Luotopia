@@ -1,0 +1,247 @@
+{
+  "meta.default.description": "Luotopia —— キャンパスサービスを一つに、オープンなエコシステムを構築",
+  "meta.default.ogDescription": "ワンストップのキャンパスプラットフォーム、オープンコミュニティが推進",
+
+  "a11y.skipToContent": "メインコンテンツへスキップ",
+
+  "nav.home": "ホーム",
+  "nav.features": "機能",
+  "nav.download": "ダウンロード",
+  "nav.community": "コミュニティ",
+  "nav.status": "ステータス",
+  "nav.brand": "ブランド",
+  "nav.legal": "法的情報",
+  "nav.menu": "メニュー",
+  "nav.themeToggle.aria": "ダークモードを切り替え",
+  "nav.themeToggle.label": "ダーク / ライトモードを切り替え",
+
+  "lang.switcher.label": "言語を選択",
+  "lang.switcher.summary": "言語：{label}",
+
+  "footer.tagline": "キャンパスサービスを一つに、オープンなエコシステムを構築。",
+  "footer.navHeading": "ナビゲーション",
+  "footer.resourcesHeading": "関連リソース",
+  "footer.nav.features": "機能一覧",
+  "footer.nav.download": "ダウンロード",
+  "footer.nav.community": "コミュニティ",
+  "footer.nav.brand": "ブランド資産",
+  "footer.nav.legal": "法的情報",
+  "footer.resources.status": "サービスステータス",
+  "footer.resources.docs": "開発者ドキュメント",
+  "footer.resources.github": "GitHub 組織",
+  "footer.resources.repo": "本サイトのオープンソースリポジトリ",
+
+  "cta.download": "アプリをダウンロード",
+  "cta.features": "機能を見る",
+
+  "home.title": "ホーム",
+  "home.hero.srPrefix": "",
+  "home.hero.words": ["知恵", "開放", "共有", "効率", "便利"],
+  "home.hero.tail": "Luotopia",
+  "home.hero.subtitleLine1": "キャンパスサービスを一つに、オープンなエコシステムを構築。",
+  "home.hero.subtitleLine2": "武漢大学のワンストップ・デジタルキャンパスプラットフォーム。",
+  "home.hero.platforms": "Android / iOS / macOS / Windows / Linux に対応；HarmonyOS は一部のリリースで提供",
+  "home.hero.scrollHint": "下にスクロール",
+  "home.features.title": "コア機能",
+  "home.features.subtitle": "時間割、予定、予約、Eカード、キャンパスバス、マップ、フォーラムと AI —— キャンパス生活に必要なものを、すべてここに。",
+  "home.preview.title": "アプリプレビュー",
+  "home.preview.subtitle": "レンダリングではなく、実際の画面です。",
+  "home.cta.title": "今すぐ体験",
+  "home.cta.subtitle": "無料・オープン・クリーンで、キャンパス生活をシンプルに。",
+
+  "carousel.roleDescription": "カルーセル",
+  "carousel.label": "アプリのスクリーンショット",
+  "carousel.prev": "前のスライド",
+  "carousel.next": "次のスライド",
+  "carousel.pause": "自動再生を停止",
+  "carousel.play": "自動再生を再開",
+  "carousel.dot": "{index} 枚目のスクリーンショット：{label}",
+  "carousel.slide.timetable": "時間割",
+  "carousel.slide.campus": "キャンパスアプリ",
+  "carousel.slide.ai": "AI アシスタント",
+  "carousel.slide.weather": "天気の詳細",
+  "carousel.slide.aqi": "空気質",
+  "carousel.slide.bus": "キャンパスバス",
+  "carousel.slide.wallpaper": "壁紙センター",
+  "carousel.announce.range": "{from}～{to} 枚目",
+  "carousel.announce.single": "{from} 枚目",
+  "carousel.announce.withLabels": "{span}／全 {total} 枚：{labels}",
+  "carousel.announce.bare": "{span}／全 {total} 枚",
+  "carousel.announce.separator": "・",
+
+  "features.title": "機能",
+  "features.header": "機能一覧",
+  "features.subtitle": "提供中の機能、近日登場のアップデート、開発中の方向性",
+  "features.status.upcoming": "近日登場",
+  "features.status.development": "開発中",
+
+  "features.category.coursework": "授業と学業",
+  "features.category.campus": "キャンパスサービス",
+  "features.category.smart": "スマートツール",
+  "features.category.crossDevice": "クロスデバイスとアカウント",
+  "features.category.inDevelopment": "開発中",
+
+  "features.item.timetable.title": "時間割",
+  "features.item.timetable.summary": "複数ソースのインポート、複数時間割の管理、週・月表示と授業リマインダー。",
+  "features.item.timetable.description": "学部の教務システム、大学院 newyjs、WakeUp ファイル/共有コード、サードパーティの時間割、手動編集に対応。複数時間割のグループ管理、週・月表示、授業リマインダー、ホーム画面ウィジェットとの連携を備えます。",
+
+  "features.item.agenda.title": "予定とToDo",
+  "features.item.agenda.summary": "授業・タスク・メモを一括管理、繰り返しと通知に対応。",
+  "features.item.agenda.description": "項目は予定、タスク、メモの 3 種類。繰り返しルール、優先度、リスト分け、スワイプ操作、授業リマインダー、ウィジェット同期に対応します。",
+
+  "features.item.freeClassrooms.title": "空き教室",
+  "features.item.freeClassrooms.summary": "複数の条件で空き教室を検索、時間割との衝突を自動で除外。",
+  "features.item.freeClassrooms.description": "日付・キャンパス・建物・時限で空き教室を検索し、自分の時間割との衝突を自動で照合して除外。検索結果はワンタップで予定として作成できます。",
+
+  "features.item.librarySeats.title": "自習席の予約",
+  "features.item.librarySeats.summary": "図書館の座席をネイティブに検索・予約・取消。",
+  "features.item.librarySeats.description": "ネイティブ API で図書館のスペース・日付・時間帯・座席を照会。予約の作成/取消、自分の予約一覧、予定へのリマインダーに対応します。",
+
+  "features.item.sportsVenues.title": "スポーツ施設の予約",
+  "features.item.sportsVenues.summary": "施設・種目・時間帯の予約と注文管理。",
+  "features.item.sportsVenues.description": "スポーツ施設と利用可能な時間帯を検索し、予約・支払い・取消・注文の確認まで完了できます。予約は予定に書き込めます。",
+
+  "features.item.universityTimetable.title": "全学時間割と聴講マッチング",
+  "features.item.universityTimetable.summary": "全学の時間割を閲覧し、衝突のない授業を抽出。",
+  "features.item.universityTimetable.description": "学年・学期ごとに全学の時間割を閲覧して科目を検索し、自分の時間割と照合して衝突のない候補を抽出。聴講や追加履修に便利です。",
+
+  "features.item.academicProgress.title": "学業状況",
+  "features.item.academicProgress.summary": "履修計画、履修進度と単位の統計。",
+  "features.item.academicProgress.description": "専攻の情報、履修計画、修得済み単位と未履修の科目を表示し、履修の進捗を追跡できます。",
+
+  "features.item.grades.title": "成績",
+  "features.item.grades.summary": "複数チャネルのインポート、GPA 計算と成績推移。",
+  "features.item.grades.description": "学部の教務システム、信頼できる電子証明書、専門開発指導システムからのインポートに対応。GPA 計算方式の切替、成績推移、成績証明書 PDF、学期による絞り込み、生体認証ロックを備えます。",
+
+  "features.item.universityCalendar.title": "学事暦",
+  "features.item.universityCalendar.summary": "武大の学事暦と学期日程をいつでも確認。",
+  "features.item.universityCalendar.description": "武大の歴年の学事暦データを表示。学期の開始・終了、休暇、授業日程がひと目で分かります。",
+
+  "features.item.courseReviews.title": "科目の成績とレビュー",
+  "features.item.courseReviews.summary": "成績分布、授業レビューと匿名での投稿。",
+  "features.item.courseReviews.description": "科目ごとの成績分布とレビューを閲覧でき、匿名での投稿に対応。少人数のサンプルは集約してプライバシーを保護します。WHU.sb / WHUCourses.cn のデータの系譜を引き継いでいます。",
+
+  "features.item.xuexitong.title": "超星学習通アカウント",
+  "features.item.xuexitong.summary": "学習通アカウントを連携、認証情報は端末に安全に保存。",
+  "features.item.xuexitong.description": "学習通（超星）へのパスワードまたは SMS でのログイン連携に対応。認証情報は端末のセキュアストレージに保存され、武大アカウントごとに分離されます。今後の授業・出席確認機能の基盤となります。",
+
+  "features.item.ecard.title": "珞珈Eカードと支払いコード",
+  "features.item.ecard.summary": "ネイティブの支払いコードは自動更新、ウォッチからも利用可能。",
+  "features.item.ecard.description": "珞珈Eカードの入口と残高・利用明細の照会に対応。ネイティブの支払いコードは毎分自動で更新され、Web 版をフォールバックとして用意。Apple Watch とホーム画面ショートカットに対応します。",
+
+  "features.item.shuttleBus.title": "キャンパスバス",
+  "features.item.shuttleBus.summary": "リアルタイム位置・路線検索・到着通知。",
+  "features.item.shuttleBus.description": "キャンパスバスの路線とリアルタイム位置を検索し、キャンパスマップに車両のリアルタイムレイヤーを重ねて表示。バックグラウンドでの到着通知、iOS のライブアクティビティとウォッチのスナップショット同期に対応します。",
+
+  "features.item.campusMap.title": "キャンパスマップ",
+  "features.item.campusMap.summary": "ネイティブ地図、場所検索、施設レイヤー。",
+  "features.item.campusMap.description": "Web ページの埋め込みではないネイティブの地図実装。場所の横断検索、駐車場/出入口/AED/キャンパス施設のレイヤー、ベクター地図と衛星画像の切替に対応します。",
+
+  "features.item.hospital.title": "医療サービス",
+  "features.item.hospital.summary": "診察カード、受付、順番、領収書と検査結果。",
+  "features.item.hospital.description": "診察カードを管理し、受付記録と取消、外来の順番呼び出し、診療時間、支払済み/未払いの領収書、検査結果レポートを確認できます。",
+
+  "features.item.utilities.title": "水道・電気料金と給水コード",
+  "features.item.utilities.summary": "寮の水道・電気の照会、支払いと給水コード。",
+  "features.item.utilities.description": "寮の水道・電気の使用量を照会してオンラインで支払え、残高不足の通知も受け取れます。給水コードは必要なときにすぐ利用できます。",
+
+  "features.item.notifications.title": "キャンパスメッセージ",
+  "features.item.notifications.summary": "武大メッセージセンターの通知とToDoを集約。",
+  "features.item.notifications.description": "武大メッセージセンターを集約し、すべて/通知/ToDo で閲覧できます。詳細表示と未読バッジに対応します。",
+
+  "features.item.smartLuojia.title": "智慧珞珈ポータル",
+  "features.item.smartLuojia.summary": "公式ポータルへ直接アクセス、キャンパス ID を自動で引き継ぎ。",
+  "features.item.smartLuojia.description": "智慧珞珈ポータルを内蔵し、キャンパス ID のセッションを再利用。よく使う学内サービスに、繰り返しログインせずにアクセスできます。",
+
+  "features.item.campusNetwork.title": "キャンパスネットワーク",
+  "features.item.campusNetwork.summary": "プラン、デバイス、チャージ、停止/再開。",
+  "features.item.campusNetwork.description": "プランの状態確認、停止/再開（日数の繰り越し）、ポータルでの自動認証、キャリアの切替、接続中デバイスの管理、ネットワーク料金のチャージに対応。iOS ではシステムレベルでの接続も可能です。",
+
+  "features.item.campusVpn.title": "キャンパス VPN",
+  "features.item.campusVpn.summary": "aTrust VPN の分割トンネリングと接続性テスト。",
+  "features.item.campusVpn.description": "WHU の aTrust VPN に接続。アプリ内プロキシまたはシステムレベルの TUN、分割トンネルルール、二要素認証チャレンジ、Web の接続性テストに対応します。",
+
+  "features.item.forum.title": "フォーラム「珞珈シェルター」",
+  "features.item.forum.summary": "投稿、コメント、添付、レピュテーションとモデレーション。",
+  "features.item.forum.description": "コミュニティフォーラムは投稿、コメント、掲示板、添付ファイル、検索、レピュテーション、ランキング、公開モデレーションログに対応。タブは既定で非表示で、設定 → ナビゲーションで有効にできます。",
+
+  "features.item.aiAssistant.title": "AI アシスタント",
+  "features.item.aiAssistant.summary": "マルチモデルのエージェントがキャンパスサービスを操作。",
+  "features.item.aiAssistant.description": "内蔵およびカスタムの複数モデル、マルチモーダル添付、音声入力/読み上げ、画像生成、ウェブ検索、MCP、スキル、アシスタントに対応。確認ブリッジは手動/半自動/全自動の 3 段階を用意し、ツールは時間割・成績・メール・キャンパスサービスのデータを照会・管理でき、ユーザーの確認を経て水道・電気料金やネットワーク料金の支払いを開始できます。",
+
+  "features.item.weather.title": "天気",
+  "features.item.weather.summary": "複数ソースの予報、AQI、降水と警報。",
+  "features.item.weather.description": "Mi Weather / Open-Meteo / AccuWeather を機能ごとに直接呼び出し、1 時間ごとの予報、空気質、花粉濃度と公式週報、降水、警報、キャッシュとリトライを提供します。データソースの代替/フォールバックはすべて追跡可能で、厳格モードにも対応します。",
+
+  "features.item.coremail.title": "Coremail メール",
+  "features.item.coremail.summary": "キャンパスメールの送受信、詳細と未読バッジ。",
+  "features.item.coremail.description": "ネイティブの Coremail クライアントは SSO ログイン、クライアント専用パスワード、受信トレイ、メールの作成と送信、詳細の安全なレンダリング、未読バッジに対応。メールは AI エージェントにも開放され、検索・整理・下書きの作成と送信に利用できます。",
+
+  "features.item.wallpapers.title": "壁紙センター",
+  "features.item.wallpapers.summary": "ローカル、オンライン URL、Bing デイリーとページごとの壁紙設定。",
+  "features.item.wallpapers.description": "壁紙なし、ローカル画像、オンライン画像 URL、Bing デイリーのランダム表示に対応。時間割、キャンパス、設定、タスクリスト、フォーラム、AI の各ページを個別に設定でき、ダークオーバーレイも調整できます。",
+
+  "features.item.hotUpdate.title": "スクリプトのホットアップデート",
+  "features.item.hotUpdate.summary": "署名付き解析スクリプトで、API の変化に新バージョンなしで対応。",
+  "features.item.hotUpdate.description": "公式サイトが Ed25519 で署名された QuickJS 解析スクリプトを配布。キャンパス API が変化したときはパーサーをホットアップデートでき、アプリの新バージョンを待たずに済みます。",
+
+  "features.item.appUpdate.title": "アプリ内アップデート",
+  "features.item.appUpdate.summary": "新しいバージョンを確認し、インストールを案内。",
+  "features.item.appUpdate.description": "GitHub Releases で更新を確認。Android では ABI のアップグレード提案とインストールの案内を提供し、デスクトッププラットフォームでは新バージョンのダウンロードを促します。",
+
+  "features.item.appleShortcuts.title": "Apple ショートカット",
+  "features.item.appleShortcuts.summary": "ショートカットから審査済みのアプリツールを呼び出し。",
+  "features.item.appleShortcuts.description": "macOS のショートカットから、学事暦、時間割、成績、空き教室などの審査済みツールを呼び出せます。書き込み操作には確認が必要です。",
+
+  "features.item.widgets.title": "ホーム画面ウィジェット",
+  "features.item.widgets.summary": "4 種類のウィジェットが Android/iOS/macOS をカバー。",
+  "features.item.widgets.description": "予定リスト、今日の授業、まもなく開始、今週の授業の 4 種類のウィジェットが、Android、iOS、macOS のメニューバーをカバーします。",
+
+  "features.item.watch.title": "ウォッチ連携",
+  "features.item.watch.summary": "Apple Watch と Huawei/HarmonyOS ウォッチと同期。",
+  "features.item.watch.description": "Apple Watch ではEカードの支払いコードを表示できます。Huawei/HarmonyOS ウォッチには予定、キャンパスバス、天気のスナップショットを同期します。",
+
+  "features.item.appShortcuts.title": "ホーム画面ショートカット",
+  "features.item.appShortcuts.summary": "アイコンの長押しでよく使う入口へ直行。",
+  "features.item.appShortcuts.description": "Android の App Shortcuts と iOS の Quick Actions から、Eカード支払いコード、自習席予約、AI などの入口へ直接アクセスできます。ログイン状態に応じて表示されます。",
+
+  "features.item.accountSecurity.title": "アカウントとセキュリティ",
+  "features.item.accountSecurity.summary": "CAS、珞家アカウント、Passkeys とデバイストラスト。",
+  "features.item.accountSecurity.description": "武大の CAS と珞家アカウントは分離されています。Passkeys、複数セッション、デバイストラスト、API 認証情報、成績の生体認証ロックに対応し、診断テレメトリはオフにできます。",
+
+  "features.item.languages.title": "多言語",
+  "features.item.languages.summary": "12 言語と地域化された時間形式。",
+  "features.item.languages.description": "簡体字中国語、繁体字中国語、広東語、英語、日本語、韓国語、フランス語、スペイン語、ポルトガル語、ロシア語、ベトナム語の 12 言語に対応します。",
+
+  "features.item.multiAccount.title": "マルチアカウント切替",
+  "features.item.multiAccount.summary": "武大アカウントごとに認証情報を分離し、切替に対応。",
+  "features.item.multiAccount.description": "1 つの端末に複数の武大アカウントを保存し、すばやく切り替えられます。VPN、メール、学習通などの認証情報はアカウントごとに分離され、混ざり合うことはありません。",
+
+  "features.item.thirdPartyAccounts.title": "サードパーティアカウント連携",
+  "features.item.thirdPartyAccounts.summary": "Ham などサードパーティアカウントの認可連携。",
+  "features.item.thirdPartyAccounts.description": "「その他のアカウント」で外部アカウントを一元管理できます。Ham などサードパーティの認可連携は、現在仕上げ中です。",
+
+  "features.item.libraryLoans.title": "図書貸出",
+  "features.item.libraryLoans.summary": "蔵書の貸出、延長と期限のリマインダー。",
+  "features.item.libraryLoans.description": "蔵書貸出 API の接続を計画中。現在の貸出、返却期限、延長状況を表示し、期限のリマインダーにも対応します。",
+
+  "features.item.studyMaterials.title": "資料共有",
+  "features.item.studyMaterials.summary": "授業・教員・学期ごとに資料を検索。",
+  "features.item.studyMaterials.description": "サーバー側での検索、アップロード、ダウンロード、お気に入り、審査状況の接続を計画中。学習資料は授業・教員・学期ごとに整理されます。",
+
+  "features.item.gradeEnhancements.title": "成績機能の強化",
+  "features.item.gradeEnhancements.summary": "学期比較、サマリーのエクスポートと科目コードの連携。",
+  "features.item.gradeEnhancements.description": "既存の成績推移を基に、学期間の比較、サマリーのエクスポート、科目コードとの連携をさらに充実させます。",
+
+  "features.item.recurrenceEnhancements.title": "繰り返し項目の強化",
+  "features.item.recurrenceEnhancements.summary": "繰り返し項目の展開と、シリーズ全体への操作を充実化。",
+  "features.item.recurrenceEnhancements.description": "繰り返し項目のインスタンスへの展開、完了、復元、シリーズ全体への操作を充実させます。",
+
+  "features.item.widgetEnhancements.title": "ウィジェットの強化",
+  "features.item.widgetEnhancements.summary": "Android を強化し、より多くのプラットフォームの入口を探索。",
+  "features.item.widgetEnhancements.description": "Android のウィジェットをさらに強化し、より多くのデスクトッププラットフォームでの入口を検討します。",
+
+  "features.item.standaloneWeb.title": "スタンドアロン Web 版",
+  "features.item.standaloneWeb.summary": "Flutter Web はメンテナンス終了、独立した Web 製品を計画中。",
+  "features.item.standaloneWeb.description": "Flutter Web の互換レイヤーとリリース成果物はメンテナンスを終了しました。スタンドアロンの Web 製品は、要件とサーバー側プロキシの能力が明確になった時点で着手します。"
+}

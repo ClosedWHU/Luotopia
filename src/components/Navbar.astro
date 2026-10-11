@@ -115,10 +115,10 @@ const persistName = `lt-navbar-${locale}`;
         <summary
           class="lt-lang-summary state-layer rounded-control px-2.5 py-2 ml-1 text-body-large text-on-surface-variant cursor-pointer list-none"
           aria-label={t("lang.switcher.label")}
-          title={t("lang.switcher.label")}
+          title={t("lang.switcher.summary", { label: meta.label })}
         >
           <Icon name="language" class="text-lg" />
-          <span class="lt-lang-current">{meta.label}</span>
+          <span class="lt-lang-current hidden lg:inline">{meta.label}</span>
         </summary>
         <div class="lt-lang-panel rounded-nested" role="group" aria-label={t("lang.switcher.label")}>
           {
@@ -333,8 +333,23 @@ const persistName = `lt-navbar-${locale}`;
     color: var(--lt-color-primary);
   }
 
-  /* Endonyms can be long (the Vietnamese one is two words); the summary must not push the theme
-   * toggle off the bar at the narrow end of the desktop breakpoint. */
+  /*
+   * The current language's endonym, hidden below `lg`.
+   *
+   * The bar at `md` (768px) has to fit the brand, seven nav links, this switcher
+   * and the theme toggle inside `max-w-6xl` minus padding, and the link row does
+   * not wrap — it overflows. English already totals 45 characters across the
+   * seven links; French is 54 and Vietnamese 61. Dropping the label to just the
+   * globe below `lg` buys back ~80px exactly where the budget is tightest, and
+   * costs nothing at desktop widths where there is room.
+   *
+   * The state is not lost when the label is: `title` carries
+   * `lang.switcher.summary` ("Language: 简体中文"), and the panel names every
+   * option. Icon-only is also the accessible shape here — `aria-label` still
+   * describes the control.
+   *
+   * Endonyms can be long (the Vietnamese one is two words), hence the ellipsis.
+   */
   .lt-lang-current {
     max-width: 7.5rem;
     overflow: hidden;

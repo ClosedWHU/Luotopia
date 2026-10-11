@@ -1,0 +1,247 @@
+{
+  "meta.default.description": "Luotopia —— 整合校園服務，建構開放生態",
+  "meta.default.ogDescription": "校園服務一站式平台，開放社群驅動",
+
+  "a11y.skipToContent": "跳至主要內容",
+
+  "nav.home": "首頁",
+  "nav.features": "功能",
+  "nav.download": "下載",
+  "nav.community": "社群",
+  "nav.status": "狀態",
+  "nav.brand": "品牌",
+  "nav.legal": "法律資訊",
+  "nav.menu": "選單",
+  "nav.themeToggle.aria": "切換深色模式",
+  "nav.themeToggle.label": "切換深色 / 淺色模式",
+
+  "lang.switcher.label": "選擇語言",
+  "lang.switcher.summary": "語言：{label}",
+
+  "footer.tagline": "整合校園服務，建構開放生態。",
+  "footer.navHeading": "導覽",
+  "footer.resourcesHeading": "相關資源",
+  "footer.nav.features": "功能概覽",
+  "footer.nav.download": "下載",
+  "footer.nav.community": "社群",
+  "footer.nav.brand": "品牌資源",
+  "footer.nav.legal": "法律資訊",
+  "footer.resources.status": "服務狀態",
+  "footer.resources.docs": "開發者文件",
+  "footer.resources.github": "GitHub 組織",
+  "footer.resources.repo": "本站開源倉庫",
+
+  "cta.download": "下載 App",
+  "cta.features": "了解功能",
+
+  "home.title": "首頁",
+  "home.hero.srPrefix": "Luotopia ",
+  "home.hero.words": ["智慧", "開放", "共享", "高效", "便捷"],
+  "home.hero.tail": "珞家",
+  "home.hero.subtitleLine1": "整合校園服務，建構開放生態。",
+  "home.hero.subtitleLine2": "武漢大學一站式數位校園平台。",
+  "home.hero.platforms": "支援 Android / iOS / macOS / Windows / Linux；HarmonyOS 隨部分版本發布",
+  "home.hero.scrollHint": "向下捲動",
+  "home.features.title": "核心功能",
+  "home.features.subtitle": "課程表、行程、預約、E卡、校車、地圖、論壇與 AI —— 校園生活所需，盡在一處。",
+  "home.preview.title": "應用預覽",
+  "home.preview.subtitle": "真實畫面，非渲染圖。",
+  "home.cta.title": "立即體驗",
+  "home.cta.subtitle": "免費、開放、純淨，讓校園生活更簡單。",
+
+  "carousel.roleDescription": "輪播",
+  "carousel.label": "應用介面截圖",
+  "carousel.prev": "上一張",
+  "carousel.next": "下一張",
+  "carousel.pause": "暫停自動輪播",
+  "carousel.play": "繼續自動輪播",
+  "carousel.dot": "第 {index} 張截圖：{label}",
+  "carousel.slide.timetable": "課程表",
+  "carousel.slide.campus": "校園應用",
+  "carousel.slide.ai": "AI 助手",
+  "carousel.slide.weather": "天氣詳情",
+  "carousel.slide.aqi": "空氣品質",
+  "carousel.slide.bus": "校車",
+  "carousel.slide.wallpaper": "桌布中心",
+  "carousel.announce.range": "第 {from} 到 {to} 張",
+  "carousel.announce.single": "第 {from} 張",
+  "carousel.announce.withLabels": "{span}，共 {total} 張：{labels}",
+  "carousel.announce.bare": "{span}，共 {total} 張",
+  "carousel.announce.separator": "、",
+
+  "features.title": "功能",
+  "features.header": "功能全覽",
+  "features.subtitle": "已上線能力、即將上線更新與開發中方向",
+  "features.status.upcoming": "即將上線",
+  "features.status.development": "開發中",
+
+  "features.category.coursework": "課程與學業",
+  "features.category.campus": "校園服務",
+  "features.category.smart": "智慧工具",
+  "features.category.crossDevice": "跨端與帳號",
+  "features.category.inDevelopment": "開發中",
+
+  "features.item.timetable.title": "課程表",
+  "features.item.timetable.summary": "多來源匯入、多課表管理，週月檢視與上課提醒。",
+  "features.item.timetable.description": "支援大學部教務、研究生 newyjs、WakeUp 檔案/分享碼、第三方課表與手動編輯；多課表分組管理、週月檢視、上課提醒與桌面小組件聯動。",
+
+  "features.item.agenda.title": "行程與待辦",
+  "features.item.agenda.summary": "課程、任務、備忘集中管理，支援重複與提醒。",
+  "features.item.agenda.description": "事項分為行程、任務與備忘；支援重複規則、優先順序、清單分組、滑動操作、上課提醒和小組件同步。",
+
+  "features.item.freeClassrooms.title": "空閒教室",
+  "features.item.freeClassrooms.summary": "多維查詢空閒教室，自動避開課表衝突。",
+  "features.item.freeClassrooms.description": "依日期、校區、大樓與節次查詢空閒教室，自動比對本人課表衝突，可一鍵生成行程事項。",
+
+  "features.item.librarySeats.title": "自習座位預約",
+  "features.item.librarySeats.summary": "圖書館座位原生查詢、預約與取消。",
+  "features.item.librarySeats.description": "原生介面查詢圖書館空間、日期、時段與座位，支援建立/取消預約、我的預約清單和行程提醒。",
+
+  "features.item.sportsVenues.title": "運動場館預約",
+  "features.item.sportsVenues.summary": "場館、項目、時段預約與訂單管理。",
+  "features.item.sportsVenues.description": "查詢運動場館與可用時段，完成預約、付款、取消和訂單檢視，可將預約寫入行程。",
+
+  "features.item.universityTimetable.title": "全校課表與蹭課配對",
+  "features.item.universityTimetable.summary": "瀏覽全校總課表，篩選無衝突課程。",
+  "features.item.universityTimetable.description": "依學年學期瀏覽全校總課表，檢索課程並結合本人課表篩出無衝突候補，方便蹭課與補選。",
+
+  "features.item.academicProgress.title": "學業狀態",
+  "features.item.academicProgress.summary": "培養方案、修讀進度與學分統計。",
+  "features.item.academicProgress.description": "顯示學校系所資訊、培養方案、已修學分與未修課程，幫助追蹤修讀進度。",
+
+  "features.item.grades.title": "成績查詢",
+  "features.item.grades.summary": "多通路匯入、GPA 演算法與成績趨勢。",
+  "features.item.grades.description": "支援大學部教務、可信電子憑證與專業發展指導系統匯入；GPA 演算法切換、成績趨勢、成績單 PDF、學期篩選與生物辨識鎖。",
+
+  "features.item.universityCalendar.title": "校歷",
+  "features.item.universityCalendar.summary": "武大校歷與學期安排隨時檢視。",
+  "features.item.universityCalendar.description": "顯示武大歷年校歷資料，學期起訖、假期與教學安排一目瞭然。",
+
+  "features.item.courseReviews.title": "課程給分與評價",
+  "features.item.courseReviews.summary": "給分分佈、課程評價與匿名提交。",
+  "features.item.courseReviews.description": "依課程檢視給分分佈與評價，支援匿名提交；小樣本聚合保護隱私，延續 WHU.sb / WHUCourses.cn 的資料脈絡。",
+
+  "features.item.xuexitong.title": "超星學習通帳號",
+  "features.item.xuexitong.summary": "綁定學習通帳號，憑證本機安全儲存。",
+  "features.item.xuexitong.description": "支援學習通（超星）密碼或簡訊登入綁定，憑證保存於本裝置安全儲存並依武大帳號隔離，為後續課程與簽到能力奠定基礎。",
+
+  "features.item.ecard.title": "珞珈E卡與付款碼",
+  "features.item.ecard.summary": "原生付款碼自動重新整理，手錶也能刷。",
+  "features.item.ecard.description": "珞珈E卡入口與餘額明細查詢；原生付款碼每分鐘自動重新整理，網頁版備援，支援 Apple Watch 與桌面捷徑。",
+
+  "features.item.shuttleBus.title": "校車",
+  "features.item.shuttleBus.summary": "即時位置、路線查詢與到站提醒。",
+  "features.item.shuttleBus.description": "查詢校車路線與即時位置，校園地圖疊加車輛即時圖層，背景到站提醒，iOS 即時活動與手錶快照同步。",
+
+  "features.item.campusMap.title": "校園地圖",
+  "features.item.campusMap.summary": "原生地圖、地點搜尋與設施圖層。",
+  "features.item.campusMap.description": "原生地圖實作，不嵌入網頁；支援地點聯合搜尋、停車場/出入口/AED/校園設施圖層、向量與衛星圖切換。",
+
+  "features.item.hospital.title": "就醫服務",
+  "features.item.hospital.summary": "就診卡、掛號、排隊、發票與報告。",
+  "features.item.hospital.description": "管理就診卡，檢視掛號記錄與退號、門診排隊叫號、工作時間、已繳/未繳發票、檢驗檢查報告。",
+
+  "features.item.utilities.title": "水電費與取水碼",
+  "features.item.utilities.summary": "宿舍水電查詢、繳費與開水取水碼。",
+  "features.item.utilities.description": "查詢宿舍水電用量並線上繳費，低餘額提醒；開水取水碼即開即用。",
+
+  "features.item.notifications.title": "校園訊息",
+  "features.item.notifications.summary": "武大訊息中心通知與待辦整合。",
+  "features.item.notifications.description": "整合武大訊息中心，依全部/通知/待辦檢視，支援詳情與未讀角標。",
+
+  "features.item.smartLuojia.title": "智慧珞珈",
+  "features.item.smartLuojia.summary": "官方入口直達，自動攜帶校園身分。",
+  "features.item.smartLuojia.description": "內嵌智慧珞珈入口，複用校園身分工作階段，常用學校服務無需反覆登入。",
+
+  "features.item.campusNetwork.title": "校園網",
+  "features.item.campusNetwork.summary": "方案、裝置、儲值與暫停恢復。",
+  "features.item.campusNetwork.description": "查詢方案狀態、暫停/恢復（天數順延）、入口自動認證、電信業者切換、線上裝置管理與網費儲值；iOS 支援系統級接入。",
+
+  "features.item.campusVpn.title": "校園 VPN",
+  "features.item.campusVpn.summary": "aTrust VPN 分流與連通性測試。",
+  "features.item.campusVpn.description": "連接 WHU aTrust VPN，支援應用內代理或系統級 TUN、分流規則、雙因素挑戰與網頁連通性測試。",
+
+  "features.item.forum.title": "論壇「珞珈防空洞」",
+  "features.item.forum.summary": "貼文、留言、附件、聲望與版務管理。",
+  "features.item.forum.description": "社群論壇支援貼文、留言、版面、附件、搜尋、聲望、排行榜與公開管理日誌；分頁預設隱藏，可在設定→導覽中開啟。",
+
+  "features.item.aiAssistant.title": "AI 助手",
+  "features.item.aiAssistant.summary": "多模型 Agent，可操作校園服務。",
+  "features.item.aiAssistant.description": "支援內建與自訂多模型、多模態附件、語音輸入/朗讀、圖像生成、聯網搜尋、MCP、技能與助手；確認橋提供手動/半自動/全自動三檔，工具可查詢和管理課程表、成績、信箱與校園服務資料，並可在使用者確認下發起水電費、網費繳費。",
+
+  "features.item.weather.title": "天氣",
+  "features.item.weather.summary": "多資料來源預報、AQI、降水與預警。",
+  "features.item.weather.description": "小米天氣 / Open-Meteo / AccuWeather 分能力直連，提供逐小時預報、空氣品質、花粉濃度與官方週報、降水、預警、快取與重試；資料來源替換/回退全程溯源可見，支援嚴格模式。",
+
+  "features.item.coremail.title": "Coremail 信箱",
+  "features.item.coremail.summary": "校園郵件收發、詳情與未讀角標。",
+  "features.item.coremail.description": "原生 Coremail 用戶端支援 SSO 登入、用戶端專用密碼、收件匣、郵件撰寫與傳送、詳情安全轉譯與未讀角標；信箱同時開放給 AI Agent 用於檢索、整理與草擬傳送。",
+
+  "features.item.wallpapers.title": "桌布中心",
+  "features.item.wallpapers.summary": "本機、網路 URL、Bing 每日與分頁桌布設定。",
+  "features.item.wallpapers.description": "支援無桌布、本機圖片、網路圖片 URL 與 Bing 每日隨機；課程表、校園、設定、任務清單、論壇、AI 頁面可獨立設定，深色遮罩可調。",
+
+  "features.item.hotUpdate.title": "指令碼熱更新",
+  "features.item.hotUpdate.summary": "簽章解析指令碼，介面變化無需發版。",
+  "features.item.hotUpdate.description": "官網散布 Ed25519 簽章的 QuickJS 解析指令碼；校園介面變化時可熱更新解析器，減少等待 App 發版。",
+
+  "features.item.appUpdate.title": "應用內更新",
+  "features.item.appUpdate.summary": "檢查新版本並引導安裝。",
+  "features.item.appUpdate.description": "從 GitHub Releases 檢查更新，Android 提供 ABI 升級建議與安裝引導，桌面平台提示下載新版本。",
+
+  "features.item.appleShortcuts.title": "Apple 捷徑",
+  "features.item.appleShortcuts.summary": "捷徑呼叫經審核的 App 工具。",
+  "features.item.appleShortcuts.description": "macOS 捷徑可呼叫校歷、課程表、成績、空閒教室等經審核工具，寫入操作需要確認。",
+
+  "features.item.widgets.title": "桌面小組件",
+  "features.item.widgets.summary": "四款小組件涵蓋 Android/iOS/macOS。",
+  "features.item.widgets.description": "事項清單、今日課程、即將開始、本週課程四款小組件，涵蓋 Android、iOS 與 macOS 選單列。",
+
+  "features.item.watch.title": "手錶聯動",
+  "features.item.watch.summary": "Apple Watch 與華為/鴻蒙手錶同步。",
+  "features.item.watch.description": "Apple Watch 可出示E卡付款碼；華為/鴻蒙手錶同步行程、校車與天氣快照。",
+
+  "features.item.appShortcuts.title": "桌面捷徑",
+  "features.item.appShortcuts.summary": "長按圖示直達常用入口。",
+  "features.item.appShortcuts.description": "Android App Shortcuts 與 iOS Quick Actions 直達E卡付款碼、自習預約、AI 等入口，並依登入狀態顯示。",
+
+  "features.item.accountSecurity.title": "帳號與安全",
+  "features.item.accountSecurity.summary": "CAS、珞家帳號、Passkeys 與裝置信任。",
+  "features.item.accountSecurity.description": "武大 CAS 與珞家帳號分離；支援 Passkeys、多工作階段、裝置信任、API 憑證、成績生物辨識鎖，診斷遙測可關閉。",
+
+  "features.item.languages.title": "多語言",
+  "features.item.languages.summary": "12 種語言與地區化時間格式。",
+  "features.item.languages.description": "支援簡體中文、繁體中文、粵語、英語、日語、韓語、法語、西班牙語、葡萄牙語、俄語、越南語共 12 種語言。",
+
+  "features.item.multiAccount.title": "多帳號切換",
+  "features.item.multiAccount.summary": "依武大帳號隔離憑證並支援切換。",
+  "features.item.multiAccount.description": "裝置可記住多個武大帳號並快速切換；VPN、信箱、學習通等憑證依帳號隔離，互不串用。",
+
+  "features.item.thirdPartyAccounts.title": "第三方帳號綁定",
+  "features.item.thirdPartyAccounts.summary": "Ham 等第三方帳號授權綁定。",
+  "features.item.thirdPartyAccounts.description": "在「其他帳號」中集中管理外部帳號；Ham 等第三方授權綁定仍在完善中。",
+
+  "features.item.libraryLoans.title": "圖書借閱",
+  "features.item.libraryLoans.summary": "館藏借閱、續借與到期提醒。",
+  "features.item.libraryLoans.description": "計劃接入館藏借閱 API，顯示目前借閱、到期時間、續借狀態，並支援到期提醒。",
+
+  "features.item.studyMaterials.title": "學習資料共享",
+  "features.item.studyMaterials.summary": "依課程、教師、學期檢索資料。",
+  "features.item.studyMaterials.description": "計劃接入伺服器端檢索、上傳、下載、收藏與審核狀態，依課程、教師、學期組織資料。",
+
+  "features.item.gradeEnhancements.title": "成績增強",
+  "features.item.gradeEnhancements.summary": "學期對比、摘要匯出與課程標識聯動。",
+  "features.item.gradeEnhancements.description": "在現有成績趨勢基礎上，持續完善學期對比、摘要匯出與課程標識聯動。",
+
+  "features.item.recurrenceEnhancements.title": "重複事項增強",
+  "features.item.recurrenceEnhancements.summary": "完善重複事項的展開與整組操作。",
+  "features.item.recurrenceEnhancements.description": "完善重複事項的逐筆展開、完成、恢復與整組操作。",
+
+  "features.item.widgetEnhancements.title": "小組件增強",
+  "features.item.widgetEnhancements.summary": "增強 Android 並探索更多平台入口。",
+  "features.item.widgetEnhancements.description": "持續增強 Android 小組件，並探索更多桌面平台入口。",
+
+  "features.item.standaloneWeb.title": "獨立 Web 版",
+  "features.item.standaloneWeb.summary": "Flutter Web 停止維護，規劃獨立 Web。",
+  "features.item.standaloneWeb.description": "Flutter Web 相容層與發佈產物已停止維護；獨立 Web 產品將在需求和伺服器端代理能力明確後啟動。"
+}

@@ -63,7 +63,15 @@ export const ALL_ROUTES = Object.keys(ROUTES) as RouteKey[];
  */
 export const TRANSLATED_ROUTES: Record<string, readonly RouteKey[]> = {
   "zh-Hans": ALL_ROUTES,
+  "zh-Hant": ["home", "features"],
   "en": ["home", "features"],
+  "ja": ["home", "features"],
+  "ko": ["home", "features"],
+  "es": ["home", "features"],
+  "fr": ["home", "features"],
+  "pt": ["home", "features"],
+  "ru": ["home", "features"],
+  "vi": ["home", "features"],
 };
 
 /** Strip a trailing slash, mapping the empty result back to `/`. */

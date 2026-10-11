@@ -9,7 +9,15 @@
  * language switcher follows for its announcement templates.
  */
 import zhHans from "./zh-Hans.json";
+import zhHant from "./zh-Hant.json";
 import en from "./en.json";
+import ja from "./ja.json";
+import ko from "./ko.json";
+import es from "./es.json";
+import fr from "./fr.json";
+import pt from "./pt.json";
+import ru from "./ru.json";
+import vi from "./vi.json";
 import { DEFAULT_LOCALE, PUBLISHED_LOCALES, getLocale, type SiteLocale } from "./locales";
 import {
   ROUTES,
@@ -42,20 +50,39 @@ export type { RouteKey } from "./routes";
  * The key set is defined by the default locale's dictionary, and every other
  * dictionary is checked against it below *and* by `tools/check-i18n.mjs`.
  *
- * `satisfies Record<TranslationKey, …>` is what fails the build when a key is
- * added to `zh-Hans.json` and forgotten in `en.json`. That is the common
+ * `satisfies Record<TranslationKey, …>` on each entry is what fails the build when
+ * a key is added to `zh-Hans.json` and forgotten elsewhere. That is the common
  * direction of drift, and catching it here rather than at runtime is the whole
- * point of typing the dictionaries at all. The script covers the other
- * direction (stale keys, placeholder mismatches, array lengths), which the type
- * system cannot express.
+ * point of typing the dictionaries at all. The script covers the other direction
+ * (stale keys, placeholder mismatches, array lengths), which the type system
+ * cannot express.
+ *
+ * A JSON module cannot be enumerated at build time, so this map is written out by
+ * hand and is the one step of "add a locale" that the file system cannot do for
+ * you. Forgetting it is silent and total — every page in that locale renders in
+ * Chinese, because `resolveLocale()` falls back when `hasDictionary()` says no —
+ * so `tools/check-i18n.mjs` asserts that every published locale is registered
+ * here.
  */
 export type TranslationKey = keyof typeof zhHans;
 type TranslationValue = string | string[];
+type Dictionary = Record<TranslationKey, TranslationValue>;
 
-const DICTIONARIES: Record<string, Record<TranslationKey, TranslationValue>> = {
+const DICTIONARIES: Record<string, Dictionary> = {
   "zh-Hans": zhHans,
-  en: en satisfies Record<TranslationKey, TranslationValue>,
+  "zh-Hant": zhHant satisfies Dictionary,
+  en: en satisfies Dictionary,
+  ja: ja satisfies Dictionary,
+  ko: ko satisfies Dictionary,
+  es: es satisfies Dictionary,
+  fr: fr satisfies Dictionary,
+  pt: pt satisfies Dictionary,
+  ru: ru satisfies Dictionary,
+  vi: vi satisfies Dictionary,
 };
+
+/** The locale codes this module can actually serve, in `published.json` order. */
+export const REGISTERED_LOCALES: string[] = Object.keys(DICTIONARIES);
 
 function hasDictionary(code: string): boolean {
   return Object.prototype.hasOwnProperty.call(DICTIONARIES, code);

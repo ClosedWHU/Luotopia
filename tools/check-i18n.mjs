@@ -187,6 +187,32 @@ for (const code of dictionaryFiles) {
   }
 }
 
+/*
+ * `src/i18n/ui.ts` registers each dictionary by hand, because a JSON module
+ * cannot be enumerated at build time. A published locale that is missing from
+ * that map renders entirely in the default language — `resolveLocale()` falls
+ * back when `hasDictionary()` says no — and nothing else in the toolchain
+ * complains: the pages build, the route table is satisfied, the switcher offers
+ * the language. This is the only thing that catches it.
+ */
+const uiSource = read("src/i18n/ui.ts");
+const DICTIONARIES_BLOCK = /const DICTIONARIES: Record<string, Dictionary> = \{([\s\S]*?)\n\};/.exec(uiSource);
+if (!DICTIONARIES_BLOCK) {
+  fail("src/i18n/ui.ts: `DICTIONARIES` no longer matches the expected shape — update DICTIONARIES_BLOCK in this script");
+} else {
+  const registered = [...DICTIONARIES_BLOCK[1].matchAll(/^\s*"?([A-Za-z0-9_-]+)"?:\s*[A-Za-z0-9_]+/gm)].map((m) => m[1]);
+  for (const code of publishedLocales) {
+    if (!registered.includes(code)) {
+      fail(`src/i18n/ui.ts: DICTIONARIES does not register "${code}", so every page in that locale would render in ${defaultLocale}`);
+    }
+  }
+  for (const code of registered) {
+    if (!publishedLocales.includes(code)) {
+      fail(`src/i18n/ui.ts: DICTIONARIES registers "${code}", which is not in published.json`);
+    }
+  }
+}
+
 const base = dictionaries.get(defaultLocale);
 if (!base) {
   fail(`src/i18n/${defaultLocale}.json is missing — it defines the key set every other dictionary is checked against`);

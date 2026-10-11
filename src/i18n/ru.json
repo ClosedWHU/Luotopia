@@ -1,0 +1,247 @@
+{
+  "meta.default.description": "Luotopia — сервисы кампуса в одном месте, открытая экосистема",
+  "meta.default.ogDescription": "Универсальная платформа кампуса, которую развивает открытое сообщество",
+
+  "a11y.skipToContent": "Перейти к основному содержимому",
+
+  "nav.home": "Главная",
+  "nav.features": "Функции",
+  "nav.download": "Скачать",
+  "nav.community": "Сообщество",
+  "nav.status": "Статус",
+  "nav.brand": "Бренд",
+  "nav.legal": "Документы",
+  "nav.menu": "Меню",
+  "nav.themeToggle.aria": "Переключить тёмную тему",
+  "nav.themeToggle.label": "Переключение тёмной / светлой темы",
+
+  "lang.switcher.label": "Выберите язык",
+  "lang.switcher.summary": "Язык: {label}",
+
+  "footer.tagline": "Сервисы кампуса в одном месте, открытая экосистема.",
+  "footer.navHeading": "Навигация",
+  "footer.resourcesHeading": "Ресурсы",
+  "footer.nav.features": "Обзор функций",
+  "footer.nav.download": "Скачать",
+  "footer.nav.community": "Сообщество",
+  "footer.nav.brand": "Фирменные материалы",
+  "footer.nav.legal": "Правовая информация",
+  "footer.resources.status": "Статус сервисов",
+  "footer.resources.docs": "Документация для разработчиков",
+  "footer.resources.github": "Организация GitHub",
+  "footer.resources.repo": "Исходный код этого сайта",
+
+  "cta.download": "Скачать приложение",
+  "cta.features": "Посмотреть функции",
+
+  "home.title": "Главная",
+  "home.hero.srPrefix": "",
+  "home.hero.words": ["Умный", "Открытый", "Общий", "Быстрый", "Удобный"],
+  "home.hero.tail": "Luotopia",
+  "home.hero.subtitleLine1": "Сервисы кампуса в одном месте, открытая экосистема.",
+  "home.hero.subtitleLine2": "Универсальная цифровая платформа кампуса Уханьского университета.",
+  "home.hero.platforms": "Android / iOS / macOS / Windows / Linux; HarmonyOS — в отдельных выпусках",
+  "home.hero.scrollHint": "Прокрутите вниз",
+  "home.features.title": "Основные функции",
+  "home.features.subtitle": "Расписание, планировщик, бронирование, карта Luojia E, автобусы кампуса, карта, форум и ИИ — всё для студенческой жизни в одном месте.",
+  "home.preview.title": "Предпросмотр приложения",
+  "home.preview.subtitle": "Настоящие экраны, а не рендеры.",
+  "home.cta.title": "Попробовать сейчас",
+  "home.cta.subtitle": "Бесплатно, открыто и без лишнего — жизнь в кампусе становится проще.",
+
+  "carousel.roleDescription": "карусель",
+  "carousel.label": "Скриншоты приложения",
+  "carousel.prev": "Предыдущий слайд",
+  "carousel.next": "Следующий слайд",
+  "carousel.pause": "Приостановить автовоспроизведение",
+  "carousel.play": "Возобновить автовоспроизведение",
+  "carousel.dot": "Слайд {index}: {label}",
+  "carousel.slide.timetable": "Расписание",
+  "carousel.slide.campus": "Приложения кампуса",
+  "carousel.slide.ai": "ИИ-ассистент",
+  "carousel.slide.weather": "Подробный прогноз",
+  "carousel.slide.aqi": "Качество воздуха",
+  "carousel.slide.bus": "Автобус кампуса",
+  "carousel.slide.wallpaper": "Центр обоев",
+  "carousel.announce.range": "Слайды с {from} по {to}",
+  "carousel.announce.single": "Слайд {from}",
+  "carousel.announce.withLabels": "{span} из {total}: {labels}",
+  "carousel.announce.bare": "{span} из {total}",
+  "carousel.announce.separator": ", ",
+
+  "features.title": "Функции",
+  "features.header": "Обзор функций",
+  "features.subtitle": "Что уже работает, что выйдет следующим и что ещё в разработке",
+  "features.status.upcoming": "Скоро",
+  "features.status.development": "В разработке",
+
+  "features.category.coursework": "Курсы и учёба",
+  "features.category.campus": "Сервисы кампуса",
+  "features.category.smart": "Умные инструменты",
+  "features.category.crossDevice": "Мультиплатформенность и аккаунты",
+  "features.category.inDevelopment": "В разработке",
+
+  "features.item.timetable.title": "Расписание",
+  "features.item.timetable.summary": "Импорт из нескольких источников, несколько расписаний, недельный и месячный виды, напоминания о занятиях.",
+  "features.item.timetable.description": "Поддерживаются система бакалавриата, система магистратуры newyjs, файлы и коды обмена WakeUp, сторонние расписания и ручное редактирование. Несколько расписаний с группировкой, недельный и месячный виды, напоминания о занятиях и связь с виджетами главного экрана.",
+
+  "features.item.agenda.title": "Планировщик и задачи",
+  "features.item.agenda.summary": "Курсы, задачи и заметки в одном месте, с повторами и напоминаниями.",
+  "features.item.agenda.description": "Записи делятся на три типа: события, задачи и заметки. Поддерживаются правила повтора, приоритеты, группировка по спискам, действия свайпом, напоминания о занятиях и синхронизация с виджетами.",
+
+  "features.item.freeClassrooms.title": "Свободные аудитории",
+  "features.item.freeClassrooms.summary": "Поиск аудиторий по нескольким критериям с автоматическим исключением конфликтов.",
+  "features.item.freeClassrooms.description": "Поиск по дате, кампусу, корпусу и номеру пары. Конфликты с вашим расписанием исключаются автоматически, а любой результат можно в одно касание превратить в запись планировщика.",
+
+  "features.item.librarySeats.title": "Места в библиотеке",
+  "features.item.librarySeats.summary": "Нативный поиск, бронирование и отмена мест в библиотеке.",
+  "features.item.librarySeats.description": "Нативный API запрашивает пространства библиотеки, даты, интервалы и отдельные места. Можно создавать и отменять брони, вести их список и получать напоминания в планировщике.",
+
+  "features.item.sportsVenues.title": "Бронирование спортплощадок",
+  "features.item.sportsVenues.summary": "Бронирование площадок, видов спорта и интервалов, управление заказами.",
+  "features.item.sportsVenues.description": "Просматривайте спортивные площадки и свободные интервалы, бронируйте, оплачивайте, отменяйте и проверяйте заказы. Бронь можно сразу сохранить в планировщике.",
+
+  "features.item.universityTimetable.title": "Общее расписание и курсы для вольных слушателей",
+  "features.item.universityTimetable.summary": "Просматривайте общее расписание и отбирайте курсы без конфликтов.",
+  "features.item.universityTimetable.description": "Просматривайте общее расписание университета по учебному году и семестру, ищите курсы и сверяйте их со своим расписанием, чтобы отобрать варианты без конфликтов — удобно для вольного слушания и добора курсов.",
+
+  "features.item.academicProgress.title": "Академический статус",
+  "features.item.academicProgress.summary": "Учебный план, прогресс и подсчёт кредитов.",
+  "features.item.academicProgress.description": "Показывает вашу специальность, учебный план, полученные кредиты и оставшиеся курсы, чтобы вы могли отслеживать прогресс обучения.",
+
+  "features.item.grades.title": "Оценки",
+  "features.item.grades.summary": "Импорт из нескольких каналов, алгоритмы GPA и динамика оценок.",
+  "features.item.grades.description": "Поддерживается импорт из системы бакалавриата, доверенных электронных документов и системы профессионального развития. Переключение алгоритма GPA, динамика оценок, PDF-выписка, фильтр по семестрам и биометрическая блокировка.",
+
+  "features.item.universityCalendar.title": "Академический календарь",
+  "features.item.universityCalendar.summary": "Календарь WHU и сроки семестров — всегда под рукой.",
+  "features.item.universityCalendar.description": "Данные календарей WHU за все годы: начало и конец семестров, каникулы и учебный график — всё на одном экране.",
+
+  "features.item.courseReviews.title": "Оценки и отзывы по курсам",
+  "features.item.courseReviews.summary": "Распределение оценок, отзывы о курсах и анонимная публикация.",
+  "features.item.courseReviews.description": "Смотрите распределение оценок и отзывы по каждому курсу, оставляйте свои анонимно. Малые выборки агрегируются ради конфиденциальности, а данные продолжают линию WHU.sb / WHUCourses.cn.",
+
+  "features.item.xuexitong.title": "Аккаунт Chaoxing",
+  "features.item.xuexitong.summary": "Привязка аккаунта Xuexitong; учётные данные — в защищённом хранилище устройства.",
+  "features.item.xuexitong.description": "Поддерживается привязка Xuexitong (Chaoxing) по паролю или SMS-коду. Учётные данные хранятся в защищённом хранилище этого устройства и изолируются по аккаунтам WHU — основа для будущих функций курсов и отметок о посещаемости.",
+
+  "features.item.ecard.title": "Карта Luojia E и платёжный код",
+  "features.item.ecard.summary": "Нативный платёжный код обновляется сам и работает даже с часов.",
+  "features.item.ecard.description": "Вход в карту Luojia E, баланс и история операций. Нативный платёжный код обновляется каждую минуту, веб-версия служит запасным вариантом; поддерживаются Apple Watch и ярлыки на главном экране.",
+
+  "features.item.shuttleBus.title": "Автобус кампуса",
+  "features.item.shuttleBus.summary": "Положение в реальном времени, маршруты и напоминания о прибытии.",
+  "features.item.shuttleBus.description": "Маршруты автобусов кампуса и их положение в реальном времени, слой транспорта поверх карты кампуса, фоновые напоминания о прибытии, синхронизация с Live Activities на iOS и снимками на часах.",
+
+  "features.item.campusMap.title": "Карта кампуса",
+  "features.item.campusMap.summary": "Нативные карты, поиск мест и слои объектов.",
+  "features.item.campusMap.description": "Нативная реализация карты, а не встроенная веб-страница. Совместный поиск мест, слои парковок, входов, AED и объектов кампуса, переключение между векторной картой и спутниковыми снимками.",
+
+  "features.item.hospital.title": "Медицинский сервис",
+  "features.item.hospital.summary": "Карта пациента, запись, очередь, счета и результаты анализов.",
+  "features.item.hospital.description": "Управление картой пациента, запись к врачу и её отмена, очередь на приём, часы работы, оплаченные и неоплаченные счета, результаты лабораторных и инструментальных исследований.",
+
+  "features.item.utilities.title": "Вода, электричество и код доступа к воде",
+  "features.item.utilities.summary": "Вода и электричество в общежитии: запрос, оплата и код доступа к горячей воде.",
+  "features.item.utilities.description": "Проверяйте расход воды и электричества в общежитии, оплачивайте онлайн и получайте предупреждение о низком балансе. Код доступа к горячей воде готов ровно тогда, когда он нужен.",
+
+  "features.item.notifications.title": "Сообщения кампуса",
+  "features.item.notifications.summary": "Сводка уведомлений и задач из центра сообщений WHU.",
+  "features.item.notifications.description": "Собирает центр сообщений WHU с разделением на все / уведомления / задачи, поддерживает детальный просмотр и счётчики непрочитанных.",
+
+  "features.item.smartLuojia.title": "Чжихуэй Лоцзя",
+  "features.item.smartLuojia.summary": "Прямой доступ к официальному порталу с автоматической идентификацией в кампусе.",
+  "features.item.smartLuojia.description": "Портал «Чжихуэй Лоцзя» встроен и переиспользует сеанс идентификации кампуса, поэтому привычные университетские сервисы больше не требуют повторного входа.",
+
+  "features.item.campusNetwork.title": "Сеть кампуса",
+  "features.item.campusNetwork.summary": "Тарифы, устройства, пополнение, пауза и возобновление.",
+  "features.item.campusNetwork.description": "Проверка тарифа, пауза и возобновление (неиспользованные дни переносятся), автоматическая аутентификация через портал, смена оператора, управление подключёнными устройствами и пополнение счёта сети. На iOS возможно подключение на уровне системы.",
+
+  "features.item.campusVpn.title": "VPN кампуса",
+  "features.item.campusVpn.summary": "Раздельное туннелирование aTrust с проверкой связности.",
+  "features.item.campusVpn.description": "Подключение к VPN WHU aTrust: прокси внутри приложения или системный TUN, правила раздельного туннелирования, двухфакторная проверка и тест связности с веб-страницами.",
+
+  "features.item.forum.title": "Форум «Луоцзяское бомбоубежище»",
+  "features.item.forum.summary": "Публикации, комментарии, вложения, репутация и модерация.",
+  "features.item.forum.description": "Форум сообщества поддерживает публикации, комментарии, разделы, вложения, поиск, репутацию, рейтинги и открытый журнал модерации. Вкладка скрыта по умолчанию и включается в разделе Настройки → Навигация.",
+
+  "features.item.aiAssistant.title": "ИИ-ассистент",
+  "features.item.aiAssistant.summary": "Агент на нескольких моделях, который управляет сервисами кампуса.",
+  "features.item.aiAssistant.description": "Поддерживаются встроенные и собственные модели (несколько сразу), мультимодальные вложения, голосовой ввод и озвучивание, генерация изображений, поиск в интернете, MCP, навыки и ассистенты. Мост подтверждения предлагает три режима — ручной, полуавтоматический и полностью автоматический; инструменты могут читать и управлять данными расписания, оценок, почты и сервисов кампуса, а после вашего подтверждения — запускать оплату воды, электричества и сети.",
+
+  "features.item.weather.title": "Погода",
+  "features.item.weather.summary": "Прогнозы из нескольких источников, AQI, осадки и предупреждения.",
+  "features.item.weather.description": "Mi Weather, Open-Meteo и AccuWeather запрашиваются напрямую по их сильным сторонам: почасовой прогноз, качество воздуха, концентрация пыльцы и официальные недельные отчёты, осадки, предупреждения, кэш и повторы запросов. Любая замена или откат к другому источнику видны целиком, доступен строгий режим.",
+
+  "features.item.coremail.title": "Почта Coremail",
+  "features.item.coremail.summary": "Кампусная почта: отправка и приём, просмотр письма и счётчики непрочитанных.",
+  "features.item.coremail.description": "Нативный клиент Coremail поддерживает вход через SSO, клиентские пароли, входящие, создание и отправку писем, безопасную отрисовку содержимого и счётчики непрочитанных. Почта также открыта ИИ-агенту для поиска, разбора и черновиков с отправкой.",
+
+  "features.item.wallpapers.title": "Центр обоев",
+  "features.item.wallpapers.summary": "Локальные файлы, URL изображений, ежедневные Bing и настройка обоев по страницам.",
+  "features.item.wallpapers.description": "Доступны варианты без обоев, локальное изображение, URL картинки в сети и случайные ежедневные обои Bing. Страницы расписания, кампуса, настроек, списка задач, форума и ИИ настраиваются независимо, затемняющий слой регулируется.",
+
+  "features.item.hotUpdate.title": "Горячее обновление сценариев",
+  "features.item.hotUpdate.summary": "Подписанные сценарии разбора: изменения API не требуют нового выпуска.",
+  "features.item.hotUpdate.description": "Сайт распространяет сценарии разбора для QuickJS, подписанные Ed25519. Когда API кампуса меняется, парсер можно обновить по воздуху, не дожидаясь нового выпуска приложения.",
+
+  "features.item.appUpdate.title": "Обновления в приложении",
+  "features.item.appUpdate.summary": "Проверка новой версии и подсказки по установке.",
+  "features.item.appUpdate.description": "Обновления проверяются через GitHub Releases. На Android приложение подскажет подходящий ABI и проведёт через установку, на настольных платформах предложит скачать новую версию.",
+
+  "features.item.appleShortcuts.title": "Команды Apple",
+  "features.item.appleShortcuts.summary": "Команды вызывают проверенные инструменты приложения.",
+  "features.item.appleShortcuts.description": "Команды macOS могут вызывать проверенные инструменты: академический календарь, расписание, оценки, свободные аудитории. Операции записи требуют подтверждения.",
+
+  "features.item.widgets.title": "Виджеты главного экрана",
+  "features.item.widgets.summary": "Четыре виджета для Android, iOS и macOS.",
+  "features.item.widgets.description": "Список дел, сегодняшние занятия, ближайшая пара и занятия недели — четыре виджета для Android, iOS и строки меню macOS.",
+
+  "features.item.watch.title": "Синхронизация с часами",
+  "features.item.watch.summary": "Синхронизация с Apple Watch и часами Huawei / HarmonyOS.",
+  "features.item.watch.description": "Apple Watch может показать платёжный код карты E; часы Huawei и HarmonyOS синхронизируют снимки планировщика, автобусов кампуса и погоды.",
+
+  "features.item.appShortcuts.title": "Ярлыки на главном экране",
+  "features.item.appShortcuts.summary": "Долгое нажатие на иконку ведёт прямо к нужным разделам.",
+  "features.item.appShortcuts.description": "Android App Shortcuts и iOS Quick Actions открывают платёжный код карты E, бронирование мест в библиотеке, ИИ и другие разделы; набор ярлыков зависит от состояния входа.",
+
+  "features.item.accountSecurity.title": "Аккаунты и безопасность",
+  "features.item.accountSecurity.summary": "CAS, аккаунты Luotopia, Passkeys и доверие устройства.",
+  "features.item.accountSecurity.description": "CAS WHU и аккаунты Luotopia разделены. Поддерживаются Passkeys, несколько сеансов, доверие устройства, учётные данные API и биометрическая блокировка оценок; диагностическую телеметрию можно отключить.",
+
+  "features.item.languages.title": "Многоязычность",
+  "features.item.languages.summary": "12 языков и локализованные форматы времени.",
+  "features.item.languages.description": "Упрощённый китайский, традиционный китайский, кантонский, английский, японский, корейский, французский, испанский, португальский, русский и вьетнамский — всего 12 языков.",
+
+  "features.item.multiAccount.title": "Переключение аккаунтов",
+  "features.item.multiAccount.summary": "Учётные данные изолированы по аккаунтам WHU, между ними можно переключаться.",
+  "features.item.multiAccount.description": "Устройство запоминает несколько аккаунтов WHU и быстро переключается между ними. Учётные данные VPN, почты и Xuexitong изолированы по аккаунтам и не пересекаются.",
+
+  "features.item.thirdPartyAccounts.title": "Привязка сторонних аккаунтов",
+  "features.item.thirdPartyAccounts.summary": "Авторизованная привязка сторонних аккаунтов, таких как Ham.",
+  "features.item.thirdPartyAccounts.description": "Внешние аккаунты собраны в разделе «Другие аккаунты»; авторизованная привязка сторонних сервисов вроде Ham ещё дорабатывается.",
+
+  "features.item.libraryLoans.title": "Выдача книг в библиотеке",
+  "features.item.libraryLoans.summary": "Выдача книг, продление и напоминания о сроке.",
+  "features.item.libraryLoans.description": "Планируется подключение API библиотечной выдачи: текущие книги, сроки возврата, статус продления и напоминания перед истечением срока.",
+
+  "features.item.studyMaterials.title": "Общие учебные материалы",
+  "features.item.studyMaterials.summary": "Поиск материалов по курсу, преподавателю и семестру.",
+  "features.item.studyMaterials.description": "Планируются серверный поиск, загрузка, скачивание, избранное и статус проверки; материалы будут организованы по курсам, преподавателям и семестрам.",
+
+  "features.item.gradeEnhancements.title": "Улучшения для оценок",
+  "features.item.gradeEnhancements.summary": "Сравнение семестров, экспорт сводки и связь с идентификаторами курсов.",
+  "features.item.gradeEnhancements.description": "На базе существующей динамики оценок продолжим развивать сравнение семестров, экспорт сводки и связь с идентификаторами курсов.",
+
+  "features.item.recurrenceEnhancements.title": "Улучшения повторов",
+  "features.item.recurrenceEnhancements.summary": "Разворачивание повторяющихся записей и действия со всей серией.",
+  "features.item.recurrenceEnhancements.description": "Разворачивание повторяющейся записи в отдельные экземпляры, их завершение и восстановление, а также действия со всей серией целиком.",
+
+  "features.item.widgetEnhancements.title": "Улучшения виджетов",
+  "features.item.widgetEnhancements.summary": "Доработка Android и поиск точек входа на других платформах.",
+  "features.item.widgetEnhancements.description": "Продолжим улучшать виджеты для Android и рассматривать точки входа на других настольных платформах.",
+
+  "features.item.standaloneWeb.title": "Отдельная веб-версия",
+  "features.item.standaloneWeb.summary": "Flutter Web больше не поддерживается; планируется отдельный веб-продукт.",
+  "features.item.standaloneWeb.description": "Слой совместимости Flutter Web и его выпуски больше не поддерживаются. Работа над отдельным веб-продуктом начнётся, когда будут определены требования и возможности серверного прокси."
+}
