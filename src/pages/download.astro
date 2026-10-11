@@ -95,12 +95,14 @@ scoop update luotopia   # 升级</code></pre>
             <p class="mt-2 text-body-small text-outline">清单基于便携 zip；也可以直接用 Release 里的 scoop-luotopia.json 单次安装。</p>
           </div>
           <div>
-            <h3 class="text-title-small text-on-surface mb-1">Homebrew（Linux）</h3>
-            <p class="mb-2">添加官方 tap 后安装（Linuxbrew，x64 / arm64）：</p>
+            <h3 class="text-title-small text-on-surface mb-1">Homebrew</h3>
+            <p class="mb-2">添加官方 tap 后安装：</p>
             <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>brew tap ClosedWHU/luotopia
+# Linux（Linuxbrew，x64 / arm64）
 brew install luotopia
-brew upgrade luotopia   # 升级</code></pre>
-            <p class="mt-2 text-body-small text-outline">macOS 的 DMG cask 会随首个携带 DMG 的 Release 自动上架到同一 tap。</p>
+# macOS（Apple 芯片，DMG cask）
+brew install --cask luotopia</code></pre>
+            <p class="mt-2 text-body-small text-outline">tap 里的 formula 与 cask 同名：<code class="text-on-surface">brew install luotopia</code> 永远先命中仅限 Linux 的 formula，macOS 必须带 <code class="text-on-surface">--cask</code>。升级用 <code class="text-on-surface">brew upgrade luotopia</code>（macOS 加 <code class="text-on-surface">--cask</code>）。</p>
           </div>
           <div>
             <h3 class="text-title-small text-on-surface mb-1">Nix</h3>
