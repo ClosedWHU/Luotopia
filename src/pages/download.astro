@@ -122,13 +122,7 @@ brew install --cask luotopia</code></pre>
 winget install --manifest .\path\to\manifests\folder</code></pre>
             <p class="mt-2">合并到 <a href="https://github.com/microsoft/winget-pkgs" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">microsoft/winget-pkgs</a> 之后：</p>
             <pre data-lenis-prevent-horizontal class="mt-2 overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>winget install ClosedWHU.Luotopia</code></pre>
-            <p class="mt-2 text-body-small text-outline">当前清单默认指向 zip 便携包；有签名 MSIX 后会改为 MSIX 安装器以改善 SmartScreen 体验。</p>
-          </div>
-          <div>
-            <h3 class="text-title-small text-on-surface mb-1">MSIX 旁加载</h3>
-            <p>下载 <code class="text-on-surface">*-windows-x64.msix</code>（ARM 设备用 <code class="text-on-surface">*-windows-arm64.msix</code>）后双击安装，或：</p>
-            <pre data-lenis-prevent-horizontal class="mt-2 overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>Add-AppxPackage .\luotopia-*-windows-x64.msix</code></pre>
-            <p class="mt-2 text-body-small text-outline">暂时未获得 Windows 代码签名证书时，仅提供未签名包。传统 WiX MSI 暂不维护。</p>
+            <p class="mt-2 text-body-small text-outline">当前清单默认指向 zip 便携包。</p>
           </div>
         </div>
       </div>

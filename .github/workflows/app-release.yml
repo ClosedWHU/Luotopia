@@ -12,12 +12,17 @@
 # they go to a private `symbols-<tag>` release on the app repo instead.
 #
 # SECURITY: this workflow holds production signing material (Android keystore,
-# Windows PFX, AUR SSH key, OHOS certs) in a PUBLIC repo's secret store. That is
+# AUR SSH key, OHOS certs) in a PUBLIC repo's secret store. That is
 # only acceptable because the triggers below are `release` and
 # `workflow_dispatch`, so no fork-supplied code ever runs with these secrets.
 # Do NOT add a `pull_request`/`pull_request_target` trigger here, and do not add
 # any other workflow to this repo that reads these secrets from a PR-triggered
 # job. Build logs of this public repo are world-readable: keep `--verbose` off.
+#
+# The Windows PFX secrets are no longer read: the MSIX is Store-only now, and a
+# package carrying the Store-assigned Publisher CN can only be signed by the
+# Store itself. WINDOWS_PFX_BASE64 / WINDOWS_PFX_PASSWORD can be deleted from
+# the repo secret store.
 name: App release build
 
 on:
@@ -1413,12 +1418,9 @@ jobs:
           echo "hash_upper=${HASH_UPPER}" >> "$GITHUB_OUTPUT"
           ls -la dist
 
-      - name: Build MSIX (unsigned unless PFX secrets present)
+      - name: Build Store MSIX (unsigned; the Store signs on ingestion)
         id: msix
         shell: bash
-        env:
-          WINDOWS_PFX_BASE64: ${{ secrets.WINDOWS_PFX_BASE64 }}
-          WINDOWS_PFX_PASSWORD: ${{ secrets.WINDOWS_PFX_PASSWORD }}
         run: |
           set -euo pipefail
           TAG='${{ needs.context.outputs.tag }}'
@@ -1426,35 +1428,50 @@ jobs:
           SAFE_TAG="${SAFE_TAG//+/-}"
           ARCH='${{ matrix.arch }}'
           BN='${{ needs.context.outputs.build_name }}'
-          BC='${{ needs.context.outputs.build_number }}'
-          # MSIX requires four-part version A.B.C.D
+          # The Store reserves the fourth segment (d) for its own use and
+          # rejects any package where d != 0, so the build number cannot ride
+          # there. It keeps living in the exe VERSIONINFO, which is what the
+          # update check actually reads: package_info_plus splits the
+          # ProductVersion string on '+' (package_info_plus_windows.dart:32),
+          # and the release feed derives versionName from the git tag
+          # (github-releases.ts:110). The AppxManifest Identity Version is a
+          # separate axis that nothing in that path reads, so pinning d=0
+          # cannot disturb update detection -- and it must not carry the build
+          # number anyway, because compareVersionNames zero-pads and compares
+          # numerically (app_update_comparator.dart:117), which would make
+          # 1.1.0.16 outrank the feed's 1.1.0 and prompt forever.
+          #
+          # Consequence: two Store submissions of the same a.b.c are
+          # indistinguishable to the Store, and it requires each submission to
+          # be >= the previous one, so the patch segment has to be bumped per
+          # submission.
+          #
+          # Unanchored on purpose: build_name can carry a prerelease suffix
+          # (the context job's tag regex admits `1.1.0-beta.1`), and only its
+          # numeric x.y.z prefix is legal here. Such a tag yields the same MSIX
+          # version as its eventual final release, so a prerelease must not be
+          # submitted to the Store ahead of the release it previews.
           if [ -n "$BN" ] && [[ "$BN" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
-            MAJ="${BASH_REMATCH[1]}"; MIN="${BASH_REMATCH[2]}"; PAT="${BASH_REMATCH[3]}"
-            REV="${BC:-0}"
-            # build-number may be non-numeric; keep digits only
-            REV=$(echo "$REV" | tr -cd '0-9')
-            [ -z "$REV" ] && REV=0
-            MSIX_VER="${MAJ}.${MIN}.${PAT}.${REV}"
+            MSIX_VER="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}.0"
           else
-            MSIX_VER="1.0.0.0"
+            # No 1.0.0.0 fallback: a hardcoded version silently submits a
+            # downgrade, which the Store rejects after wasting a build.
+            echo "::error::cannot derive an MSIX version from build_name '$BN' (want x.y.z)"
+            exit 1
           fi
+          echo "MSIX version: ${MSIX_VER}"
 
-          # msix CLI: --store is a flag (never --store=false); install-certificate is an option
-          MSIX_ARGS=(
-            --build-windows=false
-            --install-certificate=false
-            --architecture="$ARCH"
+          # store: true in pubspec.yaml supplies the Partner Center identity and
+          # makes the msix package skip signing (msix.dart:48) -- the Store signs
+          # what it ingests. The former WINDOWS_PFX_* branch is therefore dead:
+          # a Store package cannot be signed locally anyway, because the
+          # manifest Publisher CN is issued by Microsoft's Store CA and its
+          # private key is unobtainable.
+          dart run msix:create \
+            --build-windows=false \
+            --install-certificate=false \
+            --architecture="$ARCH" \
             --version="$MSIX_VER"
-          )
-          if [ -n "${WINDOWS_PFX_BASE64:-}" ] && [ -n "${WINDOWS_PFX_PASSWORD:-}" ]; then
-            echo "$WINDOWS_PFX_BASE64" | base64 -d > windows/codesign.pfx
-            MSIX_ARGS+=(--certificate-path=windows/codesign.pfx --certificate-password="$WINDOWS_PFX_PASSWORD")
-            echo "MSIX: using provided code-signing certificate"
-          else
-            echo "MSIX: building unsigned package (sideload / Developer Mode)"
-          fi
-
-          dart run msix:create "${MSIX_ARGS[@]}"
 
           # msix package writes to build/windows/<arch>/runner/Release/*.msix (depth > 3)
           MSIX_SRC=""
@@ -1537,9 +1554,17 @@ jobs:
           gh release view "$TAG" --repo "$TARGET_REPO" >/dev/null
           shopt -s nullglob
           ARCH='${{ matrix.arch }}'
+          # The MSIX deliberately stays off the public release: it carries the
+          # Store identity (Publisher CN=910180C7-...), which only Microsoft's
+          # Store CA can sign, so an unsigned copy published here could not be
+          # installed by anyone -- Windows refuses a package whose signing
+          # certificate subject does not match its manifest Publisher. It goes
+          # to the workflow artifacts below for Partner Center upload instead.
+          # Windows sideload keeps using the zip, which is already the format
+          # the download page recommends and that the Scoop/winget manifests
+          # point at.
           files=(
             dist/*-windows-"$ARCH".zip
-            dist/*-windows-"$ARCH".msix
           )
           # The Scoop/winget manifests point at the x64 zip and only ride the
           # x64 leg; arm64 installs through them run the x64 build emulated.
@@ -1569,11 +1594,22 @@ jobs:
           echo "Uploaded Windows artifacts to $TARGET_REPO@$TAG"
           gh release view "$TAG" --repo "$TARGET_REPO"
 
+      # Unsigned, so it is only useful as the Partner Center submission payload.
+      # Retained for 14 days by default; download it from the run summary and
+      # upload it under Packages for the product (Store ID 9P29527S1H0H).
+      - name: Upload Store MSIX as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: store-msix-windows-${{ matrix.arch }}
+          path: dist/*.msix
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Cleanup
         if: always()
         shell: bash
         run: |
-          rm -rf build/debug-info dist windows/codesign.pfx
+          rm -rf build/debug-info dist
 
   linux:
     name: Linux ${{ matrix.arch }} packages (release)
