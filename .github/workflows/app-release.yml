@@ -994,6 +994,42 @@ jobs:
           cp -v "$AAB" "dist/luotopia-${SAFE_TAG}-android.aab"
           echo "aab_name=luotopia-${SAFE_TAG}-android.aab" >> "$GITHUB_OUTPUT"
 
+      # The Flutter tool's release post-check (_isAabStrippedOfDebugSymbols)
+      # only printTraces why it rejected the bundle, invisible without
+      # --verbose. Reproduce its three inputs here: cmdline-tools presence,
+      # apkanalyzer health against the AGP 9.4 bundle format, and whether the
+      # BUNDLE-METADATA symbol entries actually exist.
+      - name: Diagnose AAB native symbol metadata
+        if: failure() && steps.aab.outcome == 'failure'
+        run: |
+          set +e
+          set -x
+          SDK="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          ls -la "$SDK/cmdline-tools" || true
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          ls -la "$AAB" || { echo "no AAB on disk"; exit 0; }
+          APKANALYZER="$SDK/cmdline-tools/latest/bin/apkanalyzer"
+          if [ -x "$APKANALYZER" ]; then
+            "$APKANALYZER" --version
+            echo "apkanalyzer --version exit=$?"
+            "$APKANALYZER" files list "$AAB" > /tmp/aab-files.txt
+            echo "apkanalyzer files-list exit=$?"
+            grep -Ei "BUNDLE-METADATA|\.sym|\.dbg" /tmp/aab-files.txt || echo "NO symbol-metadata entries in the AAB"
+            wc -l /tmp/aab-files.txt
+            head -30 /tmp/aab-files.txt
+          else
+            echo "apkanalyzer NOT FOUND at $APKANALYZER"
+          fi
+
+      - name: Upload the rejected AAB for inspection
+        if: failure() && steps.aab.outcome == 'failure'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: play-aab-rejected-debug
+          path: build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Publish AAB Dart symbols (private app release)
         env:
           GH_TOKEN: ${{ env.APP_TOKEN }}
