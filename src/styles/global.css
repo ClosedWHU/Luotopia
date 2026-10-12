@@ -663,7 +663,7 @@
 
 /* ── Scrollbars ──
  *
- * Two scopes, one look: a rounded translucent thumb on a transparent track.
+ * Three scopes, one look: a rounded translucent thumb on a transparent track.
  *
  * Horizontal scrollers — code blocks and other overflow-x content ship the
  * native bar by default: ~15px of opaque OS chrome under a hairline-edged
@@ -737,6 +737,41 @@ pre::-webkit-scrollbar-corner,
   background: transparent;
 }
 
+/*
+ * Nested vertical scrollers — the mobile sheet and the friend-links dialog body.
+ *
+ * Neither scope above reaches them: `html::` is the root scroller only and
+ * `pre`/`.overflow-x-auto` are horizontal, while `::-webkit-scrollbar` does not
+ * inherit and CSS has no "any scroller" selector — so an overlay's bar kept
+ * shipping as OS chrome under the same glass the page's own slim thumb sits on.
+ *
+ * `.lt-scroll-y` is the shared hook rather than a rule per element: the next
+ * overlay that scrolls gets the look by adding the class, not by being
+ * remembered here. 8px, matching the inset scrollers rather than the root's 12 —
+ * a bar inside a panel should be lighter than the one framing the page.
+ */
+.lt-scroll-y::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+
+.lt-scroll-y::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.lt-scroll-y::-webkit-scrollbar-thumb {
+  background-color: var(--lt-scrollbar-thumb);
+  border-radius: 9999px;
+}
+
+.lt-scroll-y::-webkit-scrollbar-thumb:hover {
+  background-color: var(--lt-scrollbar-thumb-hover);
+}
+
+.lt-scroll-y::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 @supports not selector(::-webkit-scrollbar) {
   html {
     scrollbar-width: thin;
@@ -744,7 +779,8 @@ pre::-webkit-scrollbar-corner,
   }
 
   pre,
-  .overflow-x-auto {
+  .overflow-x-auto,
+  .lt-scroll-y {
     scrollbar-width: thin;
     scrollbar-color: var(--lt-scrollbar-thumb) transparent;
   }
@@ -1125,7 +1161,19 @@ html.lenis body {
   scroll-behavior: auto !important;
 }
 
-.lenis.lenis-smooth [data-lenis-prevent] {
+/*
+ * `.lenis`, not `.lenis.lenis-smooth`.
+ *
+ * `lenis-smooth` is not a "smooth scrolling is on" marker — Lenis derives it
+ * from `isScrolling === "smooth"`, which is true only between an animation's
+ * `onStart` and its completion. So a rule gated on it applies for the few
+ * hundred milliseconds the page is gliding and never at the moment it matters:
+ * wheeling inside a nested scroller, when Lenis is either stopped (the sheet) or
+ * idle (a dropdown). `.lenis` is added once on construction and stays, which is
+ * the condition these rules actually mean — "Lenis owns the page scroll, so stop
+ * the gesture chaining back to it at this element's edge".
+ */
+.lenis [data-lenis-prevent] {
   overscroll-behavior: contain;
 }
 
@@ -1134,7 +1182,7 @@ html.lenis body {
  * rest — which swallowed horizontal trackpad swipes on the `<pre>` elements.
  * `contain` on x stops the gesture chaining back to the page once the block
  * reaches its scroll edge. */
-.lenis.lenis-smooth [data-lenis-prevent-horizontal] {
+.lenis [data-lenis-prevent-horizontal] {
   overscroll-behavior-x: contain;
 }
 
