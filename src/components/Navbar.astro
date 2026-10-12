@@ -30,9 +30,22 @@ const links = [
 ] as const;
 
 const path = Astro.url.pathname.replace(/\/+$/, "") || "/";
+/*
+ * The locale root matches exactly, never as a prefix.
+ *
+ * Every page of a prefixed locale lives under its root, so prefix-matching `/en`
+ * marks Home active on `/en/features`, `/en/status` and the rest — Home was
+ * pinned on for the whole visit in all nine non-default languages. The
+ * `base === "/"` test this replaces expressed the same idea but only caught the
+ * default locale, whose root happens to be `/`. Deeper tabs keep the prefix
+ * match: 法律 has to stay lit on `/legal/terms`.
+ */
+const localeRoot = routeUrl(locale, "home").replace(/\/+$/, "") || "/";
 const isActive = (href: string) => {
   const base = href.replace(/\/+$/, "") || "/";
-  return base === "/" ? path === "/" : path === base || path.startsWith(`${base}/`);
+  return base === localeRoot
+    ? path === base
+    : path === base || path.startsWith(`${base}/`);
 };
 
 /*
@@ -122,7 +135,7 @@ const persistName = `lt-navbar-${locale}`;
           <Icon name="language" class="text-lg" />
           <span class="lt-lang-current hidden lg:inline">{meta.label}</span>
         </summary>
-        <div class="lt-lang-panel rounded-nested" role="group" aria-label={t("lang.switcher.label")}>
+        <div class="lt-lang-panel lt-scroll-y rounded-nested" role="group" aria-label={t("lang.switcher.label")} data-lenis-prevent>
           {
             languageLinks.map((link) => (
               <a
@@ -187,8 +200,9 @@ const persistName = `lt-navbar-${locale}`;
 -->
 <div
   id="mobile-menu"
-  class="lt-mobile-menu fixed z-40 overflow-y-auto md:hidden"
+  class="lt-mobile-menu lt-scroll-y fixed z-40 overflow-y-auto md:hidden"
   data-open="false"
+  data-lenis-prevent
   transition:persist={`lt-mobile-menu-${locale}`}
 >
   <div class="px-4 py-3 flex flex-col gap-0.5">
@@ -372,6 +386,16 @@ const persistName = `lt-navbar-${locale}`;
     background-color: var(--lt-color-surface);
     border: 1px solid var(--lt-glass-edge);
     box-shadow: var(--lt-shadow-glass-raised);
+    /*
+     * Ten endonyms are ~430px of column hanging off a 64px bar, so a short
+     * window puts the last few languages below the fold with no way to reach
+     * them: the panel is absolutely positioned inside a fixed bar, and nothing
+     * else on the page scrolls it. Capped against the viewport rather than
+     * left to overflow it, on the same formula the sheet uses.
+     */
+    max-height: calc(100vh - 100px);
+    max-height: calc(100dvh - 100px);
+    overflow-y: auto;
   }
 
   .lt-lang-option {
@@ -565,12 +589,6 @@ const persistName = `lt-navbar-${locale}`;
 <script>
   import { onBeforeNavigation, onPageSetup } from "../scripts/page-lifecycle";
 
-  const normalizePath = (value: string) => value.replace(/\/+$/, "") || "/";
-  const isActivePath = (href: string, path: string) => {
-    const base = normalizePath(new URL(href, location.href).pathname);
-    return base === "/" ? path === "/" : path === base || path.startsWith(`${base}/`);
-  };
-
   /** The cookie `functions/_middleware.ts` reads to stand down auto-detection. */
   const LANG_COOKIE = "luotopia_lang";
 
@@ -617,6 +635,14 @@ const persistName = `lt-navbar-${locale}`;
    * client-side second copy of `TRANSLATED_ROUTES` would eventually disagree
    * with it. It also keeps this chunk free of the locale table's endonyms.
    *
+   * The nav links' `aria-current` is page-dependent in the same way and is copied
+   * for the same reason. It used to be recomputed here by a second implementation
+   * of the server's matching rule, and the two disagreed: the client copy tested
+   * `base === "/"` to mean "this is Home, match it exactly", which is only true in
+   * the default locale. In the other nine, Home's base is `/en`, `/ja`, ... — a
+   * prefix of every page in that language — so Home stayed lit for the whole
+   * visit. One rule, in one place, is the fix; copying is what keeps it that way.
+   *
    * Bound once at module scope and querying live on both sides, for the reason
    * `onBeforeNavigation` below does — this has to survive the persist-identity
    * change a cross-locale navigation causes.
@@ -624,19 +650,36 @@ const persistName = `lt-navbar-${locale}`;
   document.addEventListener("astro:before-swap", (event) => {
     const incoming = (event as BeforeSwapEvent).newDocument;
     if (!incoming) return;
+    // A page with no navbar of its own (the /open/ launch page) has nothing to
+    // copy from, and must not have the bar it is about to persist blanked.
+    if (!incoming.getElementById("lt-navbar")) return;
+
     const rendered = new Map<string, string>();
     incoming.querySelectorAll<HTMLAnchorElement>("a[data-lt-lang][href]").forEach((link) => {
       const code = link.getAttribute("data-lt-lang");
       const href = link.getAttribute("href");
       if (code && href && !rendered.has(code)) rendered.set(code, href);
     });
-    // A page with no navbar of its own (the /open/ launch page) has nothing to
-    // copy from, and must not have the bar it is about to persist blanked.
-    if (rendered.size === 0) return;
     document.querySelectorAll<HTMLAnchorElement>("a[data-lt-lang]").forEach((link) => {
       const code = link.getAttribute("data-lt-lang");
       const href = code ? rendered.get(code) : undefined;
       if (href) link.setAttribute("href", href);
+    });
+
+    // Nav links are locale-absolute and identical in the desktop bar and the
+    // mobile sheet, so the href keys both copies at once. A cross-locale swap
+    // matches nothing and clears the bar that is about to be discarded anyway.
+    const active = new Set<string>();
+    incoming
+      .querySelectorAll<HTMLAnchorElement>("a.lt-navlink[href][aria-current]")
+      .forEach((link) => {
+        const href = link.getAttribute("href");
+        if (href) active.add(href);
+      });
+    document.querySelectorAll<HTMLAnchorElement>("a.lt-navlink[href]").forEach((link) => {
+      const href = link.getAttribute("href") ?? "";
+      if (active.has(href)) link.setAttribute("aria-current", "page");
+      else link.removeAttribute("aria-current");
     });
   });
 
@@ -697,16 +740,6 @@ const persistName = `lt-navbar-${locale}`;
     const menuBtn = document.getElementById("mobile-menu-btn");
     const mobileMenu = document.getElementById("mobile-menu");
     const langMenu = document.querySelector<HTMLDetailsElement>("[data-lang-menu]");
-
-    const syncActiveLinks = () => {
-      const path = normalizePath(location.pathname);
-      document.querySelectorAll<HTMLAnchorElement>("a.lt-navlink[href]").forEach((link) => {
-        const href = link.getAttribute("href");
-        if (!href) return;
-        if (isActivePath(href, path)) link.setAttribute("aria-current", "page");
-        else link.removeAttribute("aria-current");
-      });
-    };
 
     const themeToggles = [
       document.getElementById("theme-toggle"),
@@ -813,8 +846,5 @@ const persistName = `lt-navbar-${locale}`;
       syncScrolled();
       window.addEventListener("scroll", syncScrolled, { signal, passive: true });
     }
-
-    // Route-dependent state, resynchronized because this runs after every swap.
-    syncActiveLinks();
   });
 </script>
