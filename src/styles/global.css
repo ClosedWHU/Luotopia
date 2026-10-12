@@ -547,6 +547,25 @@
 }
 
 /*
+ * zh-Hant, ja, ko: Noto Sans TC/JP/KR instead of MiSans. MiSans is
+ * Simplified-oriented and lacks `locl` (localized forms), so unified Han
+ * characters with regional variants (骨, 直, 令, 者, 艹, 辶, 門, 為, 真, etc.)
+ * render with Simplified glyph shapes even on Traditional/Japanese/Korean pages.
+ * Each locale gets the correct regional variant. System fallbacks also switch
+ * to the appropriate regional faces (PingFang TC/JhengHei for zh-Hant,
+ * Hiragino/Yu Gothic/Meiryo for ja, Apple SD Gothic Neo/Malgun Gothic for ko).
+ */
+html[lang="zh-Hant"] {
+  --font-sans: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", "Noto Sans TC", system-ui, -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+}
+html[lang="ja"] {
+  --font-sans: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", "Noto Sans JP", system-ui, -apple-system, "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+}
+html[lang="ko"] {
+  --font-sans: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", "Noto Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+
+/*
  * Registered so the pointer-tracking glint (BaseLayout writes these on
  * `.glass.lt-lift` surfaces) can interpolate: unregistered custom properties
  * flip discretely, so the highlight used to jump from the cursor's last
