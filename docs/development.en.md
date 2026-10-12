@@ -448,7 +448,7 @@ Endonyms cannot be dropped: the switcher has to be readable by someone who canno
 read the page they landed on, so each language is listed in its own script and never
 translated.
 
-**`transition:persist` conflicts with locales in three places.** Persisted elements
+**`transition:persist` conflicts with locales in four places.** Persisted elements
 are not part of the swap, so:
 
 - `Navbar.astro` keys its persist name by locale (`lt-navbar-${locale}`): same-locale
@@ -477,6 +477,15 @@ are not part of the swap, so:
   rather than recomputing keeps `pathInLocale`'s fallback for a route the target
   locale has not translated on the server, instead of duplicating
   `TRANSLATED_ROUTES` — and the locale table's endonyms — into the navbar chunk.
+- The nav links' `aria-current` is page-dependent the same way, and is copied in
+  the same handler. It used to be recomputed by a *second* implementation of the
+  server's matching rule, and the two disagreed: the client tested `base === "/"`
+  to mean "this is Home, match it exactly", which holds only in the default
+  locale. Elsewhere Home's base is `/en`, `/ja`, … — a prefix of every page in
+  that language — so Home stayed lit for the whole visit. The server rule now
+  compares against `routeUrl(locale, "home")` instead of a literal `/`, and the
+  client no longer has one. Two copies of a rule is not a redundancy, it is a
+  deadline.
 
 **The switcher links straight at its destination** — no `?lang=`, no redirect — and
 is therefore structurally identical to every other link on the site. It used to carry
