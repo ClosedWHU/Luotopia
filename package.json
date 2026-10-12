@@ -27,7 +27,7 @@
     "@fontsource/noto-sans-jp": "^5.3.1",
     "@fontsource/noto-sans-kr": "^5.3.1",
     "@fontsource/noto-sans-tc": "^5.3.1",
-    "@material-symbols/svg-400": "^0.47.5",
+    "@material-symbols/svg-400": "^0.48.0",
     "@paper-design/shaders": "^0.0.81",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.3.5",
@@ -37,7 +37,7 @@
     "three": "^0.186.1"
   },
   "devDependencies": {
-    "postcss": "^8.5.28"
+    "postcss": "^8.5.29"
   },
   "overrides": {
     "devalue": "^5.9.4"
