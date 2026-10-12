@@ -433,31 +433,29 @@ production renders `legal.privacy.s12.heading`.
 
 ### Two things that bite
 
-**The font pruning counts comments, and ten languages mostly defeat it.**
+**The font pruning counts comments, and ten languages plus regional fonts mostly defeat it.**
 `pruneFontSubsets()` scans the source *text* under `src/`, data and comments alike.
 Covering all ten locales means the charset has to include traditional-only hanzi,
-kana, hangul, Cyrillic and Vietnamese Latin Extended Additional. Measured on the
-built stylesheet with every page translated: MiSans subsets kept go 50 → 110 of
-112, its `@font-face` text goes 71 KB → 160 KB raw (25 → 57 KB gzip, 8.1 → 18.6 KB
-brotli), and the whole shared file goes 133 KB → 222 KB raw, 38 → 70 KB gzip,
-19.0 → 29.3 KB brotli. Font subsets are 72% of the shared CSS by raw bytes and
-essentially all of the growth. The pruning plugin is left with almost nothing to
-drop, which is the honest consequence of a charset that really does span simplified
-and traditional hanzi, kana, hangul, Cyrillic and Vietnamese — not waste to be
-optimised away. The number that transfers is the brotli delta, **+10.3 KB** on a
-render-blocking file; the +89 KB raw mostly costs parse time, and it is almost
-entirely `unicode-range` hex lists, which is why it compresses about 6:1.
+kana, hangul, Cyrillic and Vietnamese Latin Extended Additional. zh-Hant/ja/ko now
+use Noto Sans TC/JP/KR (MiSans is Simplified-oriented and lacks `locl`, so unified
+Han characters render with Simplified glyph shapes). Measured on the built stylesheet:
+629 `@font-face` rules, 534 woff2 files (MiSans 110 + Noto Sans TC 184 + JP 226 +
+KR 124); the whole shared file goes 133 KB → 727 KB raw, 38 → 246 KB gzip, 19.0 →
+90 KB brotli. Font subsets are 86% of the shared CSS by raw bytes and essentially
+all of the growth. The number that transfers is the brotli delta, **+71 KB** on a
+render-blocking file; the +594 KB raw mostly costs parse time, and it is almost
+entirely `unicode-range` hex lists, which is why it compresses about 6.6:1.
 
 Three things worth knowing before trying:
 
 - The subsets are **lazy**. `unicode-range` means a browser only downloads the woff2
   behind a rule when a rendered character falls in it, so a Spanish visitor never
   fetches the hangul faces. What grew is the CSS, not the font traffic
-- MiSans is only reached for CJK and Cyrillic: `--font-sans` puts Plus Jakarta Sans
-  ahead of it, so Latin copy never touches MiSans. If the CSS size ever needs to
-  come back down, that is the lever — load MiSans only on the locales whose content
-  needs it. It has not been done because it would make the switcher's own endonyms
-  render in a different face on different pages
+- MiSans is only used on zh-Hans pages; zh-Hant/ja/ko use Noto Sans TC/JP/KR
+  respectively. `--font-sans` puts Plus Jakarta Sans ahead of them, so Latin copy
+  never touches the CJK fonts. Per-locale loading is done, but the CSS is shared,
+  so all pages parse all `@font-face` rules (the font files themselves are lazy,
+  downloaded only when used)
 - Comments in the i18n modules are English, and where they would otherwise quote
   Chinese source text they paraphrase instead. A comment quoting all ten endonyms
   measured +6 surviving subsets and +6,893 raw bytes on its own

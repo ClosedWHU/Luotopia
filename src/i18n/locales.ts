@@ -16,33 +16,31 @@
  * ## Every row here costs font bytes, and that is now a settled cost
  *
  * `pruneFontSubsets()` in `astro.config.mjs` derives the site charset by scanning
- * source **text** under `src/` — data and comments alike — and drops every MiSans
+ * source **text** under `src/` — data and comments alike — and drops every
  * `@font-face` subset whose `unicode-range` covers none of it. That is how 172
  * rules became 56 and 81% of a render-blocking stylesheet disappeared.
  *
- * Ten languages undoes it, by design and not by accident. Measured on the built
- * stylesheet, with every page translated: MiSans subsets kept go 50 → 110 of 112,
- * its `@font-face` text goes 71 KB → 160 KB raw (25 → 57 KB gzip, 8.1 → 18.6 KB
- * brotli), and the whole shared file goes 133 KB → 222 KB raw, 38 → 70 KB gzip,
- * 19.0 → 29.3 KB brotli. Font subsets are 72% of the shared CSS by raw bytes and
- * essentially all of the growth; the pruning plugin is left with almost nothing to
- * drop, which is the honest consequence of a charset that really does span
- * simplified and traditional hanzi, kana, hangul, Cyrillic and Vietnamese.
+ * Ten languages undoes it, by design and not by accident. zh-Hant/ja/ko now use
+ * Noto Sans TC/JP/KR (MiSans is Simplified-oriented and lacks `locl`, so unified
+ * Han characters render with Simplified glyph shapes). Measured on the built
+ * stylesheet: 629 `@font-face` rules, 534 woff2 files (MiSans 110 + Noto Sans TC
+ * 184 + JP 226 + KR 124); the whole shared file goes 133 KB → 727 KB raw, 38 →
+ * 246 KB gzip, 19.0 → 90 KB brotli. Font subsets are 86% of the shared CSS by
+ * raw bytes and essentially all of the growth.
  *
- * The number that actually transfers is the brotli delta: **+10.3 KB** on a
- * render-blocking file. The +89 KB raw mostly costs parse time, and it is almost
- * entirely `unicode-range` hex lists, which is why it compresses 6:1.
+ * The number that actually transfers is the brotli delta: **+71 KB** on a
+ * render-blocking file. The +594 KB raw mostly costs parse time, and it is almost
+ * entirely `unicode-range` hex lists, which is why it compresses 6.6:1.
  *
  * Two consequences worth knowing before "optimising" this:
  *
  * - The subsets are *lazy*. `unicode-range` means a browser only downloads the
  *   woff2 behind a rule when a rendered character falls in it, so a Spanish
  *   visitor never fetches the hangul faces. What grew is the CSS, not the fonts.
- * - MiSans is only reached for CJK and Cyrillic. `--font-sans` puts Plus Jakarta
- *   Sans ahead of it, so Latin copy never uses MiSans at all. If the CSS size ever
- *   needs to come back down, that is the lever: load MiSans only on the locales
- *   whose content needs it. It has not been done because it would make the
- *   switcher's own endonyms render in a different face per page.
+ * - MiSans is only used on zh-Hans pages; zh-Hant/ja/ko use Noto Sans TC/JP/KR.
+ *   `--font-sans` puts Plus Jakarta Sans ahead of them, so Latin copy never uses
+ *   the CJK fonts. Per-locale loading is done, but the CSS is shared, so all
+ *   pages parse all `@font-face` rules (the font files themselves are lazy).
  *
  * The same reasoning is why comments in this file are English: a quoted CJK
  * phrase in a comment retains a subset for a glyph no page renders. The endonyms
