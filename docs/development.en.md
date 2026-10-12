@@ -448,7 +448,7 @@ Endonyms cannot be dropped: the switcher has to be readable by someone who canno
 read the page they landed on, so each language is listed in its own script and never
 translated.
 
-**`transition:persist` conflicts with locales in two places.** Persisted elements
+**`transition:persist` conflicts with locales in three places.** Persisted elements
 are not part of the swap, so:
 
 - `Navbar.astro` keys its persist name by locale (`lt-navbar-${locale}`): same-locale
@@ -465,6 +465,18 @@ are not part of the swap, so:
   `onPageSetup()` (see [Page conventions](#page-conventions)) and re-query on every
   navigation; the same goes for `onBeforeNavigation()`, which binds once and so may
   only ever query live.
+- And the flip side of that cheap same-locale persist: everything the server
+  rendered *inside* the bar stays frozen on whichever page first put it on screen.
+  The nav links and the logo are locale-absolute, so they age fine, but the
+  switcher's hrefs come from `pathInLocale(Astro.url.pathname, …)` and describe the
+  page they were built for. Walking `/en/features/` → `/en/download/` and then
+  picking 日本語 used to land on `/ja/features/`; worse, a visit that *starts* at `/`
+  pins every later switch in that locale to `/<lang>/`, which is exactly the
+  "switching language always sends me home" report. `Navbar.astro` copies the
+  incoming document's hrefs onto the persisted bar in `astro:before-swap`. Copying
+  rather than recomputing keeps `pathInLocale`'s fallback for a route the target
+  locale has not translated on the server, instead of duplicating
+  `TRANSLATED_ROUTES` — and the locale table's endonyms — into the navbar chunk.
 
 **The switcher links straight at its destination** — no `?lang=`, no redirect — and
 is therefore structurally identical to every other link on the site. It used to carry
