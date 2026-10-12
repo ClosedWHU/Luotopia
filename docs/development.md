@@ -161,6 +161,19 @@ chunk）、`import.meta`（64）都在，其余由 esbuild 降级。
 自己的填充，视觉无变化、每个元素多一个合成层。面板内的行用 `.lt-inset` /
 `.lt-inset-raised`（`FriendLinks` 与 `/status` 都是这个写法）。
 
+**圆角容器要滚动，就得是两个元素。** `border-radius` 只圆容器自己的背景，不圆它的
+滚动条：滚动条按 border box 的整个高度画成方的，滑块走到两端时就落在圆角轮廓**外面**，
+而不是被圆角切掉。把滑块本身设成圆角也没用——轨道仍然是顶天立地的。
+
+只有**裁剪祖先**能解决，因为在祖先内部滚动条只是普通子内容，会被祖先的圆角裁剪区切到。
+所以形状固定为：外层放圆角 + `overflow: hidden`，内层放 `.lt-scroll-y` +
+`overflow-y: auto`。`.lt-dialog-card`/`.lt-dialog-body`、`.lt-lang-panel`/
+`.lt-lang-scroll`、`.lt-mobile-menu`/`.lt-mobile-menu-scroll` 都是这个结构，照抄即可。
+
+`clip-path: inset(0 round Npx)` 直接加在滚动容器上、或者给 `::-webkit-scrollbar-track`
+加 `margin`，都能省掉这层元素——但两者都建立在「某个引擎会裁剪自己的滚动条」这个猜测
+上。包一层是级联规则**保证**的行为，而本站的标准是：停更的 Android WebView 也得能活。
+
 `/status` 上曾经有 12 张各自带 `backdrop-filter` 的卡片，快速滚动时合成器来不及对
 固定的 WebGL 画布重新采样，就直接画卡片自己的白色半透明底 —— 表现为滚动中的白块。
 改成「每组一个玻璃面板 + 内部 inset 行」之后消失。

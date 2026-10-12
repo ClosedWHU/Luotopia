@@ -135,23 +135,25 @@ const persistName = `lt-navbar-${locale}`;
           <Icon name="language" class="text-lg" />
           <span class="lt-lang-current hidden lg:inline">{meta.label}</span>
         </summary>
-        <div class="lt-lang-panel lt-scroll-y rounded-nested" role="group" aria-label={t("lang.switcher.label")} data-lenis-prevent>
-          {
-            languageLinks.map((link) => (
-              <a
-                class="lt-lang-option state-layer text-body-large no-underline"
-                href={link.href}
-                hreflang={link.hreflang}
-                lang={link.code}
-                aria-current={link.current ? "true" : undefined}
-                data-lt-lang={link.code}
-                data-astro-prefetch={false}
-              >
-                {link.label}
-                {link.current && <span class="lt-lang-tick" aria-hidden="true" />}
-              </a>
-            ))
-          }
+        <div class="lt-lang-panel rounded-nested" role="group" aria-label={t("lang.switcher.label")}>
+          <div class="lt-lang-scroll lt-scroll-y" data-lenis-prevent>
+            {
+              languageLinks.map((link) => (
+                <a
+                  class="lt-lang-option state-layer text-body-large no-underline"
+                  href={link.href}
+                  hreflang={link.hreflang}
+                  lang={link.code}
+                  aria-current={link.current ? "true" : undefined}
+                  data-lt-lang={link.code}
+                  data-astro-prefetch={false}
+                >
+                  {link.label}
+                  {link.current && <span class="lt-lang-tick" aria-hidden="true" />}
+                </a>
+              ))
+            }
+          </div>
         </div>
       </details>
 
@@ -200,56 +202,66 @@ const persistName = `lt-navbar-${locale}`;
 -->
 <div
   id="mobile-menu"
-  class="lt-mobile-menu lt-scroll-y fixed z-40 overflow-y-auto md:hidden"
+  class="lt-mobile-menu fixed z-40 md:hidden"
   data-open="false"
-  data-lenis-prevent
   transition:persist={`lt-mobile-menu-${locale}`}
 >
-  <div class="px-4 py-3 flex flex-col gap-0.5">
-    {
-      links.map((link) => (
-        <a
-          href={routeUrl(locale, link.route)}
-          aria-current={isActive(routeUrl(locale, link.route)) ? "page" : undefined}
-            class="lt-navlink state-layer rounded-control px-3 py-2.5 text-body-large text-on-surface-variant no-underline"
-        >
-          {link.label}
-        </a>
-      ))
-    }
+  <!--
+    The sheet clips, this child scrolls — see the same note on `.lt-lang-panel`.
+    A 24px radius on a scroll container does not round its own scrollbar, so
+    without the wrapper the bar ran the full straight height of the border box and
+    its ends sat outside the rounded silhouette. Everything geometric and glassy
+    stays on the outer element: it is the backdrop root, the `clip-path` collapse
+    target and the persisted node, and moving any of those inward would change
+    what the animation and the blur sample.
+  -->
+  <div class="lt-mobile-menu-scroll lt-scroll-y" data-lenis-prevent>
+    <div class="px-4 py-3 flex flex-col gap-0.5">
+      {
+        links.map((link) => (
+          <a
+            href={routeUrl(locale, link.route)}
+            aria-current={isActive(routeUrl(locale, link.route)) ? "page" : undefined}
+              class="lt-navlink state-layer rounded-control px-3 py-2.5 text-body-large text-on-surface-variant no-underline"
+          >
+            {link.label}
+          </a>
+        ))
+      }
 
-    <!--
-      Sits at position 8 in the sheet, which matters: the entrance stagger is
-      defined per `nth-child(1)`…`nth-child(7)` on `.lt-navlink`, so this block
-      and the theme button below it get no delay and cannot shift the seven
-      links' timing. A flat grid rather than the desktop's `<details>` — the
-      sheet is already a vertical list, and nesting a disclosure inside it would
-      put a collapsible region inside a collapsible region.
-    -->
-    <div class="lt-lang-mobile mt-2 pt-3 border-t border-glass-divider">
-      <p class="lt-navlabel px-3 pb-1.5 text-label-medium text-outline">{t("lang.switcher.label")}</p>
-      <div class="grid grid-cols-2 gap-0.5">
-        {
-          languageLinks.map((link) => (
-            <a
-              class="lt-lang-chip state-layer rounded-control px-3 py-2 text-body-medium text-on-surface-variant no-underline"
-              href={link.href}
-              hreflang={link.hreflang}
-              lang={link.code}
-              aria-current={link.current ? "true" : undefined}
-              data-lt-lang={link.code}
-              data-astro-prefetch={false}
-            >
-              {link.label}
-            </a>
-          ))
-        }
+      <!--
+        Sits at position 8 in the sheet, which matters: the entrance stagger is
+        defined per `nth-child(1)`…`nth-child(7)` on `.lt-navlink`, so this block
+        and the theme button below it get no delay and cannot shift the seven
+        links' timing. A flat grid rather than the desktop's `<details>` — the
+        sheet is already a vertical list, and nesting a disclosure inside it would
+        put a collapsible region inside a collapsible region.
+      -->
+      <div class="lt-lang-mobile mt-2 pt-3 border-t border-glass-divider">
+        <p class="lt-navlabel px-3 pb-1.5 text-label-medium text-outline">{t("lang.switcher.label")}</p>
+        <div class="grid grid-cols-2 gap-0.5">
+          {
+            languageLinks.map((link) => (
+              <a
+                class="lt-lang-chip state-layer rounded-control px-3 py-2 text-body-medium text-on-surface-variant no-underline"
+                href={link.href}
+                hreflang={link.hreflang}
+                lang={link.code}
+                aria-current={link.current ? "true" : undefined}
+                data-lt-lang={link.code}
+                data-astro-prefetch={false}
+              >
+                {link.label}
+              </a>
+            ))
+          }
+        </div>
       </div>
-    </div>
 
-    <button id="theme-toggle-mobile" class="lt-navlink state-layer rounded-control px-3 py-2.5 text-body-large text-on-surface-variant cursor-pointer text-left bg-transparent border-none" aria-label={t("nav.themeToggle.aria")} aria-pressed="false">
-      {t("nav.themeToggle.label")}
-    </button>
+      <button id="theme-toggle-mobile" class="lt-navlink state-layer rounded-control px-3 py-2.5 text-body-large text-on-surface-variant cursor-pointer text-left bg-transparent border-none" aria-label={t("nav.themeToggle.aria")} aria-pressed="false">
+        {t("nav.themeToggle.label")}
+      </button>
+    </div>
   </div>
 </div>
 
@@ -373,25 +385,46 @@ const persistName = `lt-navbar-${locale}`;
     white-space: nowrap;
   }
 
+  /*
+   * Two elements, not one: the panel clips, the child scrolls.
+   *
+   * `border-radius` on a scroll container rounds its own background but not its
+   * scrollbar — the bar is painted square across the full height of the border
+   * box, so at either end of the travel it sits outside the rounded silhouette
+   * instead of being cut by it. Only a *clipping ancestor* removes it, because
+   * then the bar is ordinary descendant painting inside the ancestor's rounded
+   * clip region. `overflow: hidden` + radius on the outer, `overflow-y: auto` on
+   * the inner, is the guaranteed-cross-browser shape; a `clip-path` or a
+   * `::-webkit-scrollbar-track` margin would be Blink-only guesses.
+   *
+   * `FriendLinks.astro`'s dialog already does exactly this (`.lt-dialog-card`
+   * clips, `.lt-dialog-body` scrolls), so this is the house pattern rather than a
+   * new one.
+   */
   .lt-lang-panel {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
     z-index: 60;
     min-width: 11rem;
-    padding: 0.375rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
+    overflow: hidden;
     background-color: var(--lt-color-surface);
     border: 1px solid var(--lt-glass-edge);
     box-shadow: var(--lt-shadow-glass-raised);
+  }
+
+  .lt-lang-scroll {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    padding: 0.375rem;
     /*
      * Ten endonyms are ~430px of column hanging off a 64px bar, so a short
      * window puts the last few languages below the fold with no way to reach
      * them: the panel is absolutely positioned inside a fixed bar, and nothing
-     * else on the page scrolls it. Capped against the viewport rather than
-     * left to overflow it, on the same formula the sheet uses.
+     * else on the page scrolls it. Capped against the viewport rather than left
+     * to overflow it, on the same formula the sheet uses. The cap sits on the
+     * scroller so the panel shrink-wraps it and its rounded clip follows.
      */
     max-height: calc(100vh - 100px);
     max-height: calc(100dvh - 100px);
@@ -491,6 +524,13 @@ const persistName = `lt-navbar-${locale}`;
     height: calc(100dvh - 100px);
     max-height: calc(100vh - 100px);
     border-radius: 24px;
+    /*
+     * Clips the child scroller's scrollbar to the 24px corners — the whole
+     * reason the scroll moved inward. `hidden` rather than the `overflow-y: auto`
+     * this element used to carry: the sheet itself must never scroll, or its bar
+     * would be back outside the clip.
+     */
+    overflow: hidden;
     background-image: var(--lt-glass-sheen);
     box-shadow: var(--lt-shadow-glass);
     visibility: hidden;
@@ -505,6 +545,19 @@ const persistName = `lt-navbar-${locale}`;
       transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
       opacity 0.2s ease,
       visibility 0s linear 0.32s;
+  }
+
+  /*
+   * The actual scroller. Full height of the sheet, so the travel range is the
+   * panel's own and the thumb reaches both rounded ends — and is cut by them.
+   * `overscroll-behavior: contain` keeps a flick at either end from chaining to
+   * the document behind the glass, which is the same reason the dialog body has
+   * it. Lenis is stopped while the sheet is open, so this scrolls natively.
+   */
+  .lt-mobile-menu-scroll {
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .lt-mobile-menu[data-open="true"] {
