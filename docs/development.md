@@ -276,10 +276,15 @@ GPLv3，需要单独评估），见 [public/scales/README.md](../public/scales/R
 | 查表 | `src/i18n/ui.ts` | `useTranslations()`、`routeUrl()`、`hreflangAlternates()` |
 | 路由表 | `src/i18n/routes.ts` | `ROUTES` 与 `TRANSLATED_ROUTES`：哪个语种翻了哪个页面 |
 | 路由 | `src/pages/[lang]/*.astro` | 每个已发布语种一份，正文共用 `src/components/pages/*.astro` |
-| 首访识别 | `functions/_middleware.ts` | `Accept-Language` → 302，见[部署文档](./deployment.md#语言协商) |
+| 法律文档 | `src/config/legal.ts` | 只存**结构**（slug、`lastUpdated`、每节有无正文、几个子节），正文按位置派生 key 落在词典里 |
+| 首访识别 / 404 语言 | `functions/_middleware.ts` | `Accept-Language` → 302，以及按语种替换 404 文档，见[部署文档](./deployment.md#语言协商) |
 
 页面组件里**不传 locale**，一律读 `Astro.currentLocale`（Astro 按路由填：`/en/features`
 → `en`，`/features` → 默认语种）。这样路由文件只是壳，两份实现不可能对不上。
+
+十个语种当前都翻了全部 12 条路由。`TRANSLATED_ROUTES` 因此对每个语种都是
+`ALL_ROUTES`——但**保留这张表**，因为「某语种只翻一部分」是随时可能再出现的状态，而
+链接生成、`hreflang`、中间件的重定向闸门三处都靠它。
 
 ### 加一个语种
 
@@ -305,23 +310,66 @@ GPLv3，需要单独评估），见 [public/scales/README.md](../public/scales/R
 - 中间件**不会**把首访者重定向到该路径的语种版本。否则会先 404、再被 404 回退弹回
   原路径、然后又被识别一次——死循环
 
-手输或过期的 `/en/status` 由中间件 302 回 `/status`。
+带语种前缀的路径 404 时，中间件先探一次去掉前缀的路径：命中就 302 过去，没命中就直接
+回该语种的 404 文档。
 
 Astro 自带的 `i18n.fallback` **不要用**：它认不出 `src/pages/[lang]/*` 建出来的路由，
 会把 `/en` 当成一个待翻译的普通页面，在 `/en/en` 生成跳转壳，而且它给 `/en/features`
 生成的壳优先级**高于**真正的英文页——真的译文会被直接丢掉，构建只报一条 warning。
 它产出的壳还是 2 秒 meta refresh、canonical 指向裸域，等于两跳重定向。
 
+### 404 页为什么是路由而不是产物
+
+`dist/404.html` 只能有一份——**这个文件本身就是 Pages 的配置**（见部署文档）。所以九种
+译文是普通路由 `src/pages/[lang]/404.astro`，构建出 `/<locale>/404/`，由中间件在 HTML
+404 上取对应那份、仍以 404 状态返回。`ROUTES` 里因此有一条 `notFound: "/404"`，
+`/404` 与 `/<locale>/404/` 都能直接访问，这与本站一直允许 `curl /404` 是一致的。
+
+它是 `noindex` 的，所以 `BaseLayout` 不给它输出 `hreflang` 簇——`/open` 同理。给
+noindex 页面声明 alternate 没有意义，而且簇不对称比不声明更糟。
+
+### App 契约：这几样不能被多语言动到
+
+`app/lib/core/config/app_config.dart` 直接从 `siteBaseUrl` 拼这些 URL，**没有语种前缀**，
+所以它们必须永远以默认语种、原路径、原字节提供：
+
+| URL | 用途 |
+|-----|------|
+| `/data/legal.json` | 法律文档目录（版本 + 各文档 `lastUpdated`），客户端据此判断缓存是否过期 |
+| `/data/friend-links.json` | 友链目录，含 QQ 群原生唤起所需的 `groupUin` / `androidKey` / `iosAuthSig` |
+| `/legal/<slug>.md` | 法律文档的 Markdown 源，客户端**原生渲染**而非 WebView |
+| `/legal/<slug>/` | 同上的 WebView 兜底 |
+
+`config/legal.ts` 与 `config/friendLinks.ts` 的重构都是**加法**：默认语种的输出字节不变，
+译文走 `/<locale>/legal/<slug>.md` 这类新路径。`renderLegalMarkdown()` 只在非默认语种
+多输出一行「以简体中文为准」的声明，这正是默认语种那份必须保持原样的原因——它是 App
+会缓存并按 `lastUpdated` 校验的文档。
+
+改这两个文件之后必须比对摘要：
+
+```sh
+npx astro build
+certutil -hashfile dist\data\legal.json SHA256
+certutil -hashfile dist\data\friend-links.json SHA256
+certutil -hashfile dist\legal\terms.md SHA256
+```
+
+`tools/check-i18n.mjs` 会走 `legalDocuments` 的结构、按位置推出全部 key，并断言默认
+语种词典一个不缺、也没有哪个 `legal.*` key 指向已不存在的章节。派生 key 是这套 i18n
+里唯一一处类型系统管不到的地方：加一节而忘了十份词典，页面上就会直接渲染出
+`legal.privacy.s12.heading`。
+
 ### 两个会咬人的地方
 
 **字体裁剪把注释也算进去，而十种语言基本上取消了这项优化。** `pruneFontSubsets()`
 扫的是 `src/**` 的源码文本，数据和注释一视同仁。全站十种语言意味着字符集必须覆盖繁体
-专有字、假名、谚文、西里尔与越南语拉丁扩展。构建产物实测：保留的 MiSans 分片
-50 → 102（共 112），其 `@font-face` 文本 71 KB → 148 KB（gzip 25 → 52 KB，brotli
-8 → 17 KB）；整份共享样式表 133 KB → 210 KB raw、38 → 66 KB gzip、19.0 → 27.9 KB
-brotli，其中字体分片占 raw 的 70%，也几乎是全部增量。这是多语言的固有代价，不是
-可以顺手优化掉的浪费。真正传输的增量是 brotli 那 **+8.8 KB**；raw 的 +77 KB 主要是
-解析成本，而它几乎全是 `unicode-range` 的十六进制列表，所以压缩率极高。
+专有字、假名、谚文、西里尔与越南语拉丁扩展。全站翻完之后的构建产物实测：保留的
+MiSans 分片 50 → 110（共 112），其 `@font-face` 文本 71 KB → 160 KB（gzip 25 → 57 KB，
+brotli 8.1 → 18.6 KB）；整份共享样式表 133 KB → 222 KB raw、38 → 70 KB gzip、
+19.0 → 29.3 KB brotli，其中字体分片占 raw 的 72%，也几乎是全部增量。也就是说这个裁剪
+插件已经没什么可裁的了——这是字符集真的横跨简繁汉字、假名、谚文、西里尔与越南语之后
+的必然结果，不是可以顺手优化掉的浪费。真正传输的增量是 brotli 那 **+10.3 KB**；raw 的
++89 KB 主要是解析成本，而它几乎全是 `unicode-range` 的十六进制列表，所以压缩率约 6:1。
 
 几条相关的约定：
 

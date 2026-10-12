@@ -325,6 +325,75 @@ if (!FEATURE_BLOCK) {
 }
 
 /* -------------------------------------------------------------------------- */
+/* Legal document shape                                                        */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * `src/config/legal.ts` holds only the *shape* of the three documents — how many
+ * sections, which have their own paragraphs, how many subsections — and the prose
+ * lives in the dictionaries under positionally derived keys
+ * (`legal.<slug>.s<i>.heading`, `.s<i>.body`, `.s<i>.sub<j>.*`).
+ *
+ * Derived keys are the one place in this codebase where a rename cannot be caught
+ * by the type system: add a section to the shape and forget the ten dictionaries,
+ * and the page renders `legal.privacy.s12.heading` in production. So the shape is
+ * walked here and every key it implies is asserted in both directions.
+ */
+const legalSource = read("src/config/legal.ts");
+const LEGAL_ARRAY = /export const legalDocuments: LegalDocumentShape\[\] = \[([\s\S]*?)\n\];/.exec(legalSource);
+if (!LEGAL_ARRAY) {
+  fail("src/config/legal.ts: `legalDocuments` no longer matches the expected shape — update LEGAL_ARRAY in this script");
+} else {
+  const expected = new Set(["legal.lastUpdated", "legal.attribution", "legal.translationNotice", "legal.index.title", "legal.index.description", "legal.index.subtitle", "legal.back"]);
+  const docBlocks = [...LEGAL_ARRAY[1].matchAll(/slug:\s*"([^"]+)",[\s\S]*?sections:\s*\[([\s\S]*?)\n {4}\],/g)];
+  if (docBlocks.length === 0) {
+    fail("src/config/legal.ts: found no documents inside `legalDocuments`");
+  }
+  for (const doc of docBlocks) {
+    const slug = doc[1];
+    for (const suffix of ["title", "shortTitle", "description"]) expected.add(`legal.${slug}.${suffix}`);
+    const sections = [...doc[2].matchAll(/\{\s*body:\s*(true|false),\s*subsections:\s*(\d+)\s*\}/g)];
+    sections.forEach((section, i) => {
+      const n = i + 1;
+      expected.add(`legal.${slug}.s${n}.heading`);
+      if (section[1] === "true") expected.add(`legal.${slug}.s${n}.body`);
+      for (let j = 1; j <= Number(section[2]); j++) {
+        expected.add(`legal.${slug}.s${n}.sub${j}.heading`);
+        expected.add(`legal.${slug}.s${n}.sub${j}.body`);
+      }
+    });
+  }
+
+  /*
+   * Completeness against the *default* dictionary only. Per-locale gaps are
+   * already reported by the dictionary comparison above, and repeating them here
+   * for all ten files turns one missing section into ten near-identical errors.
+   * What this adds is the direction nothing else can see: a key the shape implies
+   * but no dictionary defines, a key a dictionary defines that the shape no longer
+   * produces, and the string-vs-array distinction for `body`.
+   */
+  const baseDict = dictionaries.get(defaultLocale);
+  if (baseDict) {
+    for (const key of expected) {
+      if (!Object.prototype.hasOwnProperty.call(baseDict, key)) {
+        fail(`${defaultLocale}.json is missing "${key}", which src/config/legal.ts's shape requires`);
+        continue;
+      }
+      const shouldBeArray = /\.body$/.test(key);
+      if (shouldBeArray !== Array.isArray(baseDict[key])) {
+        fail(`${defaultLocale}.json: "${key}" must be ${shouldBeArray ? "an array of paragraphs" : "a string"}`);
+      }
+    }
+    for (const key of Object.keys(baseDict)) {
+      if (key.startsWith("legal.") && !expected.has(key)) {
+        fail(`${defaultLocale}.json has "${key}", but no section in src/config/legal.ts produces it`);
+      }
+    }
+  }
+  notes.push(`legal: ${docBlocks.length} documents, ${expected.size} keys implied by the shape`);
+}
+
+/* -------------------------------------------------------------------------- */
 /* routes.ts route table, and (with --dist) the built output                   */
 /* -------------------------------------------------------------------------- */
 

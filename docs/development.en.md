@@ -313,11 +313,17 @@ time. The division of labour is fixed by that:
 | Lookup | `src/i18n/ui.ts` | `useTranslations()`, `routeUrl()`, `hreflangAlternates()` |
 | Route table | `src/i18n/routes.ts` | `ROUTES` and `TRANSLATED_ROUTES`: which locale has which page |
 | Routes | `src/pages/[lang]/*.astro` | One per published locale; the body is shared via `src/components/pages/*.astro` |
-| First-visit detection | `functions/_middleware.ts` | `Accept-Language` → 302, see [deployment](./deployment.en.md#language-negotiation) |
+| Legal documents | `src/config/legal.ts` | Holds only the **shape** (slug, `lastUpdated`, whether each section has prose, how many subsections); the words are positional keys in the dictionaries |
+| First-visit detection, 404 language | `functions/_middleware.ts` | `Accept-Language` → 302, plus substituting a localized 404 document. See [deployment](./deployment.en.md#language-negotiation) |
 
 Page components do **not** take a `locale` prop. They read `Astro.currentLocale`,
 which Astro fills from the route (`/en/features` → `en`, `/features` → the
 default). The route files are then pure shells, and the two cannot disagree.
+
+All ten locales currently translate all twelve routes, so `TRANSLATED_ROUTES` is
+`ALL_ROUTES` for every one of them. The table stays a table: "this locale is only
+partly translated" is a state the site can be in again at any time, and link
+generation, `hreflang` and the middleware's redirect guard all read it.
 
 ### Adding a locale
 
@@ -349,8 +355,8 @@ claim:
   Doing so 404s, the 404 fallback sends them back, and detection fires again — an
   infinite loop
 
-Hand-typed and stale `/en/status` URLs are 302'd back to `/status` by the
-middleware.
+A 404 on a prefixed path is probed once against the unprefixed equivalent: a hit
+302s there, a miss serves that locale's own 404 document.
 
 Do **not** reach for Astro's `i18n.fallback` here. It does not understand routes
 built by `src/pages/[lang]/*`: it treats `/en` as an ordinary page needing an
@@ -359,20 +365,70 @@ English version, emits a redirect stub at `/en/en`, and the stub it emits for
 from the build with nothing but a warning. Its stubs are also 2-second meta-refresh
 documents canonicalising to the apex domain, which is a two-hop chain.
 
+### Why the 404 page is a route and not an artefact
+
+There can only be one `dist/404.html` — **that file is the Pages configuration** (see
+the deployment doc). So the nine translations are ordinary routes,
+`src/pages/[lang]/404.astro`, built to `/<locale>/404/` and substituted in by the
+middleware at status 404. That is why `ROUTES` has a `notFound: "/404"` entry: both
+`/404` and `/<locale>/404/` are directly reachable, which is consistent with the site
+having always allowed `curl /404`.
+
+It is `noindex`, so `BaseLayout` emits no `hreflang` cluster for it — same for
+`/open`. Claiming alternates for a page nobody may index is pointless, and an
+asymmetric cluster is worse than no cluster.
+
+### The app contract: these must not move
+
+`app/lib/core/config/app_config.dart` builds these URLs straight from
+`siteBaseUrl`, with **no locale prefix**, so they must keep being served at the
+default locale, on the original path, byte for byte:
+
+| URL | What the app does with it |
+|-----|---------------------------|
+| `/data/legal.json` | Legal catalog (version + per-document `lastUpdated`); the client uses it to decide whether its cache is stale |
+| `/data/friend-links.json` | Friend-link catalog, including the `groupUin` / `androidKey` / `iosAuthSig` the native QQ-group handoff needs |
+| `/legal/<slug>.md` | Markdown source, rendered **natively** rather than in a WebView |
+| `/legal/<slug>/` | The WebView fallback for the same document |
+
+Both `config/legal.ts` and `config/friendLinks.ts` were restructured **additively**:
+the default-locale output is unchanged byte for byte, and translations live at new
+paths like `/<locale>/legal/<slug>.md`. `renderLegalMarkdown()` emits one extra line
+— the "the Simplified Chinese governs" notice — and only for non-default locales.
+That is precisely why the default output has to stay identical: it is a document the
+app caches and validates against `lastUpdated`.
+
+After touching either file, compare digests:
+
+```sh
+npx astro build
+certutil -hashfile dist\data\legal.json SHA256
+certutil -hashfile dist\data\friend-links.json SHA256
+certutil -hashfile dist\legal\terms.md SHA256
+```
+
+`tools/check-i18n.mjs` walks `legalDocuments`, derives every positional key, and
+asserts the default dictionary has all of them and that no `legal.*` key points at a
+section that no longer exists. Derived keys are the one place in this i18n setup the
+type system cannot reach: add a section and forget the ten dictionaries, and
+production renders `legal.privacy.s12.heading`.
+
 ### Two things that bite
 
 **The font pruning counts comments, and ten languages mostly defeat it.**
 `pruneFontSubsets()` scans the source *text* under `src/`, data and comments alike.
 Covering all ten locales means the charset has to include traditional-only hanzi,
 kana, hangul, Cyrillic and Vietnamese Latin Extended Additional. Measured on the
-built stylesheet: MiSans subsets kept go 50 → 102 of 112, its `@font-face` text
-goes 71 KB → 148 KB raw (25 → 52 KB gzip, 8 → 17 KB brotli), and the whole shared
-file goes 133 KB → 210 KB raw, 38 → 66 KB gzip, 19.0 → 27.9 KB brotli. Font
-subsets are 70% of the shared CSS by raw bytes and essentially all of the growth.
-That is the inherent cost of being multilingual, not waste to be optimised away.
-The number that transfers is the brotli delta, **+8.8 KB** on a render-blocking
-file; the +77 KB raw mostly costs parse time, and it is almost entirely
-`unicode-range` hex lists, which is why it compresses so well.
+built stylesheet with every page translated: MiSans subsets kept go 50 → 110 of
+112, its `@font-face` text goes 71 KB → 160 KB raw (25 → 57 KB gzip, 8.1 → 18.6 KB
+brotli), and the whole shared file goes 133 KB → 222 KB raw, 38 → 70 KB gzip,
+19.0 → 29.3 KB brotli. Font subsets are 72% of the shared CSS by raw bytes and
+essentially all of the growth. The pruning plugin is left with almost nothing to
+drop, which is the honest consequence of a charset that really does span simplified
+and traditional hanzi, kana, hangul, Cyrillic and Vietnamese — not waste to be
+optimised away. The number that transfers is the brotli delta, **+10.3 KB** on a
+render-blocking file; the +89 KB raw mostly costs parse time, and it is almost
+entirely `unicode-range` hex lists, which is why it compresses about 6:1.
 
 Three things worth knowing before trying:
 

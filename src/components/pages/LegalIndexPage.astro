@@ -1,0 +1,69 @@
+---
+/**
+ * The legal index: one card per document.
+ *
+ * Extracted from `src/pages/legal/index.astro` so the default locale and the nine
+ * prefixed ones share it; see the note in `HomePage.astro`.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import Icon from "../../components/Icon.astro";
+import { legalDocumentsFor } from "../../config/legal";
+import { resolveLocale, routeUrl, useTranslations, type RouteKey } from "../../i18n/ui";
+
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const docs = legalDocumentsFor(locale);
+
+/*
+ * Icons keyed by slug, not by position: the order of `legalDocuments` is a
+ * content decision and the icon must follow its document, not its index.
+ */
+const ICONS: Record<string, string> = {
+  terms: "gavel",
+  privacy: "privacy_tip",
+  "cross-border": "public",
+};
+
+/**
+ * Each document is a route in its own right, so `routeUrl()` decides whether this
+ * locale links to its own translation or to the Chinese original.
+ *
+ * The trailing slash is preserved: `dist/legal/terms/index.html` is what Pages
+ * serves, and `/legal/terms` without it costs a 308. The app builds these URLs
+ * itself from `siteBaseUrl` (`app_config.dart`'s `termsOfServiceUrl` and friends)
+ * and always unprefixed, which is fine -- the default locale's URL is unchanged
+ * by any of this, and `hreflang` is what tells a crawler the two are alternates.
+ */
+const DOC_ROUTES: Record<string, RouteKey> = {
+  terms: "legalTerms",
+  privacy: "legalPrivacy",
+  "cross-border": "legalCrossBorder",
+};
+const docHref = (slug: string) => `${routeUrl(locale, DOC_ROUTES[slug] ?? "legal")}/`;
+---
+
+<BaseLayout title={t("legal.index.title")} description={t("legal.index.description")}>
+  <PageHeader title={t("legal.index.title")} subtitle={t("legal.index.subtitle")} />
+
+  <section class="relative pb-24 px-4">
+    <div class="max-w-content mx-auto">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {
+          docs.map((doc, i) => (
+            <div class="lt-reveal-lift h-full" style={`--lt-reveal-delay: ${i * 80}ms`}>
+              <a href={docHref(doc.slug)} class="lt-lift state-layer glass rounded-card p-6 no-underline h-full flex flex-col">
+                <span class="lt-icon-chip text-primary text-[22px] mb-3.5">
+                  <Icon name={ICONS[doc.slug] ?? "description"} />
+                </span>
+                <h2 class="text-title-medium text-on-surface mb-2">{doc.title}</h2>
+                <p class="text-body-medium text-on-surface-variant mb-4 flex-1">{doc.description}</p>
+                <p class="text-body-small text-outline">{doc.lastUpdatedLine}</p>
+              </a>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</BaseLayout>

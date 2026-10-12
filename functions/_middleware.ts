@@ -1,4 +1,6 @@
 import {
+  DEFAULT_LOCALE,
+  getLocale,
   getLocaleByPathSegment,
   isPublished,
   matchLocaleTag,
@@ -256,8 +258,37 @@ export async function onRequest(context: Context): Promise<Response> {
     // static/function pipeline.
     const accept = request.headers.get("accept") ?? "";
     if (accept.includes("text/html") && env?.ASSETS) {
+      /*
+       * Serve the launch page in the visitor's language.
+       *
+       * A rewrite, not a redirect, exactly as before: the page's script reads
+       * `location.pathname` to work out which `luotopia://app/<path>` to hand the
+       * OS, so the browser must never leave the original deep-link URL. Only the
+       * document behind it changes.
+       *
+       * `?lang=` wins outright here, and it is the parameter the *app* is expected
+       * to pass: the app knows its own locale, which beats inferring one from the
+       * OS. That matters because the two disagree often enough to be a support
+       * issue — an English system running an app the user deliberately set to
+       * Chinese. No cookie is written: this is a different host from
+       * `www.whu.sb`, so a cookie set here would not be sent there and would only
+       * look like a preference that never applies.
+       *
+       * Falls back to the default locale's page rather than 404ing, so an
+       * unpublished or bogus `lang` cannot break a deep link.
+       */
+      const requested = url.searchParams.get("lang");
+      const wanted =
+        (requested ? matchLocaleTag(requested) : undefined) ??
+        readLangCookie(request) ??
+        // `accept` above is the Accept header, which is what gates this branch;
+        // negotiation needs Accept-Language. Easy to conflate, and the failure is
+        // silent: every deep link would serve the default locale.
+        negotiateLocale(request.headers.get("accept-language"));
+      const target = wanted && wanted !== DEFAULT_LOCALE ? getLocale(wanted) : undefined;
+      const landing = target?.path ? `/${target.path}/open/` : "/open/";
       return env.ASSETS.fetch(
-        new Request(new URL("/open/", url), {
+        new Request(new URL(landing, url), {
           method: "GET",
           headers: { accept: "text/html" },
         }),
@@ -419,19 +450,84 @@ export async function onRequest(context: Context): Promise<Response> {
    * No loop: the target has no locale prefix, so this branch cannot fire on it.
    * If the unprefixed path is *also* a miss, the visitor gets the real 404 page.
    */
-  if (response.status === 404 && prefersHtml(request)) {
+  if (response.status === 404 && prefersHtml(request) && env?.ASSETS) {
     const segments = url.pathname.split("/").filter(Boolean);
-    if (segments.length > 0 && getLocaleByPathSegment(segments[0])) {
+    const prefixed = segments.length > 0 ? getLocaleByPathSegment(segments[0]) : undefined;
+
+    /*
+     * A miss on a locale-prefixed path has two possible causes, and they need
+     * different answers.
+     *
+     * The path might exist in the default locale but not in this one — the state
+     * a partly-translated site is in. Then the right answer is a 302 to the
+     * unprefixed URL, because the content the visitor wanted does exist.
+     *
+     * Or it might not exist anywhere, in which case a 302 would just move the
+     * miss and the visitor gets the default locale's 404 page in a language they
+     * may not read. So probe first, and only redirect on a hit.
+     */
+    if (prefixed) {
       const rest = segments.slice(1).join("/");
-      await response.body?.cancel();
-      return new Response(null, {
-        status: 302,
-        headers: {
-          location: `/${rest}${url.search}`,
-          "cache-control": "no-store",
-          vary: "Accept-Language",
-        },
-      });
+      const probe = await env.ASSETS.fetch(
+        new Request(new URL(`/${rest}${url.search}`, url), {
+          method: "GET",
+          headers: { accept: "text/html" },
+        }),
+      );
+      await probe.body?.cancel();
+      if (probe.status !== 404) {
+        await response.body?.cancel();
+        return new Response(null, {
+          status: 302,
+          headers: {
+            location: `/${rest}${url.search}`,
+            "cache-control": "no-store",
+            vary: "Accept-Language",
+          },
+        });
+      }
+    }
+
+    /*
+     * Serve this visitor's own 404 document, still at status 404.
+     *
+     * `dist/404.html` is the file that tells Pages this project has a custom 404
+     * rather than being an SPA, and there can only be one — so the nine
+     * translations are ordinary routes at `/<locale>/404/` (built by
+     * `src/pages/[lang]/404.astro`) and get substituted in here. That is the same
+     * job the plain-text branch below does, choosing language instead of
+     * representation, and it belongs in the same place for the same reason: the
+     * platform decides that a path missed, and only a Function can decide what the
+     * visitor is shown for it.
+     *
+     * Locale comes from the URL prefix if there is one, else the recorded choice,
+     * else detection — the same precedence as everywhere else, so a 404 does not
+     * suddenly speak a different language from the page the visitor came from.
+     *
+     * `ASSETS.fetch` goes straight to the asset store and does not re-enter
+     * Functions, so this cannot recurse.
+     */
+    const wanted =
+      prefixed?.code ??
+      readLangCookie(request) ??
+      negotiateLocale(request.headers.get("accept-language"));
+    const target = wanted && wanted !== DEFAULT_LOCALE ? getLocale(wanted) : undefined;
+    if (target?.path) {
+      const localized = await env.ASSETS.fetch(
+        new Request(new URL(`/${target.path}/404/`, url), {
+          method: "GET",
+          headers: { accept: "text/html" },
+        }),
+      );
+      if (localized.status === 200) {
+        await response.body?.cancel();
+        const headers = new Headers(localized.headers);
+        // A 404 must not stick: the path may exist after the next deploy.
+        headers.set("cache-control", "public, max-age=0, must-revalidate");
+        headers.append("vary", "Accept-Language, Cookie");
+        return new Response(localized.body, { status: 404, headers });
+      }
+      await localized.body?.cancel();
     }
   }
 

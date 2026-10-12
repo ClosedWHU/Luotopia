@@ -1,15 +1,27 @@
 ---
-import { friendLinkCatalog, categoryLabels } from "../config/friendLinks";
+import {
+  friendLinkCatalogFor,
+  friendLinkCategoryKey,
+  type FriendLinkItem,
+} from "../config/friendLinks";
 import Icon from "./Icon.astro";
+import { resolveLocale, useTranslations } from "../i18n/ui";
 
-const items = friendLinkCatalog.items;
-const grouped = new Map<string, typeof items>();
+const t = useTranslations(resolveLocale(Astro.currentLocale));
+
+/*
+ * The localised catalog, not the one `/data/friend-links.json` serves — that
+ * document is the app's wire format and stays in the default locale. See the
+ * comment on `links` in `src/config/friendLinks.ts`.
+ */
+const items = friendLinkCatalogFor(t).items;
+const grouped = new Map<string, FriendLinkItem[]>();
 for (const item of items) {
   const cat = item.category || "other";
   if (!grouped.has(cat)) grouped.set(cat, []);
   grouped.get(cat)!.push(item);
 }
-const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
+const catOrder = ["feedback", "clubOrg", "partnerApp", "other"] as const;
 ---
 
 {
@@ -18,14 +30,33 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
     if (!group) return null;
     return (
       <div class="mb-8 last:mb-0">
-        <h3 class="text-title-small text-outline mb-4">{categoryLabels[cat] || cat}</h3>
+        <h3 class="text-title-small text-outline mb-4">{t(friendLinkCategoryKey(cat))}</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {group.map((link) => {
             if (link.action.type === "dialog") {
+              /*
+               * The dialog's whole payload rides on its trigger.
+               *
+               * The script below used to build this table by importing the
+               * catalog, which put every translated dialog string into the
+               * client bundle. It also built it once, at module execution — and
+               * a bundled script is executed once per URL, so after a client
+               * navigation to the same page in another language the table would
+               * still hold the previous language while the DOM had moved on.
+               * Reading the content off the element that was clicked is correct
+               * in both cases, and is the same `data-i18n-*` handoff
+               * `ScreenshotCarousel.astro` uses. Not `define:vars`: that inlines
+               * the script and takes it out of the bundle.
+               */
               return (
                 <button
                   type="button"
                   data-friend-link-dialog={link.id}
+                  data-i18n-dialog-title={link.action.title ?? link.title}
+                  data-i18n-dialog-body={link.action.body}
+                  data-i18n-dialog-image={link.action.image?.url}
+                  data-i18n-dialog-button-label={link.action.button?.label}
+                  data-i18n-dialog-button-url={link.action.button?.url}
                   class="lt-flink state-layer flex items-center gap-3 p-3 rounded-nested cursor-pointer border-none w-full text-left"
                 >
                   {link.image && (
@@ -80,6 +111,9 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
   id="friend-link-dialog"
   class="lt-dialog"
   aria-labelledby="friend-link-dialog-title"
+  data-i18n-qr-alt={t("community.friend.dialog.qrAlt")}
+  data-i18n-qr-alt-generic={t("community.friend.dialog.qrAltGeneric")}
+  data-i18n-open-fallback={t("community.friend.dialog.openFallback")}
 >
   <div class="lt-dialog-card w-full max-w-sm rounded-group">
     <h3
@@ -117,7 +151,7 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
         id="friend-link-dialog-close"
         class="lt-dialog-close state-layer inline-flex items-center rounded-full px-5 py-2.5 bg-transparent text-primary border-none cursor-pointer text-label-large"
       >
-        关闭
+        {t("community.friend.dialog.close")}
       </button>
     </div>
   </div>
@@ -361,7 +395,6 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
 </style>
 
 <script>
-  import { friendLinkCatalog } from "../config/friendLinks";
   import { onBeforeNavigation } from "../scripts/page-lifecycle";
 
   interface DialogContent {
@@ -371,17 +404,40 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
     button: { label: string; url: string } | null;
   }
 
-  // Plain loops, not `flatMap`/`Object.fromEntries` (Chrome 69/73 — above this
-  // bundle's ~66 floor; `?.`/`??` are fine, esbuild lowers those to the target).
-  const dialogData: Record<string, DialogContent> = {};
-  for (const item of friendLinkCatalog.items) {
-    const action = item.action;
-    if (action.type !== "dialog") continue;
-    dialogData[item.id] = {
-      title: action.title ?? item.title,
-      body: action.body ?? "",
-      image: action.image?.url ?? null,
-      button: action.button ? { label: action.button.label, url: action.button.url } : null,
+  /**
+   * `{name}` substitution — the same helper `ScreenshotCarousel.astro` carries.
+   *
+   * `String.prototype.replaceAll` is Chrome 85 and this bundle's floor is 66, so
+   * it is a global regex. An unknown placeholder is left visible rather than
+   * blanked, so a typo in a dictionary shows up in the alt text instead of
+   * silently deleting part of it. The `?.` / `??` below are fine: esbuild lowers
+   * those to the target.
+   */
+  function fill(template: string, vars: Record<string, string | number>): string {
+    return template.replace(/\{([a-zA-Z][a-zA-Z0-9]*)\}/g, (match, name: string) =>
+      Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : match,
+    );
+  }
+
+  /*
+   * The dialog's content, read off the trigger that was clicked.
+   *
+   * Not imported from the catalog. A `<script>` is its own module, so importing
+   * `../config/friendLinks` here put every translated dialog string — and
+   * therefore every dictionary value behind it — into the client bundle. It also
+   * built the table once, at module execution, and a bundled script runs once
+   * per URL: after a client-side navigation to the same page in another language
+   * the table would still hold the previous language while the DOM had moved on.
+   * See the comment on the trigger's `data-i18n-*` attributes.
+   */
+  function dialogContentFor(trigger: HTMLElement): DialogContent {
+    const data = trigger.dataset;
+    const buttonUrl = data.i18nDialogButtonUrl;
+    return {
+      title: data.i18nDialogTitle ?? "",
+      body: data.i18nDialogBody ?? "",
+      image: data.i18nDialogImage ?? null,
+      button: buttonUrl ? { label: data.i18nDialogButtonLabel ?? "", url: buttonUrl } : null,
     };
   }
 
@@ -475,8 +531,8 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
     unlockScroll();
   }
 
-  function openDialog(id: string | null) {
-    const data = id ? dialogData[id] : undefined;
+  function openDialog(trigger: HTMLElement | null) {
+    const data = trigger ? dialogContentFor(trigger) : undefined;
     if (!data) return;
 
     const dialog = document.getElementById("friend-link-dialog") as HTMLDialogElement | null;
@@ -504,7 +560,9 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
     else dialog.removeAttribute("aria-describedby");
 
     if (data.image) {
-      imageEl.alt = data.title ? `${data.title}二维码` : "链接二维码";
+      imageEl.alt = data.title
+        ? fill(dialog.dataset.i18nQrAlt ?? "", { title: data.title })
+        : (dialog.dataset.i18nQrAltGeneric ?? "");
       imageEl.src = data.image;
       imageWrap.hidden = false;
     } else {
@@ -519,7 +577,7 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
 
     if (data.button?.url) {
       actionEl.href = data.button.url;
-      actionEl.textContent = data.button.label || "打开";
+      actionEl.textContent = data.button.label || (dialog.dataset.i18nOpenFallback ?? "");
       actionEl.hidden = false;
     } else {
       actionEl.removeAttribute("href");
@@ -546,7 +604,7 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"];
   document.addEventListener("click", (event) => {
     const trigger = (event.target as Element | null)?.closest("[data-friend-link-dialog]");
     if (!trigger) return;
-    openDialog(trigger.getAttribute("data-friend-link-dialog"));
+    openDialog(trigger as HTMLElement);
   });
 
   onBeforeNavigation(teardownDialog);

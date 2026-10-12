@@ -1,53 +1,9 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import PageHeader from "../components/PageHeader.astro";
-import FriendLinks from "../components/FriendLinks.astro";
-import Icon from "../components/Icon.astro";
+/*
+ * The default locale's community page. Body shared with
+ * `[lang]/community.astro` — see the same note in `index.astro`.
+ */
+import CommunityPage from "../components/pages/CommunityPage.astro";
 ---
 
-<BaseLayout title="社区">
-  <PageHeader title="社区" subtitle="加入我们，一起构建更好的校园数字生态" />
-
-  <section class="relative pb-24 px-4">
-    <div class="max-w-content mx-auto">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        <div class="lt-reveal-lift lt-lift glass rounded-card p-6 flex gap-4">
-          <span class="lt-icon-chip text-primary text-[22px]"><Icon name="forum" /></span>
-          <div class="min-w-0">
-            <h2 class="text-title-medium text-on-surface mb-1">QQ 群</h2>
-            <p class="text-body-medium text-on-surface-variant mb-3">加入 Luotopia 用户交流群，获取最新动态和帮助。</p>
-            <p class="text-body-small text-outline">
-              群号：<span class="font-medium text-primary">994642924</span>
-            </p>
-          </div>
-        </div>
-
-        <div class="lt-reveal-lift lt-lift glass rounded-card p-6 flex gap-4" style="--lt-reveal-delay: 80ms">
-          <span class="lt-icon-chip text-primary text-[22px]"><Icon name="code" /></span>
-          <div class="min-w-0">
-            <h2 class="text-title-medium text-on-surface mb-1">GitHub</h2>
-            <p class="text-body-medium text-on-surface-variant mb-3">开放协作，欢迎反馈、Issue 与社区参与。</p>
-            <a href="https://github.com/ClosedWHU" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-body-medium font-medium text-primary hover:underline">
-              github.com/ClosedWHU
-              <Icon name="arrow_outward" class="text-[16px]" />
-            </a>
-          </div>
-        </div>
-
-        <div class="lt-reveal-lift lt-lift glass rounded-card p-6 flex gap-4" style="--lt-reveal-delay: 160ms">
-          <span class="lt-icon-chip text-primary text-[22px]"><Icon name="rate_review" /></span>
-          <div class="min-w-0">
-            <h2 class="text-title-medium text-on-surface mb-1">应用内社区</h2>
-            <p class="text-body-medium text-on-surface-variant mb-3">论坛「珞珈防空洞」与课程给分评价已内置在 App 中，论坛标签可在「设置 → 导航」开启。</p>
-            <p class="text-body-small text-outline">帖子、评论、附件、声望与排行榜</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="lt-reveal-lift glass rounded-group p-6 sm:p-8" style="--lt-reveal-delay: 140ms">
-        <h2 class="text-title-large text-on-surface mb-6">友情链接</h2>
-        <FriendLinks />
-      </div>
-    </div>
-  </section>
-</BaseLayout>
+<CommunityPage />

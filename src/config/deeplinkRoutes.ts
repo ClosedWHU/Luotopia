@@ -9,9 +9,9 @@
  * can make honestly — anything deeper is the app's own error screen to handle.
  *
  * Two consumers, and the wording matters for both:
- * - `open.astro` warns that an unrecognised link will still be handed to the
+ * - `components/pages/OpenPage.astro` warns that an unrecognised link will still be handed to the
  *   app, because a stale allowlist must never block a launch that would work.
- * - `404.astro` offers to re-open an unknown *site* path on the deep-link host,
+ * - `components/pages/NotFoundPage.astro` offers to re-open an unknown *site* path on the deep-link host,
  *   where it might well be a valid app route.
  */
 export const DEEPLINK_ROOT_SEGMENTS = [

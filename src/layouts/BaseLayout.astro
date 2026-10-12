@@ -42,7 +42,13 @@
   const locale = resolveLocale(Astro.currentLocale);
   const meta = localeMeta(locale);
   const t = useTranslations(locale);
-  const alternates = hreflangAlternates(Astro.url.pathname);
+  /*
+   * No alternate-language cluster on a `noindex` page. Crawlers ignore `hreflang`
+   * there, and `/open` and `/404` would otherwise each emit eleven `<link>` tags
+   * describing a cluster nobody is allowed to index. Suppressing on every locale
+   * keeps the cluster symmetric — an asymmetric one is worse than an absent one.
+   */
+  const alternates = noindex ? [] : hreflangAlternates(Astro.url.pathname);
   const resolvedDescription = description ?? t("meta.default.description");
   const resolvedOgDescription = description ?? t("meta.default.ogDescription");
 ---
