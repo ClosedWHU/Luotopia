@@ -38,29 +38,31 @@ const isActive = (href: string) => {
 /*
  * Where the same page lives in each language, for the switcher.
  *
- * `?lang=` is what tells the edge middleware this navigation is an *explicit*
- * choice: it records the cookie that suppresses `Accept-Language` auto-detection
- * and then 302s to the same URL without the parameter, so the address bar ends up
- * clean and shareable. Detection alone cannot tell "clicked 简体中文" from
- * "followed a link to an untranslated page", and getting that wrong would either
- * bounce the visitor back to English on their next visit or silently flip their
- * preference when they open `/status` from `/en/`.
+ * The href is the destination itself, with no `?lang=` and therefore no redirect
+ * in the click path. It used to carry `?lang=` so the edge middleware could record
+ * the choice and 302 to the clean URL, on the theory that the route had to be
+ * opted out of Client Router for that to work — but the opt-out attribute that
+ * theory relied on, `data-astro-reload`, does not exist in Astro 7 (it is absent
+ * from the whole package), so every switcher click went through Client Router's
+ * fetch-and-swap path with a 302 in the middle. Linking straight at the target
+ * removes the redirect, and the route survives because the href *is* the route.
  *
- * `data-astro-reload` is required for that to work: under Client Router the
- * navigation would be a fetch, whose 302 is followed transparently, and
- * `history.pushState` would then leave `?lang=` in the address bar.
+ * The preference cookie is written on click instead — see the script below. The
+ * middleware still honours `?lang=`, which is what the app uses on the deep-link
+ * host and what a no-JS or scripted caller gets; it is just no longer on the
+ * switcher's critical path.
+ *
+ * `data-astro-prefetch={false}` does work: Astro's `elMatchesStrategy` returns
+ * false for the literal string "false", which matters here because `prefetchAll`
+ * is on and prefetching ten language copies of every page on hover is wasteful.
  */
-const languageLinks = PUBLISHED_LOCALES.map((target) => {
-  const href = pathInLocale(Astro.url.pathname, target.code);
-  const separator = href.includes("?") ? "&" : "?";
-  return {
-    code: target.code,
-    label: target.label,
-    hreflang: target.hreflang,
-    href: `${href}${separator}lang=${target.code}`,
-    current: target.code === locale,
-  };
-});
+const languageLinks = PUBLISHED_LOCALES.map((target) => ({
+  code: target.code,
+  label: target.label,
+  hreflang: target.hreflang,
+  href: pathInLocale(Astro.url.pathname, target.code),
+  current: target.code === locale,
+}));
 
 /*
  * The persisted element's name carries the locale.
@@ -129,7 +131,7 @@ const persistName = `lt-navbar-${locale}`;
                 hreflang={link.hreflang}
                 lang={link.code}
                 aria-current={link.current ? "true" : undefined}
-                data-astro-reload
+                data-lt-lang={link.code}
                 data-astro-prefetch={false}
               >
                 {link.label}
@@ -221,7 +223,7 @@ const persistName = `lt-navbar-${locale}`;
               hreflang={link.hreflang}
               lang={link.code}
               aria-current={link.current ? "true" : undefined}
-              data-astro-reload
+              data-lt-lang={link.code}
               data-astro-prefetch={false}
             >
               {link.label}
@@ -561,9 +563,7 @@ const persistName = `lt-navbar-${locale}`;
 </style>
 
 <script>
-  const navbar = document.getElementById("lt-navbar");
-  const menuBtn = document.getElementById("mobile-menu-btn");
-  const mobileMenu = document.getElementById("mobile-menu");
+  import { onBeforeNavigation, onPageSetup } from "../scripts/page-lifecycle";
 
   const normalizePath = (value: string) => value.replace(/\/+$/, "") || "/";
   const isActivePath = (href: string, path: string) => {
@@ -571,139 +571,208 @@ const persistName = `lt-navbar-${locale}`;
     return base === "/" ? path === "/" : path === base || path.startsWith(`${base}/`);
   };
 
-  function syncActiveLinks() {
-    const path = normalizePath(location.pathname);
-    document.querySelectorAll<HTMLAnchorElement>("a.lt-navlink[href]").forEach((link) => {
-      const href = link.getAttribute("href");
-      if (!href) return;
-      if (isActivePath(href, path)) link.setAttribute("aria-current", "page");
-      else link.removeAttribute("aria-current");
-    });
+  /** The cookie `functions/_middleware.ts` reads to stand down auto-detection. */
+  const LANG_COOKIE = "luotopia_lang";
+
+  /**
+   * Record an explicit language choice.
+   *
+   * Done here rather than by the middleware, because the switcher links straight
+   * at its destination: there is no `?lang=` round trip to hang a `Set-Cookie` on,
+   * and adding one back would put a 302 in the middle of a Client Router
+   * navigation. The middleware still handles `?lang=` for the app's deep links and
+   * for callers without JS; this is the browser path.
+   *
+   * `Secure` is conditional: a Secure cookie is rejected outright on a plain-http
+   * origin, which is what `wrangler pages dev` serves, and losing the preference
+   * locally would make this look broken during development. Best-effort either
+   * way — cookie writes can throw in the same restricted WebViews and private
+   * modes the `<head>` scripts defend against, and a lost preference must not cost
+   * the navigation.
+   */
+  function recordLanguageChoice(code: string) {
+    if (!code) return;
+    const secure = location.protocol === "https:" ? "; Secure" : "";
+    try {
+      document.cookie = `${LANG_COOKIE}=${code}; Path=/; Max-Age=31536000; SameSite=Lax${secure}`;
+    } catch (e) {}
   }
 
-  const themeToggles = [
-    document.getElementById("theme-toggle"),
-    document.getElementById("theme-toggle-mobile"),
-  ];
+  /*
+   * Transient UI has to close when a navigation is *requested*, before the fetch
+   * starts. `onBeforeNavigation` binds once and never rebinds, so it queries live
+   * instead of capturing elements.
+   */
+  onBeforeNavigation(() => {
+    const sheet = document.getElementById("mobile-menu");
+    if (sheet?.dataset.open === "true") {
+      // If focus is left on one of the sheet's links, Astro would restore focus to
+      // a control that is about to be hidden.
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && sheet.contains(active)) active.blur();
+    }
+    setSheetOpen(false);
+    const panel = document.querySelector<HTMLDetailsElement>("[data-lang-menu]");
+    if (panel && panel.open) panel.open = false;
+  });
 
-  // `aria-pressed` mirrors the resolved theme so assistive tech hears the
-  // state, not just the action. Seeded at module execution — the <head>
-  // inline resolver has already run by then — and on every flip.
-  const syncThemePressed = () => {
-    const dark = document.documentElement.classList.contains("dark");
-    for (const btn of themeToggles) btn?.setAttribute("aria-pressed", String(dark));
-  };
-
-  const syncTheme = () => {
-    const html = document.documentElement;
-    const dark = html.classList.toggle("dark");
-    // Storage can throw in the same restricted WebViews / private modes the
-    // head script defends against; a click handler is the wrong place to crash.
-    try {
-      localStorage.setItem("theme", dark ? "dark" : "light");
-    } catch (e) {}
-    syncThemePressed();
-  };
-  themeToggles[0]?.addEventListener("click", syncTheme);
-  themeToggles[1]?.addEventListener("click", syncTheme);
-  syncThemePressed();
-
-  const isOpen = () => mobileMenu?.dataset.open === "true";
-  const setOpen = (open: boolean) => {
-    if (!mobileMenu || !menuBtn) return;
-    mobileMenu.dataset.open = String(open);
-    menuBtn.setAttribute("aria-expanded", String(open));
+  /** Shared with the handler above, so it has to live at module scope. */
+  function setSheetOpen(open: boolean) {
+    const sheet = document.getElementById("mobile-menu");
+    const btn = document.getElementById("mobile-menu-btn");
+    const bar = document.getElementById("lt-navbar");
+    if (!sheet || !btn) return;
+    sheet.dataset.open = String(open);
+    btn.setAttribute("aria-expanded", String(open));
     // Drives the bar's glass as well as the sheet's — see data-menu-open above.
-    navbar?.setAttribute("data-menu-open", String(open));
-    // Lenis owns the scroll position, so `body { overflow: hidden }` alone
-    // would not stop the page drifting behind an open sheet.
+    bar?.setAttribute("data-menu-open", String(open));
+    // Lenis owns the scroll position, so `body { overflow: hidden }` alone would
+    // not stop the page drifting behind an open sheet.
     const lenis = (window as unknown as { ltLenis?: { stop(): void; start(): void } }).ltLenis;
     if (open) lenis?.stop();
     else lenis?.start();
-  };
-
-  const closeMenuForNavigation = () => {
-    if (!isOpen()) return;
-    // The sheet persists across client navigations. If focus is left on one of
-    // its links, Astro would restore focus to a control that is now hidden.
-    const active = document.activeElement;
-    if (active instanceof HTMLElement && mobileMenu?.contains(active)) active.blur();
-    setOpen(false);
-  };
+  }
 
   /*
-   * `<details>` opens and closes natively, which is what keeps the switcher
-   * usable with scripting off. Everything below only adds the three things the
-   * element cannot do for itself: close when the pointer goes elsewhere, close on
-   * Escape, and close before a client-side navigation (the element persists, so
-   * an open panel would otherwise survive onto the next page).
+   * Everything below re-runs on every navigation.
+   *
+   * It used to bind once at module scope, on the assumption that the navbar and
+   * the sheet persist across client navigations. That holds only while the locale
+   * does not change: the persist name is keyed by locale, so switching language
+   * hands Astro a different persist identity and it renders a fresh bar — while
+   * Astro's script deduplication means this module is *not* re-executed. Every
+   * reference captured at module scope then pointed at a detached node, and after
+   * a single language switch the theme toggle, the burger and the language panel
+   * all silently stopped working.
+   *
+   * `onPageSetup()` is the documented fix (see docs/development.md): it re-runs
+   * after every swap and its AbortSignal unbinds the previous set first. Re-querying
+   * is also correct for the same-locale case, where the elements do persist — it
+   * just returns the same nodes.
    */
-  const langMenu = document.querySelector<HTMLDetailsElement>("[data-lang-menu]");
-  const closeLangMenu = () => {
-    if (langMenu && langMenu.open) langMenu.open = false;
-  };
+  onPageSetup((signal) => {
+    const navbar = document.getElementById("lt-navbar");
+    const menuBtn = document.getElementById("mobile-menu-btn");
+    const mobileMenu = document.getElementById("mobile-menu");
+    const langMenu = document.querySelector<HTMLDetailsElement>("[data-lang-menu]");
 
-  if (langMenu) {
-    document.addEventListener("click", (event) => {
-      if (!langMenu.open) return;
-      const target = event.target;
-      if (target instanceof Node && langMenu.contains(target)) return;
-      closeLangMenu();
-    });
-  }
+    const syncActiveLinks = () => {
+      const path = normalizePath(location.pathname);
+      document.querySelectorAll<HTMLAnchorElement>("a.lt-navlink[href]").forEach((link) => {
+        const href = link.getAttribute("href");
+        if (!href) return;
+        if (isActivePath(href, path)) link.setAttribute("aria-current", "page");
+        else link.removeAttribute("aria-current");
+      });
+    };
 
-  if (menuBtn && mobileMenu) {
-    menuBtn.addEventListener("click", () => setOpen(!isOpen()));
-    mobileMenu.addEventListener("click", (e) => {
-      if ((e.target as HTMLElement).closest("a")) setOpen(false);
-    });
-    // Crossing into the desktop breakpoint hides the trigger, so the sheet would
-    // otherwise stay open with nothing on screen to close it.
-    window.matchMedia("(min-width: 768px)").addEventListener("change", (e) => {
-      if (e.matches && isOpen()) setOpen(false);
-    });
-  }
+    const themeToggles = [
+      document.getElementById("theme-toggle"),
+      document.getElementById("theme-toggle-mobile"),
+    ];
 
-  // Outside the guard above: Escape should dismiss the language panel even on a
-  // page where the mobile sheet's trigger never rendered.
-  document.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape") return;
-    if (isOpen()) setOpen(false);
-    closeLangMenu();
-  });
+    // `aria-pressed` mirrors the resolved theme so assistive tech hears the state,
+    // not just the action. The <head> inline resolver has already run by now.
+    const syncThemePressed = () => {
+      const dark = document.documentElement.classList.contains("dark");
+      for (const btn of themeToggles) btn?.setAttribute("aria-pressed", String(dark));
+    };
 
-  const threshold = 12;
-  // Write the attribute only when the state actually flips. Under Lenis the
-  // scroll event fires every frame; an unconditional setAttribute pushed a
-  // mutation (and a potential style-invalidation check) through the navbar on
-  // each one — right when the bar is also transitioning its backdrop blur.
-  let lastScrolled: boolean | null = null;
-  const syncScrolled = () => {
-    if (!navbar) return;
-    const scrolled = window.scrollY > threshold;
-    if (scrolled === lastScrolled) return;
-    lastScrolled = scrolled;
-    navbar.setAttribute("data-scrolled", String(scrolled));
-  };
-  if (navbar) {
-    syncScrolled();
-    window.addEventListener("scroll", syncScrolled, { passive: true });
-  }
+    const syncTheme = () => {
+      const html = document.documentElement;
+      const dark = html.classList.toggle("dark");
+      try {
+        localStorage.setItem("theme", dark ? "dark" : "light");
+      } catch (e) {}
+      syncThemePressed();
+    };
+    for (const btn of themeToggles) btn?.addEventListener("click", syncTheme, { signal });
+    syncThemePressed();
 
-  // The navbar and sheet persist across client navigations, so their listeners
-  // are bound once. Their route-dependent state still has to be resynchronized,
-  // and an open sheet must not survive navigation.
-  document.addEventListener("astro:before-preparation", () => {
-    closeMenuForNavigation();
-    closeLangMenu();
-  });
+    /*
+     * The language choice is recorded on a delegated listener rather than per
+     * link, so the ten options in each of the two switchers cost one binding.
+     * Capture phase, so the cookie is written before Client Router starts the
+     * navigation it triggers off the same click.
+     */
+    document.addEventListener(
+      "click",
+      (event) => {
+        const link = (event.target as HTMLElement | null)?.closest?.("[data-lt-lang]");
+        const code = link?.getAttribute("data-lt-lang");
+        if (code) recordLanguageChoice(code);
+      },
+      { signal, capture: true },
+    );
 
-  document.addEventListener("astro:page-load", () => {
-    closeMenuForNavigation();
+    /*
+     * `<details>` opens and closes natively, which is what keeps the switcher
+     * usable with scripting off. This only adds what the element cannot do itself:
+     * close when the pointer goes elsewhere.
+     */
+    if (langMenu) {
+      document.addEventListener(
+        "click",
+        (event) => {
+          if (!langMenu.open) return;
+          const target = event.target;
+          if (target instanceof Node && langMenu.contains(target)) return;
+          langMenu.open = false;
+        },
+        { signal },
+      );
+    }
+
+    const isOpen = () => mobileMenu?.dataset.open === "true";
+
+    if (menuBtn && mobileMenu) {
+      menuBtn.addEventListener("click", () => setSheetOpen(!isOpen()), { signal });
+      mobileMenu.addEventListener(
+        "click",
+        (e) => {
+          if ((e.target as HTMLElement).closest("a")) setSheetOpen(false);
+        },
+        { signal },
+      );
+      // Crossing into the desktop breakpoint hides the trigger, so the sheet would
+      // otherwise stay open with nothing on screen to close it.
+      window
+        .matchMedia("(min-width: 768px)")
+        .addEventListener("change", (e) => { if (e.matches && isOpen()) setSheetOpen(false); }, { signal });
+    }
+
+    // Escape dismisses both, and lives outside the guard above so the language
+    // panel can be closed even where the sheet's trigger never rendered.
+    document.addEventListener(
+      "keydown",
+      (e) => {
+        if (e.key !== "Escape") return;
+        if (isOpen()) setSheetOpen(false);
+        if (langMenu && langMenu.open) langMenu.open = false;
+      },
+      { signal },
+    );
+
+    const threshold = 12;
+    // Write the attribute only when the state actually flips. Under Lenis the
+    // scroll event fires every frame; an unconditional setAttribute pushed a
+    // mutation (and a potential style-invalidation check) through the navbar on
+    // each one — right when the bar is also transitioning its backdrop blur.
+    // Reset per setup: a persisted bar and a fresh one must both start honest.
+    let lastScrolled: boolean | null = null;
+    const syncScrolled = () => {
+      if (!navbar) return;
+      const scrolled = window.scrollY > threshold;
+      if (scrolled === lastScrolled) return;
+      lastScrolled = scrolled;
+      navbar.setAttribute("data-scrolled", String(scrolled));
+    };
+    if (navbar) {
+      syncScrolled();
+      window.addEventListener("scroll", syncScrolled, { signal, passive: true });
+    }
+
+    // Route-dependent state, resynchronized because this runs after every swap.
     syncActiveLinks();
-    // Force one unconditional write: cheap insurance in case the persisted
-    // element and the memo ever disagree (e.g. a failed persist).
-    lastScrolled = null;
-    syncScrolled();
   });
 </script>
