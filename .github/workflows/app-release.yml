@@ -1864,13 +1864,17 @@ jobs:
   # STORE_ID repo variable and only falls back to the reserved one, which lets
   # a throwaway test product be targeted without editing the workflow.
   #
-  # NOT YET RUN AGAINST THE LIVE API. The sequence below follows the documented
-  # submission flow (clone the current submission, upload to fileUploadUrl,
-  # replace applicationPackages, commit), but the multi-architecture upload in
-  # particular is unverified: Microsoft's samples cover one package, and
-  # whether a second POST to the same SAS URL lands as a second blob or
-  # overwrites the first has to be confirmed on the first opt-in run. Until it
-  # has been, submit with windows_arch=x64 only.
+  # Flow, per the Store submission API docs (learn.microsoft.com "Manage app
+  # submissions"): POST /submissions clones the last published submission, its
+  # response carries a fileUploadUrl (a SAS URI for ONE Azure blob), everything
+  # new for the submission -- all packages, and any images -- goes into a single
+  # ZIP that is PUT to that URL, then PUT the submission with the new
+  # applicationPackages and POST /commit. x64 + arm64 are just two entries in
+  # the ZIP and in applicationPackages, so multi-architecture is the default.
+  #
+  # One API-caveat worth remembering: a submission created through the API must
+  # then be managed through the API -- editing it in Partner Center afterwards
+  # leaves it unable to commit, and it has to be deleted and re-cloned.
   store-submit:
     name: Submit MSIX to the Microsoft Store
     needs: [context, windows]
@@ -1881,7 +1885,7 @@ jobs:
     timeout-minutes: 30
     env:
       STORE_ID: ${{ vars.STORE_ID || '9P29527S1H0H' }}
-      API: https://manage.devcenter.microsoft.com/v2.0
+      API: https://manage.devcenter.microsoft.com/v1.0/my
     steps:
       - name: Download the Store MSIX artifacts
         uses: actions/download-artifact@v4
@@ -1911,9 +1915,6 @@ jobs:
             echo "::error::the windows job produced no MSIX artifact"
             exit 1
           fi
-          if [ "${#packages[@]}" -gt 1 ]; then
-            echo "::warning::${#packages[@]} packages; the multi-architecture upload path is unverified -- prefer windows_arch=x64 until it has been exercised once"
-          fi
           printf 'will submit: %s\n' "${packages[@]}"
 
       - name: Acquire an Entra token
@@ -1925,11 +1926,11 @@ jobs:
         run: |
           set -euo pipefail
           body=$(curl -sS -f -X POST \
-            "https://login.microsoftonline.com/$TENANT/oauth2/v2.0/token" \
+            "https://login.microsoftonline.com/$TENANT/oauth2/token" \
             -d "grant_type=client_credentials" \
             -d "client_id=$CLIENT" \
             -d "client_secret=$SECRET" \
-            -d "scope=https://manage.devcenter.microsoft.com/.default")
+            -d "resource=https://manage.devcenter.microsoft.com")
           token=$(jq -er '.access_token' <<<"$body")
           # Masked before it is written to the step output, so it is redacted
           # from every later log line that interpolates it.
@@ -1943,44 +1944,62 @@ jobs:
           set -euo pipefail
           auth="Authorization: Bearer $TOKEN"
 
-          # /update clones the current submission, so the listing text, pricing,
-          # age rating and notes already configured in Partner Center carry over
-          # and only the package list changes here. Creating a submission from
-          # scratch would silently drop all of it.
-          current=$(curl -sS -f -H "$auth" "$API/applications/$STORE_ID/submissions")
-          submission_id=$(jq -er '.value[0].id' <<<"$current")
-          echo "cloning submission $submission_id"
+          # The API allows one pending submission at a time, so a previous
+          # half-finished run must be cleared before cloning. Best-effort: a
+          # submission created in Partner Center (not via the API) cannot be
+          # deleted here and has to be removed from the dashboard by hand.
+          app=$(curl -sS -f -H "$auth" "$API/applications/$STORE_ID")
+          pending_id=$(jq -r '.pendingApplicationSubmission.id // empty' <<<"$app")
+          if [ -n "${pending_id:-}" ]; then
+            echo "deleting pending submission $pending_id"
+            curl -sS -f -X DELETE -H "$auth" \
+              "$API/applications/$STORE_ID/submissions/$pending_id" || \
+              echo "::warning::could not delete pending submission $pending_id; delete it in Partner Center and retry"
+          fi
 
-          updated=$(curl -sS -f -X POST -H "$auth" \
-            "$API/applications/$STORE_ID/submissions/$submission_id/update")
-          new_id=$(jq -er '.id' <<<"$updated")
-          upload_url=$(jq -er '.fileUploadUrl' <<<"$updated")
+          # POST /submissions clones the last published submission, so listing
+          # text, pricing, age rating and notes all carry over and only the
+          # package list changes here. The response carries the fileUploadUrl.
+          cloned=$(curl -sS -f -X POST -H "$auth" \
+            "$API/applications/$STORE_ID/submissions")
+          new_id=$(jq -er '.id' <<<"$cloned")
+          upload_url=$(jq -er '.fileUploadUrl' <<<"$cloned")
           echo "new submission $new_id"
 
+          # fileUploadUrl is a SAS URI for a single blob, so everything new for
+          # the submission is one ZIP -- a second upload would overwrite the
+          # first, which is why x64 + arm64 ship together inside one archive
+          # rather than as two blobs.
           shopt -s nullglob
           packages=(msix/*/*.msix)
-          uploaded='[]'
+          rm -rf staging && mkdir -p staging
           for p in "${packages[@]}"; do
-            name=$(basename "$p")
-            echo "uploading $name ($(stat -c%s "$p") bytes)"
-            curl -sS -f -X POST \
-              -H "x-ms-blob-type: BlockBlob" \
-              -H "x-ms-date: $(date -u '+%a, %d %b %Y %H:%M:%S GMT')" \
-              -H "Content-Length: 0" \
-              --data-binary "@$p" \
-              "$upload_url"
-            uploaded=$(jq -c --arg fn "$name" \
-              '. + [{fileName: $fn, fileStatus: "PendingUpload"}]' <<<"$uploaded")
+            cp -v "$p" "staging/$(basename "$p")"
           done
+          (cd staging && zip -q ../packages.zip ./*.msix)
 
-          # Replacing rather than appending: the cloned submission still lists
-          # the previous build, and leaving it there submits both.
-          jq -c --argjson pkgs "$uploaded" \
-            '.applicationPackages = $pkgs' <<<"$updated" > submission.json
+          echo "uploading packages.zip ($(stat -c%s packages.zip) bytes)"
+          curl -sS -f -X PUT \
+            -H "x-ms-blob-type: BlockBlob" \
+            --data-binary "@packages.zip" \
+            "$upload_url"
+
+          # Replace the packages: mark every one carried over from the clone for
+          # deletion, then append the new entries. The API only requires
+          # fileName, fileStatus, minimumDirectXVersion and minimumSystemRam.
+          entries='[]'
+          for p in "${packages[@]}"; do
+            entries=$(jq -c --arg fn "$(basename "$p")" \
+              '. + [{fileName: $fn, fileStatus: "PendingUpload", minimumDirectXVersion: "None", minimumSystemRam: "None"}]' \
+              <<<"$entries")
+          done
+          jq -c --argjson entries "$entries" \
+            '(.applicationPackages // []) |= (map(.fileStatus = "PendingDelete") + $entries)' \
+            <<<"$cloned" > submission.json
+
           curl -sS -f -X PUT -H "$auth" -H "Content-Type: application/json" \
             --data-binary @submission.json \
             "$API/applications/$STORE_ID/submissions/$new_id" > /dev/null
-          rm -f submission.json
 
           curl -sS -f -X POST -H "$auth" \
             "$API/applications/$STORE_ID/submissions/$new_id/commit" > /dev/null
