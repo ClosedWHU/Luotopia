@@ -85,6 +85,9 @@ function misansWeights() {
 const SUBSETTED_FONT_CSS = [
   /\/misans\/lib\/Normal\/[^/]+\.css$/,
   /\/@fontsource-variable\/plus-jakarta-sans\/[^/]+\.css$/,
+  /\/@fontsource\/noto-sans-tc\/[^/]+\.css$/,
+  /\/@fontsource\/noto-sans-jp\/[^/]+\.css$/,
+  /\/@fontsource\/noto-sans-kr\/[^/]+\.css$/,
 ];
 
 /** Text under `src/` that can contribute rendered characters. */
