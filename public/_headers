@@ -39,3 +39,8 @@
 
 /.well-known/assetlinks.json
   Cache-Control: public, max-age=3600
+
+# Microsoft Store publisher-domain association. `.json` is enough for Pages to
+# serve `application/json`; the same 1h cache as the Android verifier file above.
+/.well-known/microsoft-identity-association.json
+  Cache-Control: public, max-age=3600
