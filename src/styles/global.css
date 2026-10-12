@@ -749,6 +749,28 @@ pre::-webkit-scrollbar-corner,
  * overlay that scrolls gets the look by adding the class, not by being
  * remembered here. 8px, matching the inset scrollers rather than the root's 12 —
  * a bar inside a panel should be lighter than the one framing the page.
+ *
+ * ## Put the class on the *inner* element of a rounded scroller
+ *
+ * `border-radius` rounds a scroll container's own background but not its
+ * scrollbar: the bar is painted square across the full height of the border box,
+ * so with the thumb at either end of its travel it sits outside the rounded
+ * silhouette instead of being cut by it. Rounding the thumb (below) does not help
+ * — the track still spans corner to corner.
+ *
+ * Only a *clipping ancestor* removes it, because inside one the bar is ordinary
+ * descendant painting subject to the ancestor's rounded clip region. So a rounded
+ * scroller is two elements: radius + `overflow: hidden` on the outer, this class +
+ * `overflow-y: auto` on the inner. `.lt-dialog-card`/`.lt-dialog-body`,
+ * `.lt-lang-panel`/`.lt-lang-scroll` and `.lt-mobile-menu`/`.lt-mobile-menu-scroll`
+ * are all that shape; copy it rather than putting the radius and the scroll on one
+ * element.
+ *
+ * A `clip-path: inset(0 round Npx)` on the scroller, or a `margin` on
+ * `::-webkit-scrollbar-track`, would avoid the extra element — and both are
+ * guesses about whether one engine clips its own scrollbar. The wrapper is the
+ * shape that is guaranteed by the cascade, which is the standard this codebase
+ * holds itself to for anything an out-of-support Android WebView has to survive.
  */
 .lt-scroll-y::-webkit-scrollbar {
   width: 8px;
