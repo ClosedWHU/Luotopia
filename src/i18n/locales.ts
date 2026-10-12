@@ -20,16 +20,18 @@
  * `@font-face` subset whose `unicode-range` covers none of it. That is how 172
  * rules became 56 and 81% of a render-blocking stylesheet disappeared.
  *
- * Ten languages mostly undoes that, by design and not by accident. Measured on the
- * built stylesheet: MiSans subsets kept go 50 → 102 of 112, its `@font-face` text
- * goes 71 KB → 148 KB raw (25 → 52 KB gzip, 8 → 17 KB brotli), and the whole
- * shared file goes 133 KB → 210 KB raw, 38 → 66 KB gzip, 19.0 → 27.9 KB brotli.
- * Font subsets are 70% of the shared CSS by raw bytes and essentially all of the
- * growth.
+ * Ten languages undoes it, by design and not by accident. Measured on the built
+ * stylesheet, with every page translated: MiSans subsets kept go 50 → 110 of 112,
+ * its `@font-face` text goes 71 KB → 160 KB raw (25 → 57 KB gzip, 8.1 → 18.6 KB
+ * brotli), and the whole shared file goes 133 KB → 222 KB raw, 38 → 70 KB gzip,
+ * 19.0 → 29.3 KB brotli. Font subsets are 72% of the shared CSS by raw bytes and
+ * essentially all of the growth; the pruning plugin is left with almost nothing to
+ * drop, which is the honest consequence of a charset that really does span
+ * simplified and traditional hanzi, kana, hangul, Cyrillic and Vietnamese.
  *
- * The number that actually transfers is the brotli delta: **+8.8 KB** on a
- * render-blocking file. The +77 KB raw mostly costs parse time, and it is almost
- * entirely `unicode-range` hex lists, which is why it compresses so well.
+ * The number that actually transfers is the brotli delta: **+10.3 KB** on a
+ * render-blocking file. The +89 KB raw mostly costs parse time, and it is almost
+ * entirely `unicode-range` hex lists, which is why it compresses 6:1.
  *
  * Two consequences worth knowing before "optimising" this:
  *

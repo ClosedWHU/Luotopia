@@ -1,0 +1,444 @@
+---
+/**
+ * The `/brand` page body.
+ *
+ * Extracted from `src/pages/brand.astro` so the route can exist once per locale
+ * without duplicating any markup: `src/pages/brand.astro` renders it in the
+ * default locale, `src/pages/[lang]/brand.astro` renders it in each published
+ * one. Everything locale-dependent is read from `Astro.currentLocale` inside
+ * here, so neither caller has to pass anything down and the two cannot drift.
+ *
+ * This page is mostly *data* wearing prose's clothes, and telling the two apart
+ * is the whole job. What stays literal, in every locale:
+ *
+ * - **Hex values** (`#005BAC`). A translated colour code is a different colour.
+ * - **Asset paths and filenames** (`/brand/logo-wu.svg`). They are URLs; the
+ *   files exist under those names and no other.
+ * - **Format names and dimensions** (`SVG`, `PNG`, `1024×1024`, `24px`, `8mm`,
+ *   `2× / 3×`, `1/4`). Standards and measurements, not sentences.
+ * - **`roleEn`** on each mark. The card already shows a fixed Chinese/English
+ *   label pair by design; that pairing is the content, so both halves are the
+ *   same in every locale.
+ * - **`Luotopia Blue` and `ClosedWHU Team`** — proper nouns, same reasoning
+ *   `downloads.ts` gives for keeping "Android" and "Windows" out of the
+ *   dictionaries.
+ *
+ * Everything else on the page — the section copy, the marks' meanings, the usage
+ * rules — is prose and moves to the dictionaries.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../PageHeader.astro";
+import BrandLogo3D from "../BrandLogo3D.astro";
+import Icon from "../Icon.astro";
+import { resolveLocale, routeUrl, useTranslations, type TranslationKey } from "../../i18n/ui";
+
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+
+/*
+ * Same escaping as `legal/[slug].astro` does before its own `set:html`. Build
+ * time only, so the Chrome 66 floor does not apply, but `replace(/g)` keeps it
+ * identical to the copies the other pages carry.
+ */
+function escapeHtml(text: string): string {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/**
+ * A dictionary value with inline markup woven through it.
+ *
+ * The usage rules put `<strong>` and `<a>` in the middle of running prose.
+ * Splitting each list item at every tag would freeze the word order Chinese
+ * happens to use, so the value carries `{name}` placeholders and this
+ * substitutes the markup for each one.
+ *
+ * The slots are written out at the call site, i.e. they are this file's own
+ * markup, and the dictionary text around them is escaped first, so nothing
+ * untrusted reaches `set:html`. Placeholders are matched with the same regex
+ * `ui.ts` and the carousel's client-side `fill()` use; an unknown one is left
+ * visible rather than blanked.
+ */
+function rich(key: TranslationKey, slots: Record<string, string>): string {
+  return escapeHtml(t(key)).replace(
+    /\{([a-zA-Z][a-zA-Z0-9]*)\}/g,
+    (match, name: string) =>
+      Object.prototype.hasOwnProperty.call(slots, name) ? slots[name] : match,
+  );
+}
+
+/*
+ * The inline fragments the usage rules weave in, spelled exactly as the template
+ * rendered them before the copy moved out — same tags, same classes, same
+ * attribute order. The dictionaries hold sentences; this holds HTML.
+ */
+const strongHtml = (text: string) =>
+  `<strong class="text-on-surface">${escapeHtml(text)}</strong>`;
+const internalLinkHtml = (href: string, text: string) =>
+  `<a href="${escapeHtml(href)}" class="text-primary hover:underline">${escapeHtml(text)}</a>`;
+
+const communityLinkHtml = internalLinkHtml(
+  routeUrl(locale, "community"),
+  t("brand.usage.licence.communityLink"),
+);
+
+const logos = [
+  {
+    key: "wu",
+    name: t("brand.mark.wu.name"),
+    role: t("brand.mark.wu.role"),
+    roleEn: "Primary mark",
+    color: "#0E4675",
+    svg: "/brand/logo-wu.svg",
+    svgWhite: "/brand/logo-wu-white.svg",
+    png: "/brand/logo-wu.png",
+    icon: "/brand/app-icon-wu.png",
+    iconChip: "edit_note",
+    meaning: t("brand.mark.wu.meaning"),
+  },
+  {
+    key: "luo",
+    name: t("brand.mark.luo.name"),
+    role: t("brand.mark.luo.role"),
+    roleEn: "Alternate mark",
+    color: "#0B674E",
+    svg: "/brand/logo-luo.svg",
+    svgWhite: "/brand/logo-luo-white.svg",
+    png: "/brand/logo-luo.png",
+    icon: "/brand/app-icon-luo.png",
+    iconChip: "spa",
+    meaning: t("brand.mark.luo.meaning"),
+  },
+];
+
+const colors = [
+  { name: "Luotopia Blue", role: t("brand.color.primary.role"), hex: "#005BAC", onDark: false },
+  { name: t("brand.color.wu.name"), role: t("brand.color.wu.role"), hex: "#0E4675", onDark: true },
+  { name: t("brand.color.luo.name"), role: t("brand.color.luo.role"), hex: "#0B674E", onDark: true },
+];
+
+const btn = "lt-btn glass-control state-layer inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-label-large text-on-surface no-underline cursor-pointer";
+
+/*
+ * The string the *script* writes into a swatch after a copy.
+ *
+ * Not `define:vars`: that inlines the script and takes it out of the bundle,
+ * which is the tradeoff `ScreenshotCarousel.astro` already rejected. It is a
+ * `{hex}` template rather than a prefix to concatenate, so a translation can put
+ * the value wherever its grammar wants it and no dictionary entry has to carry a
+ * trailing space.
+ */
+const i18n = {
+  copied: t("brand.colors.copied"),
+};
+---
+
+<BaseLayout title={t("brand.title")} description={t("brand.description")}>
+  <PageHeader title={t("brand.header")} subtitle={t("brand.subtitle")} />
+
+  <!-- ── 3D marks ────────────────────────────────────────── -->
+  <section class="relative px-4 pb-16">
+    <div class="max-w-content mx-auto">
+      <div class="lt-reveal flex items-start gap-3 mb-6">
+        <span class="lt-icon-chip text-primary text-[22px]"><Icon name="3d_rotation" /></span>
+        <div>
+          <h2 class="text-title-large text-on-surface">{t("brand.logo3d.heading")}</h2>
+          <p class="text-body-medium text-on-surface-variant mt-1 max-w-2xl">
+            {t("brand.logo3d.blurb")}
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <BrandLogo3D
+          kind="wu"
+          title={t("brand.logo3d.wu.title")}
+          subtitle={t("brand.logo3d.wu.subtitle")}
+          poster="/brand/logo-wu-white.svg"
+        />
+        <BrandLogo3D
+          kind="luo"
+          title={t("brand.logo3d.luo.title")}
+          subtitle={t("brand.logo3d.luo.subtitle")}
+          poster="/brand/logo-luo-white.svg"
+          delay="90ms"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Flat marks ──────────────────────────────────────── -->
+  <section class="relative px-4 pb-16">
+    <div class="max-w-content mx-auto">
+      <div class="lt-reveal flex items-start gap-3 mb-6">
+        <span class="lt-icon-chip text-primary text-[22px]"><Icon name="image" /></span>
+        <div>
+          <h2 class="text-title-large text-on-surface">{t("brand.flat.heading")}</h2>
+          <p class="text-body-medium text-on-surface-variant mt-1 max-w-2xl">
+            {t("brand.flat.blurb")}
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {
+          logos.map((logo, i) => (
+            <div class="lt-reveal-lift glass rounded-group p-6" style={`--lt-reveal-delay:${i * 90}ms`}>
+              <div class="flex items-center gap-3 mb-5">
+                <span class="lt-icon-chip text-primary text-[22px]">
+                  <Icon name={logo.iconChip} />
+                </span>
+                <div>
+                  <h3 class="text-title-medium text-on-surface">
+                    {logo.name} · {logo.role}
+                  </h3>
+                  <p class="text-body-small text-outline">{logo.roleEn}</p>
+                </div>
+              </div>
+
+              <div class="plates grid grid-cols-2 gap-3 mb-4">
+                <div class="plate light">
+                  <img src={logo.svg} alt={t("brand.mark.altLight", { name: logo.name })} width="160" height="160" loading="lazy" />
+                </div>
+                <div class="plate dark">
+                  <img src={logo.svgWhite} alt={t("brand.mark.altDark", { name: logo.name })} width="160" height="160" loading="lazy" />
+                </div>
+              </div>
+
+              <div class="alpha-preview mb-4">
+                <img src={logo.png} alt={t("brand.mark.altPng", { name: logo.name })} width="72" height="72" loading="lazy" />
+                <span class="text-body-small text-outline">{t("brand.mark.pngCaption")}</span>
+              </div>
+
+              <p class="text-body-medium text-on-surface-variant mb-5">{logo.meaning}</p>
+
+              <div class="flex flex-wrap gap-2">
+                <a href={logo.svg} download class={btn}><Icon name="download" class="text-lg" />SVG</a>
+                <a href={logo.svgWhite} download class={btn}><Icon name="download" class="text-lg" />{t("brand.mark.download.monoSvg")}</a>
+                <a href={logo.png} download class={btn}><Icon name="download" class="text-lg" />{t("brand.mark.download.png")}</a>
+                <a href={logo.icon} download class={btn}><Icon name="download" class="text-lg" />{t("brand.mark.download.appIcon")}</a>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Brand colours ───────────────────────────────────── -->
+  <section class="relative px-4 pb-16">
+    <div class="max-w-content mx-auto">
+      <div class="lt-reveal flex items-start gap-3 mb-6">
+        <span class="lt-icon-chip text-primary text-[22px]"><Icon name="palette" /></span>
+        <div>
+          <h2 class="text-title-large text-on-surface">{t("brand.colors.heading")}</h2>
+          <p class="text-body-medium text-on-surface-variant mt-1">{t("brand.colors.blurb")}</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {
+          colors.map((c, i) => (
+            <button
+              type="button"
+              class="lt-reveal-lift swatch glass rounded-card overflow-hidden text-left cursor-pointer"
+              data-hex={c.hex}
+              data-i18n-copied={i18n.copied}
+              style={`--lt-reveal-delay:${i * 70}ms`}
+            >
+              <span class="chip" style={`background:${c.hex}`}>
+                <span class="copy-hint">
+                  <Icon name="content_copy" />
+                </span>
+              </span>
+              <span class="meta p-4 block">
+                <span class="text-title-small text-on-surface block">{c.name}</span>
+                <span class="text-body-small text-on-surface-variant block">{c.role}</span>
+                <span class="hex text-body-medium block mt-1" style="font-variant-numeric:tabular-nums">{c.hex}</span>
+              </span>
+            </button>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Usage rules ─────────────────────────────────────── -->
+  <section class="relative px-4 pb-24">
+    <div class="max-w-content mx-auto">
+      <div class="lt-reveal flex items-start gap-3 mb-6">
+        <span class="lt-icon-chip text-primary text-[22px]"><Icon name="checklist" /></span>
+        <div>
+          <h2 class="text-title-large text-on-surface">{t("brand.usage.heading")}</h2>
+          <p class="text-body-medium text-on-surface-variant mt-1 max-w-2xl">
+            {t("brand.usage.blurb")}
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div class="lt-reveal-lift glass rounded-group p-6">
+          <h3 class="text-title-medium text-on-surface mb-4 flex items-center gap-2">
+            <Icon name="straighten" class="text-primary" /> {t("brand.usage.sizing.title")}
+          </h3>
+          <ul class="spec-list text-body-medium text-on-surface-variant">
+            <li set:html={rich("brand.usage.sizing.minSize", { digital: strongHtml("24px"), print: strongHtml("8mm") })}></li>
+            <li set:html={rich("brand.usage.sizing.clearSpace", { ratio: strongHtml("1/4") })}></li>
+            <li>{t("brand.usage.sizing.vector")}</li>
+            <li>{t("brand.usage.sizing.contrast")}</li>
+          </ul>
+        </div>
+
+        <div class="lt-reveal-lift glass rounded-group p-6" style="--lt-reveal-delay:80ms">
+          <h3 class="text-title-medium text-on-surface mb-4 flex items-center gap-2">
+            <Icon name="info" class="text-primary" /> {t("brand.usage.licence.title")}
+          </h3>
+          <ul class="spec-list text-body-medium text-on-surface-variant">
+            <li set:html={rich("brand.usage.licence.owner", { owner: strongHtml("ClosedWHU Team") })}></li>
+            <li>{t("brand.usage.licence.nonCommercial")}</li>
+            <li set:html={rich("brand.usage.licence.commercial", { community: communityLinkHtml })}></li>
+            <li>{t("brand.usage.licence.threeD")}</li>
+          </ul>
+        </div>
+
+        <div class="lt-reveal-lift glass rounded-group p-6 lg:col-span-2" style="--lt-reveal-delay:140ms">
+          <h3 class="text-title-medium text-on-surface mb-5">{t("brand.usage.donts.title")}</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
+            {
+              t.list("brand.usage.donts").map((dont) => (
+                <div class="dont flex items-start gap-2 text-body-medium text-on-surface-variant">
+                  <Icon name="cancel" class="text-[18px] mt-0.5 shrink-0 dont-icon" />
+                  <span>{dont}</span>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .plate {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--lt-radius-nested, 18px);
+    padding: 12%;
+    box-shadow: inset 0 0 0 1px rgb(120 140 160 / 0.18);
+  }
+  .plate img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .plate.light { background: linear-gradient(160deg, #ffffff, #eef2f7); }
+  .plate.dark { background: linear-gradient(160deg, #16202c, #0a1017); }
+
+  /* Transparency checkerboard for the PNG preview. */
+  .alpha-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--lt-radius-nested, 18px);
+    background-color: var(--lt-glass-subtle);
+    box-shadow: inset 0 0 0 1px rgb(120 140 160 / 0.16);
+  }
+  .alpha-preview img {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    border-radius: 8px;
+    background-image:
+      linear-gradient(45deg, #c9d2dc 25%, transparent 25%),
+      linear-gradient(-45deg, #c9d2dc 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #c9d2dc 75%),
+      linear-gradient(-45deg, transparent 75%, #c9d2dc 75%);
+    background-size: 12px 12px;
+    background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
+    background-color: #fff;
+  }
+
+  .lt-btn { border: none; font: inherit; transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+  @media (hover: hover) { .lt-btn:hover { transform: translateY(-1px); } }
+
+  .swatch { border: none; font: inherit; padding: 0; display: block; width: 100%; }
+  .swatch .chip {
+    position: relative;
+    display: block;
+    height: 96px;
+  }
+  .swatch .copy-hint {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: inline-flex;
+    color: #fff;
+    background: rgb(0 0 0 / 0.22);
+    border-radius: 999px;
+    padding: 6px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  @media (hover: hover) { .swatch:hover .copy-hint { opacity: 1; } }
+  .swatch.copied .copy-hint { opacity: 1; }
+
+  .spec-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .spec-list li { position: relative; padding-left: 22px; line-height: 1.6; }
+  .spec-list li::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 0.62em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--lt-color-primary);
+  }
+
+  .dont { line-height: 1.5; }
+  .dont-icon { color: var(--lt-color-error, #d9534f); }
+</style>
+
+<script>
+  import { onPageSetup } from "../../scripts/page-lifecycle";
+
+  onPageSetup((signal) => {
+    /**
+     * `{name}` substitution — the same helper `ScreenshotCarousel.astro` carries.
+     *
+     * `String.prototype.replaceAll` is Chrome 85 and this bundle's floor is 66,
+     * so it is a global regex. An unknown placeholder is left visible rather than
+     * blanked.
+     */
+    function fill(template: string, vars: Record<string, string | number>): string {
+      return template.replace(/\{([a-zA-Z][a-zA-Z0-9]*)\}/g, (match, name: string) =>
+        Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : match,
+      );
+    }
+
+    document.querySelectorAll<HTMLButtonElement>(".swatch[data-hex]").forEach((sw) => {
+      sw.addEventListener(
+        "click",
+        async () => {
+          const hex = sw.dataset.hex || "";
+          try {
+            await navigator.clipboard.writeText(hex);
+          } catch {
+            /* clipboard may be blocked; the HEX is still visible/selectable */
+          }
+          sw.classList.add("copied");
+          const hexEl = sw.querySelector<HTMLElement>(".hex");
+          const prev = hexEl?.textContent;
+          if (hexEl) hexEl.textContent = fill(sw.dataset.i18nCopied ?? "", { hex });
+          window.setTimeout(() => {
+            sw.classList.remove("copied");
+            if (hexEl && prev) hexEl.textContent = prev;
+          }, 1200);
+        },
+        { signal },
+      );
+    });
+  });
+</script>

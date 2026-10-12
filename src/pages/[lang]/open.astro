@@ -1,0 +1,20 @@
+---
+/**
+ * One app-launch landing page per published non-default locale. See
+ * `[lang]/index.astro`.
+ *
+ * Nothing routes to these yet. `functions/_middleware.ts` serves the deep-link
+ * host (luotopia.whu.sb) by fetching `/open/` for every HTML navigation on it,
+ * and that host takes no part in language negotiation, so today only the default
+ * locale's copy is ever reached. They are built so the wiring can be added
+ * centrally without a second pass over the page.
+ */
+import { PREFIXED_LOCALES } from "../../i18n/locales";
+import OpenPage from "../../components/pages/OpenPage.astro";
+
+export function getStaticPaths() {
+  return PREFIXED_LOCALES.map((locale) => ({ params: { lang: locale.path } }));
+}
+---
+
+<OpenPage />

@@ -1,3 +1,5 @@
+import type { TranslationKey, Translator } from "../i18n/ui";
+
 export interface FriendLinkImage {
   type: "network" | "svg";
   url?: string;
@@ -51,17 +53,38 @@ export interface FriendLinkItem {
 
 export interface FriendLinkCatalog {
   version: number;
-  items: FriendLinkItem[];
+  /**
+   * `readonly` because the literal below is `as const`, which is what makes
+   * `FriendLinkId` a union of literal ids rather than `string`. Erased at
+   * runtime, so `JSON.stringify` of the catalog is unaffected.
+   */
+  items: readonly FriendLinkItem[];
 }
 
-export const categoryLabels: Record<string, string> = {
-  feedback: "使用反馈",
-  clubOrg: "社团组织",
-  partnerApp: "合作与致谢",
-  other: "其他",
-};
-
-const links: FriendLinkItem[] = [
+/*
+ * The catalogue has two consumers with opposite requirements, and the split is
+ * the whole reason this file looks the way it does.
+ *
+ * `friendLinkCatalog` is served verbatim at `/data/friend-links.json` by
+ * `src/pages/data/friend-links.json.ts`, and the Flutter app fetches it:
+ * `app_config.dart` builds the URL and `friend_links_provider.dart` parses the
+ * result, including the `qqGroup` block that drives a native "join QQ group"
+ * sheet. That document is a wire format. It must not gain, lose, rename or
+ * reorder a field, and its bytes must not move — so it keeps the default
+ * locale's copy inline, exactly as written, and localisation does not touch it.
+ * Translating the app's friend-link sheet is the app's job, in its own ARB
+ * files, not something a shared web endpoint can do for it.
+ *
+ * `friendLinkCatalogFor(t)` is the same shape with the prose resolved through
+ * the dictionaries. `FriendLinks.astro` renders that one. Nothing else reads
+ * it, and it never reaches the endpoint.
+ *
+ * The cost is that the Chinese prose exists twice: once here, where it is the
+ * wire format's payload, and once in `src/i18n/zh-Hans.json`, where it is the
+ * default locale's dictionary value. `tools/check-i18n.mjs` cannot see the
+ * duplication. If you edit one, edit the other.
+ */
+const links = [
   {
     id: "closedwhu",
     title: "WHU闭源社区（QQ群）",
@@ -155,9 +178,108 @@ const links: FriendLinkItem[] = [
       button: { label: "注册", url: "https://app.soruxgpt.com/auth/register?aff=6L2Z8Q7M" },
     },
   },
-];
+] as const satisfies readonly FriendLinkItem[];
+
+/** Every friend-link id in the list, as a literal union. */
+export type FriendLinkId = (typeof links)[number]["id"];
+
+/** Every category id in the list, as a literal union. */
+export type FriendLinkCategoryId = (typeof links)[number]["category"];
 
 export const friendLinkCatalog: FriendLinkCatalog = {
   version: 4,
   items: links,
 };
+
+/**
+ * The two dictionary keys every friend-link row renders.
+ *
+ * Typed as template literals over `FriendLinkId` and narrowed to
+ * `TranslationKey`, so `t(friendLinkKeys(id).title)` is checked against the
+ * default locale's key set: add a link here and forget its copy in
+ * `zh-Hans.json`, and the call site stops typechecking instead of rendering the
+ * raw key. (`astro build` does not typecheck — `tools/check-i18n.mjs` enforces
+ * the same invariant at build time, and it is that script which fails CI.)
+ */
+export function friendLinkKeys(id: FriendLinkId): {
+  title: TranslationKey;
+  subtitle: TranslationKey;
+} {
+  return {
+    title: `community.friend.item.${id}.title` as TranslationKey,
+    subtitle: `community.friend.item.${id}.subtitle` as TranslationKey,
+  };
+}
+
+/**
+ * The dialog's own two keys.
+ *
+ * A separate helper rather than two more fields of `friendLinkKeys()` because
+ * only the three `type: "dialog"` links render one. Deriving them for all seven
+ * would put keys in every dictionary that no page ever reads.
+ */
+export function friendLinkDialogKeys(id: FriendLinkId): {
+  title: TranslationKey;
+  body: TranslationKey;
+} {
+  return {
+    title: `community.friend.item.${id}.dialog.title` as TranslationKey,
+    body: `community.friend.item.${id}.dialog.body` as TranslationKey,
+  };
+}
+
+/** The dialog CTA's dictionary key — only two links ship a button at all. */
+export function friendLinkDialogButtonKey(id: FriendLinkId): TranslationKey {
+  return `community.friend.item.${id}.dialog.button` as TranslationKey;
+}
+
+/** The category heading's dictionary key. */
+export function friendLinkCategoryKey(id: FriendLinkCategoryId): TranslationKey {
+  return `community.friend.category.${id}` as TranslationKey;
+}
+
+/**
+ * The same catalog with its prose resolved for `locale`.
+ *
+ * Identical shape, identical field names, identical key order — only the values
+ * of `title`, `subtitle` and, on dialog links, `action.title`, `action.body`
+ * and `action.button.label` differ. Everything that is not prose is carried
+ * across untouched by the spreads, `qqGroup` included: those are credentials
+ * and identifiers, not copy, and a translated group number does not join a
+ * group.
+ *
+ * Deliberately *not* what `/data/friend-links.json` serves; see the comment on
+ * `links` above.
+ */
+export function friendLinkCatalogFor(t: Translator): FriendLinkCatalog {
+  return {
+    version: friendLinkCatalog.version,
+    items: friendLinkCatalog.items.map((item) => {
+      const id = item.id as FriendLinkId;
+      const keys = friendLinkKeys(id);
+      const action: FriendLinkAction = { ...item.action };
+
+      if (action.type === "dialog") {
+        const dialog = friendLinkDialogKeys(id);
+        action.title = t(dialog.title);
+        action.body = t(dialog.body);
+        // Shallow copy first: `action.button` still points at the frozen
+        // literal's object, and writing through it would change the catalog the
+        // JSON endpoint serves.
+        if (action.button) {
+          action.button = {
+            ...action.button,
+            label: t(friendLinkDialogButtonKey(id)),
+          };
+        }
+      }
+
+      return {
+        ...item,
+        title: t(keys.title),
+        subtitle: t(keys.subtitle),
+        action,
+      };
+    }),
+  };
+}

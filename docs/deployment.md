@@ -128,11 +128,19 @@ Pages 判断「自定义 404」还是「单页应用」的唯一依据，是产�
   （`assets.directory` + `main`），与 Pages 是两套产品。
 - 也**不需要**在中间件里维护站点路由表。未命中由平台判定，新增页面不会漏配。
 
-`functions/_middleware.ts` 只保留平台做不到的部分。就 404 而言是**按客户端选择它的
-表示形式**：浏览器拿到完整的 `dist/404.html`，`curl` / `wget` / 各类 HTTP 库拿到一行
-`text/plain`（`404 Not Found: /path` + 站点首页），避免 34 KB 的文档刷满终端。判定
-依据 `Accept` 是否显式包含 `text/html`，并用 `Sec-Fetch-Dest` 兜底；Function 自己
-返回的 JSON 404（如 `/api/*`）不会被改写。
+`functions/_middleware.ts` 只保留平台做不到的部分。就 404 而言有两件：
+
+**按客户端选择表示形式。** 浏览器拿到完整的 404 文档，`curl` / `wget` / 各类 HTTP 库
+拿到一行 `text/plain`（`404 Not Found: /path` + 站点首页），避免 34 KB 的文档刷满
+终端。判定依据 `Accept` 是否显式包含 `text/html`，并用 `Sec-Fetch-Dest` 兜底；
+Function 自己返回的 JSON 404（如 `/api/*`）不会被改写。
+
+**按访客选择语言。** `dist/404.html` 只能有一份，所以九种译文是普通路由
+（`/<locale>/404/`，由 `src/pages/[lang]/404.astro` 构建），中间件在 HTML 404 上用
+`ASSETS.fetch` 取对应语种那份，以 **404 状态**返回。语种优先级与全站一致：路径前缀 →
+cookie → `Accept-Language`。`ASSETS.fetch` 直达资源存储、不再进 Functions，所以不会
+递归。响应头照旧是 `max-age=0, must-revalidate`——404 绝不能被缓存住，下次部署后这个
+路径可能就存在了。
 
 同一个 `prefersHtml()` 判定也是[语言协商](#语言协商)的第一道闸——静态产物没有 SSR，
 `Accept-Language` 同样只有边缘能读到。
@@ -183,12 +191,15 @@ URL；此后自动识别不再覆盖这个选择。反过来若按「路径带�
 
 一律用 302 而不是 301：永久重定向会被按 URL 缓存，用户改了浏览器语言也回不来。
 
-未翻译路径的 404 回退也在中间件：`/en/status` 没有文档 → 302 到 `/status`。这本是
-Astro `i18n.fallback` 的活，但那个方案与 `src/pages/[lang]/*` 冲突，见
-[开发文档](./development.md#部分翻译时各处怎么表现)。
+带语种前缀的路径 404 时，中间件先探一次去掉前缀的路径：存在就 302 过去（部分翻译时的
+正解），不存在就直接回该语种的 404 文档，不再多一跳。这本是 Astro `i18n.fallback` 的
+活，但那个方案与 `src/pages/[lang]/*` 冲突，见
+[开发文档](./development.md#部分翻译时各处怎么表现)。目前十个语种翻了全部路由，所以
+第一条分支实际上不会命中；留着是因为「某语种只翻一部分」这件事随时可能再发生。
 
-深链域名不参与语言协商：它在中间件更早的位置就整体返回了，`luotopia.whu.sb/*` 被 App
-认领，落地页不该再多一跳重定向。
+`/status` + `Accept-Language: en` 会 302 到 `/en/status`——**因为该语种确实有这个页面**。
+`pathInLocale()` 同时充当闸门和目标：目标等于原路径就不跳。少了这道闸就是
+`/en/status` → 404 → 回退 → `/status` → 再识别，死循环。
 
 ### 深链域名（luotopia.whu.sb）
 
@@ -197,6 +208,17 @@ Universal Links（applinks），链接与 App 内路由一一对应（GoRouter �
 已安装且验证通过时由系统直接唤起 App；否则中间件把该域名上的 HTML 导航重写到
 `/open` 落地页（保留原始 URL），由页面脚本映射回 `luotopia://app/<path>` 并提供
 「打开 App / 下载」引导。
+
+落地页**参与**语言协商，但方式与主站不同：它是服务端改写而不是重定向，因为浏览器
+地址栏必须留在原始深链 URL 上——那个 URL 就是页面脚本要映射成 `luotopia://` 的东西。
+中间件按 `?lang=` → cookie → `Accept-Language` 的优先级取语种，`ASSETS.fetch` 对应
+的 `/<locale>/open/` 返回。`?lang=` 是**给 App 用的**：App 知道自己的语言，比从系统
+推断准得多（系统是英文但 App 里选了中文这种错配很常见）。该域名上不写 cookie——它与
+`www.whu.sb` 不同源，写了也发不过去，只会看起来像一个永远不生效的偏好。取不到已发布
+语种时回落到默认语种的落地页，绝不会因为 `?lang=` 写错而让深链失败。
+
+`/.well-known/*` 与 `/open` 之外的路径照旧整体重写；关联文件必须无重定向直达，Apple
+的 CDN 与 Android 的校验器把重定向当作验证失败。
 
 维护要点：
 
@@ -298,9 +320,22 @@ curl -sI https://luotopia.whu.sb/.well-known/assetlinks.json    # 200，无重�
 # 首访识别：应 302 到 /en/
 curl -sI -H 'accept: text/html' -H 'accept-language: en' https://www.whu.sb/ | grep -i '^location'
 
-# 未翻译的页面不该被识别过去，否则就是死循环。这里期望 Pages 自己的
-# /status -> /status/ 308，而不是 /en/status
+# 每条路由都有译文，所以这里期望 302 到 /en/status（而不是 Pages 的 308）
 curl -sI -H 'accept: text/html' -H 'accept-language: en' https://www.whu.sb/status | grep -i '^location'
+
+# 404 应按访客语言返回，状态码仍是 404
+curl -s -H 'accept: text/html' -H 'accept-language: ja' https://www.whu.sb/nope-not-a-page \
+  | grep -o '<html lang="[^"]*"'
+curl -sI -H 'accept: text/html' -H 'accept-language: ja' https://www.whu.sb/nope-not-a-page | head -1
+
+# 深链域名的落地页应跟随语言，且不是重定向（地址栏要留在原 URL）
+curl -s -H 'accept: text/html' -H 'accept-language: en' https://luotopia.whu.sb/anything | grep -o '<html lang="[^"]*"'
+curl -s -H 'accept: text/html' 'https://luotopia.whu.sb/anything?lang=fr' | grep -o '<html lang="[^"]*"'
+
+# App 契约：这三个必须与语言协商无关，永远 200 且内容不变
+curl -sI https://www.whu.sb/legal/terms.md | head -1
+curl -s  https://www.whu.sb/data/legal.json | head -c 80
+curl -s  https://www.whu.sb/data/friend-links.json | head -c 80
 
 # 显式选择：应 302 到 /en/ 并带 Set-Cookie: luotopia_lang=en
 curl -sI 'https://www.whu.sb/?lang=en' | grep -i '^location\|^set-cookie'

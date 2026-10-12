@@ -1,0 +1,1014 @@
+---
+/**
+ * The `/download` page body.
+ *
+ * Extracted from `src/pages/download.astro` so the route can exist once per
+ * locale without duplicating any markup: `src/pages/download.astro` renders it
+ * in the default locale, `src/pages/[lang]/download.astro` renders it in each
+ * published one. Everything locale-dependent is read from `Astro.currentLocale`
+ * inside here, so neither caller has to pass anything down and the two cannot
+ * drift.
+ *
+ * Two kinds of string on this page deliberately stay out of the dictionaries:
+ *
+ * - **The release notes themselves.** They are authored by hand in Chinese and
+ *   `/api/releases*` serves one feed with no per-locale variant, so the
+ *   changelog body renders exactly what the API returned, in whatever language
+ *   the page around it is in. Everything *around* it — the heading that
+ *   introduces it, the pager, the loading, empty and failure states, the asset
+ *   chips — is localised as usual.
+ * - **The install commands.** `brew tap ClosedWHU/luotopia` is not a sentence
+ *   and a translated command does not run, so the snippets stay literal. The
+ *   prose, labels and captions around them move to the dictionary, and so do
+ *   the shell comments inside them, which are prose that happens to sit in a
+ *   `<pre>`.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../PageHeader.astro";
+import Icon from "../Icon.astro";
+import {
+  externalLabelKey,
+  platformKeys,
+  platforms,
+  testFlightUrl,
+} from "../../config/downloads";
+import { resolveLocale, useTranslations, type TranslationKey } from "../../i18n/ui";
+
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+
+/*
+ * Same escaping as `legal/[slug].astro` does before its own `set:html`. Build
+ * time only, so the Chrome 66 floor does not apply, but `replace(/g)` keeps it
+ * identical to the copy the script below carries.
+ */
+function escapeHtml(text: string): string {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/**
+ * A dictionary value with inline markup woven through it.
+ *
+ * The install notes put `<strong>`, `<code>` and `<a>` in the middle of running
+ * prose. Splitting every paragraph at each tag would freeze the word order a
+ * translation may use — `home.hero.subtitleLine1/2` can only get away with it
+ * because its split is a `<br>` — so the value carries `{name}` placeholders and
+ * this substitutes the markup for each one.
+ *
+ * The slots are written out at the call site, i.e. they are this file's own
+ * markup, and the dictionary text around them is escaped first, so nothing
+ * untrusted reaches `set:html`. Placeholders are matched with the same regex
+ * `ui.ts` and the carousel's client-side `fill()` use; an unknown one is left
+ * visible rather than blanked.
+ */
+function rich(key: TranslationKey, slots: Record<string, string>): string {
+  return escapeHtml(t(key)).replace(
+    /\{([a-zA-Z][a-zA-Z0-9]*)\}/g,
+    (match, name: string) =>
+      Object.prototype.hasOwnProperty.call(slots, name) ? slots[name] : match,
+  );
+}
+
+/*
+ * The inline fragments the notes above weave in, spelled exactly as the
+ * template rendered them before the copy moved out — same tags, same classes,
+ * same attribute order. The dictionaries hold sentences; this holds HTML.
+ */
+const strongHtml = (text: string) =>
+  `<strong class="text-on-surface">${escapeHtml(text)}</strong>`;
+const codeHtml = (text: string) =>
+  `<code class="text-on-surface">${escapeHtml(text)}</code>`;
+const linkHtml = (href: string, text: string) =>
+  `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${escapeHtml(text)}</a>`;
+
+const testFlightLink = linkHtml(testFlightUrl, t("download.install.apple.joinLink"));
+/* Proper nouns: the repository's own name and GitHub's own product name. */
+const wingetRepoLink = linkHtml(
+  "https://github.com/microsoft/winget-pkgs",
+  "microsoft/winget-pkgs",
+);
+const releasesLink = linkHtml(
+  "https://github.com/ClosedWHU/Luotopia/releases",
+  "GitHub Releases",
+);
+
+/*
+ * The strings the *script* needs, carried on data attributes.
+ *
+ * Not `define:vars`: that inlines the script and takes it out of the bundle,
+ * which is exactly the tradeoff `ScreenshotCarousel.astro` already rejected.
+ * Everything the client says out loud is rendered here instead, including the
+ * templates with `{link}` / `{version}` / `{page}` placeholders, so the grammar
+ * lives in the dictionaries alongside the words and a translator can move the
+ * link to wherever its language wants it.
+ *
+ * `locale` is the page's own, and is what `formatDate()` now hands to
+ * `toLocaleDateString` — the release dates used to be formatted as zh-CN
+ * whatever language the page was rendered in.
+ */
+const i18n = {
+  locale,
+  latestCurrent: t("download.latest.current"),
+  latestUnavailable: t("download.latest.unavailable"),
+  releaseDetails: t("download.latest.details"),
+  noData: t("download.badge.noData"),
+  prerelease: t("download.badge.prerelease"),
+  externalFallback: t("download.external.fallback"),
+  recommended: t("download.asset.recommended"),
+  archFilter: t("download.asset.archFilter"),
+  appleTestFlight: t("download.apple.testFlightSection"),
+  appleDmg: t("download.apple.dmgSection"),
+  windowsStore: t("download.windows.storeSection"),
+  windowsZip: t("download.windows.zipSection"),
+  noNotes: t("download.changelog.noNotes"),
+  loading: t("download.changelog.loading"),
+  empty: t("download.changelog.empty"),
+  loadFailed: t("download.changelog.error"),
+  page: t("download.changelog.page"),
+  viewOnGithub: t("download.changelog.viewOnGithub"),
+};
+---
+
+<BaseLayout title={t("download.title")}>
+  <PageHeader title={t("download.header")} subtitle={t("download.subtitle")} />
+
+  <section
+    class="relative pb-16 px-4"
+    data-download-i18n
+    data-i18n-locale={i18n.locale}
+    data-i18n-latest-current={i18n.latestCurrent}
+    data-i18n-latest-unavailable={i18n.latestUnavailable}
+    data-i18n-release-details={i18n.releaseDetails}
+    data-i18n-no-data={i18n.noData}
+    data-i18n-prerelease={i18n.prerelease}
+    data-i18n-external-fallback={i18n.externalFallback}
+    data-i18n-recommended={i18n.recommended}
+    data-i18n-arch-filter={i18n.archFilter}
+    data-i18n-apple-test-flight={i18n.appleTestFlight}
+    data-i18n-apple-dmg={i18n.appleDmg}
+    data-i18n-windows-store={i18n.windowsStore}
+    data-i18n-windows-zip={i18n.windowsZip}
+    data-i18n-no-notes={i18n.noNotes}
+    data-i18n-loading={i18n.loading}
+    data-i18n-empty={i18n.empty}
+    data-i18n-load-failed={i18n.loadFailed}
+    data-i18n-page={i18n.page}
+    data-i18n-view-on-github={i18n.viewOnGithub}
+  >
+    <div class="max-w-content mx-auto">
+      <p id="latest-meta" class="lt-reveal text-body-medium text-outline mb-10">{t("download.latest.loading")}</p>
+
+      <div id="platform-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {
+          platforms.map((p, i) => {
+            const keys = platformKeys(p.id);
+            /*
+             * The external-install link's copy, or `undefined` where the card
+             * has no such link — the same presence test `p.externalLabel` was
+             * when the label still lived in `config/downloads.ts`.
+             */
+            const external = p.externalUrl ? t(externalLabelKey(p.id)) : undefined;
+            return (
+              <div
+                class="platform-card lt-reveal-lift lt-lift glass rounded-card p-5 flex flex-col"
+                style={`--lt-reveal-delay: ${(i % 4) * 70}ms`}
+                data-platform={p.id}
+                data-external-url={p.externalUrl ?? ""}
+                data-external-label={external ?? ""}
+              >
+                <span class="lt-icon-chip text-primary text-[22px] mb-3.5"><Icon name={p.icon} /></span>
+                <h2 class="text-title-medium text-on-surface">{p.name}</h2>
+                <p class="text-body-medium text-on-surface-variant mt-1">{t(keys.desc)}</p>
+                <div class="mt-4 flex flex-wrap gap-1.5 items-center platform-badges">
+                  <span class="inline-block px-2.5 py-0.5 rounded-sm lt-inset text-on-surface-variant text-label-medium">
+                    {p.id === "apple" ? t("download.platform.apple.badge") : t("download.badge.loading")}
+                  </span>
+                </div>
+                <div class:list={["platform-assets", "mt-3", "space-y-1.5", !p.externalUrl && "hidden"]}>
+                  {p.externalUrl && (
+                    <a
+                      href={p.externalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="flex items-center gap-1 text-body-small text-primary hover:underline no-underline"
+                    >
+                      <Icon name="open_in_new" class="text-base" />
+                      <span>{external ?? t("download.external.fallback")}</span>
+                    </a>
+                  )}
+                </div>
+                <p class="mt-2 text-body-small text-outline">{t(keys.note)}</p>
+              </div>
+            );
+          })
+        }
+      </div>
+
+      <div class="lt-reveal-lift mt-16 rounded-card glass p-6 sm:p-8">
+        <h2 class="text-title-medium text-on-surface mb-4">{t("download.install.title")}</h2>
+        <div class="space-y-4 text-body-medium text-on-surface-variant">
+          <div>
+            <h3 class="text-title-small text-on-surface mb-1">Android</h3>
+            <p
+              set:html={rich("download.install.android.body", {
+                arm64: strongHtml("arm64-v8a"),
+                armv7: strongHtml("armeabi-v7a"),
+                x86: strongHtml("x86_64"),
+              })}
+            />
+          </div>
+          <div>
+            <h3 class="text-title-small text-on-surface mb-1">Apple</h3>
+            <p
+              set:html={rich("download.install.apple.ios.body", {
+                lead: strongHtml(t("download.install.apple.ios.lead")),
+                joinLink: testFlightLink,
+              })}
+            />
+            <p
+              class="mt-1"
+              set:html={rich("download.install.apple.macos.body", {
+                dmg: strongHtml("DMG"),
+                openWith: strongHtml(t("download.install.apple.openWith")),
+                xattr: codeHtml("xattr -cr /Applications/Luotopia.app"),
+              })}
+            />
+          </div>
+          <div>
+            <h3 class="text-title-small text-on-surface mb-1">Linux</h3>
+            <p
+              set:html={rich("download.install.linux.body", {
+                arch: strongHtml(t("download.install.linux.arch")),
+                format: strongHtml(t("download.install.linux.format")),
+              })}
+            />
+            <pre data-lenis-prevent-horizontal class="mt-2 overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># .tar.gz
+tar -xzf luotopia-*-linux-x64.tar.gz &amp;&amp; ./luotopia/luotopia
+# .AppImage
+chmod +x luotopia-*-linux-x64.AppImage &amp;&amp; ./luotopia-*-linux-x64.AppImage
+# .deb
+sudo apt install ./luotopia-*-linux-*.deb
+# .flatpak
+flatpak install --user ./luotopia-*-linux-*.flatpak</code></pre>
+            <p class="mt-2 text-body-small text-outline">{t("download.install.linux.note")}</p>
+          </div>
+          <div>
+            <h3 class="text-title-small text-on-surface mb-1">HarmonyOS</h3>
+            <p
+              set:html={rich("download.install.harmony.body", {
+                hap: codeHtml(".hap"),
+                signedHap: codeHtml("luotopia-*-harmonyos-arm64-signed.hap"),
+                sideload: codeHtml("HARMONYOS-SIDELOAD.txt"),
+              })}
+            />
+            <p class="mt-2 text-body-small text-outline">{t("download.install.harmony.note")}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lt-reveal-lift mt-8 rounded-card glass p-6 sm:p-8">
+        <h2 class="text-title-medium text-on-surface mb-2">{t("download.pkg.title")}</h2>
+        <p class="text-body-medium text-on-surface-variant mb-4">{t("download.pkg.subtitle")}</p>
+        <div class="space-y-5 text-body-medium text-on-surface-variant">
+          <div>
+            <h3 class="text-title-small text-on-surface mb-1">Scoop</h3>
+            <p class="mb-2">{t("download.pkg.scoop.body")}</p>
+            <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>scoop bucket add luotopia https://github.com/ClosedWHU/Luotopia-Dist
+scoop install luotopia
+scoop update luotopia   # {t("download.pkg.scoop.update")}</code></pre>
+            <p class="mt-2 text-body-small text-outline">{t("download.pkg.scoop.note")}</p>
+          </div>
+          <div>
+            <h3 class="text-title-small text-on-surface mb-1">Homebrew</h3>
+            <p class="mb-2">{t("download.pkg.brew.body")}</p>
+            <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>brew tap ClosedWHU/luotopia
+# {t("download.pkg.brew.linux")}
+brew install luotopia
+# {t("download.pkg.brew.macos")}
+brew install --cask luotopia</code></pre>
+            <p
+              class="mt-2 text-body-small text-outline"
+              set:html={rich("download.pkg.brew.note", {
+                install: codeHtml("brew install luotopia"),
+                cask: codeHtml("--cask"),
+                upgrade: codeHtml("brew upgrade luotopia"),
+              })}
+            />
+          </div>
+          <div>
+            <h3 class="text-title-small text-on-surface mb-1">Nix</h3>
+            <p class="mb-2">{t("download.pkg.nix.body")}</p>
+            <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>nix profile install github:ClosedWHU/Luotopia-Dist</code></pre>
+          </div>
+          <div>
+            <h3 class="text-title-small text-on-surface mb-1">{t("download.pkg.aur.title")}</h3>
+            <p class="mb-2">{t("download.pkg.aur.body")}</p>
+            <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>yay -S luotopia-bin</code></pre>
+            <p class="mt-2 text-body-small text-outline">{t("download.pkg.aur.note")}</p>
+          </div>
+          <div>
+            <h3 class="text-title-small text-on-surface mb-1">winget</h3>
+            <p class="mb-2">{t("download.pkg.winget.body")}</p>
+            <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># {t("download.pkg.winget.snippet")}
+winget install --manifest .\path\to\manifests\folder</code></pre>
+            <p class="mt-2" set:html={rich("download.pkg.winget.merged", { repo: wingetRepoLink })} />
+            <pre data-lenis-prevent-horizontal class="mt-2 overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>winget install ClosedWHU.Luotopia</code></pre>
+            <p class="mt-2 text-body-small text-outline">{t("download.pkg.winget.note")}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 text-center mb-20">
+        <p class="text-body-small text-outline" set:html={rich("download.releases.more", { link: releasesLink })} />
+      </div>
+
+      <!-- `lt-reveal-lift`, not `lt-reveal`: this wrapper holds the dynamically
+           injected `.glass` release articles, and an opacity transition would
+           make it a backdrop root for 0.7s — every glass card rendering flat,
+           then snapping into blur at the end. Transform-only, per the rule in
+           global.css. -->
+      <div id="changelog" class="lt-reveal-lift">
+        <h2 class="text-headline-small text-on-surface mb-2">{t("download.changelog.title")}</h2>
+        <p class="text-body-large text-on-surface-variant mb-8">{t("download.changelog.subtitle")}</p>
+
+        <div id="changelog-list" class="space-y-6" tabindex="-1">
+          <p class="text-body-medium text-outline">{t("download.changelog.loading")}</p>
+        </div>
+
+        <div id="changelog-pager" class="mt-8 flex items-center justify-center gap-3 hidden">
+          <button type="button" id="changelog-prev" class="state-layer rounded-full px-5 py-2 border border-outline text-primary bg-transparent cursor-pointer font-medium disabled:opacity-40 disabled:cursor-not-allowed">{t("download.changelog.prev")}</button>
+          <span id="changelog-page-label" class="text-body-small text-outline"></span>
+          <button type="button" id="changelog-next" class="state-layer rounded-full px-5 py-2 border border-outline text-primary bg-transparent cursor-pointer font-medium disabled:opacity-40 disabled:cursor-not-allowed">{t("download.changelog.next")}</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { onPageSetup } from "../../scripts/page-lifecycle";
+  import { normalizeIconSvg } from "../../scripts/icon-svg";
+  import downloadIconRaw from "@material-symbols/svg-400/outlined/download.svg?raw";
+  import openInNewIconRaw from "@material-symbols/svg-400/outlined/open_in_new.svg?raw";
+
+  const openInNewIcon = normalizeIconSvg(openInNewIconRaw, "text-base");
+  const assetDownloadIcon = normalizeIconSvg(downloadIconRaw, "text-base shrink-0 mt-0.5");
+  const changelogDownloadIcon = normalizeIconSvg(downloadIconRaw, "text-sm");
+
+  /*
+   * The link both changelog failure states point at. Markup, not copy: the
+   * dictionaries carry the sentence with a `{link}` placeholder, so a
+   * translation can put the link wherever its grammar needs it.
+   */
+  const releasesLinkHtml = `<a href="https://github.com/ClosedWHU/Luotopia/releases" class="text-primary hover:underline" target="_blank" rel="noopener noreferrer">GitHub Releases</a>`;
+
+  onPageSetup((signal) => {
+    const PER_PAGE = 5;
+    let page = 1;
+    let hasNext = false;
+    let hasPrev = false;
+    // Read back by loadTestFlightVersion, which repaints the Apple badge after
+    // the release pass and must not drop the 测试版 chip.
+    let latestPrerelease = false;
+
+    const latestMeta = document.getElementById("latest-meta");
+    const listEl = document.getElementById("changelog-list");
+    const pager = document.getElementById("changelog-pager");
+    const prevBtn = document.getElementById("changelog-prev");
+    const nextBtn = document.getElementById("changelog-next");
+    const pageLabel = document.getElementById("changelog-page-label");
+
+    /*
+     * The strings this script speaks, read back off the section.
+     *
+     * Same reasoning as `ScreenshotCarousel`'s slide labels: a `<script>` is its
+     * own module, and `define:vars` would inline it and drop it out of the
+     * bundle. The frontmatter renders every one of them into a `data-i18n-*`
+     * attribute, including the `{link}` / `{version}` / `{page}` templates, so
+     * the client bundle stays language-neutral and the grammar is translated
+     * along with the words instead of being baked into concatenation here.
+     *
+     * `locale` is the page's own, for `formatDate()`.
+     */
+    const root = document.querySelector<HTMLElement>("[data-download-i18n]");
+    const dataset = root?.dataset ?? {};
+    const copy = {
+      locale: dataset.i18nLocale ?? "",
+      latestCurrent: dataset.i18nLatestCurrent ?? "",
+      latestUnavailable: dataset.i18nLatestUnavailable ?? "",
+      releaseDetails: dataset.i18nReleaseDetails ?? "",
+      noData: dataset.i18nNoData ?? "",
+      prerelease: dataset.i18nPrerelease ?? "",
+      externalFallback: dataset.i18nExternalFallback ?? "",
+      recommended: dataset.i18nRecommended ?? "",
+      archFilter: dataset.i18nArchFilter ?? "",
+      appleTestFlight: dataset.i18nAppleTestFlight ?? "",
+      appleDmg: dataset.i18nAppleDmg ?? "",
+      windowsStore: dataset.i18nWindowsStore ?? "",
+      windowsZip: dataset.i18nWindowsZip ?? "",
+      noNotes: dataset.i18nNoNotes ?? "",
+      loading: dataset.i18nLoading ?? "",
+      empty: dataset.i18nEmpty ?? "",
+      loadFailed: dataset.i18nLoadFailed ?? "",
+      page: dataset.i18nPage ?? "",
+      viewOnGithub: dataset.i18nViewOnGithub ?? "",
+    };
+
+    /**
+     * `{name}` substitution.
+     *
+     * `String.prototype.replaceAll` is Chrome 85 and the bundle's floor is 66, so
+     * this is a global regex instead. Unknown placeholders are left alone rather
+     * than blanked, so a typo in a dictionary shows up on the page instead of
+     * silently deleting part of the sentence.
+     */
+    function fill(template: string, vars: Record<string, string | number>): string {
+      return template.replace(/\{([a-zA-Z][a-zA-Z0-9]*)\}/g, (match, name: string) =>
+        Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : match,
+      );
+    }
+
+    function formatSize(bytes) {
+      if (!bytes && bytes !== 0) return "";
+      if (bytes < 1024) return bytes + " B";
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+      return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+    }
+
+    /** Split name so UI can truncate base while keeping suffix (e.g. .tar.gz) visible. */
+    function splitFilename(name) {
+      const n = String(name || "");
+      const multi = n.match(/(\.(tar\.gz|tgz))$/i);
+      if (multi) {
+        return { base: n.slice(0, -multi[1].length), ext: multi[1] };
+      }
+      const i = n.lastIndexOf(".");
+      if (i > 0) return { base: n.slice(0, i), ext: n.slice(i) };
+      return { base: n, ext: "" };
+    }
+
+    /*
+     * The page's own locale, not a hardcoded one: this page now exists in ten
+     * languages and a release date written as zh-CN on the English page is
+     * wrong twice over. An empty value falls back to the browser's locale,
+     * which is what passing `undefined` means.
+     */
+    function formatDate(iso) {
+      if (!iso) return "";
+      try {
+        return new Date(iso).toLocaleDateString(copy.locale || undefined, { year: "numeric", month: "short", day: "numeric" });
+      } catch {
+        return iso.slice(0, 10);
+      }
+    }
+
+    function escapeHtml(s) {
+      // `replace(/g)`, not `replaceAll` (Chrome 85+): this bundle must parse
+      // and run on WebView kernels back to ~66.
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    /** Inline markdown after HTML escape: **bold**, `code`, [text](url) */
+    function formatInline(s) {
+      return s
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, (_, t, u) => {
+          return `<a href="${u}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${t}</a>`;
+        })
+        .replace(/`([^`]+)`/g, '<code class="px-1 rounded-[4px] lt-inset text-on-surface text-[0.9em]">$1</code>')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-medium text-on-surface">$1</strong>');
+    }
+
+    /** Release notes markdown: headings, lists, quotes, hr, paragraphs */
+    function formatBody(body) {
+      if (!body) return `<p class="text-outline">${copy.noNotes}</p>`;
+      const lines = escapeHtml(body).split(/\r?\n/);
+      const html = [];
+      let inList = false;
+      const closeList = () => {
+        if (inList) {
+          html.push("</ul>");
+          inList = false;
+        }
+      };
+      let inQuote = false;
+      let quoteLines = [];
+      const closeQuote = () => {
+        if (!inQuote) return;
+        const paras = [];
+        let cur = [];
+        for (const l of quoteLines) {
+          if (l.trim() === "") {
+            if (cur.length) {
+              paras.push(cur);
+              cur = [];
+            }
+          } else {
+            cur.push(l);
+          }
+        }
+        if (cur.length) paras.push(cur);
+        const inner = paras.length
+          ? paras
+              .map(
+                (p) =>
+                  `<p class="my-1 text-body-medium text-on-surface-variant">${p
+                    .map(formatInline)
+                    .join("<br>")}</p>`,
+              )
+              .join("")
+          : '<p class="my-1">&nbsp;</p>';
+        html.push(
+          `<blockquote class="my-2 border-l-2 border-outline-variant pl-3">${inner}</blockquote>`,
+        );
+        inQuote = false;
+        quoteLines = [];
+      };
+      for (const raw of lines) {
+        const line = raw.replace(/\s+$/, "");
+        // `>` is HTML-escaped to `&gt;` before parsing, so match the entity.
+        const quote = line.match(/^\s*&gt;\s?(.*)$/);
+        if (quote) {
+          if (!inQuote) {
+            closeList();
+            inQuote = true;
+            quoteLines = [];
+          }
+          quoteLines.push(quote[1].replace(/\s+$/, ""));
+          continue;
+        }
+        closeQuote();
+        if (line.trim() === "") {
+          closeList();
+          html.push('<div class="h-2"></div>');
+          continue;
+        }
+        if (/^---+$/.test(line.trim()) || /^\*\*\*+$/.test(line.trim())) {
+          closeList();
+          html.push('<hr class="my-3 border-outline-variant" />');
+          continue;
+        }
+        const h = line.match(/^(#{1,4})\s+(.+)$/);
+        if (h) {
+          closeList();
+          const level = h[1].length;
+          const text = formatInline(h[2]);
+          // The release article already spends h3 on the version title, so
+          // note headings start at h4 to keep the outline hierarchical.
+          if (level === 1) {
+            html.push(
+              `<h4 class="mt-4 mb-2 text-title-large text-on-surface">${text}</h4>`,
+            );
+          } else if (level === 2) {
+            html.push(
+              `<h4 class="mt-4 mb-2 text-title-medium text-on-surface">${text}</h4>`,
+            );
+          } else {
+            html.push(
+              `<h5 class="mt-3 mb-1.5 text-title-small text-on-surface">${text}</h5>`,
+            );
+          }
+          continue;
+        }
+        const item = line.match(/^\s*[-*•]\s+(.+)/);
+        if (item) {
+          if (!inList) {
+            html.push('<ul class="space-y-1.5 my-2 pl-0 list-none">');
+            inList = true;
+          }
+          html.push(
+            `<li class="flex gap-2 text-body-medium text-on-surface-variant"><span class="text-primary shrink-0 select-none">•</span><span class="min-w-0">${formatInline(item[1])}</span></li>`,
+          );
+          continue;
+        }
+        closeList();
+        html.push(
+          `<p class="text-body-medium text-on-surface-variant">${formatInline(line)}</p>`,
+        );
+      }
+      closeList();
+      closeQuote();
+      return html.join("");
+    }
+
+    function prereleaseBadge() {
+      return `<span class="inline-block px-2 py-0.5 rounded-sm bg-error-container text-on-error-container text-label-medium">${copy.prerelease}</span>`;
+    }
+
+    function stableBadge(text) {
+      return `<span class="inline-block px-2.5 py-0.5 rounded-sm bg-primary-container text-on-primary-container text-label-medium">${escapeHtml(text)}</span>`;
+    }
+
+    function statusBadge(text) {
+      return `<span class="inline-block px-2.5 py-0.5 rounded-sm lt-inset text-on-surface-variant text-label-medium">${escapeHtml(text)}</span>`;
+    }
+
+    /**
+     * Every card renders its version through here, whether or not it has
+     * GitHub assets. The Apple card ships via TestFlight and so has none; it
+     * used to keep the grey status pill while the others got a filled badge,
+     * which read as a different version even when the string matched.
+     */
+    function paintBadges(badges, verLabel, isPrerelease, statusText) {
+      badges.innerHTML = verLabel
+        ? (isPrerelease ? prereleaseBadge() : "") + stableBadge(verLabel)
+        : statusBadge(statusText || copy.noData);
+    }
+
+    /** Returns the external-link markup, or "" when the card has none. */
+    function externalLinkHtml(card) {
+      const externalUrl = card.getAttribute("data-external-url") || "";
+      if (!externalUrl) return "";
+      const externalLabel = card.getAttribute("data-external-label") || copy.externalFallback;
+      return `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-body-small text-primary hover:underline no-underline">
+          ${openInNewIcon}
+          <span>${escapeHtml(externalLabel)}</span>
+        </a>`;
+    }
+
+    function paintAssets(assetsEl, html) {
+      if (html) {
+        assetsEl.classList.remove("hidden");
+        assetsEl.innerHTML = html;
+      } else {
+        assetsEl.classList.add("hidden");
+        assetsEl.innerHTML = "";
+      }
+    }
+
+    /* ── Per-arch filtering for the desktop cards ──
+     * Windows and Linux ship x64 and arm64 builds of every format; without a
+     * filter the cards list eight links and bury the one the visitor wants.
+     * A segmented pill (inset container + raised active segment, per the glass
+     * rules — no nested backdrop-filter) narrows the list to one arch.
+     * Arch-less assets (universal/unknown) stay visible in both segments so
+     * nothing ever disappears. Cards whose release only spans one arch render
+     * no switcher at all.
+     */
+    const ARCH_FILTER_DEFAULT = { windows: "x64", linux: "x64" };
+    const archChoice = {};
+    const cardAssetState = {};
+
+    function archBucketOf(a) {
+      if (a.arch === "amd64") return "x64";
+      if (a.arch === "arm64") return "arm64";
+      return null;
+    }
+
+    function assetLinkHtml(a) {
+      const title =
+        a.label ||
+        [a.archLabel || a.arch, a.formatLabel].filter(Boolean).join(" · ") ||
+        a.name;
+      const rec = a.recommended
+        ? `<span class="shrink-0 px-1.5 py-0.5 rounded-sm bg-primary-container text-on-primary-container text-label-small leading-none">${copy.recommended}</span>`
+        : "";
+      const { base, ext } = splitFilename(a.name);
+      return `<a href="${escapeHtml(a.url)}" title="${escapeHtml(a.name)}" class="flex items-start gap-1.5 text-body-small text-primary hover:underline no-underline" download>
+          ${assetDownloadIcon}
+          <span class="min-w-0 flex-1">
+            <span class="flex flex-wrap items-center gap-1.5">
+              <span class="font-medium text-on-surface">${escapeHtml(title)}</span>
+              ${rec}
+            </span>
+            <span class="flex min-w-0 items-baseline text-outline text-[11px] mt-0.5">
+              <span class="truncate min-w-0">${escapeHtml(base)}</span>
+              <span class="shrink-0">${escapeHtml(ext)}</span>
+              <span class="shrink-0"> · ${formatSize(a.size)}</span>
+            </span>
+          </span>
+        </a>`;
+    }
+
+    function archSwitcherHtml(id) {
+      const seg = (key) => {
+        const active = archChoice[id] === key;
+        return `<button type="button" data-arch="${key}" aria-pressed="${active ? "true" : "false"}" class="state-layer rounded-full px-2.5 py-0.5 text-label-medium cursor-pointer ${active ? "lt-inset-raised text-primary" : "bg-transparent text-on-surface-variant"}">${key}</button>`;
+      };
+      /* Escaped because it lands in an attribute: Astro escaped the literal this
+       * replaced, and a translated value must not be able to close the quote. */
+      return `<div class="inline-flex items-center gap-0.5 rounded-full lt-inset p-0.5" role="group" aria-label="${escapeHtml(copy.archFilter)}">${seg("x64")}${seg("arm64")}</div>`;
+    }
+
+    /**
+     * The Apple card carries two different distribution channels - the
+     * TestFlight link and (since DMGs ship on releases) direct-download
+     * assets - which read as one confusing pile when listed flat. Split them
+     * into labeled sections; the outer .platform-assets space-y then spaces
+     * the sections, and each section keeps the tight link rhythm.
+     * The asset label says macOS because DMGs are the only public Apple
+     * asset; IPAs stay TestFlight-only.
+     */
+    function appleCardHtml(installers, externalLink) {
+      let html = "";
+      if (externalLink) {
+        html += `<div class="space-y-1.5">
+          <p class="text-label-medium text-outline">${copy.appleTestFlight}</p>
+          ${externalLink}
+        </div>`;
+      }
+      if (installers.length > 0) {
+        html += `<div class="space-y-1.5 ${externalLink ? "pt-2 border-t border-outline-variant" : ""}">
+          <p class="text-label-medium text-outline">${copy.appleDmg}</p>
+          ${installers.map(assetLinkHtml).join("")}
+        </div>`;
+      }
+      return html;
+    }
+
+    /**
+     * Windows ships two channels the same way Apple does: the Microsoft Store
+     * MSIX (Store-signed, never a GitHub asset) and the portable zip. Mirror
+     * `appleCardHtml`, but the zip section still gets the x64 / arm64 switcher
+     * the Apple DMG never needed.
+     */
+    function windowsCardHtml(installers, externalLink) {
+      const { switcher, list } = applyArchFilter("windows", installers);
+      let html = "";
+      if (externalLink) {
+        html += `<div class="space-y-1.5">
+          <p class="text-label-medium text-outline">${copy.windowsStore}</p>
+          ${externalLink}
+        </div>`;
+      }
+      if (list.length > 0) {
+        html += `<div class="space-y-1.5 ${externalLink ? "pt-2 border-t border-outline-variant" : ""}">
+          <p class="text-label-medium text-outline">${copy.windowsZip}</p>
+          ${switcher}
+          ${list.map(assetLinkHtml).join("")}
+        </div>`;
+      }
+      return html;
+    }
+
+    /**
+     * Apply the x64 / arm64 filter to a desktop platform's installers, or
+     * hand them back untouched when the platform has no filter or the release
+     * only spans one arch. The caller decides where the switcher sits.
+     */
+    function applyArchFilter(id, installers) {
+      if (!Object.prototype.hasOwnProperty.call(ARCH_FILTER_DEFAULT, id)) {
+        return { switcher: "", list: installers };
+      }
+      let hasX64 = false;
+      let hasArm64 = false;
+      for (const a of installers) {
+        const bucket = archBucketOf(a);
+        if (bucket === "x64") hasX64 = true;
+        if (bucket === "arm64") hasArm64 = true;
+      }
+      if (!hasX64 || !hasArm64) return { switcher: "", list: installers };
+      if (!archChoice[id]) archChoice[id] = ARCH_FILTER_DEFAULT[id];
+      const choice = archChoice[id];
+      return {
+        switcher: archSwitcherHtml(id),
+        list: installers.filter((a) => {
+          const bucket = archBucketOf(a);
+          return bucket === null || bucket === choice;
+        }),
+      };
+    }
+
+    function cardAssetsHtml(id, installers, externalLink) {
+      if (id === "apple") return appleCardHtml(installers, externalLink);
+      if (id === "windows") return windowsCardHtml(installers, externalLink);
+      const { switcher, list } = applyArchFilter(id, installers);
+      return externalLink + switcher + list.map(assetLinkHtml).join("");
+    }
+
+    /**
+     * The navigation signal plus a timeout, combined by hand: `AbortSignal.any`
+     * is Chrome 116+ and `AbortSignal.timeout` 103+, far above this bundle's
+     * ~66 floor. Without a timeout a hung API would keep "加载中…" forever.
+     */
+    function fetchWithTimeout(url: string, ms: number) {
+      const ctrl = new AbortController();
+      const timer = window.setTimeout(() => ctrl.abort(), ms);
+      const onNavAbort = () => ctrl.abort();
+      if (signal.aborted) onNavAbort();
+      else signal.addEventListener("abort", onNavAbort, { once: true });
+      return fetch(url, { signal: ctrl.signal }).finally(() => {
+        window.clearTimeout(timer);
+        signal.removeEventListener("abort", onNavAbort);
+      });
+    }
+
+    async function loadTestFlightVersion() {
+      if (signal.aborted) return;
+
+      try {
+        // TestFlight builds are not GitHub Release assets. Ask the Pages
+        // Function directly so the Apple card shows the actual beta build.
+        const r = await fetchWithTimeout("/api/appstore/latest?connect=1", 15000);
+        if (!r.ok || signal.aborted) return;
+
+        const info = await r.json();
+        if (info?.error || info?.channel !== "testflight" || !info.version) return;
+
+        const card = document.querySelector('.platform-card[data-platform="apple"]');
+        const badges = card?.querySelector(".platform-badges");
+        if (!badges) return;
+        paintBadges(badges, info.version, latestPrerelease, "");
+      } catch { /* Keep the static TestFlight label when Connect is unavailable. */ }
+    }
+
+    async function loadLatest() {
+      if (signal.aborted) return;
+      // Prefer newest including prerelease so testers see pre builds; badge will mark it
+      let release = null;
+      try {
+        const r = await fetchWithTimeout("/api/releases/latest?prerelease=1", 15000);
+        if (r.ok) release = await r.json();
+      } catch { /* ignore */ }
+      if (signal.aborted) return;
+
+      if (!release || release.error) {
+        if (latestMeta) latestMeta.textContent = copy.latestUnavailable;
+        document.querySelectorAll(".platform-card").forEach((card) => {
+          const badges = card.querySelector(".platform-badges");
+          const assetsEl = card.querySelector(".platform-assets");
+          if (!badges || !assetsEl) return;
+          paintBadges(badges, "", false, copy.noData);
+          paintAssets(assetsEl, externalLinkHtml(card));
+        });
+        void loadTestFlightVersion();
+        return;
+      }
+
+      const verLabel = release.version || release.tag || release.title;
+      latestPrerelease = !!release.prerelease;
+      if (latestMeta) {
+        latestMeta.innerHTML =
+          fill(copy.latestCurrent, {
+            version: `<strong class="text-on-surface">${escapeHtml(verLabel)}</strong>`,
+          }) +
+          (release.prerelease ? ` ${prereleaseBadge()}` : "") +
+          (release.publishedAt ? ` · ${formatDate(release.publishedAt)}` : "") +
+          (release.htmlUrl
+            ? ` · <a href="${escapeHtml(release.htmlUrl)}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${copy.releaseDetails}</a>`
+            : "");
+      }
+
+      const byPlatform = {};
+      for (const a of release.assets || []) {
+        const p = a.platform || "other";
+        if (!byPlatform[p]) byPlatform[p] = [];
+        byPlatform[p].push(a);
+      }
+
+      document.querySelectorAll(".platform-card").forEach((card) => {
+        const id = card.getAttribute("data-platform");
+        const badges = card.querySelector(".platform-badges");
+        const assetsEl = card.querySelector(".platform-assets");
+        if (!badges || !assetsEl) return;
+
+        paintBadges(badges, verLabel, release.prerelease, "");
+
+        // The Apple card stands in for both asset platforms the classifier
+        // produces (ios IPAs - never public - and macOS DMGs). concat, not
+        // flatMap: the bundle floor is Chrome 66.
+        const sources = id === "apple" ? ["macos", "ios"] : [id];
+        let platformAssets = [];
+        for (const source of sources) {
+          platformAssets = platformAssets.concat(byPlatform[source] || []);
+        }
+        const installers = platformAssets.filter((a) => !a.meta);
+        const externalLink = externalLinkHtml(card);
+        cardAssetState[id] = { installers, externalLink, assetsEl };
+        paintAssets(assetsEl, cardAssetsHtml(id, installers, externalLink));
+
+        if (Object.prototype.hasOwnProperty.call(ARCH_FILTER_DEFAULT, id)) {
+          // Delegated: the switcher buttons live in innerHTML that is replaced
+          // on every toggle, while assetsEl itself is static Astro markup.
+          assetsEl.addEventListener(
+            "click",
+            (ev) => {
+              const btn =
+                ev.target && ev.target.closest
+                  ? ev.target.closest("button[data-arch]")
+                  : null;
+              if (!btn || !assetsEl.contains(btn)) return;
+              const state = cardAssetState[id];
+              if (!state) return;
+              const nextArch = btn.getAttribute("data-arch");
+              // Replacing innerHTML detaches the focused segment and drops
+              // focus to <body>; park it back on the same segment (the
+              // changelog pager does the same with its list).
+              const hadFocus = assetsEl.contains(document.activeElement);
+              archChoice[id] = nextArch;
+              paintAssets(
+                state.assetsEl,
+                cardAssetsHtml(id, state.installers, state.externalLink),
+              );
+              if (hadFocus) {
+                const restored = state.assetsEl.querySelector(
+                  `button[data-arch="${nextArch}"]`,
+                );
+                if (restored) restored.focus({ preventScroll: true });
+              }
+            },
+            { signal },
+          );
+        }
+      });
+
+      void loadTestFlightVersion();
+    }
+
+    // Rapid clicks put several loadChangelog calls in flight at once; a stale
+    // response landing late would otherwise overwrite the newer page and leave
+    // `page` disagreeing with what is on screen. Only the newest request may
+    // touch the DOM. (Deliberately not `disabled` during load: disabling the
+    // focused pager button drops keyboard focus to <body>.)
+    let changelogRequestId = 0;
+
+    async function loadChangelog(p) {
+      if (!listEl || signal.aborted) return;
+      const requestId = ++changelogRequestId;
+      // Replacing innerHTML detaches a focused link and drops focus to <body>;
+      // remember it and park focus on the list (tabindex="-1") instead, both
+      // while loading and after the new page renders.
+      const focusWasInList = listEl.contains(document.activeElement);
+      listEl.innerHTML = `<p class="text-body-medium text-outline">${copy.loading}</p>`;
+      if (focusWasInList) listEl.focus({ preventScroll: true });
+      try {
+        const r = await fetchWithTimeout(`/api/releases?page=${p}&per_page=${PER_PAGE}`, 15000);
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        const data = await r.json();
+        if (signal.aborted || requestId !== changelogRequestId) return;
+        page = data.page || p;
+        hasNext = !!data.hasNext;
+        hasPrev = !!data.hasPrev || page > 1;
+        const items = data.items || [];
+
+        if (items.length === 0) {
+          listEl.innerHTML = `<p class="text-body-medium text-outline">${fill(copy.empty, { link: releasesLinkHtml })}</p>`;
+        } else {
+          listEl.innerHTML = items
+            .map((rel) => {
+              const ver = rel.version || rel.tag || rel.title;
+              const assetList = (rel.assets || []).filter((a) => !a.meta);
+              const assets =
+                assetList.length > 0
+                  ? `<div class="mt-4 flex flex-wrap gap-2">${assetList
+                      .map((a) => {
+                        const label =
+                          a.label ||
+                          [a.platform, a.archLabel || a.arch, a.formatLabel]
+                            .filter(Boolean)
+                            .join(" · ") ||
+                          a.name;
+                        const rec = a.recommended ? ` · ${copy.recommended}` : "";
+                        return `<a href="${escapeHtml(a.url)}" title="${escapeHtml(a.name)}" class="inline-flex items-center gap-1 px-3 py-1 rounded-full lt-inset-raised text-label-medium text-primary no-underline hover:underline" download>
+                            ${changelogDownloadIcon}${escapeHtml(label + rec)}
+                          </a>`;
+                      })
+                      .join("")}</div>`
+                  : "";
+              return `<article class="rounded-card glass p-6">
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                  <h3 class="text-title-large text-on-surface">${escapeHtml(ver)}</h3>
+                  ${rel.prerelease ? prereleaseBadge() : ""}
+                  <span class="text-body-small text-outline ml-auto">${formatDate(rel.publishedAt)}</span>
+                </div>
+                ${rel.title && rel.title !== ver && rel.title !== rel.tag ? `<p class="text-body-small text-outline mb-3">${escapeHtml(rel.title)}</p>` : ""}
+                <div class="text-body-medium text-on-surface-variant">${formatBody(rel.body)}</div>
+                ${assets}
+                ${rel.htmlUrl ? `<p class="mt-4 text-body-small"><a href="${escapeHtml(rel.htmlUrl)}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${copy.viewOnGithub}</a></p>` : ""}
+              </article>`;
+            })
+            .join("");
+        }
+        if (focusWasInList) listEl.focus({ preventScroll: true });
+
+        if (pager && prevBtn && nextBtn && pageLabel) {
+          pager.classList.remove("hidden");
+          prevBtn.disabled = !hasPrev;
+          nextBtn.disabled = !hasNext;
+          pageLabel.textContent = fill(copy.page, { page });
+        }
+      } catch {
+        if (signal.aborted || requestId !== changelogRequestId) return;
+        listEl.innerHTML = `<p class="text-body-medium text-outline">${fill(copy.loadFailed, { link: releasesLinkHtml })}</p>`;
+        pager?.classList.add("hidden");
+      }
+    }
+
+    prevBtn?.addEventListener("click", () => {
+      if (page > 1) loadChangelog(page - 1);
+    }, { signal });
+    nextBtn?.addEventListener("click", () => {
+      if (hasNext) loadChangelog(page + 1);
+    }, { signal });
+
+    loadLatest();
+    loadChangelog(1);
+  });
+</script>

@@ -80,7 +80,7 @@ export async function mountLuo(canvas, opts = {}) {
     else if (holes >= 1) classified.frame = shape;
     else if (nPts > 12 && bb.w < 300) classified.brushWang = shape;
   }
-  if (!classified.stroke || !classified.frame || !classified.brushWang) throw new Error('logo-luo.svg 部件识别失败');
+  if (!classified.stroke || !classified.frame || !classified.brushWang) throw new Error('logo-luo.svg: could not classify the stroke, frame and brush parts');
 
   function flipWinding(geo) {
     const idx = geo.index;

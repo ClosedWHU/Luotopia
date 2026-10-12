@@ -243,5 +243,632 @@
 
   "features.item.standaloneWeb.title": "Standalone web edition",
   "features.item.standaloneWeb.summary": "Flutter Web is retired; a standalone web product is planned.",
-  "features.item.standaloneWeb.description": "The Flutter Web compatibility layer and its release artefacts are no longer maintained. A standalone web product will start once the requirements and the server-side proxy capabilities are settled."
+  "features.item.standaloneWeb.description": "The Flutter Web compatibility layer and its release artefacts are no longer maintained. A standalone web product will start once the requirements and the server-side proxy capabilities are settled.",
+
+  "brand.title": "Brand",
+  "brand.description": "Luotopia brand assets: the 3D marks, vector and bitmap logo downloads, brand colours and usage rules.",
+  "brand.header": "Brand",
+  "brand.subtitle": "Luotopia's marks, colours and usage rules, for the media, for developers and for campus partners.",
+
+  "brand.logo3d.heading": "3D marks",
+  "brand.logo3d.blurb": "Both logos in three dimensions. Drag to rotate, scroll to zoom.",
+  "brand.logo3d.wu.title": "Wu · stacked slices",
+  "brand.logo3d.wu.subtitle": "The Wu character is cut into fourteen stone slabs that offset layer by layer and settle into place in turn. It echoes the stacked rock of Luojia Hill; turn the viewpoint and the layering and the depth become visible.",
+  "brand.logo3d.luo.title": "Luo · growth",
+  "brand.logo3d.luo.subtitle": "The Luo character is written as calligraphy: translucent jade-like strokes grow in one by one, following the stroke order, with a faint new-sprout glimmer at the brush tip, and sway lightly in the wind once the character is complete.",
+  "brand.logo3d.canvasAria": "3D view of {title}",
+  "brand.logo3d.hint": "3D · drag or flick to rotate · scroll to zoom",
+  "brand.logo3d.pauseToggleAria": "Pause or resume playback",
+  "brand.logo3d.pause": "Pause",
+  "brand.logo3d.resume": "Resume",
+  "brand.logo3d.replay": "Replay",
+
+  "brand.flat.heading": "Flat marks",
+  "brand.flat.blurb": "Vector (SVG) scales without loss for the web and for print; bitmap (PNG, 1024×1024 with transparency) suits app icons and other raster contexts. Both are available in full colour and as a monochrome white version.",
+  "brand.mark.wu.name": "Wu",
+  "brand.mark.wu.role": "Primary mark",
+  "brand.mark.wu.meaning": "A geometric transformation of the Wu character from Wuhan University's name, its horizontal strokes stacked to echo the Luojia hills. It is also the app's default icon.",
+  "brand.mark.luo.name": "Luo",
+  "brand.mark.luo.role": "Alternate mark",
+  "brand.mark.luo.meaning": "The Luo character is taken from Luojia. A geometric jade radical on the left, a single cursive stroke on the right; used as the alternate icon and as the basis for brand extensions.",
+  "brand.mark.altLight": "{name} mark on a light background",
+  "brand.mark.altDark": "{name} mark on a dark background",
+  "brand.mark.altPng": "{name} PNG preview on transparency",
+  "brand.mark.pngCaption": "PNG · transparent, 1024²",
+  "brand.mark.download.monoSvg": "Monochrome SVG",
+  "brand.mark.download.png": "PNG glyph",
+  "brand.mark.download.appIcon": "App icon",
+
+  "brand.colors.heading": "Brand colours",
+  "brand.colors.blurb": "Click a swatch to copy its HEX.",
+  "brand.colors.copied": "Copied {hex}",
+  "brand.color.primary.role": "Primary colour",
+  "brand.color.wu.name": "Wu · Mountain Blue",
+  "brand.color.wu.role": "Primary mark colour",
+  "brand.color.luo.name": "Luo · Ink Green",
+  "brand.color.luo.role": "Alternate mark colour",
+
+  "brand.usage.heading": "Usage rules",
+  "brand.usage.blurb": "These conventions keep the marks consistent across every context.",
+  "brand.usage.sizing.title": "Size and clear space",
+  "brand.usage.sizing.minSize": "Minimum height {digital} on screen; minimum height {print} in print.",
+  "brand.usage.sizing.clearSpace": "Keep clear space of at least {ratio} of the mark's height on all four sides, so it never crowds the elements around it.",
+  "brand.usage.sizing.vector": "Prefer the vector SVG; export the bitmap PNG at 2× / 3× as needed for high-density screens.",
+  "brand.usage.sizing.contrast": "Use the monochrome white version on dark backgrounds and the full-colour version on light ones, so contrast stays sufficient.",
+  "brand.usage.licence.title": "Licence and attribution",
+  "brand.usage.licence.owner": "The marks are copyright {owner}, and identify the Luotopia app and its official content.",
+  "brand.usage.licence.nonCommercial": "Press reviews and non-commercial use by campus partners are welcome, provided the mark stays whole — no recolouring and no distortion.",
+  "brand.usage.licence.commercial": "For commercial partnerships, derivative work or large-scale distribution, please get in touch through the {community} first to obtain a licence.",
+  "brand.usage.licence.communityLink": "community channels",
+  "brand.usage.licence.threeD": "The 3D versions on this page are for demonstration only; use the flat marks above for anything formal.",
+  "brand.usage.donts.title": "Please do not",
+  "brand.usage.donts": [
+    "Stretch it, squash it or change its aspect ratio",
+    "Recolour it (other than to the monochrome white version)",
+    "Add outlines, shadows, gradients or any other extra effect",
+    "Rotate or mirror the mark",
+    "Place it directly on a cluttered or low-contrast background",
+    "Substitute a low-resolution bitmap for the vector source file"
+  ],
+
+  "community.title": "Community",
+  "community.header": "Community",
+  "community.subtitle": "Join us and help build a better digital campus ecosystem",
+
+  "community.qqGroup.title": "QQ group",
+  "community.qqGroup.body": "Join the Luotopia users' group for the latest news and help.",
+  "community.qqGroup.number": "Group number: {uin}",
+
+  "community.github.body": "Developed in the open. Feedback, issues and community contributions are all welcome.",
+
+  "community.inApp.title": "In-app community",
+  "community.inApp.body": "The Luojia Shelter forum and the course grade-and-review feature are built into the app. The forum tab can be turned on under Settings → Navigation.",
+  "community.inApp.features": "Posts, comments, attachments, reputation and leaderboards",
+
+  "community.friend.title": "Friend links",
+
+  "community.friend.category.feedback": "Feedback",
+  "community.friend.category.clubOrg": "Clubs and societies",
+  "community.friend.category.partnerApp": "Partners and thanks",
+  "community.friend.category.other": "Other",
+
+  "community.friend.dialog.close": "Close",
+  "community.friend.dialog.qrAlt": "QR code for {title}",
+  "community.friend.dialog.qrAltGeneric": "Link QR code",
+  "community.friend.dialog.openFallback": "Open",
+
+  "community.friend.item.closedwhu.title": "WHU Closed-Source Community (QQ group)",
+  "community.friend.item.closedwhu.subtitle": "Currently building a next-generation campus life service app for Wuhan University",
+  "community.friend.item.closedwhu.dialog.title": "WHU Closed-Source Community",
+  "community.friend.item.closedwhu.dialog.body": "Group number: 994642924 (long-press to select and copy)",
+  "community.friend.item.closedwhu.dialog.button": "Visit GitHub",
+
+  "community.friend.item.whu-emo.title": "WHU-EMO (QQ group)",
+  "community.friend.item.whu-emo.subtitle": "A community dedicated to writing economics-and-management study materials and sharing them as open source",
+  "community.friend.item.whu-emo.dialog.title": "WHU-EMO",
+  "community.friend.item.whu-emo.dialog.body": "Group 1: 389414112 (full)\nGroup 2: 1032919287 (long-press the text to select and copy)",
+
+  "community.friend.item.whudays.title": "Wuhan University Animation Association",
+  "community.friend.item.whudays.subtitle": "Hoping every member finds their own interest here and enjoys every moment in the club",
+
+  "community.friend.item.ham-app.title": "Ham App",
+  "community.friend.item.ham-app.subtitle": "A Wuhan University life assistant — timetable lookup, grade lookup, sports venue booking and Wuhan University library booking",
+
+  "community.friend.item.milthm.title": "Milthm",
+  "community.friend.item.milthm.subtitle": "A passionate non-commercial rhythm game, built around energetic tracks and charts",
+
+  "community.friend.item.nike232.title": "Tomfng",
+  "community.friend.item.nike232.subtitle": "Into AI tooling and agents, systems and KVCache; works in TypeScript / Go / Rust / C++",
+
+  "community.friend.item.soruxgpt.title": "SoruxGPT",
+  "community.friend.item.soruxgpt.subtitle": "One-stop access to the world's leading AI models",
+  "community.friend.item.soruxgpt.dialog.title": "SoruxGPT",
+  "community.friend.item.soruxgpt.dialog.body": "Invite code: 6L2Z8Q7M (use it when registering)\nDiscount code: IAMWHUER — registration requires a WHU email address",
+  "community.friend.item.soruxgpt.dialog.button": "Register",
+
+  "download.title": "Download",
+  "download.header": "Download Luotopia",
+  "download.subtitle": "Pick your platform and get the latest release",
+
+  "download.latest.loading": "Loading from GitHub Releases…",
+  "download.latest.current": "Latest release: {version}",
+  "download.latest.unavailable": "The latest release could not be loaded right now. Please check GitHub Releases instead.",
+  "download.latest.details": "Release details",
+
+  "download.badge.loading": "Loading…",
+  "download.badge.noData": "No data yet",
+  "download.badge.prerelease": "Pre-release",
+
+  "download.platform.apple.badge": "TestFlight beta",
+
+  "download.platform.android.desc": "Install the APK directly (arm64-v8a / armeabi-v7a / x86_64)",
+  "download.platform.android.note": "Android 8 and later",
+  "download.platform.apple.desc": "TestFlight beta · a DMG is also available for macOS",
+  "download.platform.apple.note": "iOS 16+ · iPadOS · macOS 13.5+ (Apple silicon)",
+  "download.platform.apple.externalLabel": "Join on TestFlight to download",
+  "download.platform.windows.desc": "Microsoft Store build · also a portable zip (x64 / arm64)",
+  "download.platform.windows.note": "Windows 10 and later",
+  "download.platform.windows.externalLabel": "Get it from the Microsoft Store",
+  "download.platform.linux.desc": "x64 / arm64, several formats",
+  "download.platform.linux.note": "tar.gz · AppImage · deb · AUR",
+
+  "download.external.fallback": "External install",
+  "download.asset.recommended": "Recommended",
+  "download.asset.archFilter": "Filter by architecture",
+  "download.apple.testFlightSection": "TestFlight beta · iOS / iPadOS / macOS",
+  "download.apple.dmgSection": "Direct macOS install · DMG (unsigned)",
+  "download.windows.storeSection": "Microsoft Store · store build",
+  "download.windows.zipSection": "Portable zip · direct download",
+
+  "download.install.title": "Installation notes",
+  "download.install.android.body": "Builds are split by ABI. On an Android phone — or on Zhuoyitong, the Android compatibility layer on HarmonyOS — take the build marked \"Recommended\": {arm64}. If an older device cannot install that one, try {armv7}; on an Android emulator, use {x86}. Install the APK as soon as it has downloaded. If the system warns you about an unknown source or a possible risk, allow the installation in system settings and choose to ignore the warning and continue.",
+  "download.install.apple.ios.lead": "iOS / iPadOS / macOS:",
+  "download.install.apple.ios.body": "{lead} all distributed through TestFlight. Open the {joinLink} to request access on an iPhone, an iPad or an Apple-silicon Mac (macOS 13.5+). A TestFlight build stays valid for 90 days and a new one ships roughly every week or two, so keeping the app updated is all it takes — turning on automatic updates is worth doing.",
+  "download.install.apple.joinLink": "TestFlight invite link",
+  "download.install.apple.openWith": "right-click → Open",
+  "download.install.apple.macos.body": "On macOS you can also download the {dmg} straight from a release (Apple silicon, unsigned build): drag Luotopia.app into Applications, then on first launch {openWith}, or run {xattr} in a terminal. Only ever do this for a DMG that came from this site or from an official GitHub release.",
+  "download.install.linux.body": "Published per {arch} (x64 / arm64) and per {format}. Installation examples:",
+  "download.install.linux.arch": "architecture",
+  "download.install.linux.format": "package format",
+  "download.install.linux.note": "Needs a reasonably recent glibc and GTK3.",
+  "download.install.harmony.body": "Sideloading on HarmonyOS NEXT is difficult and nothing here is actively maintained, so the {hap} does not ship with every release. When a release does include {signedHap}, sideload it by following the {sideload} file from the same version.",
+  "download.install.harmony.note": "Platform limits mean some features are hidden or reduced on HarmonyOS.",
+
+  "download.pkg.title": "Advanced users / package managers",
+  "download.pkg.subtitle": "For anyone who prefers installing from a CLI and upgrading reproducibly. These artifacts ship with every GitHub release.",
+  "download.pkg.scoop.body": "Add the official bucket, then install (x64 / arm64 is matched automatically):",
+  "download.pkg.scoop.update": "upgrade",
+  "download.pkg.scoop.note": "The manifest is built on the portable zip; you can also install once from the scoop-luotopia.json attached to a release.",
+  "download.pkg.brew.body": "Add the official tap, then install:",
+  "download.pkg.brew.linux": "Linux (Linuxbrew, x64 / arm64)",
+  "download.pkg.brew.macos": "macOS (Apple silicon, DMG cask)",
+  "download.pkg.brew.note": "The formula and the cask in the tap share a name: {install} always resolves to the Linux-only formula, so on macOS you have to pass {cask}. To upgrade, use {upgrade} (add {cask} on macOS).",
+  "download.pkg.nix.body": "The flake provides x86_64-linux and aarch64-linux packages:",
+  "download.pkg.aur.title": "AUR (Arch Linux)",
+  "download.pkg.aur.body": "The prebuilt package updates automatically with each release:",
+  "download.pkg.aur.note": "The AUR package downloads the portable archive that matches your architecture, x64 or arm64.",
+  "download.pkg.winget.body": "Until the manifest is merged into the official community source, you can verify the draft manifest from a release locally:",
+  "download.pkg.winget.snippet": "after downloading winget-ClosedWHU.Luotopia*.yaml",
+  "download.pkg.winget.merged": "Once it is merged into {repo}:",
+  "download.pkg.winget.note": "The current manifest points at the portable zip by default.",
+
+  "download.releases.more": "You can also go straight to {link} for every past version and its release notes.",
+
+  "download.changelog.title": "Changelog",
+  "download.changelog.subtitle": "Release history from GitHub Releases",
+  "download.changelog.loading": "Loading…",
+  "download.changelog.noNotes": "No release notes",
+  "download.changelog.empty": "No releases yet. Please see {link}.",
+  "download.changelog.error": "Loading failed (local development needs Pages Functions deployed, or GITHUB_TOKEN configured). Please see {link}.",
+  "download.changelog.prev": "Previous",
+  "download.changelog.next": "Next",
+  "download.changelog.page": "Page {page}",
+  "download.changelog.viewOnGithub": "View on GitHub",
+
+  "notFound.title": "Page not found",
+  "notFound.srOnly": "Error 404: this page does not exist.",
+  "notFound.heading": "This page isn't here",
+  "notFound.subtitle": "The address may be misspelled, or this page may have been moved or taken down.",
+  "notFound.pathLabel": "The address you requested",
+  "notFound.pathCopy": "Copy this address",
+  "notFound.action.home": "Back to home",
+  "notFound.action.features": "Feature overview",
+  "notFound.action.download": "Download the app",
+  "notFound.deeplink.title": "This looks like a page from the app",
+  "notFound.deeplink.body": "The website has no such page, but the app might recognise it.",
+  "notFound.deeplink.cta": "Open this link in the app",
+  "notFound.help.body": "Can't find what you're looking for? Ask in the {community}, or {issue}.",
+  "notFound.help.communityLink": "community",
+  "notFound.help.issueLink": "file an issue",
+
+  "open.title": "Opening the app",
+  "open.appName": "Luotopia",
+  "open.tagline": "The one-stop digital campus platform for Wuhan University",
+  "open.unsupported": "The app may not have this page, but it will still try to open",
+
+  "open.status.opening": "Opening the app…",
+  "open.status.opened": "{appName} opened",
+  "open.status.blocked": "This in-app browser may have blocked the redirect",
+  "open.status.notOpened": "Did not open automatically?",
+
+  "open.openApp": "Open the app",
+  "open.download": "Download {appName}",
+  "open.fallbackHint": "If nothing happens, the app may not be installed yet, or your system or browser may have blocked the redirect. Once it is installed, open this link again to go straight to the matching page.",
+  "open.siteLink": "Go to the website, {domain}",
+
+  "open.mask.label": "Please open this in a browser",
+  "open.mask.title": "Tap “···” in the top-right corner",
+  "open.mask.body": "Choose “Open in browser” to launch or download {appName}",
+  "open.mask.close": "Got it",
+
+  "status.title": "Service status",
+  "status.description": "Live availability of every WHU.sb service, with the last 90 days of uptime history",
+  "status.header": "Service status",
+  "status.subtitle": "Availability of every service, monitored live and refreshed every 5 minutes",
+
+  "status.loading.title": "Fetching status…",
+  "status.loading.desc": "Reading data from the monitoring API",
+  "status.nextRefresh": "Next refresh",
+  "status.refresh": "Refresh now",
+  "status.refreshing": "Refreshing…",
+
+  "status.stat.uptime": "Average uptime",
+  "status.stat.services": "Monitored services",
+  "status.stat.incidents": "Incidents",
+  "status.stat.downtime": "Total downtime",
+
+  "status.meta.static": "Source: UptimeRobot · checked every 5 minutes",
+  "status.meta.full": "Source: UptimeRobot · refreshed every {interval} · window: {days} days · time zone: {timeZone}",
+
+  "status.legend.up": "Up",
+  "status.legend.degraded": "Partially down",
+  "status.legend.down": "Down all day",
+  "status.legend.none": "No data",
+
+  "status.window.aria": "Time range",
+  "status.window.label": "Last {days} days",
+  "status.window.days": "{days} days",
+
+  "status.noscript": "The live data on this page needs JavaScript; UptimeRobot collects the underlying measurements every 5 minutes.",
+
+  "status.state.up": "Operational",
+  "status.state.down": "Down",
+  "status.state.degraded": "Degraded",
+  "status.state.paused": "Paused",
+  "status.state.pending": "Pending",
+  "status.state.unknown": "Unknown",
+  "status.state.none": "No data",
+
+  "status.overview.title.up": "All services operational",
+  "status.overview.title.degraded": "Partial outage",
+  "status.overview.title.down": "Service outage",
+  "status.overview.title.unknown": "Status unknown",
+  "status.overview.desc.allUp": "All {active} services online · updated at {time}",
+  "status.overview.desc.partial": "{up} of {active} services online · updated at {time}",
+  "status.overview.chip.up": "{count} operational",
+  "status.overview.chip.down": "{count} down",
+  "status.overview.chip.degraded": "{count} degraded",
+  "status.overview.chip.pending": "{count} pending",
+  "status.overview.chip.paused": "{count} paused",
+
+  "status.group.ungrouped": "Other services",
+  "status.group.online": "{up} of {active} online",
+  "status.group.paused": "{count} paused",
+
+  "status.summary.noData": "No usable data in this window",
+  "status.summary.uptime": "{uptime} uptime",
+  "status.summary.incidents": "{count} incidents",
+  "status.summary.downtime": "{duration} in total",
+  "status.summary.noIncidents": "No incidents recorded",
+
+  "status.card.ongoing": "Ongoing for {duration}",
+  "status.card.every": "every {interval}",
+  "status.card.openTarget": "Open the monitored target for {label}",
+  "status.card.chartLabel": "Daily uptime for {label} over the last {days} days; use the left and right arrow keys to inspect it",
+  "status.card.today": "Today",
+  "status.card.sr": "{label}: {state}, {summary}",
+
+  "status.empty.title": "The monitor list is empty",
+  "status.empty.desc": "There are no monitors on the UptimeRobot account yet.",
+
+  "status.error.title": "Unable to fetch status data",
+  "status.error.meta": "The monitoring API is temporarily unavailable; the page will retry on its own in a minute",
+  "status.error.cardTitle": "Monitoring data is temporarily unavailable",
+  "status.error.retry": "Retry",
+  "status.error.httpStatus": "The API returned {status}",
+
+  "status.toast.refreshFailed": "Refresh failed; still showing the data loaded last time",
+  "status.toast.throttled": "Monitoring data updates every 5 minutes, and it was just fetched",
+
+  "status.tip.head": "{date} {weekday}",
+  "status.tip.unknownDate": "Unknown date",
+  "status.tip.noData": "No monitoring data for this day",
+  "status.tip.uptime": "Uptime",
+  "status.tip.incidents": "Incidents",
+  "status.tip.none": "None",
+  "status.tip.value.incidents": "{count} · {duration}",
+  "status.tip.value.carryover": "Carried over · {duration}",
+  "status.tip.spoken.noData": "no monitoring data",
+  "status.tip.spoken.uptime": "uptime {uptime}",
+  "status.tip.spoken.incidents": "{count} incidents, {duration} in total",
+  "status.tip.spoken.carryover": "outage carried over from another day, {duration} in total",
+  "status.tip.spoken.none": "no incidents",
+  "status.tip.spokenSeparator": ", ",
+
+  "status.duration.seconds": "{seconds}s",
+  "status.duration.daysHours": "{days}d {hours}h",
+  "status.duration.days": "{days}d",
+  "status.duration.hoursMinutes": "{hours}h {minutes}m",
+  "status.duration.hours": "{hours}h",
+  "status.duration.minutesSeconds": "{minutes}m {seconds}s",
+  "status.duration.minutes": "{minutes}m",
+  "status.interval.minutes": "{minutes} minutes",
+
+  "status.separator": " · ",
+
+  "legal.terms.title": "Terms of Service",
+  "legal.terms.shortTitle": "Terms of Service",
+  "legal.terms.description": "Please read this agreement before you use Luotopia, so that you understand the scope of the service, the rules of use, and the boundaries around accounts and liability.",
+  "legal.terms.s1.heading": "1. Parties and Scope",
+  "legal.terms.s1.body": [
+    "This agreement is entered into between ClosedWHU Team (hereinafter “we”, “us” or “our”) and the users of the Luotopia client and related services (hereinafter “you” or “your”). Luotopia is an all-in-one campus-life client for students and staff at Wuhan University, and is available on platforms including Android, iOS, Windows, macOS and Linux.",
+    "By installing, opening or continuing to use this app, you confirm that you have read, understood and agree to this agreement, together with the Privacy Policy and the Cross-Border Data Transfer Notice that take effect alongside it. If you do not agree, please stop using the app immediately and uninstall it.",
+    "This app operates primarily as a “client”: features such as the timetable, grades, free classrooms, library seats, sports venues, the shuttle bus, campus messages and the Luojia E-card usually send requests to Wuhan University and its partners' systems through the campus unified identity authentication (CAS) session established once you authorise a sign-in; the related business data is, in principle, cached locally on your own device rather than uploaded and hosted centrally by us."
+  ],
+  "legal.terms.s2.heading": "2. Service Content and Boundaries",
+  "legal.terms.s2.body": [
+    "Depending on the features of the actual version, this app may provide, including but not limited to: timetable management and multi-source import, free-classroom search, library seat booking, sports venue booking, the Luojia E-card and payment-code entry point, campus messages, shuttle-bus information, the university calendar, academic-progress and grade lookup, weather and air quality, the wallpaper centre, local agenda and notes, AI assistant conversations, home-screen widgets, and optional Luotopia account sign-in with community-related capabilities.",
+    "The availability of the campus-side features depends on the openness of Wuhan University's academic-affairs, Smart Luojia, library, venue, shuttle-bus, message and payment systems, on changes to their interfaces, and on your account permissions. We cannot guarantee that the university's systems stay available, that their fields are complete, or that what is displayed is absolutely accurate.",
+    "Some pages embed the university's or a partner's pages through a WebView (for example Smart Luojia, email, and pages related to China Construction Bank campus-card payment). These pages are operated by third parties; their interface, rules and data handling are governed by the third party's own terms, and we only provide the entry point and the necessary session hand-off.",
+    "External resources such as the developer docs, friend links and the hot-update script repository may be reached through links. Once you follow a link, the service is the responsibility of its own operator, and this does not constitute any guarantee of third-party content by this app."
+  ],
+  "legal.terms.s3.heading": "3. Accounts, Sign-In and Credentials",
+  "legal.terms.s3.body": [
+    "The campus features usually require you to authenticate through Wuhan University's CAS (`cas.whu.edu.cn`). The sign-in process takes place inside the system WebView; we will not ask you to re-enter your CAS password into the app's own form for upload to our servers. After successful authentication, the app stores the session cookies / tickets needed for CAS and for business systems such as academic affairs in secure on-device storage, so that it can call the university's interfaces later.",
+    "If you use a Luotopia account (registering with or signing in to the server we operate), you need to provide information such as a username, a password and an optional email address. The server issues an access token (such as a JWT), which is kept in the secure storage of your device. The first-party server that the client connects to by default is `api-whu-sb.tsinbei.cn`; the website and static resources are at `www.whu.sb`; and `api.whu.sb` has also been used in the past. The exact endpoints follow the actual client configuration.",
+    "We may show a “Signed-in devices” list under your account. It usually includes the device name and device identifier, the sign-in IP and its location, the app version and system version, and the runtime-environment security conclusion reported by the device itself. You can revoke the session of any of these devices at any time. For details of the related processing, see the Privacy Policy.",
+    "You should keep your device, lock screen and biometric settings secure. Losses caused by a lost device, a shared device, malware, or your own disclosure of credentials are your responsibility. You can sign out of the campus account or clear the related cache in the app at any time (subject to the feature settings).",
+    "Sensitive displays such as grades can be protected with a local privacy lock (unlocked by system biometrics or the device credential). This mechanism works only on the device and does not upload your biometric data to our servers."
+  ],
+  "legal.terms.s4.heading": "4. User Conduct",
+  "legal.terms.s4.body": [
+    "You must comply with the laws and regulations of the People's Republic of China, with Wuhan University's rules and discipline, and with this agreement. You may not use this app for any unlawful, infringing, harassing or fraudulent activity, or for anything that endangers network security.",
+    "You may not carry out unauthorised reverse engineering, decompilation, cracking, tampering or repackaging of this app, or bypass its technical protection measures; nor may you subject the campus interfaces or this app's interfaces to high-frequency scraping, bulk automated abuse, load-based attacks, or anything that disrupts normal service.",
+    "You may not use another person's account, cookies or tokens for unauthorised access; nor may you forge a User-Agent or forge requests to impersonate the official campus client for improper purposes. For compatibility with the university's systems, this app may use a smart-campus-related client identifier in certain WebViews or requests; this is done solely for functional interoperability and does not authorise you to impersonate the official app to commit fraud.",
+    "You may not use features such as the AI assistant, messages, the forum or reviews to generate or spread content that is unlawful or non-compliant, or that infringes others' privacy or intellectual-property rights.",
+    "If we find, or have reasonable grounds to believe, that you have breached this agreement, we may restrict features, refuse service or take other reasonable measures, and we reserve the right to pursue liability in accordance with the law."
+  ],
+  "legal.terms.s5.heading": "5. AI Assistant and User-Generated Content",
+  "legal.terms.s5.body": [
+    "The AI assistant feature relies on the provider, interface address, model and API key that you configure yourself. The built-in default providers may include domestic services such as SiliconFlow; you can also switch to overseas providers such as OpenAI, Anthropic, Google Gemini, xAI and Perplexity, or to a custom address.",
+    "When you use the AI, your conversation content, message history, and the local agenda summary injected to improve the experience (such as item titles, details, locations and times) are sent to the servers of the provider you choose. Do not enter sensitive information such as passwords, full identity-document numbers or payment passcodes into the conversation.",
+    "You are responsible for how you use AI output and for its consequences. AI replies may be inaccurate and do not constitute academic-affairs, legal or medical advice, or an official notice."
+  ],
+  "legal.terms.s6.heading": "6. Intellectual Property and Open Interfaces",
+  "legal.terms.s6.body": [
+    "Unless otherwise stated or licensed as open source, the intellectual property in this app's name, marks, interface design, code and documentation belongs to ClosedWHU Team or the corresponding rights holders. You may not copy, distribute or use them for commercial purposes without permission.",
+    "The app client itself is not distributed as open source; however, we may provide official documentation, an open API, or community collaboration channels. When you use these open capabilities, you must follow the corresponding interface specifications and rate limits, and must not harm the stability of the service or the rights of others.",
+    "The rights in user content that you import or create through this app — such as timetables, agenda items, notes and wallpapers — remain with you or the original rights holder. You grant us the limited processing permissions necessary to provide local features to you (for example, storing and displaying them on your device)."
+  ],
+  "legal.terms.s7.heading": "7. Disclaimers and Limitation of Liability",
+  "legal.terms.s7.body": [
+    "This app is provided on an “as is” and “as available” basis. To the maximum extent permitted by law, we are not liable for: failures, interface changes or maintenance downtime of the university's or a third party's systems; network interruptions or device-compatibility problems; problems caused by your not updating the app in time; or the consequences of decisions you make — such as course selection, bookings or travel — in reliance on the displayed data.",
+    "For operations involving money or quotas — such as bookings, payments and the campus card — the university's or bank's pages and official records are ultimately authoritative. Balances, orders, seat statuses and similar information shown in this app are for reference only.",
+    "To the extent permitted by law, we are not liable for any indirect, incidental or punitive losses. If we are nonetheless held liable under law, our liability is capped at the fees you actually paid in relation to the dispute (if any); where use is free of charge, our liability is limited to what the law mandatorily requires."
+  ],
+  "legal.terms.s8.heading": "8. Service Changes, Suspension and Termination",
+  "legal.terms.s8.body": [
+    "We may change, suspend or discontinue some or all features for reasons of product iteration, compliance requirements or operational needs, and we will give notice through in-app announcements, the website or other reasonable means.",
+    "You may stop using and uninstall the app at any time. After uninstalling, data in the device's local cache and secure storage may be cleared by the system's own mechanisms; for the handling of cloud account data, see the Privacy Policy."
+  ],
+  "legal.terms.s9.heading": "9. Agreement Updates and Governing Law",
+  "legal.terms.s9.body": [
+    "We may update this agreement. Updated versions will be published on this site, and the “Last updated” date at the bottom of the page is authoritative. If a change affects your material rights, we will try to notify you by reasonable means. If you continue to use the app after an update, you are deemed to accept the updated content.",
+    "The formation, validity, interpretation and dispute resolution of this agreement are governed by the laws of the People's Republic of China (excluding its conflict-of-laws rules). Disputes should be resolved through friendly negotiation; if negotiation fails, they will be submitted to the competent people's court at the place of our principal operations (except where the law mandatorily provides otherwise)."
+  ],
+  "legal.terms.s10.heading": "10. Contact Us",
+  "legal.terms.s10.body": [
+    "If you have any questions about this agreement, you can contact us through the ClosedWHU community channels (such as the ClosedWHU GitHub organisation, or the community entry points published in the app or on the website)."
+  ],
+  "legal.privacy.title": "Privacy Policy",
+  "legal.privacy.shortTitle": "Privacy Policy",
+  "legal.privacy.description": "Explains how Luotopia collects, uses, stores and protects your personal information, and the rights you have.",
+  "legal.privacy.s1.heading": "1. Introduction",
+  "legal.privacy.s1.body": [
+    "ClosedWHU Team (hereinafter “we”, “us” or “our”) values user privacy. This policy explains how we process personal information when you use the Luotopia client and related services, and how you can exercise your rights.",
+    "The design principle of this app is that academic and campus-life data is handled mainly by “on-device processing and on-device caching”; only when you use features that need a network connection — such as accounts, AI, weather, wallpapers or the open interfaces — does the app send to the relevant servers the data necessary to make those features work.",
+    "Please read this policy together with the Terms of Service and the Cross-Border Data Transfer Notice. If you do not agree with this policy, please stop using the app."
+  ],
+  "legal.privacy.s2.heading": "2. Types of Information We Process",
+  "legal.privacy.s2.sub1.heading": "2.1 Campus Identity and Session Information (Usually Stored Only On-Device)",
+  "legal.privacy.s2.sub1.body": [
+    "After you sign in through CAS, the app may store locally on your device: CAS session cookies (which may include session-ticket fields), business cookies for systems such as academic affairs, sign-in and verification timestamps, and student-status display information obtained from the university's interfaces (such as your student ID number, name, school, major, class and year of study, following whatever the university actually returns). This information is used to keep you signed in and to call features such as grades, timetables, free classrooms, venues, the library and messages. By default it is not uploaded to Luotopia's own business servers."
+  ],
+  "legal.privacy.s2.sub2.heading": "2.2 Academic and Campus Business Data (Mostly Cached On-Device)",
+  "legal.privacy.s2.sub2.body": [
+    "This includes but is not limited to: timetables and timetable-import data, grades and GPA-related data, academic progress, free-classroom search results, library seat-booking records, sports-venue bookings and order information, campus messages, shuttle-bus route and location data, and university-calendar display data. This data comes from Wuhan University's systems, is obtained with the authorisation of your sign-in session, and is mainly cached on your device so that it can be shown offline or faster."
+  ],
+  "legal.privacy.s2.sub3.heading": "2.3 Luojia E-card / Payment-Related",
+  "legal.privacy.s2.sub3.body": [
+    "The E-card and payment-code features may reach Smart Luojia, the mobile gateway and pages related to the China Construction Bank campus card through a WebView or an interface chain. This process may involve session cookies, redirect parameters and bank-side identifiers (such as `USERID` and `SKEY`, following the actual chain). Payment and the handling of funds are completed by the bank's or the university's systems; we do not store your bank-card password or payment passcode."
+  ],
+  "legal.privacy.s2.sub4.heading": "2.4 Luotopia Account Information (If You Register / Sign In)",
+  "legal.privacy.s2.sub4.body": [
+    "This may include your username, password (submitted to the server over a secure connection), optional email address, tokens, and profile fields (such as display name, bio and avatar, following the fields actually made available). It is used for account authentication and for the optional community and open capabilities. The server keeps a session record for each sign-in, which usually contains the sign-in IP address, the client User-Agent (including the app version and platform), the device identifier and the runtime-environment security conclusion (see 2.9); this is used to show you the “Signed-in devices” list and to let you revoke the corresponding sessions."
+  ],
+  "legal.privacy.s2.sub5.heading": "2.5 Local Content You Create",
+  "legal.privacy.s2.sub5.body": [
+    "Agenda items, to-dos, notes, course-editing data, wallpaper choices, and preferences such as theme and language. These are saved on your device by default; notes and wallpapers may read album images that you authorise."
+  ],
+  "legal.privacy.s2.sub6.heading": "2.6 AI Assistant-Related",
+  "legal.privacy.s2.sub6.body": [
+    "Conversation content, session history, the API key you configure, and your provider and model settings. The API key is kept in the system's secure storage; conversation content can be stored encrypted on your device. For what is sent to the AI provider, see Section 4 and the Cross-Border Data Transfer Notice."
+  ],
+  "legal.privacy.s2.sub7.heading": "2.7 Location and Weather",
+  "legal.privacy.s2.sub7.body": [
+    "When you grant location permission, the app may use your precise or approximate location to provide weather and shuttle-bus-stop experiences; if you do not grant location permission, it may use an approximate, IP-based location. Weather data may come from a source you choose or from a default one, such as Open-Meteo, Mi Weather or AccuWeather, and is cached on your device."
+  ],
+  "legal.privacy.s2.sub8.heading": "2.8 Device and Permission-Related Information",
+  "legal.privacy.s2.sub8.body": [
+    "To provide features such as notification reminders, exact alarms, Bluetooth watch pairing and album reading, the system may request the corresponding permissions from you. We will not collect data unrelated to the features — such as your contacts or text messages — without saying so."
+  ],
+  "legal.privacy.s2.sub9.heading": "2.9 Device Identifiers, Signed-In Devices and Security Checks",
+  "legal.privacy.s2.sub9.body": [
+    "So that you can tell your own devices apart and manage them in the “Signed-in devices” list, the client generates a random installation identifier (a UUID). This identifier contains no personal information in itself and is not linked to your campus identity; the authoritative copy of it is kept in the system's secure storage (such as the Android Keystore, the iOS Secure Enclave, or a desktop platform's key store). The client also reports the device name (on Android the manufacturer and model; on iOS the model's marketing name; on Windows and macOS the computer name; on Linux the distribution name), the platform, the system version and the app version. These fields are submitted with the sign-in request and synced to the current session after a successful sign-in and on a cold start; you can revoke any device's session at any time.",
+    "The client has built-in runtime-environment security checks: on Android and iOS it uses the third-party SDK freeRASP (Talsec / AHEAD), and on desktop platforms it uses a local probe. The check conclusion (normal, at risk, app data cloned, or checks not supported on this platform) and the risk-type labels (such as root or jailbreak, injection frameworks, an attached debugger, an emulator, a tampered app signature, or running with administrator or root privileges) are reported to our server and shown in your own “Signed-in devices” list. To carry out its detection of malicious and hidden apps, this SDK may read information about some of the apps installed on the device.",
+    "Please note: these conclusions are reference information reported by the device itself and are used only to help you spot abnormal sign-ins and abnormal devices. We will not take action such as banning you on the basis of this information alone. On platforms that do not support the checks, the list will show “No data” or “Not supported” rather than recording them as “Secure”.",
+    "When the security SDK determines that the app data has been copied to another device, the client clears the credentials in this device's secure storage and regenerates the installation identifier, which signs you out. This measure runs locally and is meant to protect the security of your account.",
+    "The raw details collected by the desktop-platform probe (such as the system username and user groups) are shown only on a local developer page on the device and are not reported to our server."
+  ],
+  "legal.privacy.s2.sub10.heading": "2.10 Logs and Debugging Information",
+  "legal.privacy.s2.sub10.body": [
+    "Development and debugging builds may output logs such as network status and error information (for example via `debugPrint`). The app also maintains a rolling diagnostic log file on the device, which usually contains timestamps, feature modules, network status and error summaries; this log is kept only on your device and leaves it only when you actively export or share it.",
+    "We have integrated three optional channels provided by Google Firebase: Analytics, Crashlytics and Performance. The corresponding toggles in Settings are off by default; the onboarding page shown on first launch presents a consent option for diagnostics and analytics, which is ticked by default. You can untick it before finishing onboarding, and you can turn it on or off at any time afterwards under “Settings → Privacy”. Collection begins only once you turn it on, and what may be collected includes crash and exception records (including the call stack and the reason for failure), together with the usage-analytics and performance data you choose to enable. On Android devices without Google Play services, Firebase is not initialised at all. After you turn it off, we stop any new collection; the processing of data already submitted is governed by Google's relevant rules.",
+    "If the server enables audit logs, rate limiting or human verification (such as Altcha), these are used only for security and operations, and not to sell user profiles."
+  ],
+  "legal.privacy.s3.heading": "3. Where and How Information Is Stored",
+  "legal.privacy.s3.body": [
+    "On-device secure storage (wrapping system capabilities such as the Android Keystore / iOS Keychain): the Luotopia sign-in token and user profile, the AI API key, campus-authentication snapshots (cookies and the like), and the local encryption master key.",
+    "On-device encrypted storage: sensitive local data such as AI conversations can be encrypted at the application layer before being written to preference storage.",
+    "Ordinary on-device preferences and files: settings, timetables, agenda items, weather and shuttle-bus caches, grade-import caches, wallpaper files and metadata, and the onboarding-completion state.",
+    "WebView cookies: used to keep you signed in to CAS and to the various campus business sites.",
+    "Cloud: only when you use a Luotopia account, or cloud community / review features that may be enabled in the future, is the related data stored on our servers or those of a party we entrust (the client connects by default to `api-whu-sb.tsinbei.cn`; `api.whu.sb` has also been used in the past). By default, academic-affairs data is not uploaded for the purpose of “syncing to our cloud”. The session records kept on the server usually contain the sign-in IP address, the client User-Agent, the device identifier and device name, platform and version information, the runtime-environment security conclusion, and the device note you fill in yourself."
+  ],
+  "legal.privacy.s4.heading": "4. How We Use Information",
+  "legal.privacy.s4.body": [
+    "To provide and maintain the features you choose to use (sign-in, lookup, booking entry points, display, reminders, AI conversations and so on);",
+    "To cache data on your device in order to reduce repeated requests and improve performance and the experience on weak networks;",
+    "To safeguard the security of accounts and sessions and to guard against abuse and attacks;",
+    "To improve the product experience (based on overall feature needs, not on selling personal data);",
+    "To fulfil the obligations set out in laws and regulations.",
+    "We do not sell your personal information."
+  ],
+  "legal.privacy.s5.heading": "5. Entrusted Processing, Sharing and Third Parties",
+  "legal.privacy.s5.body": [
+    "Operators of the campus systems: when you use CAS sign-in and the various campus features, Wuhan University and the relevant systems (for example `cas.whu.edu.cn`, `jwgl.whu.edu.cn`, `zyfzzd.whu.edu.cn`, `zhlj.whu.edu.cn`, `zsgx.whu.edu.cn`, `gym.whu.edu.cn`, `seat.lib.whu.edu.cn`, `bus.whu.edu.cn`, `msgp.whu.edu.cn` and `pay.whu.edu.cn`, among others) process your identity and business data according to their own rules. We cannot control the privacy practices of the university's systems, so we suggest that you also read the university's own notices.",
+    "Banks and payment-related parties: scenarios such as the E-card payment code may involve services related to the China Construction Bank campus card (such as `app.xiaoyuan.ccb.com`), to which the bank's own rules apply.",
+    "Weather and geo services: Open-Meteo, Mi Weather, AccuWeather, OpenStreetMap Nominatim, and IP-geolocation services (such as `api.ip.sb` and `ip-api.com`) receive location or query parameters only when a feature needs them.",
+    "Wallpaper services: the Bing daily wallpaper may request Bing's relevant interfaces and cache the image on your device.",
+    "AI providers: the large-model API you choose receives the conversation and the agenda-summary context.",
+    "Security-check SDK: freeRASP (Talsec / AHEAD), used for runtime-environment integrity and device-binding checks. This SDK reports security events to its provider's back end; separately, we provide the random installation identifier generated by the client (see 2.9) to that provider as an external id, so that security events can be matched to the same device on our side. What is reported does not include your campus credentials, account passwords or chat content; security-alert emails are received at `security@whu.sb`. This provider's servers may be located overseas.",
+    "Push services: Google Firebase Cloud Messaging (`fcm.googleapis.com`), and Huawei Push Kit on devices without Google Play services. Our server stores the push token and the installation identifier in order to deliver notifications to you. Push is on by default and you can turn it off in Settings; once you turn it off, the client deletes the push token and stops registering.",
+    "IP-location lookup: when you open the “Signed-in devices” list, the client queries `ip9.com.cn` directly for the location and carrier of the IP addresses in the list, in order to show the “Region / carrier”. This request is sent by your device and does not pass through our server; it contains nothing beyond the IP address and the usual request headers. This service is located within mainland China.",
+    "Infrastructure and content distribution: the website, static resources and the friend-links configuration may be distributed through platforms such as Cloudflare; the server may use human verification such as Altcha.",
+    "Open-source and collaboration links: visits to GitHub, Weblate and similar sites are triggered by you, and the corresponding platform's policies apply.",
+    "Except where necessary to make a feature work, where we have your consent, or where the law requires it, we do not share personal information that can identify you with unrelated third parties."
+  ],
+  "legal.privacy.s6.heading": "6. Permissions",
+  "legal.privacy.s6.body": [
+    "Network: to access the campus systems, weather, AI, website configuration and so on;",
+    "Location: for weather, shuttle-bus and related experiences (you can refuse; some features will be reduced);",
+    "Notifications and exact alarms: for class and agenda reminders;",
+    "Album / media reading: for wallpaper and note images;",
+    "Biometrics: for the optional grades privacy lock;",
+    "Bluetooth: for optional watch-companion communication.",
+    "You can manage permissions in the system settings; refusing a non-essential permission usually does not affect other, unrelated features."
+  ],
+  "legal.privacy.s7.heading": "7. Information Security and Retention Periods",
+  "legal.privacy.s7.body": [
+    "We take reasonable technical measures to protect sensitive local data (for example through the system's secure storage and application-layer encryption) and the security of data in transit (for example HTTPS; a few of the university's or compatibility-related links may still use legacy compatibility configurations).",
+    "How long the local cache is retained depends on whether you sign out, clear the cache or uninstall the app. Cloud account data is retained for as long as the business needs require, until you close your account or it must be deleted by law.",
+    "The validity period of cloud tokens and sessions follows the server configuration and is usually as follows: an access token is valid for 15 minutes; a refresh token and a session are each valid for 720 hours (30 days), and each use during that period slides the expiry forward. If there is no activity for more than 30 days, the corresponding session and refresh token both expire and you need to sign in again.",
+    "Please note: no security measure can guarantee absolute security, so please strengthen the protection of your device."
+  ],
+  "legal.privacy.s8.heading": "8. Your Rights",
+  "legal.privacy.s8.body": [
+    "Access and copy: you can view the cached content in the app, such as your timetable, grades and agenda;",
+    "Correct and delete: you can edit your local agenda and timetable, sign out of the campus account to stop using the corresponding cookies, or uninstall the app to clear the data on your device;",
+    "Withdraw consent: you can turn off permissions such as location, notifications and album access, or stop using optional features such as the AI and weather;",
+    "Session management: on the “Signed-in devices” page you can see the sessions of each device under your current account, revoke a single device's session, or revoke all sessions at once; if you change your password or your email address, all sessions under that account are revoked automatically and you need to sign in again on each device;",
+    "Account matters: if you use a Luotopia account, you can contact us through the published channels to handle account-closure or correction requests (subject to identity verification and to the extent permitted by law).",
+    "Display controls such as the grades privacy lock and spoiler protection are local experience features; they do not change the processing rules of the party the data comes from."
+  ],
+  "legal.privacy.s9.heading": "9. Minors",
+  "legal.privacy.s9.body": [
+    "This app is aimed mainly at students and staff of higher-education institutions. If you are a minor, please read this policy and use the app under the guidance of a guardian."
+  ],
+  "legal.privacy.s10.heading": "10. Policy Updates",
+  "legal.privacy.s10.body": [
+    "We may update this policy from time to time, and the “Last updated” date on this page is authoritative. For material changes, we will try to notify you by reasonable means such as the website or in-app prompts."
+  ],
+  "legal.privacy.s11.heading": "11. Contact Us",
+  "legal.privacy.s11.body": [
+    "If you have questions, complaints or requests about this policy or about the processing of your personal information, please contact us through the ClosedWHU community channels (such as the ClosedWHU GitHub organisation or the entry point published on the website)."
+  ],
+  "legal.cross-border.title": "Cross-Border Data Transfer Notice",
+  "legal.cross-border.shortTitle": "Cross-Border Data Transfers",
+  "legal.cross-border.description": "Explains the overseas recipients, transfer scenarios and choices that may be involved when you use Luotopia.",
+  "legal.cross-border.s1.heading": "1. Purpose of This Notice",
+  "legal.cross-border.s1.body": [
+    "This notice tells you which features may, in the course of providing Luotopia's services, cause your data to be transferred to servers outside the People's Republic of China or processed through overseas nodes, so that you can decide whether to use those features on a fully informed basis.",
+    "Campus unified authentication and most business requests — for academic affairs, venues, the library, the shuttle bus and the like — are sent by default to Wuhan University and to the domains of partner systems within mainland China, and are not the “active cross-border” scenarios that this notice mainly addresses; but accessing the website, weather, wallpapers, some AI providers, code hosting and CDNs may involve cross-border processing."
+  ],
+  "legal.cross-border.s2.heading": "2. Scenarios and Recipients That May Involve Cross-Border Transfers",
+  "legal.cross-border.s2.sub1.heading": "2.1 Weather and Geocoding (Optional / Depends on Provider)",
+  "legal.cross-border.s2.sub1.body": [
+    "Open-Meteo (such as `api.open-meteo.com`, `air-quality-api.open-meteo.com` and `geocoding-api.open-meteo.com`): may receive latitude-and-longitude or place-name queries, used for forecasts and air quality. Its service facilities are usually located overseas.",
+    "AccuWeather (`api.accuweather.com`): if you choose this source or the system uses it, query parameters and location-related information may be sent overseas.",
+    "OpenStreetMap Nominatim (`nominatim.openstreetmap.org`): reverse-geocoding requests may be sent overseas.",
+    "Coarse IP-based location (such as `api.ip.sb` and `ip-api.com`): when GPS is not authorised, or a fallback location is needed, the app may query the relevant service for an approximate, IP-based location; these services may be located overseas or reached through overseas routes.",
+    "Domestic sources such as Mi Weather (`weatherapi.market.xiaomi.com`): these generally do not constitute the cross-border transfer described in this section, but the actual DNS resolution and network path are authoritative."
+  ],
+  "legal.cross-border.s2.sub2.heading": "2.2 Wallpapers and Content Distribution",
+  "legal.cross-border.s2.sub2.body": [
+    "Bing daily wallpaper (`www.bing.com` and related interfaces): when requesting wallpaper metadata or images, the app may reach Microsoft's relevant overseas infrastructure and cache the image file on your device."
+  ],
+  "legal.cross-border.s2.sub3.heading": "2.3 AI Large Models (Configured by the User)",
+  "legal.cross-border.s2.sub3.body": [
+    "When you set the AI provider to OpenAI (`api.openai.com`), Anthropic (`api.anthropic.com`), Google Gemini (`generativelanguage.googleapis.com`), xAI (`api.x.ai`), Perplexity (`api.perplexity.ai`) or another overseas or custom overseas address, your conversation content, message history and local agenda-summary fields are transferred to the corresponding overseas server.",
+    "If you use a default or optional provider that is based within mainland China or whose main site is within mainland China — such as SiliconFlow, DeepSeek, Moonshot AI, Zhipu AI, Tongyi or Hunyuan — this generally does not constitute a cross-border transfer in the sense of this section; the provider's actual deployment and privacy policy are ultimately authoritative. The model gateway built into the app, `ai.tsinbei.cn`, is our own first-party service (within mainland China)."
+  ],
+  "legal.cross-border.s2.sub4.heading": "2.4 Official Website, Static Resources and Security Verification",
+  "legal.cross-border.s2.sub4.body": [
+    "Luotopia's website and some static resources (such as the `whu.sb` site, the friend-links JSON, the legal text and app screenshots) may be hosted on Cloudflare Pages or distributed through the Cloudflare network, and the access logs and requests may pass through overseas nodes.",
+    "The client itself also actively requests `www.whu.sb` to obtain the legal text and catalogue, the font mirror, the hot-update script manifest, the friend-links configuration and app-update information; these requests are likewise distributed through the Cloudflare network and may generate standard access logs (IP, User-Agent and request path). Among these, our Pages Function reverse proxy forwards font requests to `fonts.gstatic.com`.",
+    "The server uses Altcha human verification, whose proof-of-work is completed on the client and verified by the server."
+  ],
+  "legal.cross-border.s2.sub5.heading": "2.5 Developer and Community Resources (Accessed by the User)",
+  "legal.cross-border.s2.sub5.body": [
+    "GitHub (`github.com`, `raw.githubusercontent.com` and the like): when you view the source code, releases, hot-update scripts or documentation, the requests go overseas.",
+    "Google Noto Sans font: unlike the resources above that you actively access, the font is a default interface resource that is usually loaded on demand in the background. When the client needs this font, it first tries to obtain it from our own first-party source `www.whu.sb/fonts/gstatic/` (this source reverse-proxies `fonts.gstatic.com` through Cloudflare Pages, the file names are their SHA-256 digests, and the client verifies the digest and the file length); only when this mirror is unavailable does it connect directly to `fonts.gstatic.com`, in which case a cross-border request may occur.",
+    "iOS and macOS use the system fonts by default and usually do not download any fonts at all; devices whose system already includes the chosen font likewise do not download it. The MiSans font is obtained on demand from `www.whu.sb/fonts/misans/`. The fonts used by the website itself are all self-hosted and do not make requests to Google."
+  ],
+  "legal.cross-border.s2.sub6.heading": "2.6 Friend Links and Third-Party Apps",
+  "legal.cross-border.s2.sub6.body": [
+    "After you click a friend link and go to a third-party website or app (such as a club site, a partner app or an AI sign-up page), that third party's privacy and cross-border rules apply, so please read them carefully."
+  ],
+  "legal.cross-border.s2.sub7.heading": "2.7 Security Checks and Push Services",
+  "legal.cross-border.s2.sub7.body": [
+    "Security checks: freeRASP (Talsec / AHEAD) reports security events to that provider's back end, and we separately provide the random installation identifier generated by the client (a UUID) to that provider as an external id, so that security events can be matched to the same device; its servers may be located overseas.",
+    "Push services: the push token for Google Firebase Cloud Messaging (`fcm.googleapis.com`) is forwarded to Google via our server, and the related processing may take place overseas; on devices without Google Play services, Huawei Push Kit (within mainland China) may be used instead.",
+    "Optional telemetry: only after you turn it on in the onboarding page or in Settings are the crash and exception records, usage analytics and performance data from Firebase Analytics, Crashlytics and Performance sent to Google, whose servers are usually located overseas; these three channels are off by default.",
+    "None of the transfers described above include your campus account credentials, passwords, detailed grades or chat content. For the related processing, see the Privacy Policy."
+  ],
+  "legal.cross-border.s3.heading": "3. Scope of Transferred Information (Minimised)",
+  "legal.cross-border.s3.body": [
+    "Weather / geo: location coordinates or a city name, the IP (for coarse location), and request metadata such as the device time zone and language;",
+    "Wallpapers: requests for the wallpaper list or image URLs, generally without any campus-account cookies;",
+    "AI: chat text, agenda-summary fields, the model name and the API key (the key is provided by you and stored on your device, and is submitted with the request to the provider you choose);",
+    "Website / CDN: standard web access logs (IP, User-Agent, the path accessed and the like);",
+    "Security checks: risk-type labels, the check conclusion and the random installation identifier;",
+    "Push: the push token, the installation identifier, the platform and version, and the language and time zone;",
+    "By default, CAS passwords, academic-affairs cookies and detailed grades are not uploaded in bulk to overseas weather or wallpaper services."
+  ],
+  "legal.cross-border.s4.heading": "4. Purpose and Legal Basis",
+  "legal.cross-border.s4.body": [
+    "Cross-border transfers happen only to make the features you actively use work (obtaining forecasts, wallpapers, AI replies, accessing documentation or the website and so on), or to safeguard the security and availability of the site.",
+    "You give your consent by turning on the relevant permissions, by choosing an overseas data source or AI provider, or by actively following an overseas link; you can also refuse or stop this through “Your choices” below."
+  ],
+  "legal.cross-border.s5.heading": "5. Security and Safeguards",
+  "legal.cross-border.s5.body": [
+    "We use encrypted transport such as HTTPS wherever possible;",
+    "Sensitive credentials are kept first in the system's secure storage, and AI conversations can be stored encrypted on your device;",
+    "The choice of overseas provider is left to you (especially for the AI);",
+    "Core campus business connects by default directly to the university's systems within mainland China, reducing unnecessary cross-border transfers.",
+    "We require or expect third parties to protect data within the scope of what their own policies promise, but a third party's independent processing is its own responsibility."
+  ],
+  "legal.cross-border.s6.heading": "6. Your Choices",
+  "legal.cross-border.s6.body": [
+    "Refuse location permission and avoid using features that rely on overseas weather sources; in Settings, prefer a weather data source within mainland China (where one is available);",
+    "Do not use the Bing wallpaper source; use a local image instead, or turn wallpapers off;",
+    "For the AI, use only providers within mainland China, or turn off the AI assistant; do not provide sensitive personal information in the conversation;",
+    "Do not follow overseas links such as GitHub;",
+    "If you do not agree to the cross-border processing described in this notice, please stop using the relevant features or uninstall the app."
+  ],
+  "legal.cross-border.s7.heading": "7. Updates to This Notice",
+  "legal.cross-border.s7.body": [
+    "The list of overseas recipients may change as versions iterate or as the default providers or infrastructure are adjusted. The updated notice is authoritative as of the “Last updated” date on this page and is published on this site. We suggest that you review it from time to time.",
+    "For the machine-readable catalogue, see `/data/legal.json` (it contains each document's slug, title and `lastUpdated`, so that the client can check versions)."
+  ],
+  "legal.cross-border.s8.heading": "8. Contact Us",
+  "legal.cross-border.s8.body": [
+    "If you have questions about cross-border processing, please contact us through the ClosedWHU community channels."
+  ],
+  "legal.lastUpdated": "Last updated: {date}",
+  "legal.attribution": "ClosedWHU Team · Luotopia",
+  "legal.translationNotice": "This is an English translation provided for your convenience. If it differs from the Simplified Chinese original, the Simplified Chinese version governs.",
+  "legal.index.title": "Legal information",
+  "legal.index.description": "Luotopia's Terms of Service, Privacy Policy and Cross-Border Data Transfer Notice",
+  "legal.index.subtitle": "Terms of Service, Privacy Policy and notices on data compliance",
+  "legal.back": "Back to Legal information"
 }

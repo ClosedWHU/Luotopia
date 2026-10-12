@@ -1,0 +1,115 @@
+---
+/**
+ * The `/community` page body.
+ *
+ * Extracted from `src/pages/community.astro` so the route can exist once per
+ * locale without duplicating any markup: `src/pages/community.astro` renders it
+ * in the default locale, `src/pages/[lang]/community.astro` renders it in each
+ * published one. Everything locale-dependent is read from `Astro.currentLocale`
+ * inside here, so neither caller has to pass anything down and the two cannot
+ * drift.
+ *
+ * Three things on this page are data rather than copy and stay literal in every
+ * locale: the QQ group number, the `github.com/ClosedWHU` handle (which is also
+ * the link's own URL), and "GitHub" itself. The friend-link rows and the dialog
+ * they open come from `FriendLinks.astro`, which resolves its own locale.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../PageHeader.astro";
+import FriendLinks from "../FriendLinks.astro";
+import Icon from "../Icon.astro";
+import { resolveLocale, useTranslations, type TranslationKey } from "../../i18n/ui";
+
+const t = useTranslations(resolveLocale(Astro.currentLocale));
+
+/*
+ * Same escaping as `legal/[slug].astro` does before its own `set:html`. Build
+ * time only, so the Chrome 66 floor does not apply, but `replace(/g)` keeps it
+ * identical to the copies the other pages carry.
+ */
+function escapeHtml(text: string): string {
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/**
+ * A dictionary value with inline markup woven through it.
+ *
+ * The group number sits mid-sentence in a `<span>` of its own, and splitting the
+ * copy at the tag would freeze the word order Chinese happens to use, so the
+ * value carries a `{uin}` placeholder and this substitutes the markup for it.
+ *
+ * The slot is written out at the call site, i.e. it is this file's own markup,
+ * and the dictionary text around it is escaped first, so nothing untrusted
+ * reaches `set:html`. Placeholders are matched with the same regex `ui.ts` and
+ * the carousel's client-side `fill()` use; an unknown one is left visible rather
+ * than blanked.
+ */
+function rich(key: TranslationKey, slots: Record<string, string>): string {
+  return escapeHtml(t(key)).replace(
+    /\{([a-zA-Z][a-zA-Z0-9]*)\}/g,
+    (match, name: string) =>
+      Object.prototype.hasOwnProperty.call(slots, name) ? slots[name] : match,
+  );
+}
+
+/*
+ * The inline fragment the group number weaves in, spelled exactly as the
+ * template rendered it before the copy moved out — same tag, same classes. The
+ * dictionary holds the sentence; this holds the HTML.
+ */
+const primarySpanHtml = (text: string) =>
+  `<span class="font-medium text-primary">${escapeHtml(text)}</span>`;
+
+const groupNumberHtml = rich("community.qqGroup.number", {
+  uin: primarySpanHtml("994642924"),
+});
+---
+
+<BaseLayout title={t("community.title")}>
+  <PageHeader title={t("community.header")} subtitle={t("community.subtitle")} />
+
+  <section class="relative pb-24 px-4">
+    <div class="max-w-content mx-auto">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <div class="lt-reveal-lift lt-lift glass rounded-card p-6 flex gap-4">
+          <span class="lt-icon-chip text-primary text-[22px]"><Icon name="forum" /></span>
+          <div class="min-w-0">
+            <h2 class="text-title-medium text-on-surface mb-1">{t("community.qqGroup.title")}</h2>
+            <p class="text-body-medium text-on-surface-variant mb-3">{t("community.qqGroup.body")}</p>
+            <p class="text-body-small text-outline" set:html={groupNumberHtml}></p>
+          </div>
+        </div>
+
+        <div class="lt-reveal-lift lt-lift glass rounded-card p-6 flex gap-4" style="--lt-reveal-delay: 80ms">
+          <span class="lt-icon-chip text-primary text-[22px]"><Icon name="code" /></span>
+          <div class="min-w-0">
+            <h2 class="text-title-medium text-on-surface mb-1">GitHub</h2>
+            <p class="text-body-medium text-on-surface-variant mb-3">{t("community.github.body")}</p>
+            <a href="https://github.com/ClosedWHU" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-body-medium font-medium text-primary hover:underline">
+              github.com/ClosedWHU
+              <Icon name="arrow_outward" class="text-[16px]" />
+            </a>
+          </div>
+        </div>
+
+        <div class="lt-reveal-lift lt-lift glass rounded-card p-6 flex gap-4" style="--lt-reveal-delay: 160ms">
+          <span class="lt-icon-chip text-primary text-[22px]"><Icon name="rate_review" /></span>
+          <div class="min-w-0">
+            <h2 class="text-title-medium text-on-surface mb-1">{t("community.inApp.title")}</h2>
+            <p class="text-body-medium text-on-surface-variant mb-3">{t("community.inApp.body")}</p>
+            <p class="text-body-small text-outline">{t("community.inApp.features")}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lt-reveal-lift glass rounded-group p-6 sm:p-8" style="--lt-reveal-delay: 140ms">
+        <h2 class="text-title-large text-on-surface mb-6">{t("community.friend.title")}</h2>
+        <FriendLinks />
+      </div>
+    </div>
+  </section>
+</BaseLayout>

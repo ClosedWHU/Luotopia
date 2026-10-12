@@ -1,0 +1,366 @@
+---
+/**
+ * The `/open` page body — the deep-link host's app-launch landing.
+ *
+ * Extracted from `src/pages/open.astro` so the route can exist once per locale
+ * without duplicating any markup: `src/pages/open.astro` renders it in the
+ * default locale, `src/pages/[lang]/open.astro` renders it in each published
+ * one. Everything locale-dependent is read from `Astro.currentLocale` inside
+ * here, so neither caller has to pass anything down and the two cannot drift.
+ *
+ * Two things about this page constrain the localisation:
+ *
+ * - **It is `bare`.** No navbar, no footer, and therefore no language switcher
+ *   anywhere on it. A visitor who arrives from a deep link in a browser they
+ *   cannot read has no way to change language. That gap is deliberate here —
+ *   adding a switcher to a single-CTA launch screen is a design decision, not a
+ *   localisation one — but it is a real gap and is recorded as a follow-up.
+ * - **The launch script is `is:inline` and ES5-only**, because it has to run on
+ *   first parse inside ancient in-app WebViews. `define:vars` is unavailable to
+ *   it by construction, so the three status strings it writes are rendered onto
+ *   `#launch-status` as `data-i18n-*` attributes and read back with
+ *   `getAttribute`, and are fully interpolated at build time — the script never
+ *   has to substitute anything.
+ *
+ * The URL-mapping logic below is untouched: `location.pathname + search` onto
+ * `luotopia://app<path>?<query>&source=web`, the `intent://` variant for real
+ * Chrome on Android, and the "warn but launch anyway" check against
+ * `DEEPLINK_ROOT_SEGMENTS`. Only the wording of the warning is localised, never
+ * the behaviour.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import AppIcon from "../AppIcon.astro";
+import Icon from "../Icon.astro";
+import { DEEPLINK_ROOT_SEGMENTS } from "../../config/deeplinkRoutes";
+import { resolveLocale, routeUrl, useTranslations } from "../../i18n/ui";
+
+/*
+ * App-launch landing page for the deep-link domain (luotopia.whu.sb).
+ *
+ * How the whole flow fits together:
+ *
+ * - The app registers https://luotopia.whu.sb/* as Android App Links
+ *   (autoVerify + /.well-known/assetlinks.json) and iOS Universal Links
+ *   (applinks: entitlement + /.well-known/apple-app-site-association). When
+ *   the app is installed and verified, the OS opens it directly and this page
+ *   is never even fetched.
+ * - When it is not (missing install, failed verification, in-app browsers,
+ *   address-bar entry), the middleware in functions/_middleware.ts serves
+ *   this page for *any* HTML navigation on that host while preserving the
+ *   original URL. The script below then maps `location.pathname + search`
+ *   onto `luotopia://app<path>?<query>&source=web` — the same routes the
+ *   widgets and live updates already emit, and GoRouter matches on path only.
+ * - The URL is deliberately never rewritten client-side: it is the deep link.
+ *
+ * All site links here are absolute https://www.whu.sb URLs: relative links
+ * would stay on the deep-link host, where the middleware would only serve
+ * this launch page again.
+ *
+ * They *are* locale-aware, and carry the locale across to the main host. The
+ * deep-link host does not participate in language negotiation for its own paths
+ * — the middleware returns this page wholesale, before the `Accept-Language` gate
+ * ever runs, because the URL is the deep link and must not move — but it does pick
+ * which locale's copy of this page to serve, from `?lang=` (which the app passes,
+ * and which beats detection because the app knows its own language) or from the
+ * visitor's headers. A page rendered in English therefore has to send its
+ * "download" link to `/en/download`; sending it to the Chinese page would undo the
+ * choice on the very next click.
+ */
+const SITE = "https://www.whu.sb";
+
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const downloadHref = `${SITE}${routeUrl(locale, "download")}`;
+const homeHref = `${SITE}${routeUrl(locale, "home")}`;
+
+const appName = t("open.appName");
+
+/*
+ * The strings the *script* writes, carried on the element it writes them into.
+ *
+ * Interpolated here rather than in the browser: the ES5 launch script must stay
+ * dumb enough to run on the oldest WebView that can still open a deep link, and
+ * nothing it says depends on anything knowable only at runtime.
+ */
+const i18n = {
+  opened: t("open.status.opened", { appName }),
+  blocked: t("open.status.blocked"),
+  notOpened: t("open.status.notOpened"),
+};
+---
+
+<BaseLayout title={t("open.title")} bare noindex>
+  <section class="lt-open-stage flex flex-col items-center justify-center px-6 py-16 text-center">
+      <AppIcon class="w-24 h-24" size={96} plate alt="" />
+    <h1 class="mt-6 text-headline-small text-on-surface">{appName}</h1>
+    <p class="mt-1 text-body-medium text-on-surface-variant">{t("open.tagline")}</p>
+
+    <!--
+      Unrecognised link. The deep-link host claims `luotopia.whu.sb/*` wholesale,
+      so this page is served for paths the app has never heard of as readily as
+      for real routes — a stale QR code, a truncated share, a scanner probing for
+      `/wp-login.php`. The launch still happens either way: the app is better
+      placed than this page to decide what to do with a path it does not
+      recognise, and a wrong guess here would silently refuse to open a link
+      that would have worked. This is a warning, never a gate.
+    -->
+    <p
+      id="launch-unsupported"
+      data-shown="false"
+      class="lt-open-warn mt-6 inline-flex items-center gap-2 rounded-full lt-inset px-4 py-2 text-left text-body-small text-on-surface-variant"
+    >
+      <Icon name="link_off" class="text-base shrink-0" />
+      <span>{t("open.unsupported")}</span>
+    </p>
+
+    <div class="mt-8 flex items-center justify-center gap-2 text-body-medium text-on-surface-variant">
+      <span id="launch-spinner" class="lt-open-spinner" aria-hidden="true"></span>
+      <span
+        id="launch-status"
+        data-i18n-opened={i18n.opened}
+        data-i18n-blocked={i18n.blocked}
+        data-i18n-not-opened={i18n.notOpened}
+      >{t("open.status.opening")}</span>
+    </div>
+
+    <div id="launch-fallback" data-shown="false" class="mt-8 w-full max-w-xs flex-col items-stretch gap-3">
+      <button
+        id="open-app-btn"
+        type="button"
+        class="filled-glass state-layer inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 text-[17px] font-medium cursor-pointer border-none"
+      >
+        <Icon name="open_in_new" class="text-lg" />
+        {t("open.openApp")}
+      </button>
+      <a
+        href={downloadHref}
+        class="glass-control state-layer inline-flex items-center justify-center gap-2 rounded-full px-6 py-2.5 text-label-large text-on-surface no-underline font-medium"
+      >
+        <Icon name="download" class="text-lg" />
+        {t("open.download", { appName })}
+      </a>
+      <p class="mt-1 text-body-small text-outline leading-relaxed">
+        {t("open.fallbackHint")}
+      </p>
+    </div>
+
+    <p class="mt-12 text-body-small text-outline">
+      <a href={homeHref} class="text-primary hover:underline no-underline">{t("open.siteLink", { domain: "www.whu.sb" })}</a>
+    </p>
+  </section>
+
+  <!--
+    In-app browsers (WeChat/QQ/Weibo/DingTalk) block custom-scheme jumps
+    outright — the standard domestic remedy is a mask telling the user to
+    continue in the system browser, instead of a launch attempt that can
+    never succeed.
+  -->
+  <div id="wechat-mask" data-shown="false" class="lt-open-mask" role="dialog" aria-label={t("open.mask.label")}>
+    <div class="lt-open-mask-card glass rounded-card p-6 text-center">
+      <Icon name="north_east" class="text-[40px] text-primary" />
+      <p class="mt-3 text-title-medium text-on-surface">{t("open.mask.title")}</p>
+      <p class="mt-1 text-body-medium text-on-surface-variant">{t("open.mask.body", { appName })}</p>
+      <button
+        id="wechat-mask-close"
+        type="button"
+        class="mt-5 glass-control state-layer inline-flex items-center justify-center rounded-full px-6 py-2 text-label-large text-on-surface cursor-pointer border-none"
+      >
+        {t("open.mask.close")}
+      </button>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .lt-open-stage {
+    /* dvh so the mobile URL bar cannot push the CTA below the fold; vh first
+     * as the fallback for engines without dynamic viewport units. */
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .lt-open-spinner {
+    width: 1.15em;
+    height: 1.15em;
+    flex-shrink: 0;
+    border-radius: 999px;
+    border: 2px solid var(--lt-color-outline-variant);
+    border-top-color: var(--lt-color-primary);
+    animation: lt-open-spin 0.9s linear infinite;
+  }
+
+  @keyframes lt-open-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* `hidden` utility vs `flex` would be an order-dependent duel in the
+   * flattened build; the toggle lives here instead, driven by data-shown. */
+  #launch-fallback {
+    display: none;
+  }
+
+  #launch-fallback[data-shown="true"] {
+    display: flex;
+  }
+
+  /* Same reason, and the scoped rule has to beat the `inline-flex` utility the
+   * element carries: Astro emits component styles unlayered, so this wins, but
+   * only because the toggle is written here rather than as a class swap. */
+  #launch-unsupported {
+    display: none;
+  }
+
+  #launch-unsupported[data-shown="true"] {
+    display: inline-flex;
+  }
+
+  .lt-open-mask {
+    position: fixed;
+    /* Four sides, not the `inset` shorthand (Chrome 87+): in-app WebViews are
+     * exactly the old-kernel audience this mask serves. */
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    display: none;
+    background-color: var(--lt-modal-scrim);
+  }
+
+  .lt-open-mask[data-shown="true"] {
+    display: block;
+  }
+
+  .lt-open-mask-card {
+    position: absolute;
+    top: 15%;
+    right: 1.25rem;
+    left: 1.25rem;
+    margin-inline: auto;
+    max-width: 22rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lt-open-spinner {
+      animation-duration: 2.4s;
+    }
+  }
+</style>
+
+<script is:inline set:html={`var __ltDeeplinkRoots = ${JSON.stringify(DEEPLINK_ROOT_SEGMENTS)};`}></script>
+
+<script is:inline>
+  // Deliberately inline (not a bundled module): the launch attempt must run
+  // on first parse, before any module chunk downloads, and this page is
+  // regularly opened in ancient in-app WebViews — ES5 only, same contract as
+  // the head scripts in BaseLayout.
+  (function () {
+    var ua = navigator.userAgent || "";
+    var isAndroid = /Android/i.test(ua);
+    var needsBrowserHint = /MicroMessenger|QQ\/[0-9]|Weibo|DingTalk/i.test(ua);
+    // Real Chrome (not a Chrome-UA in-app browser): understands intent://,
+    // which buys the native confirmation dialog and a fallback-url reload.
+    var isChromeAndroid =
+      isAndroid &&
+      /Chrome\//.test(ua) &&
+      !/MicroMessenger|QQ\/|QQBrowser|Weibo|DingTalk|EdgA|OPR|CriOS|SamsungBrowser|UCBrowser|Quark/i.test(ua);
+
+    // `/open` reached directly (not through the middleware rewrite) still
+    // means "open the app root".
+    var path = /^\/open\/?$/.test(location.pathname) ? "/" : location.pathname;
+    var query = location.search ? location.search + "&source=web" : "?source=web";
+    var schemeUrl = "luotopia://app" + path + query;
+    var intentUrl =
+      "intent://app" +
+      path +
+      query +
+      "#Intent;scheme=luotopia;package=sb.whu.luotopia;S.browser_fallback_url=" +
+      encodeURIComponent(location.href) +
+      ";end";
+
+    var statusEl = document.getElementById("launch-status");
+    var spinnerEl = document.getElementById("launch-spinner");
+    var fallbackEl = document.getElementById("launch-fallback");
+    var maskEl = document.getElementById("wechat-mask");
+    var warnEl = document.getElementById("launch-unsupported");
+
+    /*
+     * The three states this script writes into `#launch-status`, read back off
+     * the element the frontmatter rendered them onto.
+     *
+     * `define:vars` is not an option twice over: it is banned for anything that
+     * should stay in the bundle, and this script is `is:inline` by necessity.
+     * `getAttribute` rather than `dataset` to match the rest of this file, which
+     * touches the DOM through attributes alone for the old kernels it serves.
+     */
+    var statusOpened = statusEl ? statusEl.getAttribute("data-i18n-opened") || "" : "";
+    var statusBlocked = statusEl ? statusEl.getAttribute("data-i18n-blocked") || "" : "";
+    var statusNotOpened = statusEl ? statusEl.getAttribute("data-i18n-not-opened") || "" : "";
+
+    /*
+     * Only the first segment is checked, and only to *warn*. The app owns a
+     * couple of hundred nested routes that change release to release; duplicating
+     * them here would mean a stale list refusing to launch links that work. A
+     * first segment the router has never had is the one case that cannot match,
+     * so that is the only claim this page makes. The launch runs regardless.
+     */
+    var roots = window.__ltDeeplinkRoots || [];
+    var rootSegment = path.replace(/^\/+/, "").split("/")[0];
+    var isKnownRoot = rootSegment === "" || roots.indexOf(rootSegment) !== -1;
+    if (!isKnownRoot && warnEl) warnEl.setAttribute("data-shown", "true");
+
+    var opened = false;
+    var attempted = false;
+    // Storage can throw in restricted in-app browsers; a missed flag only
+    // costs one extra automatic attempt.
+    try {
+      attempted = sessionStorage.getItem("lt-launch-attempted") === "1";
+    } catch (e) {}
+
+    function markOpened() {
+      if (opened) return;
+      opened = true;
+      if (spinnerEl) spinnerEl.style.display = "none";
+      if (statusEl) statusEl.textContent = statusOpened;
+      if (fallbackEl) fallbackEl.setAttribute("data-shown", "false");
+    }
+    // The page going to the background is the only reliable "the app took
+    // over" signal a browser gives us.
+    window.addEventListener("pagehide", markOpened);
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) markOpened();
+    });
+
+    function launch() {
+      try {
+        sessionStorage.setItem("lt-launch-attempted", "1");
+      } catch (e) {}
+      window.location.href = isChromeAndroid ? intentUrl : schemeUrl;
+    }
+
+    function showFallback() {
+      if (opened) return;
+      if (spinnerEl) spinnerEl.style.display = "none";
+      if (statusEl) statusEl.textContent = needsBrowserHint ? statusBlocked : statusNotOpened;
+      if (fallbackEl) fallbackEl.setAttribute("data-shown", "true");
+    }
+
+    var openBtn = document.getElementById("open-app-btn");
+    if (openBtn) openBtn.addEventListener("click", launch);
+    var maskClose = document.getElementById("wechat-mask-close");
+    if (maskClose) maskClose.addEventListener("click", function () { maskEl.setAttribute("data-shown", "false"); });
+
+    if (needsBrowserHint) {
+      // Scheme jumps are dead on arrival here; skip the attempt and explain.
+      if (maskEl) maskEl.setAttribute("data-shown", "true");
+      showFallback();
+    } else {
+      if (!attempted) setTimeout(launch, 400);
+      // Still on the page after the window in which the OS would have
+      // switched to the app: surface the manual controls.
+      setTimeout(showFallback, attempted ? 300 : 2500);
+    }
+  })();
+</script>
