@@ -184,6 +184,24 @@ blurring again samples the parent's own fill — no visual change, one extra
 compositor layer per element. Rows inside a panel use `.lt-inset` /
 `.lt-inset-raised` (both `FriendLinks` and `/status` follow this).
 
+**A rounded container that scrolls has to be two elements.** `border-radius` rounds
+the container's own background, not its scrollbar: the bar is painted square across
+the full height of the border box, so with the thumb at either end of its travel it
+sits *outside* the rounded silhouette instead of being cut by it. Rounding the thumb
+does not help — the track still spans corner to corner.
+
+Only a **clipping ancestor** removes it, because inside one the bar is ordinary
+descendant painting subject to the ancestor's rounded clip region. So the shape is
+fixed: radius + `overflow: hidden` on the outer, `.lt-scroll-y` + `overflow-y: auto`
+on the inner. `.lt-dialog-card`/`.lt-dialog-body`, `.lt-lang-panel`/`.lt-lang-scroll`
+and `.lt-mobile-menu`/`.lt-mobile-menu-scroll` are all built that way; copy it.
+
+`clip-path: inset(0 round Npx)` on the scroller itself, or a `margin` on
+`::-webkit-scrollbar-track`, would both save the extra element — and both rest on a
+guess about whether one engine clips its own scrollbar. The wrapper is what the
+cascade *guarantees*, and the bar here is that an out-of-support Android WebView has
+to survive it too.
+
 `/status` once had twelve cards each carrying their own `backdrop-filter`. On a
 fast scroll the compositor could not keep re-sampling a fixed WebGL canvas and
 painted each card's own translucent white fill instead — the white blocks visible
