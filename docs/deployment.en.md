@@ -204,18 +204,29 @@ That last condition is not optional either. Without it, `/status` with
 `Accept-Language: en` 302s to `/en/status`, which 404s, whose fallback 302s back to
 `/status`, which detects English again — an infinite loop.
 
-**Detection writes no cookie; only `?lang=` does.** The switcher's links carry
-`?lang=<code>`; the middleware answers with `Set-Cookie: luotopia_lang` (one year,
-`SameSite=Lax`, `Secure`) and a 302 to the same URL without the parameter, and from
-then on detection no longer overrides the choice. Inferring the choice from "the path
-had a locale prefix" instead would get the direction wrong: on `/en/`, clicking a page
-English does not have (the nav points at the Chinese original) would write
-`luotopia_lang=zh-Hans` and silently reverse what the visitor asked for.
+**Detection writes no cookie; only an explicit choice does.** Two things count as
+explicit:
+
+- The site's own switcher writes it **in the browser** (a capture-phase delegated
+  listener in `Navbar.astro`; `Path=/`, one-year `Max-Age`, `SameSite=Lax`, with
+  `Secure` added only over https — a Secure cookie is rejected outright on the
+  plain-http origin `wrangler pages dev` serves). Its links point **straight at the
+  destination**, with no parameter and no redirect, so they are shaped exactly like
+  every other link on the site.
+- `?lang=<code>`, which the middleware answers with `Set-Cookie` plus a 302 to the
+  landing path. This one exists for the **app's deep links, browsers without JS and
+  scripted callers**: on `luotopia.whu.sb` it is a server-side rewrite rather than a
+  redirect (next section), and on the main host an ordinary 302.
+
+Neither may be replaced by "infer the preference from the locale prefix", which gets
+the direction wrong: on `/en/`, clicking a page English does not have (the nav points
+at the Chinese original) would write `luotopia_lang=zh-Hans` and silently reverse what
+the visitor asked for.
 
 `?lang=` lands on where *that page* lives in the chosen locale, not on the same path
-minus the parameter: `/status?lang=en` records `en` and stays on `/status` (English
-has no status page), while `/features?lang=en` lands on `/en/features`. Other query
-parameters survive; an unpublished locale (`?lang=ja`) is ignored entirely.
+minus the parameter: `/status?lang=en` records `en` and stays on `/status` when
+English has no status page, while `/features?lang=en` lands on `/en/features`. Other
+query parameters survive; an unpublished locale (`?lang=ja`) is ignored entirely.
 
 302 throughout, never 301 — a permanent redirect gets cached against the URL and
 would keep sending the visitor to English after they changed their browser language.

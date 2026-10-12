@@ -384,15 +384,28 @@ brotli 8.1 → 18.6 KB）；整份共享样式表 133 KB → 222 KB raw、38 →
 本地名（endonym）不能省：切换器必须在任何语种下都能让看不懂当前页面的人找到自己的
 语言，所以它按各自文字渲染，不翻译成本地语的说法。
 
-**`transition:persist` 会把旧语言的导航栏带到新语言的页面上。** 持久化元素不参与
-swap，所以 `Navbar.astro` 的 persist 名带语种（`lt-navbar-${locale}`）：同语种导航照旧
-走持久化，跨语种导航重新渲染一份。`<html lang>` 不用管，Astro 会从新文档同步根元素
-属性（`BaseLayout` 的 `preserveRootState` 只负责 theme 与 kiosk 这两个纯客户端状态）。
+**`transition:persist` 与语种是冲突的，两处。** 持久化元素不参与 swap，所以：
 
-切换器的链接带 `data-astro-reload`：`?lang=` 要靠中间件 302 换 cookie，而 Client Router
-用 fetch 导航时会透明跟随 302、再 `pushState` 到带参数的那个 URL，地址栏就脏了。同理带
-`data-astro-prefetch={false}`——`prefetchAll: true` 会让鼠标划过就把十个语种的整页文档
-全预取一遍。
+- `Navbar.astro` 的 persist 名带语种（`lt-navbar-${locale}`）：同语种导航照旧走持久化，
+  跨语种导航重新渲染一份，否则旧语言的标签会留在新语言的页面上。`<html lang>` 不用管，
+  Astro 会从新文档同步根元素属性（`BaseLayout` 的 `preserveRootState` 只负责 theme 与
+  kiosk 这两个纯客户端状态）。
+- 而 persist 名一变，元素就被换掉，**导航栏脚本里所有模块级引用都指向了脱离文档的
+  节点**——Astro 按内容去重脚本，模块不会重新执行。后果是切一次语言之后主题开关、
+  汉堡按钮、语言面板全部静默失效。所以 `Navbar.astro` 的脚本必须走
+  `onPageSetup()`（见[页面约定](#页面约定)），每次导航重新查询元素；
+  `onBeforeNavigation()` 里同理，只能实时查询，不能捕获。
+
+**切换器链接直接指向目标 URL，不带 `?lang=`、不经过重定向**，形状与站内其它链接完全
+一致。曾经带过 `?lang=`，指望中间件 302 换 cookie 再落到干净 URL，并靠
+`data-astro-reload` 让它走整页导航——但**那个属性在 Astro 7 里根本不存在**（整个包里
+搜不到），所以点击始终走 Client Router 的 fetch+swap，中间夹一个 302。改成直链后重定向
+从点击路径里消失了，路由能保住是因为 href 本身就是那条路由；偏好 cookie 由捕获阶段的
+委托监听在导航开始前写入。中间件仍然认 `?lang=`，那是给 App 深链和无 JS 调用方用的。
+
+`data-astro-prefetch={false}` **是有效的**（Astro 的 `elMatchesStrategy` 对字符串
+`"false"` 直接返回 false），必须留着：`prefetchAll: true` 否则会让鼠标划过就把十个语种
+的整页文档全预取一遍。
 
 ### 校验
 

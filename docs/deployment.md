@@ -179,14 +179,21 @@ matcher），把标签逐级折叠到本站语种：`zh-TW` → `zh-Hant`、`en-
 最后那个条件不是可选的。少了它，`/status` + `Accept-Language: en` 会 302 到
 `/en/status`，那里 404，404 回退再 302 回 `/status`，然后又被识别一次——死循环。
 
-**自动识别不写 cookie，只有 `?lang=` 写。** 切换器的链接带 `?lang=<code>`，中间件据此
-`Set-Cookie: luotopia_lang`（一年、`SameSite=Lax`、`Secure`）并 302 到去掉参数的干净
-URL；此后自动识别不再覆盖这个选择。反过来若按「路径带语种前缀」来记就会记错方向：在
-`/en/` 上点一个没有译文的页面（导航直接指向中文原页），cookie 会被写成 `zh-Hans`，把
-用户的选择悄悄改掉。
+**自动识别不写 cookie，只有显式选择写。** 写的一方有两个：
+
+- 站内的语言切换器**在浏览器里写**（`Navbar.astro` 的捕获阶段委托监听，
+  `Path=/; Max-Age=一年; SameSite=Lax`，`Secure` 仅在 https 下附加——否则本地
+  `wrangler pages dev` 会直接拒收）。切换器的链接**直接指向目标 URL**，不带参数、
+  不经过重定向，形状与站内其它链接一致。
+- `?lang=<code>` 由中间件 `Set-Cookie` 并 302 到落点。这条留给 **App 深链、无 JS
+  的浏览器和脚本调用**：`luotopia.whu.sb` 上是服务端改写而不是重定向（见下节），主站
+  上则是普通 302。
+
+两者都不能换成「按路径前缀记偏好」，那会记错方向：在 `/en/` 上点一个没有译文的页面
+（导航直接指向中文原页），cookie 就会被写成 `zh-Hans`，把用户的选择悄悄改掉。
 
 `?lang=` 的落点是**该语种下这个页面**的位置，不是原路径去掉参数：`/status?lang=en`
-记下 en 并停在 `/status`（英文没有这一页），`/features?lang=en` 落到 `/en/features`；
+记下 en 并停在 `/status`（英文没有这一页时），`/features?lang=en` 落到 `/en/features`；
 其它查询参数保留，未发布的语种（`?lang=ja`）整个忽略。
 
 一律用 302 而不是 301：永久重定向会被按 URL 缓存，用户改了浏览器语言也回不来。

@@ -448,17 +448,37 @@ Endonyms cannot be dropped: the switcher has to be readable by someone who canno
 read the page they landed on, so each language is listed in its own script and never
 translated.
 
-**`transition:persist` carries the old language's navbar onto the new language's
-page.** Persisted elements are not part of the swap, so `Navbar.astro` keys its
-persist name by locale (`lt-navbar-${locale}`): same-locale navigations still get
-the cheap persist, cross-locale ones render fresh. `<html lang>` needs no help —
-Astro syncs root-element attributes from the new document, and `BaseLayout`'s
-`preserveRootState` only has to carry the two client-only states (theme, kiosk).
+**`transition:persist` conflicts with locales in two places.** Persisted elements
+are not part of the swap, so:
 
-The switcher's links carry `data-astro-reload`: `?lang=` needs the middleware's 302
-to set the cookie, and Client Router navigating by fetch would follow that 302
-transparently and then `pushState` the *parameterised* URL, leaving the address bar
-dirty. They also carry `data-astro-prefetch={false}` — with `prefetchAll: true` a
+- `Navbar.astro` keys its persist name by locale (`lt-navbar-${locale}`): same-locale
+  navigations still get the cheap persist, cross-locale ones render fresh, and the
+  old language's labels cannot survive onto the new language's page. `<html lang>`
+  needs no help — Astro syncs root-element attributes from the new document, and
+  `BaseLayout`'s `preserveRootState` only carries the two client-only states (theme,
+  kiosk).
+- But a changed persist name means the element is *replaced*, and every module-scope
+  reference in the navbar script then points at a detached node — Astro dedupes
+  scripts by content, so the module does not re-execute. The observable result is
+  that after one language switch the theme toggle, the burger and the language panel
+  all silently stop working. `Navbar.astro`'s script therefore has to use
+  `onPageSetup()` (see [Page conventions](#page-conventions)) and re-query on every
+  navigation; the same goes for `onBeforeNavigation()`, which binds once and so may
+  only ever query live.
+
+**The switcher links straight at its destination** — no `?lang=`, no redirect — and
+is therefore structurally identical to every other link on the site. It used to carry
+`?lang=` and rely on the middleware's 302 to set the cookie and land on the clean
+URL, with `data-astro-reload` forcing a full navigation. **That attribute does not
+exist in Astro 7** (it appears nowhere in the package), so every click went through
+Client Router's fetch-and-swap with a 302 in the middle. Linking directly removes
+the redirect from the click path; the route survives because the href *is* the route.
+The preference cookie is written by a capture-phase delegated listener before the
+navigation starts. The middleware still honours `?lang=` — that is for the app's deep
+links and for callers without JS.
+
+`data-astro-prefetch={false}` **does** work (Astro's `elMatchesStrategy` returns
+false for the literal string `"false"`) and must stay: with `prefetchAll: true` a
 hover would otherwise prefetch a whole document per language.
 
 ### Checks
