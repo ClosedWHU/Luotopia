@@ -598,6 +598,48 @@ const persistName = `lt-navbar-${locale}`;
     } catch (e) {}
   }
 
+  type BeforeSwapEvent = Event & { newDocument?: Document };
+
+  /*
+   * The bar persists across same-locale navigations, and a persisted element is
+   * not part of the swap — so everything the server rendered inside it stays
+   * frozen on whichever page first put the bar on screen. For the switcher that
+   * is load-bearing: from `/en/features/`, walking to `/en/download/` and then
+   * picking 日本語 used to land on `/ja/features/`, because the hrefs still
+   * described the features page. It is also why the defect reads as "switching
+   * language always goes home" — a visit that starts at `/` pins every later
+   * switch in that locale to `/<lang>/`, whatever page the visitor has reached
+   * since.
+   *
+   * The hrefs are copied from the incoming document rather than recomputed here,
+   * so the answer stays the server's: `pathInLocale` falls back to the default
+   * locale's URL for a route the target language has not translated, and a
+   * client-side second copy of `TRANSLATED_ROUTES` would eventually disagree
+   * with it. It also keeps this chunk free of the locale table's endonyms.
+   *
+   * Bound once at module scope and querying live on both sides, for the reason
+   * `onBeforeNavigation` below does — this has to survive the persist-identity
+   * change a cross-locale navigation causes.
+   */
+  document.addEventListener("astro:before-swap", (event) => {
+    const incoming = (event as BeforeSwapEvent).newDocument;
+    if (!incoming) return;
+    const rendered = new Map<string, string>();
+    incoming.querySelectorAll<HTMLAnchorElement>("a[data-lt-lang][href]").forEach((link) => {
+      const code = link.getAttribute("data-lt-lang");
+      const href = link.getAttribute("href");
+      if (code && href && !rendered.has(code)) rendered.set(code, href);
+    });
+    // A page with no navbar of its own (the /open/ launch page) has nothing to
+    // copy from, and must not have the bar it is about to persist blanked.
+    if (rendered.size === 0) return;
+    document.querySelectorAll<HTMLAnchorElement>("a[data-lt-lang]").forEach((link) => {
+      const code = link.getAttribute("data-lt-lang");
+      const href = code ? rendered.get(code) : undefined;
+      if (href) link.setAttribute("href", href);
+    });
+  });
+
   /*
    * Transient UI has to close when a navigation is *requested*, before the fetch
    * starts. `onBeforeNavigation` binds once and never rebinds, so it queries live
