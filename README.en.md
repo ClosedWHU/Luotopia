@@ -39,7 +39,7 @@ The full list, including what is still in development, is on the
 |----------|-----|
 | Android | APK, split per ABI (arm64-v8a / armeabi-v7a / x86_64) — [Releases](https://github.com/ClosedWHU/Luotopia/releases) |
 | iOS / iPadOS / macOS | [TestFlight](https://testflight.apple.com/join/dMwZT97V) |
-| Windows | zip / MSIX / Scoop |
+| Windows | [Microsoft Store](https://apps.microsoft.com/detail/9P29527S1H0H) / zip / Scoop |
 | Linux | tar.gz / AppImage / deb / AUR / flatpak |
 | HarmonyOS | `.hap` ships with some releases; sideload per the notes in the package |
 

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": 27,
-  "updatedAt": "2026-09-07T06:19:36.053Z",
-  "expiresAt": "2027-03-06T06:19:36.053Z",
+  "version": 28,
+  "updatedAt": "2026-10-12T04:24:46.761Z",
+  "expiresAt": "2027-04-10T04:24:46.761Z",
   "keyId": "luotopia-hot-update-2026-01",
   "scripts": [
     {
@@ -391,6 +391,52 @@
       }
     },
     {
+      "name": "medical-unpaid-bill-detail-parser",
+      "label": "校医院待缴费账单详情解析器",
+      "version": 1,
+      "url": "/hot-update/scripts/medical-unpaid-bill-detail-parser.js",
+      "checksum": "sha256:76955525eff211e69108f1de9a0e8aacd6b341cdee405a1f194baec439fb660f",
+      "minAppVersion": "1.0.0",
+      "apiVersion": 1,
+      "testInput": {
+        "html": "<p class=\"bgyellow text-center font-yellow f13 ls1\">就诊人: &nbsp;*旭祺</p><ul><a class=\"f14 lcount\"><div class=\"weui-cell weui-cell_access bgw borderBottom\"><p class=\"weui-cell__bd font333\">枸橼酸坦度螺酮片(希德)[10mg*21]</p><div class=\"font-blue\">183.28元</div></div><div class=\"pl20 bgw borderBottom pt10 pb10\"><p class=\"font333 opacity90\"><span>医嘱分类:</span>&nbsp;&nbsp;<span>西药口服剂(内科专用)</span></p><p class=\"mt10 font333 opacity90\"><span>单价:</span>&nbsp;<span>45.82</span></p><p class=\"mt10 font333 opacity90\"><span>数量:</span>&nbsp;<span>4盒(21)</span></p></div></a><a class=\"f14 lcount\"><div class=\"weui-cell weui-cell_access bgw borderBottom\"><p class=\"weui-cell__bd font333\">草酸艾司西酞普兰片[10mg*28]</p><div class=\"font-blue\">64.34元</div></div><div class=\"pl20 bgw borderBottom pt10 pb10\"><p class=\"font333 opacity90\"><span>医嘱分类:</span>&nbsp;&nbsp;<span>西药口服剂</span></p><p class=\"mt10 font333 opacity90\"><span>单价:</span>&nbsp;<span>32.17</span></p><p class=\"mt10 font333 opacity90\"><span>数量:</span>&nbsp;<span>2盒(28)</span></p></div></a></ul><div class=\"bgw postFix b0 w100p\"><p class=\"pull-left pl15\"><span class=\"font-grey\">总计：</span><span class=\"f16 font-blue\" id=\"total\">247.62元</span></p><p class=\"pull-left pl15\"><span class=\"font-grey\">折后：</span><span class=\"f16 font-blue\" id=\"total\">24.76元</span></p></div>"
+      },
+      "testExpect": {
+        "schemaVersion": 1,
+        "patientName": "*旭祺",
+        "totalAmount": "247.62元",
+        "discountAmount": "24.76元",
+        "categories": [
+          {
+            "title": "西药口服剂(内科专用)",
+            "items": [
+              {
+                "name": "枸橼酸坦度螺酮片(希德)",
+                "spec": "[10mg*21]",
+                "quantity": "4盒(21)",
+                "unitPrice": "45.82",
+                "amount": "183.28元",
+                "packageCount": 4
+              }
+            ]
+          },
+          {
+            "title": "西药口服剂",
+            "items": [
+              {
+                "name": "草酸艾司西酞普兰片",
+                "spec": "[10mg*28]",
+                "quantity": "2盒(28)",
+                "unitPrice": "32.17",
+                "amount": "64.34元",
+                "packageCount": 2
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "name": "medical-unpaid-invoice-parser",
       "label": "校医院未缴费账单解析器",
       "version": 2,
@@ -688,5 +734,5 @@
       }
     }
   ],
-  "signature": "uo06T/siHVwCJCTd9AhBO6EEHRtYjmBg2IiP77Khho6WQ2x+jZtstnwshpcU5SGi2M5CyE7M1I9BO7axN5/YBA=="
+  "signature": "DmrmPVTe40BgI610MABwXhHw6ckLNkqSf//M2vsEdPs+f7R5K6XiU3f2MSOvLkDPdble2nGj5LjSt6oE2pvoBg=="
 }

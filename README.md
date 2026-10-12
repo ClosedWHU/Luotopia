@@ -33,7 +33,7 @@
 |------|------|
 | Android | APK，按 ABI 分发（arm64-v8a / armeabi-v7a / x86_64）—— [Releases](https://github.com/ClosedWHU/Luotopia/releases) |
 | iOS / iPadOS / macOS | [TestFlight](https://testflight.apple.com/join/dMwZT97V) |
-| Windows | zip / MSIX / Scoop |
+| Windows | [Microsoft Store](https://apps.microsoft.com/detail/9P29527S1H0H) / zip / Scoop |
 | Linux | tar.gz / AppImage / deb / AUR / flatpak |
 | HarmonyOS | `.hap` 随部分版本发布，按包内说明侧载 |
 
