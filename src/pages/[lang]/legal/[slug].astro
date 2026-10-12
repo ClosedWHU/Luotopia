@@ -1,0 +1,16 @@
+---
+/**
+ * One legal document per locale per slug. See `[lang]/index.astro`.
+ */
+import { PREFIXED_LOCALES } from "../../../i18n/locales";
+import { legalDocuments } from "../../../config/legal";
+import LegalDocumentPage from "../../../components/pages/LegalDocumentPage.astro";
+
+export function getStaticPaths() {
+  return PREFIXED_LOCALES.flatMap((locale) =>
+    legalDocuments.map((doc) => ({ params: { lang: locale.path, slug: doc.slug } })),
+  );
+}
+---
+
+<LegalDocumentPage slug={Astro.params.slug!} />

@@ -7,7 +7,13 @@
  * other pages pay nothing. A static SVG poster shows immediately and cross-
  * fades out once WebGL is live; if WebGL is unavailable or the mount throws,
  * the poster simply stays (progressive enhancement, no broken box).
+ *
+ * Reads its own locale rather than taking one as a prop, exactly as the page
+ * components do: `Astro.currentLocale` is correct inside a component during a
+ * page render, so the caller cannot pass a locale that disagrees with the route.
  */
+import { resolveLocale, useTranslations } from "../i18n/ui";
+
 export interface Props {
   kind: "wu" | "luo";
   title: string;
@@ -18,26 +24,42 @@ export interface Props {
 }
 
 const { kind, title, subtitle, poster, aspect = "4 / 3", delay = "0ms" } = Astro.props;
+
+const t = useTranslations(resolveLocale(Astro.currentLocale));
+
+/*
+ * The two labels the *script* rewrites, carried on the button that owns them.
+ *
+ * Not `define:vars`: that inlines the script and takes it out of the bundle,
+ * which is the tradeoff `ScreenshotCarousel.astro` already rejected. The button
+ * is the element the visible label lives on, so it is also the element that
+ * carries both translations — and there are two of these cards on `/brand`, each
+ * rendered with its own locale's copy.
+ */
+const i18n = {
+  pause: t("brand.logo3d.pause"),
+  resume: t("brand.logo3d.resume"),
+};
 ---
 
 <figure class="lt-reveal-lift glass rounded-group overflow-hidden brand3d" data-brand3d={kind} style={`--lt-reveal-delay:${delay}`}>
   <div class="viewer" style={`aspect-ratio:${aspect}`}>
     <img class="poster" src={poster} alt="" width="256" height="256" />
-    <canvas data-logo3d={kind} data-lenis-prevent aria-label={`${title} 3D 展示`}></canvas>
-    <span class="tag">3D · 拖拽旋转 / 甩动 · 滚轮缩放</span>
+    <canvas data-logo3d={kind} data-lenis-prevent aria-label={t("brand.logo3d.canvasAria", { title })}></canvas>
+    <span class="tag">{t("brand.logo3d.hint")}</span>
   </div>
   <figcaption class="p-5 sm:p-6">
     <h3 class="text-title-medium text-on-surface">{title}</h3>
     {subtitle && <p class="text-body-medium text-on-surface-variant mt-1.5">{subtitle}</p>}
     <div class="controls mt-4 flex flex-wrap items-center gap-2">
-      <button type="button" data-act="pause" aria-pressed="false" aria-label="暂停或继续播放" class="lt-btn glass-control state-layer inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-label-large text-on-surface cursor-pointer">
+      <button type="button" data-act="pause" aria-pressed="false" aria-label={t("brand.logo3d.pauseToggleAria")} data-i18n-pause={i18n.pause} data-i18n-resume={i18n.resume} class="lt-btn glass-control state-layer inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-label-large text-on-surface cursor-pointer">
         <svg class="ico-pause" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2"></rect><rect x="14" y="5" width="4" height="14" rx="1.2"></rect></svg>
         <svg class="ico-play" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><path d="M8 5.14v13.72c0 .8.87 1.3 1.56.88l10.2-6.86a1.05 1.05 0 0 0 0-1.76L9.56 4.26A1.05 1.05 0 0 0 8 5.14z"></path></svg>
-        <span class="lbl">暂停</span>
+        <span class="lbl">{i18n.pause}</span>
       </button>
       <button type="button" data-act="replay" class="lt-btn glass-control state-layer inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-label-large text-on-surface cursor-pointer">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
-        重播
+        {t("brand.logo3d.replay")}
       </button>
     </div>
   </figcaption>
@@ -133,7 +155,14 @@ const { kind, title, subtitle, poster, aspect = "4 / 3", delay = "0ms" } = Astro
         btn.querySelector(".ico-pause")?.toggleAttribute("hidden", paused);
         btn.querySelector(".ico-play")?.toggleAttribute("hidden", !paused);
         const lbl = btn.querySelector(".lbl");
-        if (lbl) lbl.textContent = paused ? "继续" : "暂停";
+        // Both labels read back off the button the frontmatter rendered them
+        // onto — see `i18n` above. `?.` / `??` are fine here: esbuild lowers them
+        // to this bundle's Chrome 66 floor.
+        if (lbl) {
+          lbl.textContent = paused
+            ? (btn.dataset.i18nResume ?? "")
+            : (btn.dataset.i18nPause ?? "");
+        }
       }
     }
     for (const btn of pauseButtons) {

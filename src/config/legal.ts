@@ -1,3 +1,110 @@
+import { DEFAULT_LOCALE } from "../i18n/locales";
+import { useTranslations, type TranslationKey, type Translator } from "../i18n/ui";
+
+/*
+ * Legal documents: structure here, prose in the dictionaries.
+ *
+ * This file used to hold all three documents inline — 472 lines of Chinese. It now
+ * holds only their *shape*: which documents exist, their slugs, their `lastUpdated`
+ * dates, and for each section whether it has its own paragraphs and how many
+ * subsections it has. The words live in `src/i18n/<locale>.json` under
+ * `legal.<slug>.*`, keyed positionally off this shape.
+ *
+ * Two constraints make this more delicate than the rest of the site's i18n:
+ *
+ * 1. **The Flutter app consumes two of the outputs.** `app_config.dart` builds
+ *    `legalCatalogJsonUrl` (`/data/legal.json`) and `legalDocumentMdUrl(slug)`
+ *    (`/legal/<slug>.md`); `legal_catalog_service.dart` fetches the catalog and
+ *    `friend_links_provider.dart`'s sibling caches the markdown, versioned by
+ *    `lastUpdated`, and renders it with a native Markdown widget instead of a
+ *    WebView. Both endpoints therefore default to the authoritative locale and
+ *    were verified byte-identical across this refactor (sha256 of all three `.md`
+ *    files and of `legal.json`).
+ * 2. **This is legally operative text.** A translation of a privacy policy is a
+ *    claim about what the product does with people's data. Every non-default
+ *    locale therefore renders `legal.translationNotice`, which states that the
+ *    Simplified Chinese version governs. The notice is deliberately absent from
+ *    the default locale's output so those two endpoints do not change by a byte.
+ *
+ * Adding or reordering a section means editing this shape *and* the ten
+ * dictionaries; `tools/check-i18n.mjs` fails the build if they disagree in either
+ * direction.
+ */
+
+export interface LegalSectionShape {
+  /** True when the section has paragraphs of its own before any subsections. */
+  body: boolean;
+  /** Subsection count. Zero for a flat section. */
+  subsections: number;
+}
+
+export interface LegalDocumentShape {
+  id: string;
+  slug: string;
+  lastUpdated: string;
+  sections: LegalSectionShape[];
+}
+
+export const legalDocuments: LegalDocumentShape[] = [
+  {
+    id: "terms-of-service",
+    slug: "terms",
+    lastUpdated: "2026-09-20",
+    sections: [
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+    ],
+  },
+  {
+    id: "privacy-policy",
+    slug: "privacy",
+    lastUpdated: "2026-09-20",
+    sections: [
+      { body: true, subsections: 0 },
+      // Section 2 enumerates the ten information categories; it has no lead-in.
+      { body: false, subsections: 10 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+    ],
+  },
+  {
+    id: "cross-border-data",
+    slug: "cross-border",
+    lastUpdated: "2026-09-20",
+    sections: [
+      { body: true, subsections: 0 },
+      // Section 2 enumerates the seven cross-border scenarios; no lead-in.
+      { body: false, subsections: 7 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+      { body: true, subsections: 0 },
+    ],
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/* Resolved documents                                                          */
+/* -------------------------------------------------------------------------- */
+
+/** A document with its prose filled in for one locale. Shape is what the pages render. */
 export interface LegalSubsection {
   heading: string;
   body: string[];
@@ -5,8 +112,8 @@ export interface LegalSubsection {
 
 export interface LegalSection {
   heading: string;
-  body?: string[];
-  subsections?: LegalSubsection[];
+  body: string[];
+  subsections: LegalSubsection[];
 }
 
 export interface LegalDocument {
@@ -16,420 +123,98 @@ export interface LegalDocument {
   shortTitle: string;
   description: string;
   lastUpdated: string;
+  /** `legal.lastUpdated` with the date already substituted. */
+  lastUpdatedLine: string;
+  /** Signature line. Identical in every locale. */
+  attribution: string;
+  /**
+   * Governing-language notice, empty for the default locale. Rendered on the page
+   * and in the markdown of every translation.
+   */
+  translationNotice: string;
   sections: LegalSection[];
 }
 
-export const legalDocuments: LegalDocument[] = [
-  {
-    id: "terms-of-service",
-    slug: "terms",
-    title: "用户协议",
-    shortTitle: "用户协议",
-    description: "使用 Luotopia 前请阅读本协议，了解服务范围、使用规范、账号与责任边界。",
-    lastUpdated: "2026-09-20",
-    sections: [
-      {
-        heading: "1. 协议主体与适用范围",
-        body: [
-          "本协议由 ClosedWHU Team（以下简称「我们」）与使用 Luotopia 客户端及相关服务的用户（以下简称「您」）共同订立。Luotopia 是一款面向武汉大学师生的校园生活整合客户端，可在 Android、iOS、Windows、macOS、Linux 等平台提供。",
-          "您安装、打开或继续使用本应用，即表示您已阅读、理解并同意本协议以及同步生效的《隐私政策》与《跨境数据传输说明》。若您不同意，请立即停止使用并卸载本应用。",
-          "本应用主要作为「客户端」运行：课程表、成绩、空闲教室、图书馆座位、运动场馆、校车、校园消息、珞珈E卡等功能，通常通过您授权登录后的校园统一身份认证（CAS）会话，向武汉大学及相关合作方系统发起请求；相关业务数据原则上缓存在您的设备本地，而非由我们统一上传托管。",
-        ],
-      },
-      {
-        heading: "2. 服务内容与边界",
-        body: [
-          "本应用可提供（以实际版本功能为准）包括但不限于：课程表管理与多源导入、空闲教室查询、图书馆座位预约、运动场馆预约、珞珈E卡与付款码入口、校园消息、校车信息、校历、学业状态与成绩查询、天气与空气质量、壁纸中心、本地日程/备忘、AI 助手会话、桌面小组件，以及可选的 Luotopia 账号登录与社区相关能力。",
-          "校园侧功能的可用性取决于武汉大学教务、智慧珞珈、图书馆、场馆、校车、消息、支付等系统的开放状态、接口变更与您的账号权限。我们无法保证校方系统持续可用、字段完整或展示绝对准确。",
-          "部分页面以 WebView 方式嵌入校方或合作方页面（例如智慧珞珈、邮箱、建设银行校园卡付款相关页面等）。该等页面由第三方运营，其界面、规则与数据处理适用第三方自身条款；我们仅提供访问入口与必要的会话衔接。",
-          "开发者文档、友情链接、热更新脚本仓库等外部资源可能通过链接跳转。跳转后的服务由对应运营方负责，不构成本应用对第三方内容的保证。",
-        ],
-      },
-      {
-        heading: "3. 账号、登录与凭证",
-        body: [
-          "校园功能通常需要您通过武汉大学 CAS（`cas.whu.edu.cn`）完成身份认证。登录过程在系统 WebView 中完成，我们不会要求您在应用自有表单中二次输入 CAS 密码用于上传至我们的服务器；认证成功后，本应用会在设备本地安全存储 CAS 及教务等业务所需的会话 Cookie / 票据信息，以便后续调用校方接口。",
-          "若您使用 Luotopia 账号（注册/登录我们运营的服务端），您需提供用户名、密码及可选邮箱等信息。服务端将签发访问令牌（如 JWT），并保存在您设备的安全存储中。客户端默认连接的第一方服务端为 `api-whu-sb.tsinbei.cn`，官网与静态资源为 `www.whu.sb`，历史上亦使用过 `api.whu.sb`；具体以实际客户端配置为准。",
-          "我们可能在您的账号下展示「登录设备」列表，内容通常包括设备名称与设备标识、登录 IP 及其归属地、App 版本与系统版本，以及该设备自行上报的运行环境安全结论。您可随时吊销其中任一设备的会话。相关处理详见《隐私政策》。",
-          "您应妥善保管设备、锁屏与生物识别设置。因设备丢失、共享设备、恶意软件或您主动泄露凭证导致的损失，由您自行承担。您可随时在应用内退出校园登录或清除相关缓存（以功能设置为准）。",
-          "成绩等敏感展示可启用本地隐私锁（系统生物识别/设备凭证解锁）。该机制仅在本机生效，不会将生物特征上传至我们的服务器。",
-        ],
-      },
-      {
-        heading: "4. 用户行为规范",
-        body: [
-          "您应遵守中华人民共和国法律法规、武汉大学校规校纪以及本协议。禁止利用本应用从事任何违法、侵权、骚扰、欺诈或危害网络安全的行为。",
-          "禁止对本应用进行未经授权的逆向工程、反编译、破解、篡改、二次打包，或绕过技术保护措施；禁止对校园接口或本应用接口进行高频爬取、批量自动化滥用、压测攻击或干扰正常服务。",
-          "禁止将他人账号、Cookie、令牌用于非授权访问；禁止伪造 User-Agent、伪造请求以冒充官方校园客户端从事违规用途。本应用为兼容校方系统，可能在特定 WebView/请求中使用与智慧校园相关的客户端标识，该行为仅用于功能互通，不授权您仿冒官方应用从事欺诈。",
-          "禁止利用 AI 助手、消息、论坛或评价等功能生成或传播违法违规内容、侵犯他人隐私或知识产权的内容。",
-          "若我们发现或有合理理由认为您违反本协议，我们有权限制功能、拒绝服务或采取其他合理措施，并保留依法追究责任的权利。",
-        ],
-      },
-      {
-        heading: "5. AI 助手与用户生成内容",
-        body: [
-          "AI 助手功能依赖您自行配置的服务商、接口地址、模型与 API Key。默认内置提供商可能包含硅基流动等国内服务；您亦可切换至 OpenAI、Anthropic、Google Gemini、xAI、Perplexity 等境外服务商或自定义地址。",
-          "使用 AI 时，您的对话内容、历史消息，以及为提升体验而注入的本地日程摘要（如事项标题、详情、地点、时间等）将发送至您所选服务商的服务器。请勿在对话中输入密码、完整证件号、支付口令等敏感信息。",
-          "您对 AI 输出内容的采用与后果自行负责。AI 回复可能不准确，不构成教务、法律、医疗或官方通知。",
-        ],
-      },
-      {
-        heading: "6. 知识产权与开放接口",
-        body: [
-          "本应用的名称、标识、界面设计、代码与文档等，除另有说明或开源许可外，其知识产权归 ClosedWHU Team 或相应权利人所有。未经许可，不得擅自复制、传播或用于商业用途。",
-          "本应用客户端本身并非开源分发；但我们可能提供官方文档、开放 API 或社区协作渠道。使用开放能力时，应遵守对应接口规范与频率限制，不得危害服务稳定与他人权益。",
-          "您通过本应用导入或创建的课程表、日程、备忘、壁纸等用户内容，其权利仍归您或原始权利人所有；您授予我们为向您提供本地功能所必需的、有限的处理权限（例如在本机存储与展示）。",
-        ],
-      },
-      {
-        heading: "7. 免责声明与责任限制",
-        body: [
-          "本应用按「现状」和「可提供」基础提供。在法律允许的最大范围内，我们不对以下情形承担责任：校方或第三方系统故障、接口变更、维护停机；网络中断、设备兼容性问题；因您未及时更新应用导致的异常；因您依赖展示数据作出的选课、预约、出行等决策后果。",
-          "预约、支付、校园卡等涉及资金或名额的操作，最终以校方/银行页面与官方记录为准。本应用展示的余额、订单、座位状态等仅供参考。",
-          "在法律允许范围内，我们对任何间接、附带、惩罚性损失不承担责任；若依法仍需承担责任，责任范围以您就相关争议所实际支付的费用（如有）为上限，免费使用场景下责任以法律强制规定为限。",
-        ],
-      },
-      {
-        heading: "8. 服务变更、中止与终止",
-        body: [
-          "我们可能基于产品迭代、合规要求或运营需要变更、中止或终止部分或全部功能，并通过应用内公告、网站或其他合理方式通知。",
-          "您可随时停止使用并卸载本应用。卸载后，设备本地缓存与安全存储中的数据可能随系统机制被清除；云端账号数据的处理见《隐私政策》。",
-        ],
-      },
-      {
-        heading: "9. 协议更新与适用法律",
-        body: [
-          "我们可能更新本协议。更新后的版本将在本站发布，并以页面底部「最后更新」日期为准。若变更涉及您的重大权益，我们将尽量以合理方式提示。您在更新后继续使用，即视为接受更新内容。",
-          "本协议的订立、效力、解释与争议解决，适用中华人民共和国法律（不含冲突规范）。争议应友好协商；协商不成的，提交我们主要运营所在地有管辖权的人民法院诉讼解决（法律另有强制规定的除外）。",
-        ],
-      },
-      {
-        heading: "10. 联系我们",
-        body: [
-          "如对本协议有疑问，可通过 ClosedWHU 社区渠道（如 GitHub 组织 ClosedWHU、应用内/网站公示的社区入口）与我们联系。",
-        ],
-      },
-    ],
-  },
-  {
-    id: "privacy-policy",
-    slug: "privacy",
-    title: "隐私政策",
-    shortTitle: "隐私政策",
-    description: "说明 Luotopia 如何收集、使用、存储与保护您的个人信息，以及您享有的权利。",
-    lastUpdated: "2026-09-20",
-    sections: [
-      {
-        heading: "1. 引言",
-        body: [
-          "ClosedWHU Team（以下简称「我们」）重视用户隐私。本政策说明在您使用 Luotopia 客户端及相关服务时，我们如何处理个人信息，以及您如何行使相关权利。",
-          "本应用的设计原则是：校园教务与生活类数据以「本机处理、本机缓存」为主；仅在您使用账号、AI、天气、壁纸、开放接口等需要联网的功能时，才会向相应服务器发送实现功能所必需的数据。",
-          "请结合《用户协议》《跨境数据传输说明》一并阅读。若您不同意本政策，请停止使用本应用。",
-        ],
-      },
-      {
-        heading: "2. 我们处理的信息类型",
-        subsections: [
-          {
-            heading: "2.1 校园身份与会话信息（通常仅存于本机）",
-            body: [
-              "当您通过 CAS 登录后，本应用可能在设备本地保存：CAS 会话 Cookie（可能包含会话票据类字段）、教务等业务 Cookie、登录/校验时间戳，以及从校方接口获取的学籍相关展示信息（如学号、姓名、学院、专业、班级、年级等，具体以校方返回为准）。上述信息用于维持登录态并调用成绩、课表、空闲教室、场馆、图书馆、消息等功能，默认不会上传至 Luotopia 自有业务服务器。",
-            ],
-          },
-          {
-            heading: "2.2 学业与校园业务数据（本机缓存为主）",
-            body: [
-              "包括但不限于：课程表与课表导入数据、成绩与学分绩相关数据、学业状态、空闲教室查询结果、图书馆座位预约记录、运动场馆预约与订单信息、校园消息、校车线路与位置相关数据、校历展示数据等。这些数据来源于武汉大学相关系统，由您的登录态授权获取，并主要缓存在本机以便离线或加速展示。",
-            ],
-          },
-          {
-            heading: "2.3 珞珈E卡 / 付款相关",
-            body: [
-              "E卡与付款码功能可能通过 WebView 或接口链路访问智慧珞珈、移动网关及建设银行校园卡相关页面。过程中可能涉及会话 Cookie、跳转参数及银行侧标识（如 `USERID`、`SKEY` 等，以实际链路为准）。支付与资金处理由银行/校方系统完成，我们不存储您的银行卡密码或支付口令。",
-            ],
-          },
-          {
-            heading: "2.4 Luotopia 账号信息（若您注册/登录）",
-            body: [
-              "可能包括用户名、密码（经安全传输提交至服务端）、可选邮箱、令牌、资料字段（如显示名、简介、头像等，以实际开放字段为准）。用于账号鉴权与可选的社区/开放能力。服务端会为每次登录保存会话记录，其中通常包含登录 IP 地址、客户端 User-Agent（含 App 版本与平台）、设备标识与运行环境安全结论（详见 2.9），用于向您展示「登录设备」列表并支持您吊销相应会话。",
-            ],
-          },
-          {
-            heading: "2.5 您主动创建的本地内容",
-            body: [
-              "日程、待办、备忘、课程编辑数据、壁纸选择、主题与语言等偏好。默认保存在本机；备忘/壁纸可能读取您授权的相册图片。",
-            ],
-          },
-          {
-            heading: "2.6 AI 助手相关",
-            body: [
-              "对话内容、会话历史、您配置的 API Key、服务商与模型设置。API Key 保存在系统安全存储；会话内容可在本机加密存储。向 AI 服务商发送的内容见第 4 节与《跨境数据传输说明》。",
-            ],
-          },
-          {
-            heading: "2.7 位置与天气",
-            body: [
-              "在您授权定位权限时，可能使用精确/粗略位置以提供天气与校车站点相关体验；若未授权定位，可能使用基于 IP 的大致位置。天气数据可能来自 Open-Meteo、小米天气、AccuWeather 等您选择或默认的数据源，并在本机缓存。",
-            ],
-          },
-          {
-            heading: "2.8 设备与权限相关信息",
-            body: [
-              "为实现通知提醒、精确闹钟、蓝牙手表配套、相册读取等功能，系统可能向您申请相应权限。我们不会在未说明的情况下收集与功能无关的通讯录、短信等。",
-            ],
-          },
-          {
-            heading: "2.9 设备标识、登录设备与安全检测",
-            body: [
-              "为了便于您在「登录设备」列表中分辨并管理自己的设备，客户端会生成一个随机安装标识（UUID），其本身不含任何个人信息，也与您的校园身份无关；该标识的权威副本保存在系统安全存储中（如 Android Keystore、iOS Secure Enclave 或桌面平台密钥库）。客户端同时会上报设备名称（Android 为厂商与型号，iOS 为机型市场名称，Windows 与 macOS 为计算机名，Linux 为发行版名称）、平台、系统版本与 App 版本。上述字段随登录请求提交，并在登录成功后以及冷启动时同步至当前会话；您可随时吊销任一设备的会话。",
-              "客户端内置运行环境安全检测：在 Android 与 iOS 上使用第三方 SDK freeRASP（Talsec / AHEAD），在桌面平台使用本地探针。检测结论（正常、存在风险、应用数据被克隆、该平台不支持检测）与风险类型标签（如 root 或越狱、注入框架、调试器附加、模拟器、应用签名被篡改、以管理员或 root 权限运行等）会上报至我们的服务端，并显示在您自己的「登录设备」列表中。该 SDK 为完成恶意应用与隐藏应用检测，可能读取设备上部分已安装应用的信息。",
-              "请注意：上述结论属于设备自行上报的参考信息，仅用于帮助您识别异常登录与异常设备，我们不会仅凭该信息对您作出封禁等处置。对于不支持检测的平台，列表中将显示「无数据」或「不支持」，而不会被记为「安全」。",
-              "当安全 SDK 判定应用数据已被复制到其它设备时，客户端会清除本机安全存储中的凭证并重新生成安装标识，您会因此被退出登录。该措施在本地执行，用于保护您的账号安全。",
-              "桌面平台探针采集的原始明细（如系统用户名、用户组等）仅在设备本地的开发者页面展示，不会上报至我们的服务端。",
-            ],
-          },
-          {
-            heading: "2.10 日志与调试信息",
-            body: [
-              "开发/调试构建中可能输出网络状态、错误信息等日志（例如 `debugPrint`）。应用还会在本机维护滚动的诊断日志文件，其中通常包含时间戳、功能模块、网络状态与错误摘要等信息；该日志仅保存在您的设备上，只有在您主动导出或分享时才会离开设备。",
-              "我们集成了 Google Firebase 提供的 Analytics、Crashlytics 与 Performance 三个可选通道。设置中的对应开关默认关闭；首次启动的引导页会向您展示一个诊断与分析的同意选项，该选项默认处于勾选状态，您可以在完成引导前取消勾选，此后也可随时在「设置 → 隐私」中开启或关闭。只有在您开启后才会开始收集，可能收集的内容包括：崩溃与异常记录（含调用堆栈与失败原因），以及您选择开启的使用分析数据与性能数据。在不具备 Google Play 服务的 Android 设备上，Firebase 整体不会初始化。关闭后我们将停止新的收集；此前已提交数据的处理适用 Google 的相关规则。",
-              "服务端若启用审计日志、限流或人机验证（如 Altcha），仅用于安全与运维，不用于出售用户画像。",
-            ],
-          },
-        ],
-      },
-      {
-        heading: "3. 信息存储位置与方式",
-        body: [
-          "本机安全存储（如 Android Keystore / iOS Keychain 等系统能力封装）：Luotopia 登录令牌与用户资料、AI API Key、校园认证快照（Cookie 等）、本地加密主密钥等。",
-          "本机加密存储：如 AI 会话等敏感本地数据，可使用应用层加密后写入偏好存储。",
-          "本机普通偏好与文件：设置项、课表、日程、天气/校车等缓存、成绩导入缓存、壁纸文件与元数据、引导完成状态等。",
-          "WebView Cookie：用于维持 CAS 与各校园业务站点的登录态。",
-          "云端：仅当您使用 Luotopia 账号或未来启用的云端社区/评价等功能时，相关数据才会保存在我们或受托方服务器（客户端默认连接 `api-whu-sb.tsinbei.cn`，历史上亦使用过 `api.whu.sb`）。校园教务类数据默认不以「同步到我们云端」为目的进行上传。服务端保存的会话记录通常包含登录 IP 地址、客户端 User-Agent、设备标识与设备名称、平台与版本信息、运行环境安全结论，以及您自行填写的设备备注。",
-        ],
-      },
-      {
-        heading: "4. 我们如何使用信息",
-        body: [
-          "提供与维护您选择使用的功能（登录、查询、预约入口、展示、提醒、AI 对话等）；",
-          "在本机缓存数据以减少重复请求、改善性能与弱网体验；",
-          "保障账号与会话安全，防范滥用与攻击；",
-          "改进产品体验（基于总体功能需要，而非出售个人数据）；",
-          "履行法律法规规定的义务。",
-          "我们不会出售您的个人信息。",
-        ],
-      },
-      {
-        heading: "5. 委托处理、共享与第三方",
-        body: [
-          "校园系统运营方：当您使用 CAS 登录及各类校园功能时，武汉大学及相关系统（例如 `cas.whu.edu.cn`、`jwgl.whu.edu.cn`、`zyfzzd.whu.edu.cn`、`zhlj.whu.edu.cn`、`zsgx.whu.edu.cn`、`gym.whu.edu.cn`、`seat.lib.whu.edu.cn`、`bus.whu.edu.cn`、`msgp.whu.edu.cn`、`pay.whu.edu.cn` 等）将按照其规则处理您的身份与业务数据。我们无法控制校方系统的隐私实践，建议您同时阅读校方公示。",
-          "银行与支付相关方：E卡付款码等场景可能涉及建设银行校园卡相关服务（如 `app.xiaoyuan.ccb.com`），适用银行侧规则。",
-          "天气与地理服务：Open-Meteo、小米天气、AccuWeather、OpenStreetMap Nominatim、IP 定位服务（如 `api.ip.sb`、`ip-api.com`）等，仅在功能需要时发送位置或查询参数。",
-          "壁纸服务：必应每日壁纸可能请求 Bing 相关接口并缓存图片至本机。",
-          "AI 服务商：由您选择的大模型 API 接收对话与日程摘要上下文。",
-          "安全检测 SDK：freeRASP（Talsec / AHEAD），用于运行环境完整性与设备绑定检测。该 SDK 会向其服务商后台上报安全事件；我们另行将客户端生成的随机安装标识（见 2.9）作为 external id 提供给该服务商，以便将安全事件与我们侧的同一台设备对应起来。上报内容不含您的校园凭证、账号密码或聊天内容；安全告警邮件接收地址为 `security@whu.sb`。该服务商的服务器可能位于境外。",
-          "推送服务：Google Firebase Cloud Messaging（`fcm.googleapis.com`），以及在无 Google Play 服务设备上的华为 Push Kit。我们的服务端会保存推送令牌与安装标识，用于向您投递通知。推送默认开启，您可在设置中关闭；关闭后客户端会删除推送令牌并停止注册。",
-          "IP 归属地查询：客户端在您打开「登录设备」列表时，会直接向 `ip9.com.cn` 查询列表中 IP 地址的归属地与运营商，用于显示「地区/运营商」。该请求由您的设备发出，不经过我们的服务端，除 IP 地址与常规请求头外不含其它信息；该服务位于境内。",
-          "基础设施与内容分发：官网、静态资源、友情链接配置等可能经 Cloudflare 等平台分发；服务端可能使用 Altcha 等人机验证。",
-          "开源与协作链接：访问 GitHub、Weblate 等由您主动触发，适用对应平台政策。",
-          "除实现功能所必要、获得您的同意或法律要求外，我们不会与无关第三方共享可用于识别您身份的个人信息。",
-        ],
-      },
-      {
-        heading: "6. 权限说明",
-        body: [
-          "网络：访问校园系统、天气、AI、官网配置等；",
-          "位置：天气与校车等相关体验（可拒绝，部分功能降级）；",
-          "通知与精确闹钟：课程/日程提醒；",
-          "相册/媒体读取：壁纸与备忘图片；",
-          "生物识别：可选的成绩隐私锁；",
-          "蓝牙：可选的手表配套通信。",
-          "您可在系统设置中管理权限；拒绝非必要权限通常不影响其他无关功能。",
-        ],
-      },
-      {
-        heading: "7. 信息安全与保留期限",
-        body: [
-          "我们采取合理的技术措施保护本地敏感数据（如系统安全存储、应用层加密）与传输安全（HTTPS 等，个别校方/兼容链路可能存在历史兼容配置）。",
-          "本地缓存的保留期限取决于您是否退出登录、清理缓存或卸载应用。云端账号数据在您注销或依法需要删除前，按业务必要性保留。",
-          "云端令牌与会话的有效期以服务端配置为准，通常为：访问令牌有效期 15 分钟；刷新令牌与会话有效期均为 720 小时（30 天），期间每次使用会滑动续期。若超过 30 天未活动，相应会话与刷新令牌均会失效，您需要重新登录。",
-          "请注意：任何安全措施都无法保证绝对安全，请加强设备防护。",
-        ],
-      },
-      {
-        heading: "8. 您的权利",
-        body: [
-          "查阅、复制：您可在应用内查看课表、成绩、日程等已缓存内容；",
-          "更正、删除：您可编辑本地日程/课表，退出校园登录以停止使用对应 Cookie，或卸载应用清除本机数据；",
-          "撤回同意：您可关闭定位、通知、相册等权限，或停止使用 AI/天气等可选功能；",
-          "会话管理：您可在「登录设备」页面查看当前账号下各设备的会话，并可吊销单个设备的会话，或一次性吊销全部会话；若您修改密码或修改邮箱，该账号下的全部会话将被自动吊销，您需要在各设备重新登录；",
-          "账号相关：若使用 Luotopia 账号，可通过公示渠道联系我们处理注销或更正请求（在核实身份与法律允许范围内）。",
-          "成绩隐私锁、防剧透等展示控制为本地体验功能，不改变数据来源方的处理规则。",
-        ],
-      },
-      {
-        heading: "9. 未成年人",
-        body: [
-          "本应用主要面向高等学校师生。若您为未成年人，请在监护人指导下阅读本政策并使用本应用。",
-        ],
-      },
-      {
-        heading: "10. 政策更新",
-        body: [
-          "我们可能适时更新本政策，并以本页「最后更新」日期为准。重大变更时，我们将尽量通过网站、应用内提示等合理方式告知。",
-        ],
-      },
-      {
-        heading: "11. 联系我们",
-        body: [
-          "如对本政策或个人信息处理有疑问、投诉或请求，请通过 ClosedWHU 社区渠道（如 GitHub 组织 ClosedWHU 或网站公示入口）与我们联系。",
-        ],
-      },
-    ],
-  },
-  {
-    id: "cross-border-data",
-    slug: "cross-border",
-    title: "跨境数据传输说明",
-    shortTitle: "跨境数据传输",
-    description: "说明使用 Luotopia 时可能涉及的境外接收方、传输场景与您的选择权。",
-    lastUpdated: "2026-09-20",
-    sections: [
-      {
-        heading: "1. 说明目的",
-        body: [
-          "本说明用于告知：在提供 Luotopia 服务过程中，哪些功能可能使您的数据被传输至中华人民共和国境外的服务器或经境外节点处理，以便您在充分知情的前提下选择是否使用相关功能。",
-          "校园统一认证及多数教务/场馆/图书馆/校车等业务请求，默认发往武汉大学及境内合作系统域名，不属于本说明重点规制的「主动跨境」场景；但访问官网、天气、壁纸、部分 AI 服务商、代码托管与 CDN 时，可能产生跨境处理。",
-        ],
-      },
-      {
-        heading: "2. 可能涉及跨境的场景与接收方",
-        subsections: [
-          {
-            heading: "2.1 天气与地理编码（可选/按提供商）",
-            body: [
-              "Open-Meteo（如 `api.open-meteo.com`、`air-quality-api.open-meteo.com`、`geocoding-api.open-meteo.com`）：可能接收经纬度或地名查询，用于预报与空气质量。服务设施通常位于境外。",
-              "AccuWeather（`api.accuweather.com`）：若您选择或系统使用该数据源，查询参数与位置相关信息可能发往境外。",
-              "OpenStreetMap Nominatim（`nominatim.openstreetmap.org`）：逆地理编码请求可能发往境外。",
-              "IP 粗定位（如 `api.ip.sb`、`ip-api.com`）：在未授权 GPS 或需要兜底定位时，可能向相应服务查询基于 IP 的大致位置；相关服务可能位于境外或经由境外链路。",
-              "小米天气（`weatherapi.market.xiaomi.com`）等境内数据源：一般不构成本条所述跨境，但以实际解析与网络路径为准。",
-            ],
-          },
-          {
-            heading: "2.2 壁纸与内容分发",
-            body: [
-              "必应每日壁纸（`www.bing.com` 等相关接口）：请求壁纸元数据/图片时，可能访问微软相关境外基础设施，并在本机缓存图片文件。",
-            ],
-          },
-          {
-            heading: "2.3 AI 大模型（用户主动配置）",
-            body: [
-              "当您将 AI 提供商设置为 OpenAI（`api.openai.com`）、Anthropic（`api.anthropic.com`）、Google Gemini（`generativelanguage.googleapis.com`）、xAI（`api.x.ai`）、Perplexity（`api.perplexity.ai`）或其他境外/自定义境外地址时，您的对话内容、历史消息以及本地日程摘要字段将传输至对应境外服务器。",
-              "若您使用硅基流动、DeepSeek、月之暗面、智谱、通义、混元等默认或可选的境内/主站在境内的服务商，则通常不构成本条意义上的跨境；最终以该服务商实际部署与隐私政策为准。应用内置的模型网关 `ai.tsinbei.cn` 属我们的第一方服务（境内）。",
-            ],
-          },
-          {
-            heading: "2.4 官网、静态资源与安全验证",
-            body: [
-              "Luotopia 官网与部分静态资源（如 `whu.sb` 站点、友情链接 JSON、法律文案、应用截图等）可能托管于 Cloudflare Pages 或经 Cloudflare 网络分发，访问日志与请求可能经过境外节点。",
-              "客户端本身也会主动请求 `www.whu.sb`，用于获取法律文案与目录、字体镜像、热更新脚本清单、友情链接配置与应用更新信息等；这些请求同样经 Cloudflare 网络分发，并可能产生标准访问日志（IP、User-Agent、请求路径）。其中，我们的 Pages Function 反向代理会向 `fonts.gstatic.com` 转发字体请求。",
-              "服务端使用 Altcha 人机验证，其工作量证明在客户端完成并由服务端验证。",
-            ],
-          },
-          {
-            heading: "2.5 开发者与社区资源（用户主动访问）",
-            body: [
-              "GitHub（`github.com`、`raw.githubusercontent.com` 等）：查看源码、Release、热更新脚本或文档时，访问将发往境外。",
-              "Google Noto Sans 字体：与前述由您主动访问的资源不同，字体属于界面默认资源，通常在后台按需加载。客户端在需要该字体时，优先通过我们的第一方源 `www.whu.sb/fonts/gstatic/` 获取（该源由 Cloudflare Pages 反向代理 `fonts.gstatic.com`，文件名为其 SHA-256 摘要，客户端会校验摘要与文件长度）；仅当该镜像不可用时，才会直连 `fonts.gstatic.com`，此时可能产生跨境请求。",
-              "iOS 与 macOS 默认使用系统字体，通常不发生任何字体下载；系统已内置所选字体的设备同样不会下载。MiSans 字体按需从 `www.whu.sb/fonts/misans/` 获取。官网自身使用的字体均已自托管，不会请求 Google。",
-            ],
-          },
-          {
-            heading: "2.6 友情链接与第三方应用",
-            body: [
-              "您点击友情链接跳转至第三方网站或应用（如社团站点、合作 App、AI 注册页等）后，适用该第三方的隐私与跨境规则，请谨慎阅读。",
-            ],
-          },
-          {
-            heading: "2.7 安全检测与推送服务",
-            body: [
-              "安全检测：freeRASP（Talsec / AHEAD）的安全事件会上报至该服务商后台，我们另行将客户端生成的随机安装标识（UUID）作为 external id 提供给该服务商，以便将安全事件与同一台设备对应；其服务器可能位于境外。",
-              "推送服务：Google Firebase Cloud Messaging（`fcm.googleapis.com`）的推送令牌经我们的服务端转发至 Google，相关处理可能位于境外；在不具备 Google Play 服务的设备上，可能改用华为 Push Kit（境内）。",
-              "可选遥测：仅在您于引导页或设置中开启后，Firebase Analytics、Crashlytics 与 Performance 的崩溃与异常记录、使用分析与性能数据才会发送至 Google，其服务器通常位于境外；这三个通道默认关闭。",
-              "上述传输均不含您的校园账号凭证、密码、成绩明细或聊天内容。相关处理详见《隐私政策》。",
-            ],
-          },
-        ],
-      },
-      {
-        heading: "3. 传输的信息范围（最小化）",
-        body: [
-          "天气/地理：位置坐标或城市名、IP（用于粗定位）、设备时区/语言等请求元数据；",
-          "壁纸：壁纸列表/图片 URL 请求，一般不含校园账号 Cookie；",
-          "AI：聊天文本、日程摘要字段、模型名称与 API Key（Key 由您提供并存储在本机，随请求提交给您所选服务商）；",
-          "官网/CDN：标准 Web 访问日志（IP、User-Agent、访问路径等）；",
-          "安全检测：风险类型标签、检测结论与随机安装标识；",
-          "推送：推送令牌、安装标识、平台与版本、语言与时区；",
-          "默认不会将 CAS 密码、教务 Cookie、成绩明细批量上传至境外天气或壁纸服务。",
-        ],
-      },
-      {
-        heading: "4. 目的与法律基础",
-        body: [
-          "跨境传输仅为实现您主动使用的功能（获取预报、壁纸、AI 回复、访问文档/官网等），或保障站点安全与可用性。",
-          "您通过开启相关权限、选择境外数据源/AI 提供商、或主动访问境外链接的方式作出同意；您也可以通过下文「您的选择」拒绝或终止。",
-        ],
-      },
-      {
-        heading: "5. 安全与保护措施",
-        body: [
-          "尽量使用 HTTPS 等加密传输；",
-          "敏感凭证优先存放于系统安全存储，AI 会话可加密保存在本机；",
-          "对境外提供商的选择权交给您（尤其是 AI）；",
-          "校园核心业务默认直连接境内校方系统，降低不必要的跨境。",
-          "我们要求或期待第三方在其政策承诺范围内保护数据，但第三方的独立处理行为由其自身负责。",
-        ],
-      },
-      {
-        heading: "6. 您的选择",
-        body: [
-          "拒绝定位权限，并避免使用依赖境外天气源的功能；在设置中优先选择境内天气数据源（如有）；",
-          "不使用必应壁纸来源，改用本地图片或关闭壁纸；",
-          "AI 仅使用境内提供商，或关闭 AI 助手；不要在对话中提供敏感个人信息；",
-          "不访问 GitHub 等境外链接；",
-          "如您不同意本说明项下的跨境处理，请停止使用相应功能或卸载本应用。",
-        ],
-      },
-      {
-        heading: "7. 说明更新",
-        body: [
-          "境外接收方名单可能随版本迭代、默认提供商或基础设施调整而变化。更新后的说明以本页「最后更新」日期为准，并在本站发布。建议您定期查阅。",
-          "机器可读目录见：`/data/legal.json`（含各文档 slug、标题与 `lastUpdated`，供客户端核对版本）。",
-        ],
-      },
-      {
-        heading: "8. 联系我们",
-        body: [
-          "如对跨境处理有疑问，请通过 ClosedWHU 社区渠道与我们联系。",
-        ],
-      },
-    ],
-  },
-];
+/**
+ * Positional keys are derived from the shape rather than written out, so they
+ * cannot be `TranslationKey` literals and the compiler cannot check them.
+ * `tools/check-i18n.mjs` closes that loop instead: it walks `legalDocuments` and
+ * asserts every derived key exists in all ten dictionaries, and that no `legal.*`
+ * key is left pointing at a section that no longer exists.
+ */
+const k = (key: string): TranslationKey => key as TranslationKey;
 
-export function getLegalBySlug(slug: string): LegalDocument | undefined {
-  return legalDocuments.find((d) => d.slug === slug);
+/**
+ * Resolve one document for one locale.
+ *
+ * `body: false` in the shape yields an empty array rather than a missing key, so
+ * the renderers can keep their existing `length > 0` tests and no dictionary has
+ * to carry empty arrays for the two enumeration sections.
+ */
+export function legalDocumentFor(shape: LegalDocumentShape, t: Translator): LegalDocument {
+  const s = shape.slug;
+  return {
+    id: shape.id,
+    slug: s,
+    title: t(k(`legal.${s}.title`)),
+    shortTitle: t(k(`legal.${s}.shortTitle`)),
+    description: t(k(`legal.${s}.description`)),
+    lastUpdated: shape.lastUpdated,
+    lastUpdatedLine: t("legal.lastUpdated", { date: shape.lastUpdated }),
+    attribution: t("legal.attribution"),
+    translationNotice:
+      t.locale === DEFAULT_LOCALE ? "" : t("legal.translationNotice"),
+    sections: shape.sections.map((section, i) => {
+      const n = i + 1;
+      return {
+        heading: t(k(`legal.${s}.s${n}.heading`)),
+        body: section.body ? t.list(k(`legal.${s}.s${n}.body`)) : [],
+        subsections: Array.from({ length: section.subsections }, (_, j) => ({
+          heading: t(k(`legal.${s}.s${n}.sub${j + 1}.heading`)),
+          body: t.list(k(`legal.${s}.s${n}.sub${j + 1}.body`)),
+        })),
+      };
+    }),
+  };
 }
 
-export function getLegalCatalog() {
+/** Every document, resolved for one locale, in display order. */
+export function legalDocumentsFor(locale: string = DEFAULT_LOCALE): LegalDocument[] {
+  const t = useTranslations(locale);
+  return legalDocuments.map((shape) => legalDocumentFor(shape, t));
+}
+
+export function getLegalBySlug(
+  slug: string,
+  locale: string = DEFAULT_LOCALE,
+): LegalDocument | undefined {
+  const shape = legalDocuments.find((d) => d.slug === slug);
+  return shape ? legalDocumentFor(shape, useTranslations(locale)) : undefined;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Endpoints                                                                   */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The machine-readable catalog at `/data/legal.json`.
+ *
+ * `path` and `mdPath` are always the default-locale URLs, whatever `locale` is
+ * asked for: the app resolves them against `siteBaseUrl` and has no notion of a
+ * locale prefix, and a localized catalog that pointed at `/en/legal/terms.md`
+ * would break every installed client. Localized markdown is reachable at
+ * `/<locale>/legal/<slug>.md` for a client that grows a locale parameter later.
+ */
+export function getLegalCatalog(locale: string = DEFAULT_LOCALE) {
+  const docs = legalDocumentsFor(locale);
   return {
     version: 1,
     updatedAt:
-      legalDocuments
+      docs
         .map((d) => d.lastUpdated)
         .sort()
         .at(-1) ?? null,
-    documents: legalDocuments.map((d) => ({
+    documents: docs.map((d) => ({
       id: d.id,
       slug: d.slug,
       title: d.title,
@@ -449,11 +234,19 @@ export function getLegalCatalog() {
  * and renders it with its own Markdown widget, so a legal page opens instantly
  * from cache instead of spinning up a WebView. Body copy already uses backtick
  * inline code, which is native Markdown, so paragraphs are emitted verbatim.
+ *
+ * Takes a *resolved* document, so the caller picks the locale and this function
+ * stays a pure formatter. For the default locale its output is byte-identical to
+ * the pre-i18n version — the translation notice is the only conditional line, and
+ * it is empty there.
  */
 export function renderLegalMarkdown(doc: LegalDocument): string {
   const out: string[] = [`# ${doc.title}`, ""];
   if (doc.description) {
     out.push(`> ${doc.description}`, "");
+  }
+  if (doc.translationNotice) {
+    out.push(`> ${doc.translationNotice}`, "");
   }
   for (const section of doc.sections) {
     out.push(`## ${section.heading}`, "");
@@ -467,6 +260,6 @@ export function renderLegalMarkdown(doc: LegalDocument): string {
       }
     }
   }
-  out.push("---", "", `最后更新：${doc.lastUpdated}`, "", "ClosedWHU Team · Luotopia", "");
+  out.push("---", "", doc.lastUpdatedLine, "", doc.attribution, "");
   return out.join("\n");
 }

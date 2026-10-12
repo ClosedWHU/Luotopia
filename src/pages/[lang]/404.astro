@@ -1,0 +1,25 @@
+---
+/**
+ * One 404 page per published non-default locale. See `[lang]/index.astro`.
+ *
+ * These are real URLs — `/en/404` builds to `dist/en/404/index.html` — and that
+ * is the whole point of the file. There is exactly one top-level `dist/404.html`
+ * and Pages serves it for every miss whatever the visitor's language, so a
+ * localised variant has to live somewhere `functions/_middleware.ts` can fetch it
+ * from and substitute into the answer. Being reachable at `/en/404` directly is
+ * fine, and consistent with `/404` already being reachable.
+ *
+ * No `Astro.response.status` here, unlike the top-level shell. These documents
+ * exist at ordinary URLs and are fetched as ordinary static assets, so nothing
+ * in them has to claim a 404 — the status of a miss belongs to the platform and
+ * to the middleware, not to the copy.
+ */
+import { PREFIXED_LOCALES } from "../../i18n/locales";
+import NotFoundPage from "../../components/pages/NotFoundPage.astro";
+
+export function getStaticPaths() {
+  return PREFIXED_LOCALES.map((locale) => ({ params: { lang: locale.path } }));
+}
+---
+
+<NotFoundPage />
