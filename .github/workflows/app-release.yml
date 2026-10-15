@@ -1121,7 +1121,7 @@ jobs:
 
       - name: Upload the rejected AAB for inspection
         if: failure() && steps.aab.outcome == 'failure' && matrix.package == 'aab'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: play-aab-rejected-debug
           path: build/app/outputs/bundle/playRelease/*.aab
@@ -1152,7 +1152,7 @@ jobs:
       # never as a public release asset.
       - name: Upload Play AAB (workflow artifact)
         if: matrix.package == 'aab'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: play-aab-${{ needs.context.outputs.build_name }}-${{ needs.context.outputs.build_number }}
           path: dist/${{ steps.aab.outputs.aab_name }}
@@ -1833,7 +1833,7 @@ jobs:
       # Retained for 14 days by default; download it from the run summary and
       # upload it under Packages for the product (Store ID 9P29527S1H0H).
       - name: Upload Store MSIX as workflow artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: store-msix-windows-${{ matrix.arch }}
           path: dist/*.msix
@@ -1888,7 +1888,7 @@ jobs:
       API: https://manage.devcenter.microsoft.com/v1.0/my
     steps:
       - name: Download the Store MSIX artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: store-msix-windows-*
           path: msix
