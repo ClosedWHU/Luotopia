@@ -47,7 +47,7 @@ env:
   ANDROID_NDK_VERSION: 28.2.13676358
   # Every asset the lock file expects from a rebuild (SHA256SUMS is added last
   # and doubles as the "this generation is complete" marker).
-  EXPECTED_ASSETS: key_obfuscator-ios.a key_obfuscator-ios-simulator.a key_obfuscator-macos.a key_obfuscator-android-arm64-v8a.so key_obfuscator-android-armeabi-v7a.so key_obfuscator-android-x86_64.so key_obfuscator-linux.so key_obfuscator-linux-arm64.so key_obfuscator-windows.dll key_obfuscator-windows-arm64.dll
+  EXPECTED_ASSETS: key_obfuscator-ios.a key_obfuscator-ios-simulator.a key_obfuscator-macos.a key_obfuscator-android-arm64-v8a.so key_obfuscator-android-armeabi-v7a.so key_obfuscator-android-x86_64.so key_obfuscator-android-dev-arm64-v8a.so key_obfuscator-android-dev-armeabi-v7a.so key_obfuscator-android-dev-x86_64.so key_obfuscator-linux.so key_obfuscator-linux-arm64.so key_obfuscator-windows.dll key_obfuscator-windows-arm64.dll
 
 jobs:
   plan:
@@ -241,6 +241,22 @@ jobs:
           cd "$CRATE_DIR"
           export ANDROID_NDK_HOME="${ANDROID_HOME}/ndk/${ANDROID_NDK_VERSION}"
           cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 build --release
+
+          # Both feature sets write to the same target/<triple>/release/
+          # libkey_obfuscator.so, so stash the pinned libraries before the
+          # dev-unpinned pass overwrites them. The dev-unpinned build drops the
+          # install-identity gate; debug and profile installs load it because
+          # they are signed with the team debug keystore that is public in the
+          # app repo. It is staged under its own asset name and fetched into a
+          # source set no release variant reads. See
+          # native/key_obfuscator/src/caller_gate.rs.
+          for triple in aarch64-linux-android armv7-linux-androideabi x86_64-linux-android; do
+            install -D "target/$triple/release/libkey_obfuscator.so" \
+              "pinned-android/$triple/libkey_obfuscator.so"
+          done
+          cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 build --release \
+            --features dev-unpinned
+
           cargo build --release --target x86_64-unknown-linux-gnu
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc \
             cargo build --release --target aarch64-unknown-linux-gnu
@@ -252,9 +268,14 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p stage
-          cp "$CRATE_DIR/target/aarch64-linux-android/release/libkey_obfuscator.so" stage/key_obfuscator-android-arm64-v8a.so
-          cp "$CRATE_DIR/target/armv7-linux-androideabi/release/libkey_obfuscator.so" stage/key_obfuscator-android-armeabi-v7a.so
-          cp "$CRATE_DIR/target/x86_64-linux-android/release/libkey_obfuscator.so" stage/key_obfuscator-android-x86_64.so
+          # Pinned libraries come from the stash the build step made before the
+          # dev-unpinned pass overwrote target/; target/ now holds the dev ones.
+          cp "$CRATE_DIR/pinned-android/aarch64-linux-android/libkey_obfuscator.so" stage/key_obfuscator-android-arm64-v8a.so
+          cp "$CRATE_DIR/pinned-android/armv7-linux-androideabi/libkey_obfuscator.so" stage/key_obfuscator-android-armeabi-v7a.so
+          cp "$CRATE_DIR/pinned-android/x86_64-linux-android/libkey_obfuscator.so" stage/key_obfuscator-android-x86_64.so
+          cp "$CRATE_DIR/target/aarch64-linux-android/release/libkey_obfuscator.so" stage/key_obfuscator-android-dev-arm64-v8a.so
+          cp "$CRATE_DIR/target/armv7-linux-androideabi/release/libkey_obfuscator.so" stage/key_obfuscator-android-dev-armeabi-v7a.so
+          cp "$CRATE_DIR/target/x86_64-linux-android/release/libkey_obfuscator.so" stage/key_obfuscator-android-dev-x86_64.so
           cp "$CRATE_DIR/target/x86_64-unknown-linux-gnu/release/libkey_obfuscator.so" stage/key_obfuscator-linux.so
           cp "$CRATE_DIR/target/aarch64-unknown-linux-gnu/release/libkey_obfuscator.so" stage/key_obfuscator-linux-arm64.so
           (cd stage && sha256sum * > ../checksums.txt)
@@ -391,14 +412,49 @@ jobs:
               parts = line.split()
               if len(parts) >= 2:
                   sums[parts[1]] = parts[0]
+
+          # Assets this workflow publishes that may not be in the lock yet, and
+          # where the app repo wants them. Adding an artifact is therefore a
+          # one-line change here rather than a hand-edited lock entry pointing
+          # at a release that does not exist yet (which would break every fetch
+          # until this step ran).
+          new_paths = {
+              'key_obfuscator-android-dev-arm64-v8a.so':
+                  'android/app/src/dev/jniLibs/arm64-v8a/libkey_obfuscator_dev.so',
+              'key_obfuscator-android-dev-armeabi-v7a.so':
+                  'android/app/src/dev/jniLibs/armeabi-v7a/libkey_obfuscator_dev.so',
+              'key_obfuscator-android-dev-x86_64.so':
+                  'android/app/src/dev/jniLibs/x86_64/libkey_obfuscator_dev.so',
+          }
+
           lock_path = pathlib.Path('native/key_obfuscator/prebuilts.lock.json')
           lock = json.loads(lock_path.read_text())
+          known = {a['asset'] for a in lock['artifacts']}
           for artifact in lock['artifacts']:
               sha = sums.get(artifact['asset'])
               if sha is None:
                   continue  # har / ohos stay pinned to their existing release
               artifact['release'] = tag
               artifact['sha256'] = sha
+
+          # Insert after the last pinned Android entry so the file stays grouped
+          # by platform instead of accumulating strays at the end.
+          additions = [a for a in sums if a not in known]
+          unknown = [a for a in additions if a not in new_paths]
+          if unknown:
+              sys.exit(f'published assets with no lock path mapping: {sorted(unknown)}')
+          if additions:
+              at = max((i for i, a in enumerate(lock['artifacts'])
+                        if a['asset'].startswith('key_obfuscator-android')), default=-1)
+              for offset, asset in enumerate(sorted(additions), start=1):
+                  lock['artifacts'].insert(at + offset, {
+                      'asset': asset,
+                      'release': tag,
+                      'path': new_paths[asset],
+                      'sha256': sums[asset],
+                  })
+              print('added lock entries for', sorted(additions))
+
           lock_path.write_text(json.dumps(lock, indent=2) + '\n')
           print('lock updated for', tag)
           PY
