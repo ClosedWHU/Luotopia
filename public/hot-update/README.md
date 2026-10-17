@@ -7,7 +7,8 @@
 ```text
 hot-update/
 ├── manifest.json    # 带 Ed25519 签名的脚本清单（生成物，勿手改）
-└── scripts/         # 解析脚本，每个解析器一个 .js 文件
+├── scripts/         # 解析脚本，每个解析器一个 .js 文件
+└── assets/          # 数据资产，每个资产一个 .json.gz 文件
 ```
 
 `manifest.json` 由 [tools/generate-hot-update-manifest.mjs](../../tools/generate-hot-update-manifest.mjs) 生成。手工编辑会在下次构建时被覆盖，签名失效的清单也会被客户端整体丢弃。
@@ -21,6 +22,7 @@ hot-update/
 3. 客户端按清单中的 `checksum` 下载新增或有更新的脚本。
 4. 客户端在 QuickJS 沙箱中运行每个脚本自带的测试向量（`testInput` / `testExpect`）。运行失败或输出不符的脚本不会启用。
 5. 通过验证的脚本写入本地缓存，业务模块按 `name` 调用。
+6. 清单里的数据资产（`assets`）不走沙箱：客户端按 `checksum` 下载 `.json.gz`，校验 sha256 后原子落盘，读取时再次校验。资产不会在任何引擎里执行，完整性由清单签名加每文件 sha256 保证。
 
 App 内的用户入口是「设置 → 热更新」，下拉即可检查并下载。
 
@@ -49,6 +51,17 @@ App 内的用户入口是「设置 → 热更新」，下拉即可检查并下�
 | `minAppVersion` | 兼容的最低 App 版本 |
 | `apiVersion` | 脚本接口版本，当前为 1 |
 | `testInput` / `testExpect` | 测试向量，构建时与客户端各运行一次 |
+
+`assets` 数组每项（可选字段，没有数据资产时整个数组不出现在清单里；旧客户端验签时对整个 payload 做规范化 JSON，因此新增该字段不影响其签名校验，它们只是忽略它）：
+
+| 字段 | 说明 |
+|---|---|
+| `name` | 资产名，与文件名一致（去掉 `.json.gz` 后缀），客户端按它找到对应的加载器 |
+| `label` | 中文名称 |
+| `version` | 资产版本，内容（checksum）变化时自动递增 |
+| `url` | 下载路径，形如 `/hot-update/assets/model-metadata-catalog.json.gz` |
+| `checksum` | 资产文件摘要，形如 `sha256:<hex>` |
+| `minAppVersion` | 能加载该资产的最低 App 版本，必须是包含对应加载代码的首个发行版，否则旧客户端会白白下载用不上的文件 |
 
 ## 脚本编写约定
 
@@ -79,6 +92,18 @@ function parse(rawJson) {
 4. 将脚本与 `manifest.json` 一并提交。构建时的 `prebuild` 钩子会再次生成并校验。
 
 签名私钥的初始化、CI 配置与预览环境的未签名构建规则，见 [docs/development.md](../../docs/development.md) 的「热更新清单」一节与 [docs/deployment.md](../../docs/deployment.md)。
+
+## 更新数据资产
+
+数据资产用于把更新频率高于发版的打包数据（目前是 AI 模型元数据目录）移出安装包：客户端优先读热更缓存，缓存缺失或损坏时回退到包内资产。
+
+`model-metadata-catalog` 的来源是 App 仓库的 `tool/model_metadata_sync.dart`：它在重新同步目录时会把 `.gz` 自动镜像到 `public/hot-update/assets/`。之后的发布步骤与脚本一致——
+
+1. 在生成器的 `assetMinAppVersions`（必要）与 `assetLabels` 中登记资产名。
+2. 本地运行 `npm run hot-update:generate`（需要签名私钥），`manifest.json` 中该资产的 `version` 会因 checksum 变化自动递增。
+3. 将资产文件与 `manifest.json` 一并提交。`prebuild` 与 `hot-update:verify` 会校验每个清单资产的 checksum 与文件一致。
+
+新增其它资产时，客户端还需要有按 `name` 读取它的加载代码，且 `minAppVersion` 必须指向包含该代码的首个发行版。
 
 > [!CAUTION]
 > 签名私钥（`HOT_UPDATE_ED25519_PRIVATE_KEY`）能给全部已安装 App 下发可执行代码。私钥只配置在 Production 环境，不要提交到仓库，也不要配置给 Preview。
