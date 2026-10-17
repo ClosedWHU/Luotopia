@@ -6,6 +6,7 @@ import vm from 'node:vm';
 
 const root = path.resolve(import.meta.dirname, '..');
 const scriptsDir = path.join(root, 'public', 'hot-update', 'scripts');
+const assetsDir = path.join(root, 'public', 'hot-update', 'assets');
 const manifestPath = path.join(root, 'public', 'hot-update', 'manifest.json');
 const envPath = path.join(root, '.env.hot-update');
 const verifierPath = path.resolve(root, '..', 'app', 'lib', 'features', 'hot_update', 'data', 'hot_update_manifest_verifier.dart');
@@ -104,6 +105,23 @@ const versions = {
   'medical-report-list-parser': 2,
 };
 
+/*
+ * Data assets. Unlike scripts these are inert files (gzip-compressed JSON),
+ * verified by checksum and never executed, so they carry no test vectors.
+ * `minAppVersion` is mandatory and must be the first app release whose code
+ * knows how to load the asset: the manifest reaches every installed version,
+ * and an old client downloading a file it cannot use is pure wasted traffic.
+ * The app repo's tool/model_metadata_sync.dart mirrors the catalog .gz into
+ * public/hot-update/assets/ whenever it re-syncs.
+ */
+const assetLabels = {
+  'model-metadata-catalog': 'AI 模型元数据目录',
+};
+
+const assetMinAppVersions = {
+  'model-metadata-catalog': '1.1.1',
+};
+
 function canonical(value) {
   if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
   if (value && typeof value === 'object') return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonical(value[key])}`).join(',')}}`;
@@ -158,10 +176,12 @@ async function generate() {
       testInput: tests[name].input, testExpect: tests[name].expect,
     };
   }));
+  const assets = await collectAssets(existing);
   const now = new Date();
   const changed = existing.schemaVersion !== 1 ||
     existing.keyId !== keyId ||
-    canonical(existing.scripts || []) !== canonical(scripts);
+    canonical(existing.scripts || []) !== canonical(scripts) ||
+    canonical(existing.assets || []) !== canonical(assets);
   const payload = {
     schemaVersion: 1,
     version: changed ? Math.max(existing.version || 0, 6) + 1 : Math.max(existing.version || 0, 7),
@@ -169,6 +189,10 @@ async function generate() {
     expiresAt: changed ? new Date(now.getTime() + 180 * 86400000).toISOString() : existing.expiresAt,
     keyId,
     scripts,
+    // Omitted entirely when empty: clients read `assets` as optional, and an
+    // empty array would still change the canonical payload (and thus the
+    // signature) for no reason.
+    ...(assets.length ? { assets } : {}),
   };
   if (!privateKey) {
     /*
@@ -184,20 +208,55 @@ async function generate() {
      * the app accepts or rejects on checksum — fail-closed either way, and
      * nothing new is published.
      */
-    const drifted = canonical(existing.scripts || []) !== canonical(scripts);
+    const drifted =
+      canonical(existing.scripts || []) !== canonical(scripts) ||
+      canonical(existing.assets || []) !== canonical(assets);
     console.warn('[hot-update] No signing key; HOT_UPDATE_ALLOW_UNSIGNED is set, so skipping the signature.');
-    console.warn(`[hot-update] Validated ${scripts.length} scripts against their test vectors.`);
+    console.warn(`[hot-update] Validated ${scripts.length} scripts against their test vectors and ${assets.length} asset(s).`);
     console.warn(
       drifted
-        ? '[hot-update] This build\'s scripts differ from the committed manifest. Leaving it untouched: the deployment will serve a manifest whose checksums do not match, and the app rejects those.'
-        : '[hot-update] Scripts match the committed manifest; leaving it untouched.',
+        ? '[hot-update] This build\'s scripts/assets differ from the committed manifest. Leaving it untouched: the deployment will serve a manifest whose checksums do not match, and the app rejects those.'
+        : '[hot-update] Scripts and assets match the committed manifest; leaving it untouched.',
     );
     console.warn('[hot-update] Unsigned builds are for preview deployments only. Never for production.');
     return;
   }
   const signature = sign(null, Buffer.from(canonical(payload)), privateKey).toString('base64');
   await writeFile(manifestPath, `${JSON.stringify({ ...payload, signature }, null, 2)}\n`);
-  console.log(`Generated signed manifest with ${scripts.length} scripts`);
+  console.log(`Generated signed manifest with ${scripts.length} scripts and ${assets.length} asset(s)`);
+}
+
+async function collectAssets(existing) {
+  const existingAssets = Object.fromEntries((existing.assets || []).map((item) => [item.name, item]));
+  let files;
+  try {
+    files = (await readdir(assetsDir)).filter((name) => name.endsWith('.json.gz')).sort();
+  } catch (error) {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  }
+  return Promise.all(files.map(async (file) => {
+    const name = file.slice(0, -'.json.gz'.length);
+    if (!assetMinAppVersions[name]) {
+      throw new Error(
+        `Missing minAppVersion registration for asset ${name}; ` +
+          'add it to assetMinAppVersions (and a label to assetLabels) in generate-hot-update-manifest.mjs',
+      );
+    }
+    const bytes = await readFile(path.join(assetsDir, file));
+    const checksum = `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
+    // Same rule as scripts: the version bumps whenever the content changed,
+    // inherited from the committed manifest so regeneration is stable.
+    const prev = existingAssets[name];
+    const changed = !prev || prev.checksum !== checksum;
+    const version = Math.max((prev?.version || 0) + (changed ? 1 : 0), 1);
+    return {
+      name, label: assetLabels[name] || name, version,
+      url: `/hot-update/assets/${file}`,
+      checksum,
+      minAppVersion: assetMinAppVersions[name],
+    };
+  }));
 }
 
 async function verifyManifest() {
@@ -219,7 +278,26 @@ async function verifyManifest() {
       throw new Error(`Test vector failed for ${script.name}: ${error.message}`);
     }
   }
-  console.log(`Manifest signature and ${manifest.scripts.length} script tests verified`);
+  for (const asset of manifest.assets || []) {
+    const fileName = `${asset.name}.json.gz`;
+    if (asset.url !== `/hot-update/assets/${fileName}`) {
+      throw new Error(`Asset ${asset.name} has unexpected url ${asset.url}`);
+    }
+    if (!assetMinAppVersions[asset.name]) {
+      throw new Error(`Asset ${asset.name} is not registered in assetMinAppVersions`);
+    }
+    const bytes = await readFile(path.join(assetsDir, fileName)).catch(() => {
+      throw new Error(`Asset ${asset.name} is listed in the manifest but ${fileName} is missing`);
+    });
+    const checksum = `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
+    if (checksum !== asset.checksum) {
+      throw new Error(`Asset ${asset.name} checksum mismatch: manifest ${asset.checksum}, file ${checksum}`);
+    }
+  }
+  console.log(
+    `Manifest signature, ${manifest.scripts.length} script tests and ` +
+      `${(manifest.assets || []).length} asset(s) verified`,
+  );
 }
 
 function matchesExpected(actual, expected) {
