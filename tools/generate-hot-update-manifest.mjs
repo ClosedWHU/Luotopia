@@ -116,10 +116,14 @@ const versions = {
  */
 const assetLabels = {
   'model-metadata-catalog': 'AI 模型元数据目录',
+  'campus-news-sources': '校园新闻订阅目录',
+  'water-electric-fee-room-directory': '水电费房间目录',
 };
 
 const assetMinAppVersions = {
   'model-metadata-catalog': '1.1.1',
+  'campus-news-sources': '1.1.1',
+  'water-electric-fee-room-directory': '1.1.1',
 };
 
 function canonical(value) {

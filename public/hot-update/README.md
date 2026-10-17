@@ -95,15 +95,18 @@ function parse(rawJson) {
 
 ## 更新数据资产
 
-数据资产用于把更新频率高于发版的打包数据移出安装包：客户端优先读热更缓存，缓存缺失或损坏时回退到包内资产。
+数据资产用于把更新频率高于发版的打包数据移出安装包：客户端优先读热更缓存，缓存缺失或损坏时回退到包内资产。当前发布三个：
 
-`model-metadata-catalog`（AI 模型元数据目录）由 [tools/sync-model-metadata.mjs](../../tools/sync-model-metadata.mjs) 从 models.dev、OpenRouter 与 Vercel AI Gateway 重建，[.github/workflows/sync-model-metadata.yml](../../.github/workflows/sync-model-metadata.yml) **每天自动运行一次**（也可手动 dispatch）：只有模型数据真的变了才会重写 `.json.gz` 并递增清单里的资产版本，安静日的运行不产生任何提交。App 仓库的包内快照（`tool/model_metadata_sync.dart`）不再自己抓源，而是直接下载这里发布的文件。
+| 资产 | 更新方式 |
+|---|---|
+| `model-metadata-catalog`（AI 模型元数据目录） | **自动**：[.github/workflows/sync-model-metadata.yml](../../.github/workflows/sync-model-metadata.yml) 每天用 [tools/sync-model-metadata.mjs](../../tools/sync-model-metadata.mjs) 从 models.dev、OpenRouter 与 Vercel AI Gateway 重建，只有模型数据真的变了才会重写 `.json.gz` 并递增资产版本，安静日零提交。App 仓库的包内快照（`tool/model_metadata_sync.dart`）不再自己抓源，而是直接下载这里发布的文件 |
+| `campus-news-sources`（校园新闻订阅目录） | **手动**：App 仓库 `tool/news/import_catalog.py` 重建目录后，把 `app/assets/data/campus_news_sources.json.gz` 拷贝到本目录（文件名换成 kebab-case），再走下面的发布步骤。源站改版导致选择器失效时不必等发版 |
+| `water-electric-fee-room-directory`（水电费房间目录） | **手动**：同上，拷贝 `app/assets/data/water_electric_fee_room_directory.json.gz`。新宿舍交付、房间编号变化时更新 |
 
-手动本地重建与发布：
+手动资产的发布步骤：
 
 ```sh
-npm run hot-update:sync-models
-npm run hot-update:generate   # 需要签名私钥
+npm run hot-update:generate   # 需要签名私钥；checksum 变化自动递增资产 version
 npm run hot-update:verify
 ```
 

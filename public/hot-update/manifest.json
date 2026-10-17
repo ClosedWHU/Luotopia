@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": 31,
-  "updatedAt": "2026-10-17T21:22:43.867Z",
-  "expiresAt": "2027-04-15T21:22:43.867Z",
+  "version": 32,
+  "updatedAt": "2026-10-17T21:42:12.289Z",
+  "expiresAt": "2027-04-15T21:42:12.289Z",
   "keyId": "luotopia-hot-update-2026-01",
   "scripts": [
     {
@@ -736,13 +736,29 @@
   ],
   "assets": [
     {
+      "name": "campus-news-sources",
+      "label": "校园新闻订阅目录",
+      "version": 1,
+      "url": "/hot-update/assets/campus-news-sources.json.gz",
+      "checksum": "sha256:5b5afbdb6f9c94b4ba958600e794f5a9d05c33ff44015fff0e4e2dc78c034d1f",
+      "minAppVersion": "1.1.1"
+    },
+    {
       "name": "model-metadata-catalog",
       "label": "AI 模型元数据目录",
       "version": 3,
       "url": "/hot-update/assets/model-metadata-catalog.json.gz",
       "checksum": "sha256:a3d541130f2632d18f66e55f1d9c79c06aa2a6c1130a9989b7f3470d48be9ec4",
       "minAppVersion": "1.1.1"
+    },
+    {
+      "name": "water-electric-fee-room-directory",
+      "label": "水电费房间目录",
+      "version": 1,
+      "url": "/hot-update/assets/water-electric-fee-room-directory.json.gz",
+      "checksum": "sha256:2baab7fc89cc336ba0ef5e39cb63540c91c5548aa1358eb3bb558cd597f38216",
+      "minAppVersion": "1.1.1"
     }
   ],
-  "signature": "S8LrX8YR8g+RBxG7Ofoo1RyvKkMfk+e7BiJ4XNrsAZBWfy5RNTI23t/3BUzCaL9ZTnEpYCKx7mGH8OP5pnhgAA=="
+  "signature": "CS05ju5lJ+O4tSpZyqwCLe057vQAIoDJrL7AX3xaauh4w817fAYlRfOocwCl9mNcF9co9ARW7FpYZZ6zuhpEDg=="
 }
