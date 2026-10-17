@@ -1,0 +1,63 @@
+name: Sync model metadata catalog
+
+# Rebuilds the AI model metadata catalog from models.dev, OpenRouter and the
+# Vercel AI Gateway and publishes it as a hot-update data asset. The sync
+# tool only rewrites the .gz when models or source metadata actually changed,
+# so a daily run costs nothing when the model landscape is quiet; when it did
+# change, the manifest regeneration bumps the asset version and Cloudflare
+# Pages ships both on the next production deploy. Clients pick the update up
+# on their next hot-update check (12 h throttle), so daily is the interval
+# that matches end-to-end staleness — anything faster is absorbed by the
+# client throttle, anything slower holds back new-model context windows.
+#
+# Requires the HOT_UPDATE_ED25519_PRIVATE_KEY repository secret (same value
+# as the Cloudflare Production variable) to sign the regenerated manifest.
+
+on:
+  schedule:
+    # 01:00 Asia/Shanghai
+    - cron: '0 17 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-model-metadata
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Rebuild the catalog
+        run: node tools/sync-model-metadata.mjs
+
+      - name: Regenerate and verify the signed manifest
+        run: |
+          npm run hot-update:generate
+          npm run hot-update:verify
+        env:
+          HOT_UPDATE_ED25519_PRIVATE_KEY: ${{ secrets.HOT_UPDATE_ED25519_PRIVATE_KEY }}
+
+      - name: Publish changes
+        run: |
+          if [ -z "$(git status --porcelain -- public/hot-update)" ]; then
+            echo 'Catalog unchanged; nothing to publish.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/hot-update/assets public/hot-update/manifest.json
+          git commit -m 'chore(hot-update): refresh the AI model metadata catalog'
+          git push

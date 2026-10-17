@@ -233,7 +233,9 @@ App 的解析器热更新脚本放在 `public/hot-update/scripts/`，数据资�
 元数据目录，`.json.gz`）放在 `public/hot-update/assets/`，清单是
 `public/hot-update/manifest.json`。App **只接受有有效 Ed25519 签名的清单** ——
 校验和对了但签名无效同样会被拒。数据资产不进沙箱执行，完整性由清单签名加
-每文件 sha256 保证；详见 [public/hot-update/README.md](../public/hot-update/README.md)。
+每文件 sha256 保证；模型目录由 `.github/workflows/sync-model-metadata.yml`
+每日重建（需要仓库 secret `HOT_UPDATE_ED25519_PRIVATE_KEY`，与 Cloudflare
+Production 变量同值），详见 [public/hot-update/README.md](../public/hot-update/README.md)。
 
 首次本地开发要初始化一次签名密钥：
 
