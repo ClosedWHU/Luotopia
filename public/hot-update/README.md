@@ -95,15 +95,21 @@ function parse(rawJson) {
 
 ## 更新数据资产
 
-数据资产用于把更新频率高于发版的打包数据（目前是 AI 模型元数据目录）移出安装包：客户端优先读热更缓存，缓存缺失或损坏时回退到包内资产。
+数据资产用于把更新频率高于发版的打包数据移出安装包：客户端优先读热更缓存，缓存缺失或损坏时回退到包内资产。
 
-`model-metadata-catalog` 的来源是 App 仓库的 `tool/model_metadata_sync.dart`：它在重新同步目录时会把 `.gz` 自动镜像到 `public/hot-update/assets/`。之后的发布步骤与脚本一致——
+`model-metadata-catalog`（AI 模型元数据目录）由 [tools/sync-model-metadata.mjs](../../tools/sync-model-metadata.mjs) 从 models.dev、OpenRouter 与 Vercel AI Gateway 重建，[.github/workflows/sync-model-metadata.yml](../../.github/workflows/sync-model-metadata.yml) **每天自动运行一次**（也可手动 dispatch）：只有模型数据真的变了才会重写 `.json.gz` 并递增清单里的资产版本，安静日的运行不产生任何提交。App 仓库的包内快照（`tool/model_metadata_sync.dart`）不再自己抓源，而是直接下载这里发布的文件。
 
-1. 在生成器的 `assetMinAppVersions`（必要）与 `assetLabels` 中登记资产名。
-2. 本地运行 `npm run hot-update:generate`（需要签名私钥），`manifest.json` 中该资产的 `version` 会因 checksum 变化自动递增。
-3. 将资产文件与 `manifest.json` 一并提交。`prebuild` 与 `hot-update:verify` 会校验每个清单资产的 checksum 与文件一致。
+手动本地重建与发布：
 
-新增其它资产时，客户端还需要有按 `name` 读取它的加载代码，且 `minAppVersion` 必须指向包含该代码的首个发行版。
+```sh
+npm run hot-update:sync-models
+npm run hot-update:generate   # 需要签名私钥
+npm run hot-update:verify
+```
+
+然后将资产文件与 `manifest.json` 一并提交。工作流与 `prebuild` / `hot-update:verify` 都会校验每个清单资产的 checksum 与文件一致。
+
+新增其它资产时，在生成器的 `assetMinAppVersions`（必要）与 `assetLabels` 中登记资产名，且客户端还需要有按 `name` 读取它的加载代码，`minAppVersion` 必须指向包含该代码的首个发行版。
 
 > [!CAUTION]
 > 签名私钥（`HOT_UPDATE_ED25519_PRIVATE_KEY`）能给全部已安装 App 下发可执行代码。私钥只配置在 Production 环境，不要提交到仓库，也不要配置给 Preview。
