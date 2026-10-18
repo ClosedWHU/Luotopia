@@ -77,6 +77,7 @@
 
   "features.category.coursework": "授業と学業",
   "features.category.campus": "キャンパスサービス",
+  "features.category.health": "ヘルスケア",
   "features.category.smart": "スマートツール",
   "features.category.crossDevice": "クロスデバイスとアカウント",
   "features.category.inDevelopment": "開発中",
@@ -85,9 +86,9 @@
   "features.item.timetable.summary": "複数ソースのインポート、複数時間割の管理、週・月表示と授業リマインダー。",
   "features.item.timetable.description": "学部の教務システム、大学院 newyjs、WakeUp ファイル/共有コード、サードパーティの時間割、手動編集に対応。複数時間割のグループ管理、週・月表示、授業リマインダー、ホーム画面ウィジェットとの連携を備えます。",
 
-  "features.item.agenda.title": "予定とToDo",
-  "features.item.agenda.summary": "授業・タスク・メモを一括管理、繰り返しと通知に対応。",
-  "features.item.agenda.description": "項目は予定、タスク、メモの 3 種類。繰り返しルール、優先度、リスト分け、スワイプ操作、授業リマインダー、ウィジェット同期に対応します。",
+  "features.item.agenda.title": "アジェンダとToDo",
+  "features.item.agenda.summary": "コース・スケジュール・タスク・メモ・服薬を1か所に集約し、繰り返しとリマインダーに対応。",
+  "features.item.agenda.description": "アイテムはコース・スケジュール・タスク・メモ・服薬の5種類。柔軟な繰り返し（1日複数回、曜日ごとの時刻、月日ルール、間隔サイクル）、スワイプ操作、授業とタスクのリマインダーに対応し、アジェンダのデータはウィジェットにも同期されます。",
 
   "features.item.freeClassrooms.title": "空き教室",
   "features.item.freeClassrooms.summary": "複数の条件で空き教室を検索、時間割との衝突を自動で除外。",
@@ -117,13 +118,33 @@
   "features.item.universityCalendar.summary": "武大の学事暦と学期日程をいつでも確認。",
   "features.item.universityCalendar.description": "武大の歴年の学事暦データを表示。学期の開始・終了、休暇、授業日程がひと目で分かります。",
 
-  "features.item.courseReviews.title": "科目の成績とレビュー",
-  "features.item.courseReviews.summary": "成績分布、授業レビューと匿名での投稿。",
-  "features.item.courseReviews.description": "科目ごとの成績分布とレビューを閲覧でき、匿名での投稿に対応。少人数のサンプルは集約してプライバシーを保護します。WHU.sb / WHUCourses.cn のデータの系譜を引き継いでいます。",
+  "features.item.courseReviews.title": "成績分布とレビュー",
+  "features.item.courseReviews.summary": "成績分布、コースレビュー、匿名での投稿。",
+  "features.item.courseReviews.description": "コースの成績分布を確認してレビューを読んだり、匿名で自分のレビューを投稿したりできます。プライバシー保護のため少数サンプルは集約され、WHU.sbのデータの系譜を継承しています。",
 
   "features.item.xuexitong.title": "超星学習通アカウント",
   "features.item.xuexitong.summary": "学習通アカウントを連携、認証情報は端末に安全に保存。",
   "features.item.xuexitong.description": "学習通（超星）へのパスワードまたは SMS でのログイン連携に対応。認証情報は端末のセキュアストレージに保存され、武大アカウントごとに分離されます。今後の授業・出席確認機能の基盤となります。",
+
+  "features.item.xiji.title": "西基コースプラットフォーム",
+  "features.item.xiji.summary": "課題と試験のリマインダーを備えた第2のコースプラットフォーム。",
+  "features.item.xiji.description": "CASまたはプラットフォームのアカウントで西基（PTA）コースプラットフォームにサインインし、履修コースの一覧表示、コース概要・課題・試験とその期限の確認、リマインダーの事前通知時間の設定、課題の締切をアジェンダや時間割へ反映できます。",
+
+  "features.item.courseSpace.title": "コーススペース",
+  "features.item.courseSpace.summary": "教員とリソースを備えた共有コースディレクトリ。",
+  "features.item.courseSpace.description": "開講クラスを学期ごとに統合し、コース名とコース番号を標準化した統一コースディレクトリを作成します。コースを開くと、そのクラスと共有情報、教員プロフィール、リソース、監査・信頼ステータスを確認でき、管理者はカタログとクラス全体をメンテナンスできます。",
+
+  "features.item.majorInfo.title": "専攻とプログラム",
+  "features.item.majorInfo.summary": "専攻、育成計画、就職実績を閲覧。",
+  "features.item.majorInfo.description": "学校の「学部 → カレッジ → 専攻」の階層を閲覧でき、育成目標、位置づけ、特色、教育計画に加えて、就職実績のグラフ（業種・地域・雇用主・業界）を確認できます。カレッジでは育成計画PDFのアプリ内プレビューも提供しています。",
+
+  "features.item.csEban.title": "CS易办",
+  "features.item.csEban.summary": "コンピューター科学学院の受賞、懲戒記録、評価ポイント。",
+  "features.item.csEban.description": "コンピューター科学学院の易办（大学の各種手続きプラットフォーム）に接続し、学部の受賞および懲戒記録（区分、レベル、理由、ポイント、発行者）と思想評価ポイント（合計、評定、詳細）を日付範囲で絞り込んで確認できます。資格情報は端末内にのみ保存されます。",
+
+  "features.item.libraryLoans.title": "図書館の貸出",
+  "features.item.libraryLoans.summary": "蔵書検索、貸出、更新、予約、返却期限のリマインダー。",
+  "features.item.libraryLoans.description": "WHU OPACのネイティブクライアントです。蔵書検索（分野・年・言語・資料のフィルター付き）、所蔵情報と請求記号の確認、受取場所と有効期限を指定した予約、現在の予約と貸出の一覧表示とワンタップ更新、貸出履歴の統計確認、端末内での返却期限と延滞のリマインダーに対応しています。",
 
   "features.item.ecard.title": "珞珈Eカードと支払いコード",
   "features.item.ecard.summary": "ネイティブの支払いコードは自動更新、ウォッチからも利用可能。",
@@ -165,9 +186,49 @@
   "features.item.forum.summary": "投稿、コメント、添付、レピュテーションとモデレーション。",
   "features.item.forum.description": "コミュニティフォーラムは投稿、コメント、掲示板、添付ファイル、検索、レピュテーション、ランキング、公開モデレーションログに対応。タブは既定で非表示で、設定 → ナビゲーションで有効にできます。",
 
-  "features.item.aiAssistant.title": "AI アシスタント",
-  "features.item.aiAssistant.summary": "マルチモデルのエージェントがキャンパスサービスを操作。",
-  "features.item.aiAssistant.description": "内蔵およびカスタムの複数モデル、マルチモーダル添付、音声入力/読み上げ、画像生成、ウェブ検索、MCP、スキル、アシスタントに対応。確認ブリッジは手動/半自動/全自動の 3 段階を用意し、ツールは時間割・成績・メール・キャンパスサービスのデータを照会・管理でき、ユーザーの確認を経て水道・電気料金やネットワーク料金の支払いを開始できます。",
+  "features.item.social.title": "コミュニティSNS",
+  "features.item.social.summary": "プロフィール、フォロー、ダイレクトメッセージ。",
+  "features.item.social.description": "公開ユーザープロフィール、フォロー／ブロックのグラフ、アプリ内ダイレクトメッセージを備え、フォーラムと1つのアカウントを共有します。",
+
+  "features.item.campusNews.title": "キャンパスニュース",
+  "features.item.campusNews.summary": "キャンパス内の情報源を購読でき、オフライン閲覧と全文検索に対応。",
+  "features.item.campusNews.description": "200以上のサイトと約1000のカラムにわたるキャンパスニュースを集約。サイト単位・カラム単位で購読でき、既読状態の管理、全件横断の検索、オフライン閲覧用のキャッシュに対応。内蔵のリーディングモードとテキスト抽出機能を備え、VPNが利用できない場合も穏やかに劣化して動作します。",
+
+  "features.item.dining.title": "食堂",
+  "features.item.dining.summary": "メニュー・評価・ランダム選びを備えたキャンパスのグルメ発見。",
+  "features.item.dining.description": "地図上で食堂スポットや食堂フロアを閲覧でき、検索、キャンパス範囲の絞り込み、品目ごとの価格付きメニュー、評価・レビュー、営業時間、写真を確認できます。ランダム選び（店舗・料理）は評価と価格のフィルターに対応し、店舗・メニュー・営業時間・修正情報を投稿することもできます。",
+
+  "features.item.ebike.title": "シェア電動自転車",
+  "features.item.ebike.summary": "電動自転車のアカウントを連携し、スキャンで解錠。",
+  "features.item.ebike.description": "Zhiyin、Mangoなどのシェア電動自転車アカウントを連携し、スキャン（BLE）で解錠。現在の走行状態、ウォレット残高、乗車カード、注文履歴、未払いアラート、走行マップをリアルタイムで確認できます。",
+
+  "features.item.lepao.title": "Lepaoランニング",
+  "features.item.lepao.summary": "キャンパス内のランニング記録とGPSトラック。",
+  "features.item.lepao.description": "Lepaoキャンパスランニングのアカウントをバインドし、年ごとの走行履歴（距離・時間・ペース・有効性）を確認。走行ごとのGPSトラックマップと1kmごとのスプリットも表示します。",
+
+  "features.item.washing.title": "洗濯",
+  "features.item.washing.summary": "洗濯機の状態を確認し、洗濯を予約。",
+  "features.item.washing.description": "エリア・建物・フロアごとに洗濯場を閲覧でき、機械のリアルタイム状態（空き・稼働中・故障）と残り時間を確認。洗濯モード（価格と時間）を選んで注文し、支払いは運営元のミニプログラムに引き継ぎます。",
+
+  "features.item.voteTicket.title": "チケット獲得",
+  "features.item.voteTicket.summary": "イベントのチケットを獲得し、他の人を助けることも。",
+  "features.item.voteTicket.description": "WHUのイベントチケット獲得情報を閲覧し、ポスター・ルール・割当数を確認。参加して個人用の支援QRコードを発行し、他人のコードをスキャンまたは貼り付けて支援できます。相互支援ホールでは受けた支援・行った支援・純粋な立ち位置を確認でき、ワンタップの一括支援にも対応しています。",
+
+  "features.item.medication.title": "服薬管理",
+  "features.item.medication.summary": "アジェンダ上で用量スケジュール・在庫・服薬継続を管理。",
+  "features.item.medication.description": "各薬の用量、次回の服用、残りの在庫をアジェンダ上で管理でき、追加服用の記録、在庫の補充、30日間の服薬継続サマリーの確認、medTimerバックアップのインポート、CSV履歴のエクスポートが可能です。",
+
+  "features.item.mentalHealth.title": "メンタルヘルス",
+  "features.item.mentalHealth.summary": "採点結果付きの心理尺度ライブラリ。",
+  "features.item.mentalHealth.description": "リモートで同期される心理尺度のライブラリ（検索とカテゴリ絞り込みに対応）。一括表示、自動保存される下書き、性別ごとの基準値を備えた尺度を受検でき、結果には合計点と因子得点、レベル、レーダーチャートによる内訳、危機フラグが表示され、ローカルの履歴も残ります。",
+
+  "features.item.menstrualCycle.title": "生理周期トラッカー",
+  "features.item.menstrualCycle.summary": "端末内のみで完結する周期管理と予測。",
+  "features.item.menstrualCycle.description": "日ごとに経血量、症状、気分、メモを記録でき、カレンダーには記録日・予測日・妊娠しやすい日が色分け表示されます。次回生理日・排卵日・妊娠しやすい期間の予測とその信頼度、周期統計、周期と生理期間の長さの調整が可能で、すべて端末内で完結します。",
+
+  "features.item.aiAssistant.title": "AIアシスタント",
+  "features.item.aiAssistant.summary": "キャンパスサービスを操作できるマルチモデルエージェント。",
+  "features.item.aiAssistant.description": "内蔵モデルとカスタムモデル、マルチモーダル添付、端末内・クラウドの音声入力、読み上げ、画像生成、ウェブ検索、MCP、スキル、アシスタントに対応。確認ブリッジにより半自動・全自動のモードを提供し、ツールは時間割・成績・メールボックス・キャンパスサービスのデータを読み取り・管理でき、確認後に公共料金やネットワークの支払いを開始することもできます。",
 
   "features.item.weather.title": "天気",
   "features.item.weather.summary": "複数ソースの予報、AQI、降水と警報。",
@@ -186,20 +247,20 @@
   "features.item.hotUpdate.description": "公式サイトが Ed25519 で署名された QuickJS 解析スクリプトを配布。キャンパス API が変化したときはパーサーをホットアップデートでき、アプリの新バージョンを待たずに済みます。",
 
   "features.item.appUpdate.title": "アプリ内アップデート",
-  "features.item.appUpdate.summary": "新しいバージョンを確認し、インストールを案内。",
-  "features.item.appUpdate.description": "GitHub Releases で更新を確認。Android では ABI のアップグレード提案とインストールの案内を提供し、デスクトッププラットフォームでは新バージョンのダウンロードを促します。",
+  "features.item.appUpdate.summary": "新しいバージョンを確認し、インストールまで案内。",
+  "features.item.appUpdate.description": "GitHub Releasesでアップデートを確認します。Androidでは適切なABIのアップグレードを提案してインストールを案内し、デスクトップではブラウザでリリースページを開きます。",
 
   "features.item.appleShortcuts.title": "Apple ショートカット",
   "features.item.appleShortcuts.summary": "ショートカットから審査済みのアプリツールを呼び出し。",
   "features.item.appleShortcuts.description": "macOS のショートカットから、学事暦、時間割、成績、空き教室などの審査済みツールを呼び出せます。書き込み操作には確認が必要です。",
 
   "features.item.widgets.title": "ホーム画面ウィジェット",
-  "features.item.widgets.summary": "4 種類のウィジェットが Android/iOS/macOS をカバー。",
-  "features.item.widgets.description": "予定リスト、今日の授業、まもなく開始、今週の授業の 4 種類のウィジェットが、Android、iOS、macOS のメニューバーをカバーします。",
+  "features.item.widgets.summary": "Android・iOS・macOS・Linuxで4種類のウィジェット。",
+  "features.item.widgets.description": "アジェンダリスト、今日の授業、カウントダウン、今週の授業の4種類のウィジェットで、Android・iOS・macOSのメニューバー・Linuxのトレイをカバーし、iOSのLive Activitiesにも対応しています。",
 
   "features.item.watch.title": "ウォッチ連携",
-  "features.item.watch.summary": "Apple Watch と Huawei/HarmonyOS ウォッチと同期。",
-  "features.item.watch.description": "Apple Watch ではEカードの支払いコードを表示できます。Huawei/HarmonyOS ウォッチには予定、キャンパスバス、天気のスナップショットを同期します。",
+  "features.item.watch.summary": "Apple Watch、およびHuawei・HarmonyOS・vivo・Xiaomiのウォッチと同期。",
+  "features.item.watch.description": "Apple WatchではE-cardの支払いコードを表示し、アジェンダ項目とシャトルバスを同期できます。Huawei・HarmonyOS・vivo・Xiaomiのウォッチでは、アジェンダとシャトルバスのスナップショットを同期します。",
 
   "features.item.appShortcuts.title": "ホーム画面ショートカット",
   "features.item.appShortcuts.summary": "アイコンの長押しでよく使う入口へ直行。",
@@ -209,21 +270,17 @@
   "features.item.accountSecurity.summary": "CAS、珞家アカウント、Passkeys とデバイストラスト。",
   "features.item.accountSecurity.description": "武大の CAS と珞家アカウントは分離されています。Passkeys、複数セッション、デバイストラスト、API 認証情報、成績の生体認証ロックに対応し、診断テレメトリはオフにできます。",
 
-  "features.item.languages.title": "多言語",
-  "features.item.languages.summary": "12 言語と地域化された時間形式。",
-  "features.item.languages.description": "簡体字中国語、繁体字中国語、広東語、英語、日本語、韓国語、フランス語、スペイン語、ポルトガル語、ロシア語、ベトナム語の 12 言語に対応します。",
+  "features.item.languages.title": "多言語対応",
+  "features.item.languages.summary": "12の表記バリエーションで11言語に対応し、時刻形式もローカライズ。",
+  "features.item.languages.description": "簡体字中国語、繁体字中国語、広東語（簡体字・繁体字）、英語、日本語、韓国語、フランス語、スペイン語、ポルトガル語、ロシア語、ベトナム語の11言語を、12の表記バリエーションで提供します。",
 
   "features.item.multiAccount.title": "マルチアカウント切替",
   "features.item.multiAccount.summary": "武大アカウントごとに認証情報を分離し、切替に対応。",
   "features.item.multiAccount.description": "1 つの端末に複数の武大アカウントを保存し、すばやく切り替えられます。VPN、メール、学習通などの認証情報はアカウントごとに分離され、混ざり合うことはありません。",
 
   "features.item.thirdPartyAccounts.title": "サードパーティアカウント連携",
-  "features.item.thirdPartyAccounts.summary": "Ham などサードパーティアカウントの認可連携。",
-  "features.item.thirdPartyAccounts.description": "「その他のアカウント」で外部アカウントを一元管理できます。Ham などサードパーティの認可連携は、現在仕上げ中です。",
-
-  "features.item.libraryLoans.title": "図書貸出",
-  "features.item.libraryLoans.summary": "蔵書の貸出、延長と期限のリマインダー。",
-  "features.item.libraryLoans.description": "蔵書貸出 API の接続を計画中。現在の貸出、返却期限、延長状況を表示し、期限のリマインダーにも対応します。",
+  "features.item.thirdPartyAccounts.summary": "Hamなどのサードパーティアカウントの認可連携。",
+  "features.item.thirdPartyAccounts.description": "「その他のアカウント」で外部アカウントを一元管理できます。Hamの認可連携と連携解除に対応しており、今後さらに多くのサードパーティに対応予定です。",
 
   "features.item.studyMaterials.title": "資料共有",
   "features.item.studyMaterials.summary": "授業・教員・学期ごとに資料を検索。",

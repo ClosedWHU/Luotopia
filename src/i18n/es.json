@@ -77,6 +77,7 @@
 
   "features.category.coursework": "Asignaturas y estudios",
   "features.category.campus": "Servicios del campus",
+  "features.category.health": "Salud",
   "features.category.smart": "Herramientas inteligentes",
   "features.category.crossDevice": "Multidispositivo y cuentas",
   "features.category.inDevelopment": "En desarrollo",
@@ -86,8 +87,8 @@
   "features.item.timetable.description": "Compatible con el sistema de grado, newyjs para el posgrado, los archivos y códigos de WakeUp, los horarios de terceros y la edición manual; agrupa varios horarios, con vistas semanal y mensual, recordatorios de clase y sincronización con los widgets de inicio.",
 
   "features.item.agenda.title": "Agenda y tareas",
-  "features.item.agenda.summary": "Cursos, tareas y notas en un solo lugar, con repeticiones y avisos.",
-  "features.item.agenda.description": "Los elementos se dividen en eventos, tareas y notas; admite reglas de repetición, prioridades, agrupación en listas, gestos de deslizamiento, recordatorios de clase y sincronización con los widgets.",
+  "features.item.agenda.summary": "Cursos, horarios, tareas, notas y medicación en un solo lugar, con repeticiones y recordatorios.",
+  "features.item.agenda.description": "Los elementos son de cinco tipos — cursos, horarios, tareas, notas y medicación — con repetición flexible (varias veces al día, horarios por día de la semana, reglas de día del mes, ciclos por intervalo), acciones de deslizamiento, recordatorios de clases y tareas, y datos de la agenda sincronizados con los widgets.",
 
   "features.item.freeClassrooms.title": "Aulas libres",
   "features.item.freeClassrooms.summary": "Búsqueda multicriterio de aulas libres que evita automáticamente los choques con tu horario.",
@@ -117,13 +118,33 @@
   "features.item.universityCalendar.summary": "El calendario de la WHU y las fechas de los semestres, siempre a mano.",
   "features.item.universityCalendar.description": "Los calendarios de la WHU de todos los años: inicio y fin de cada semestre, vacaciones y organización docente, de un vistazo.",
 
-  "features.item.courseReviews.title": "Notas y reseñas de cursos",
-  "features.item.courseReviews.summary": "Distribución de notas, reseñas de cursos y envío anónimo.",
-  "features.item.courseReviews.description": "Consulta la distribución de notas y las reseñas de cada curso, y envía las tuyas de forma anónima; las muestras pequeñas se agregan para proteger la privacidad; los datos continúan la serie de WHU.sb / WHUCourses.cn.",
+  "features.item.courseReviews.title": "Distribuciones de notas y reseñas",
+  "features.item.courseReviews.summary": "Distribuciones de notas, reseñas de cursos y envío anónimo.",
+  "features.item.courseReviews.description": "Consulta cómo se distribuyen las notas de un curso y lee sus reseñas, o envía la tuya de forma anónima. Las muestras pequeñas se agregan para proteger la privacidad, continuando el linaje de datos de WHU.sb.",
 
   "features.item.xuexitong.title": "Cuenta de Chaoxing",
   "features.item.xuexitong.summary": "Vincula tu cuenta de Chaoxing; las credenciales se guardan de forma segura en el dispositivo.",
   "features.item.xuexitong.description": "Admite vincular Chaoxing (Xuexitong) con contraseña o con un código por SMS; las credenciales se guardan en el almacenamiento seguro de este dispositivo y se aíslan por cuenta de la WHU, la base de las futuras funciones de cursos y de control de asistencia.",
+
+  "features.item.xiji.title": "Plataforma de cursos Xiji",
+  "features.item.xiji.summary": "Una segunda plataforma de cursos con recordatorios de tareas y exámenes.",
+  "features.item.xiji.description": "Inicia sesión en la plataforma de cursos Xiji (PTA) mediante CAS o con una cuenta de la plataforma, consulta los cursos matriculados, ve las descripciones, las tareas y los exámenes con sus fechas límite, configura los avisos con antelación y proyecta las entregas de tareas en tu agenda y tu horario.",
+
+  "features.item.courseSpace.title": "Espacio de cursos",
+  "features.item.courseSpace.summary": "Un directorio de cursos compartido con profesores y recursos.",
+  "features.item.courseSpace.description": "Agrega las clases impartidas en un directorio unificado de cursos por cuatrimestre, con nombres y números de curso estandarizados. Abre un curso para ver sus clases y la información compartida, los perfiles de los profesores, los recursos y el estado de auditoría/confianza; los administradores pueden mantener el catálogo completo y las clases.",
+
+  "features.item.majorInfo.title": "Titulaciones y programas",
+  "features.item.majorInfo.summary": "Consulta titulaciones, planes de formación y salidas laborales.",
+  "features.item.majorInfo.description": "Explora la jerarquía facultad → escuela → titulación de la universidad, con objetivos formativos, posicionamiento, características y planes docentes, además de gráficos de inserción laboral (tipo, provincia, empleador y sector). Las escuelas ofrecen una vista previa dentro de la app del PDF del plan de formación.",
+
+  "features.item.csEban.title": "Yiban de Ciencias de la Computación",
+  "features.item.csEban.summary": "Premios, expedientes disciplinarios y puntos de evaluación de la Escuela de Ciencias de la Computación.",
+  "features.item.csEban.description": "Se conecta a la plataforma de asuntos Yiban (易办) de la Escuela de Ciencias de la Computación para consultar los premios y los expedientes disciplinarios de grado (categoría, nivel, motivo, puntos, entidad emisora) y los puntos de la evaluación ideológica (total, calificación, detalle), con filtrado por rango de fechas; las credenciales permanecen en el dispositivo.",
+
+  "features.item.libraryLoans.title": "Préstamos de la biblioteca",
+  "features.item.libraryLoans.summary": "Búsqueda en el catálogo, préstamos, renovaciones, reservas y avisos de vencimiento.",
+  "features.item.libraryLoans.description": "Un cliente nativo de WHU OPAC: busca en el catálogo (con filtros de campo, año, idioma y material), consulta fondos y signaturas, haz reservas con punto de recogida y validez, lista las reservas y préstamos actuales con renovación con un solo toque, revisa las estadísticas del historial de préstamos y recibe avisos locales de vencimiento y de retraso.",
 
   "features.item.ecard.title": "Tarjeta E de Luojia y código de pago",
   "features.item.ecard.summary": "El código de pago nativo se actualiza solo y también funciona desde el reloj.",
@@ -165,9 +186,49 @@
   "features.item.forum.summary": "Publicaciones, comentarios, adjuntos, reputación y moderación.",
   "features.item.forum.description": "El foro de la comunidad admite publicaciones, comentarios, secciones, adjuntos, búsqueda, reputación, clasificaciones y un registro público de moderación; la pestaña está oculta de forma predeterminada y se activa en Ajustes → Navegación.",
 
+  "features.item.social.title": "Comunidad social",
+  "features.item.social.summary": "Perfiles, seguimiento y mensajes directos.",
+  "features.item.social.description": "Perfiles públicos de usuario, un gráfico de seguidores y bloqueos, y mensajes directos dentro de la app, compartiendo una única cuenta con el foro.",
+
+  "features.item.campusNews.title": "Noticias del campus",
+  "features.item.campusNews.summary": "Suscríbete a fuentes del campus, con lectura sin conexión y búsqueda de texto completo.",
+  "features.item.campusNews.description": "Agrega más de 200 sitios y casi un millar de columnas de noticias del campus. Suscríbete por sitio o por columna, sigue el estado de lectura, busca en todo el contenido y guárdalo en caché para leer sin conexión, con un modo de lectura integrado y una extracción de texto que se degrada con elegancia cuando la VPN no está disponible.",
+
+  "features.item.dining.title": "Comedores",
+  "features.item.dining.summary": "Descubre la comida del campus con menús, valoraciones y un selector aleatorio.",
+  "features.item.dining.description": "Explora los locales de restauración y las plantas de los comedores en un mapa, con búsqueda, delimitación por campus, menús con precios por plato, valoraciones y reseñas, horarios y fotos. Un selector aleatorio (de local o de plato) admite filtros de valoración y de precio, y puedes aportar locales, menús, horarios y correcciones.",
+
+  "features.item.ebike.title": "Bicicletas eléctricas compartidas",
+  "features.item.ebike.summary": "Vincula tus cuentas de e-bike y desbloquea escaneando.",
+  "features.item.ebike.description": "Vincula cuentas de Zhiyin, Mango y otras bicicletas eléctricas compartidas, desbloquéalas escaneando (BLE) y consulta el estado del trayecto en vivo, el saldo de la cartera, las tarjetas de viaje, el historial de pedidos, los avisos de pedidos impagados y un mapa de la ruta.",
+
+  "features.item.lepao.title": "Carreras Lepao",
+  "features.item.lepao.summary": "Tus registros de running del campus y tus rutas GPS.",
+  "features.item.lepao.description": "Vincula una cuenta de running del campus Lepao y revisa tu historial de carreras por año — distancia, duración, ritmo y validez — con mapas de la ruta GPS de cada carrera y los parciales por kilómetro.",
+
+  "features.item.washing.title": "Lavandería",
+  "features.item.washing.summary": "Consulta el estado de las lavadoras y encarga un lavado.",
+  "features.item.washing.description": "Explora los puntos de lavandería por zona, edificio y planta, consulta el estado de las máquinas en vivo (libre, en uso o averiada) y el tiempo restante, elige un modo de lavado (precio y minutos) y haz el pedido, para luego ceder el pago al miniprograma del operador.",
+
+  "features.item.voteTicket.title": "Conseguir entradas",
+  "features.item.voteTicket.summary": "Consigue entradas para eventos y ayuda a otros.",
+  "features.item.voteTicket.description": "Explora las entradas de eventos de WHU, consulta carteles, normas y cupos, participa para generar un código QR de ayuda personal, escanea o pega el código de otra persona para asistirla, y usa un salón de ayuda mutua que muestra lo recibido, lo dado y el saldo neto, con asistencia por lotes con un solo toque.",
+
+  "features.item.medication.title": "Medicación",
+  "features.item.medication.summary": "Horario de dosis, existencias y seguimiento de la adherencia sobre tu agenda.",
+  "features.item.medication.description": "Gestiona la dosis, la próxima toma y las existencias restantes de cada fármaco sobre tu agenda, registra tomas extra, repón existencias, revisa un resumen de adherencia de 30 días e importa copias de seguridad de medTimer o exporta el historial en CSV.",
+
+  "features.item.mentalHealth.title": "Salud mental",
+  "features.item.mentalHealth.summary": "Una biblioteca de escalas psicológicas con resultados puntuados.",
+  "features.item.mentalHealth.description": "Una biblioteca de escalas psicológicas sincronizada de forma remota (con búsqueda y filtro por categoría). Realiza una escala con visualización por lotes, borradores guardados automáticamente y baremos específicos por sexo; los resultados muestran las puntuaciones totales y por factor, el nivel, un desglose en radar y señales de crisis, con un historial local.",
+
+  "features.item.menstrualCycle.title": "Seguimiento del periodo",
+  "features.item.menstrualCycle.summary": "Seguimiento y predicción del ciclo solo en tu dispositivo.",
+  "features.item.menstrualCycle.description": "Registra flujo, síntomas, estado de ánimo y notas por día, con un calendario que sombrea los días registrados, previstos y fértiles, predicción con grado de confianza de la próxima regla, la ovulación y la ventana fértil, estadísticas del ciclo y ajuste de la duración del ciclo y del periodo — todo ello íntegramente en el dispositivo.",
+
   "features.item.aiAssistant.title": "Asistente de IA",
-  "features.item.aiAssistant.summary": "Un agente multimodelo que puede operar los servicios del campus.",
-  "features.item.aiAssistant.description": "Admite varios modelos integrados y propios, adjuntos multimodales, entrada y lectura por voz, generación de imágenes, búsqueda en línea, MCP, habilidades y asistentes; el puente de confirmación ofrece tres modos (manual, semiautomático y totalmente automático), las herramientas pueden consultar y gestionar el horario, las notas, el correo y los datos de los servicios del campus, e iniciar los pagos de agua, electricidad y red con tu confirmación.",
+  "features.item.aiAssistant.summary": "Un agente multimodal capaz de operar los servicios del campus.",
+  "features.item.aiAssistant.description": "Modelos integrados y personalizados, adjuntos multimodales, entrada de voz en el dispositivo y en la nube, lectura en voz alta, generación de imágenes, búsqueda web, MCP, habilidades y asistentes. Un puente de confirmación ofrece modos semiautomático y totalmente automático; las herramientas pueden leer y gestionar tu horario, tus notas, tu correo y los datos de los servicios del campus, y pueden iniciar pagos de servicios o de red una vez que los confirmas.",
 
   "features.item.weather.title": "Clima",
   "features.item.weather.summary": "Previsiones multifuente, AQI, precipitación y alertas.",
@@ -185,21 +246,21 @@
   "features.item.hotUpdate.summary": "Scripts de análisis firmados: los cambios de las API no requieren una nueva versión.",
   "features.item.hotUpdate.description": "Este sitio distribuye scripts de análisis para QuickJS firmados con Ed25519; cuando cambia una API del campus, el analizador puede actualizarse en caliente, sin esperar una nueva versión de la app.",
 
-  "features.item.appUpdate.title": "Actualizaciones en la app",
-  "features.item.appUpdate.summary": "Comprueba si hay una versión nueva y te guía al instalarla.",
-  "features.item.appUpdate.description": "Busca actualizaciones en GitHub Releases; en Android sugiere la actualización de ABI adecuada y guía la instalación, y en las plataformas de escritorio avisa para descargar la versión nueva.",
+  "features.item.appUpdate.title": "Actualizaciones dentro de la app",
+  "features.item.appUpdate.summary": "Comprueba si hay una nueva versión y déjate guiar por la instalación.",
+  "features.item.appUpdate.description": "Comprueba las actualizaciones en GitHub Releases. En Android sugiere la actualización con la ABI correcta y guía la instalación; en escritorio abre la página de la versión en tu navegador.",
 
   "features.item.appleShortcuts.title": "Atajos de Apple",
   "features.item.appleShortcuts.summary": "Los atajos pueden llamar a las herramientas verificadas de la app.",
   "features.item.appleShortcuts.description": "Los atajos de macOS pueden llamar a herramientas verificadas como el calendario, el horario, las notas y las aulas libres; las operaciones de escritura requieren confirmación.",
 
-  "features.item.widgets.title": "Widgets de inicio",
-  "features.item.widgets.summary": "Cuatro widgets para Android, iOS y macOS.",
-  "features.item.widgets.description": "Cuatro widgets —lista de la agenda, clases de hoy, empieza pronto y clases de la semana— que cubren Android, iOS y la barra de menús de macOS.",
+  "features.item.widgets.title": "Widgets de pantalla de inicio",
+  "features.item.widgets.summary": "Cuatro widgets para Android, iOS, macOS y Linux.",
+  "features.item.widgets.description": "Lista de agenda, clases de hoy, cuenta atrás y clases de esta semana — cuatro widgets que cubren Android, iOS, la barra de menús de macOS y la bandeja de Linux, además de Live Activities en iOS.",
 
-  "features.item.watch.title": "Integración con relojes",
-  "features.item.watch.summary": "Sincroniza con Apple Watch y con relojes Huawei / HarmonyOS.",
-  "features.item.watch.description": "El Apple Watch puede mostrar el código de pago de la tarjeta E; los relojes Huawei y HarmonyOS sincronizan instantáneas de la agenda, del autobús del campus y del clima.",
+  "features.item.watch.title": "Compañero de reloj",
+  "features.item.watch.summary": "Se sincroniza con Apple Watch y con relojes Huawei, HarmonyOS, vivo y Xiaomi.",
+  "features.item.watch.description": "El Apple Watch puede mostrar el código de pago de la E-card y sincronizar los elementos de la agenda y el autobús de enlace; los relojes Huawei, HarmonyOS, vivo y Xiaomi sincronizan la agenda y las instantáneas del autobús de enlace.",
 
   "features.item.appShortcuts.title": "Accesos directos de la app",
   "features.item.appShortcuts.summary": "Mantén pulsado el icono para ir directo a lo que más usas.",
@@ -210,8 +271,8 @@
   "features.item.accountSecurity.description": "El CAS de la WHU y las cuentas de Luotopia están separados; admite Passkeys, varias sesiones, confianza del dispositivo, credenciales de API y bloqueo biométrico de las notas, y la telemetría de diagnóstico se puede desactivar.",
 
   "features.item.languages.title": "Varios idiomas",
-  "features.item.languages.summary": "12 idiomas y formatos de hora localizados.",
-  "features.item.languages.description": "Chino simplificado, chino tradicional, cantonés, inglés, japonés, coreano, francés, español, portugués, ruso y vietnamita: 12 idiomas en total.",
+  "features.item.languages.summary": "Once idiomas en doce variantes de escritura, con formatos de hora localizados.",
+  "features.item.languages.description": "Chino simplificado, chino tradicional, cantonés (simplificado y tradicional), inglés, japonés, coreano, francés, español, portugués, ruso y vietnamita — once idiomas en doce variantes de escritura.",
 
   "features.item.multiAccount.title": "Cambio entre varias cuentas",
   "features.item.multiAccount.summary": "Credenciales aisladas por cuenta de la WHU, con cambio entre ellas.",
@@ -219,11 +280,7 @@
 
   "features.item.thirdPartyAccounts.title": "Vinculación de cuentas de terceros",
   "features.item.thirdPartyAccounts.summary": "Vinculación autorizada de cuentas de terceros como Ham.",
-  "features.item.thirdPartyAccounts.description": "Gestiona las cuentas externas en un solo lugar, en «Otras cuentas»; la vinculación autorizada de terceros como Ham aún se está completando.",
-
-  "features.item.libraryLoans.title": "Préstamos de la biblioteca",
-  "features.item.libraryLoans.summary": "Préstamos del catálogo, renovaciones y avisos de vencimiento.",
-  "features.item.libraryLoans.description": "Previsto: una API de préstamos del catálogo que muestra tus préstamos actuales, las fechas de devolución y el estado de las renovaciones, con avisos antes del vencimiento.",
+  "features.item.thirdPartyAccounts.description": "Gestiona cuentas externas en un único lugar, en Otras cuentas. Está disponible la vinculación y desvinculación autorizada de Ham, y vendrán más terceros.",
 
   "features.item.studyMaterials.title": "Archivos de estudio",
   "features.item.studyMaterials.summary": "Busca materiales por asignatura, profesor y semestre.",
