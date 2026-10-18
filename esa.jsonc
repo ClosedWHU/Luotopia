@@ -1,0 +1,29 @@
+// Alibaba Cloud ESA Pages build configuration.
+//
+// This file overrides the console: once it exists in the repo, every field it
+// manages is taken from here and the corresponding console inputs are ignored
+// (docs: Pages 部署路由指南). So do not "fix" a setting in the console and
+// wonder why nothing changed.
+{
+  // Must match the Pages project already created for this repo, or ESA will
+  // create a second one. Adjust before the first deploy.
+  "name": "luotopia-homepage",
+
+  // Function entry point. This is the bundled artifact, not the TypeScript
+  // source: ESA gets one self-contained file, so nothing depends on its
+  // builder resolving the ../functions/ imports.
+  "entry": "./platform-dist/esa/edge-routine.js",
+
+  "installCommand": "npm install",
+  "buildCommand": "npm run build:esa",
+
+  // Astro's output (pages-or-stubs per MIRROR_ASSETS_ONLY in the build env).
+  // Default routing is what we want: serve a matching static file, otherwise
+  // run the function — so /api/* and /fonts/gstatic/* reach the routine and
+  // everything else is the site. Deliberately no `notFoundStrategy`: the docs
+  // say configuring one alongside a function changes which navigation
+  // requests ever reach it.
+  "assets": {
+    "directory": "./dist"
+  }
+}

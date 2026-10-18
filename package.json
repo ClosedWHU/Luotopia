@@ -8,6 +8,9 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "build:esa": "npm run build && node build.mjs esa",
+    "build:edgeone": "npm run build && node build.mjs edgeone",
+    "smoke:platforms": "node tools/smoke-platform-bundles.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "check:aasa": "node tools/verify-aasa.mjs",

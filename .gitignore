@@ -1,5 +1,7 @@
 # build output
 dist/
+# bundled edge-function artifacts for EdgeOne / ESA (build.mjs)
+platform-dist/
 
 # generated types
 .astro/
