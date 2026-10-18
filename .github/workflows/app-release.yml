@@ -1602,6 +1602,10 @@ jobs:
           rm -rf "$STAGE"
           mkdir -p "$STAGE/luotopia"
           cp -a "$REL_DIR"/. "$STAGE/luotopia/"
+          # The zip is what users sideload by hand, and "extract first, then
+          # run the exe" is not obvious to everyone: ship the instructions
+          # inside the archive (BOM+CRLF so Notepad renders the Chinese).
+          cp packaging/windows/portable-readme.txt "$STAGE/luotopia/README.txt"
           find "$STAGE" -type f \( -iname '*.pdb' -o -iname '*debug*' \) -delete || true
           (
             cd "$STAGE"
