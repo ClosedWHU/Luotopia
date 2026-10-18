@@ -11,13 +11,15 @@ Luotopia (珞家) is a one-stop digital campus client for students and staff at 
 
 COURSEWORK & STUDIES
 · Timetable: import from multiple sources (undergraduate and graduate systems, WakeUp files/screenshots, manual editing), multiple schedules, week/month views and class reminders
-· Agenda & to-dos: courses, tasks and notes in one place, with recurrence and reminders
+· Agenda & to-dos: courses, schedules, tasks, notes and medication in one place, with recurrence and reminders
 · Free classrooms: multi-criteria search that automatically avoids clashes with your timetable
 · Library study seats and sports venues: search, book and cancel; bookings can be written into your agenda
+· Library borrowing: search the catalogue, renew loans, reserve books and get due-date reminders
 · University-wide timetable with auditable-course matching
 · Grades: multi-channel import, GPA algorithms and grade trends
 · Academic progress, university calendar, grade distributions and anonymous course reviews
-· Xuexitong (学习通) account binding with credentials stored securely on-device
+· Xuexitong (学习通) and Xiji (希冀) course platforms with on-device credential storage
+· Course space, major & programme information, and CS Yiban (易办) college affairs
 
 CAMPUS SERVICES
 · Luojia E-card: native payment code with automatic refresh — works from your watch too
@@ -30,6 +32,13 @@ CAMPUS SERVICES
 · Campus network: plans, devices, top-up, pause/resume
 · Campus VPN: Sangfor aTrust split tunneling with connectivity tests
 · Community forum "Luojia Shelter": posts, comments, attachments and reputation
+· Campus news, dining, shared e-bikes, Lepao running, laundry and event ticket-grabbing
+· Community social: profiles, following and direct messages
+
+HEALTH & WELLBEING
+· Medication: dose schedule, stock and adherence tracking
+· Mental-health scales with scored results
+· A private, on-device period tracker with cycle prediction
 
 SMART TOOLS
 · AI assistant: multimodal chat that can operate campus services
@@ -41,11 +50,11 @@ SMART TOOLS
 
 CROSS-DEVICE & ACCOUNTS
 · Home-screen widgets and shortcuts
-· Huawei/HarmonyOS watch companion sync
+· Huawei, HarmonyOS, vivo and Xiaomi watch companion sync
 · CAS single sign-on, Luotopia accounts and Passkeys
 · Device trust with token binding to defeat credential replay
 · Multi-account switching, credentials isolated per WHU account
-· 12 languages with localized time formats, dark mode
+· 11 languages (12 script variants) with localized time formats, dark mode
 · The Luotopia ecosystem spans Android, iOS, Windows, macOS, Linux and HarmonyOS
 
 SECURITY & PRIVACY

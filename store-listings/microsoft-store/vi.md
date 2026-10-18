@@ -9,16 +9,19 @@ Luotopia
 Luotopia (珞家) là ứng dụng khách số hóa toàn diện dành cho sinh viên và cán bộ Đại học Vũ Hán, gói gọn việc học tập, các dịch vụ học đường và công cụ thông minh vào một ứng dụng desktop duy nhất, trau chuốt.
 
 HỌC TẬP
-Nhập thời khóa biểu từ nhiều nguồn (hệ thống đại học, sau đại học, v.v.), quản lý nhiều thời khóa biểu với chế độ xem tuần/tháng và nhắc lịch học; gom môn học, công việc và ghi chú vào một lịch trình với lặp lại và nhắc nhở; tìm phòng học trống, tự động loại trừ xung đột với thời khóa biểu của bạn; đặt chỗ tự học ở thư viện và sân bãi thể thao; xem thời khóa biểu toàn trường để tìm môn học dự thính không trùng lịch; nhập điểm từ nhiều kênh với thuật toán GPA và xu hướng điểm; cùng với tiến độ học tập, lịch năm học, phân bố điểm và đánh giá môn học ẩn danh.
+Nhập thời khóa biểu từ nhiều nguồn (hệ thống đại học, sau đại học, v.v.), quản lý nhiều thời khóa biểu với chế độ xem tuần/tháng và nhắc lịch học; gom môn học, lịch trình, công việc, ghi chú và thuốc men vào một lịch trình với lặp lại và nhắc nhở; tìm phòng học trống, tự động loại trừ xung đột với thời khóa biểu của bạn; đặt chỗ tự học ở thư viện, mượn và gia hạn sách thư viện, và đặt sân bãi thể thao; xem thời khóa biểu toàn trường để tìm môn học dự thính không trùng lịch; nhập điểm từ nhiều kênh với thuật toán GPA và xu hướng điểm; cùng với tiến độ học tập, lịch năm học, phân bố điểm và đánh giá môn học ẩn danh, không gian môn học và thông tin chuyên ngành/chương trình, cùng CS Yiban (易办) cho công việc học đường.
 
 DỊCH VỤ HỌC ĐƯỜNG
-Mã thanh toán thẻ Luojia E tự động làm mới; vị trí thời gian thực của xe buýt trường, tra cứu tuyến và nhắc đến trạm; bản đồ học đường gốc với tìm kiếm địa điểm và lớp tiện ích; khám bệnh: đăng ký, xếp hàng, hóa đơn và kết quả; thanh toán điện nước ký túc xá và mã lấy nước nóng; tổng hợp thông báo học đường; truy cập trực tiếp cổng Smart Luojia; quản lý gói mạng học đường; VPN học đường Sangfor aTrust; và diễn đàn cộng đồng "Luojia Shelter".
+Mã thanh toán thẻ Luojia E tự động làm mới; vị trí thời gian thực của xe buýt trường, tra cứu tuyến và nhắc đến trạm; bản đồ học đường gốc với tìm kiếm địa điểm và lớp tiện ích; khám bệnh: đăng ký, xếp hàng, hóa đơn và kết quả; thanh toán điện nước ký túc xá và mã lấy nước nóng; tổng hợp thông báo học đường; truy cập trực tiếp cổng Smart Luojia; quản lý gói mạng học đường; VPN học đường Sangfor aTrust; và diễn đàn cộng đồng "Luojia Shelter". Đời sống học đường còn có tin tức học đường, ăn uống, xe đạp điện dùng chung, chạy bộ Lepao, giặt là và giành vé sự kiện, cùng hồ sơ cộng đồng xã hội với nhắn tin trực tiếp.
+
+SỨC KHỎE & TINH THẦN
+Một công cụ lên lịch thuốc men trên lịch trình của bạn với theo dõi liều dùng và kho thuốc; thư viện thang đo tự đánh giá tâm lý với kết quả chấm điểm; và công cụ theo dõi kỳ kinh riêng tư trên máy với dự đoán chu kỳ.
 
 CÔNG CỤ THÔNG MINH
 Trợ lý AI đa phương thức tích hợp, có thể thao tác các dịch vụ học đường qua hội thoại; thời tiết đa nguồn với AQI, lượng mưa và cảnh báo; hộp thư Coremail của trường với huy hiệu chưa đọc; trung tâm hình nền (cục bộ, trực tuyến và Bing mỗi ngày); cơ chế cập nhật nóng kịch bản có chữ ký số giúp tính năng bắt kịp thay đổi API của trường mà không cần phát hành phiên bản mới.
 
 BẢO MẬT VÀ RIÊNG TƯ
-Hỗ trợ đăng nhập một lần CAS, tài khoản Luotopia và Passkeys; niềm tin thiết bị cùng ràng buộc token chống phát lại thông tin đăng nhập; mọi thông tin đăng nhập được mã hóa ngay trên máy; thống kê và báo cáo sự cố hoàn toàn tùy chọn và mặc định tắt. Chế độ tối, 12 ngôn ngữ và chuyển đổi nhiều tài khoản cách ly theo tài khoản WHU.
+Hỗ trợ đăng nhập một lần CAS, tài khoản Luotopia và Passkeys; niềm tin thiết bị cùng ràng buộc token chống phát lại thông tin đăng nhập; mọi thông tin đăng nhập được mã hóa ngay trên máy; thống kê và báo cáo sự cố hoàn toàn tùy chọn và mặc định tắt. Chế độ tối, 11 ngôn ngữ (12 biến thể chữ viết), và chuyển đổi nhiều tài khoản cách ly theo tài khoản WHU.
 
 Hệ sinh thái Luotopia bao phủ Windows, macOS, Linux, Android, iOS và HarmonyOS, đồng bộ trải nghiệm điện thoại - desktop - đồng hồ (tiện ích widget và liên kết đồng hồ chỉ có trên di động).
 
@@ -29,19 +32,24 @@ Luotopia do đội ngũ ClosedWHU phát triển độc lập, là ứng dụng k
 
 ## Tính năng sản phẩm (mỗi dòng một mục)
 Thời khóa biểu: nhập đa nguồn, nhiều thời khóa biểu, xem tuần/tháng và nhắc lịch học
-Lịch trình và việc cần làm: môn học, công việc, ghi chú một nơi, có lặp lại và nhắc nhở
+Lịch trình và việc cần làm: môn học, lịch trình, công việc, ghi chú và thuốc men, có lặp lại và nhắc nhở
 Điểm: nhập đa kênh, thuật toán GPA và xu hướng điểm
-Phòng học trống, chỗ tự học thư viện và sân bãi thể thao: tra cứu và đặt chỗ
+Phòng học trống, chỗ tự học thư viện, mượn sách thư viện và đặt sân bãi thể thao
 Thời khóa biểu toàn trường và ghép môn dự thính không xung đột
-Thẻ Luojia E: mã thanh toán tự động làm mới
-Xe buýt trường và bản đồ: vị trí thời gian thực, tuyến và lớp tiện ích
-Khám bệnh, điện nước và mạng học đường trong một nơi
+Nền tảng môn học Xuexitong và Xiji với thông tin đăng nhập lưu trên máy
+Không gian môn học, thông tin chuyên ngành & chương trình, và CS Yiban (易办)
+Mã thanh toán thẻ Luojia E tự động làm mới
+Xe buýt trường và bản đồ học đường: vị trí thời gian thực, tuyến và lớp tiện ích
+Dịch vụ y tế, điện nước và mạng học đường trong một nơi
 Trợ lý AI: hội thoại đa phương thức, có thể thao tác dịch vụ học đường
 Hộp thư Coremail và tổng hợp thông báo học đường
 VPN học đường Sangfor aTrust
 Diễn đàn cộng đồng "Luojia Shelter"
+Tin tức học đường, ăn uống, xe đạp điện dùng chung, chạy bộ Lepao và giặt là
+Thuốc men, thang đo sức khỏe tinh thần và công cụ theo dõi kỳ kinh riêng tư
+Hồ sơ cộng đồng, nhắn tin và giành vé sự kiện
 Bảo mật: CAS / Passkeys / niềm tin thiết bị, thông tin đăng nhập mã hóa trên máy, thống kê mặc định tắt
-12 ngôn ngữ, nhiều tài khoản, chế độ tối và cập nhật nóng có chữ ký
+11 ngôn ngữ, nhiều tài khoản, chế độ tối và cập nhật nóng có chữ ký
 
 ## Tiêu đề ngắn
 Luotopia
