@@ -92,6 +92,7 @@ Preview 环境没有运行时 secret，所以：
 | `HOT_UPDATE_ED25519_PRIVATE_KEY` | 是 | base64 的 PKCS#8 Ed25519 私钥，`npm run hot-update:init-key` 生成。**只配 Production** |
 | `HOT_UPDATE_ALLOW_UNSIGNED` | 否 | `1` 时允许无密钥构建（只校验、不签名、不写清单）。**只配 Preview**，见 [PR 预览构建](#pr-预览构建) |
 | `HOT_UPDATE_PRODUCTION_BRANCH` | 否 | 生产分支名，默认 `main`。用于拒绝在生产分支上未签名构建 |
+| `MIRROR_ASSETS_ONLY` | 否 | `1` 时从构建产物剥离全部 HTML 页面（仅保留根 `404.html`），把部署变成纯静态文件镜像。**只配镜像项目**，Cloudflare 主站不配。见[其他部署方式](#其他部署方式) |
 | `UPTIMEROBOT_API_KEY` | `/status` 需要 | Read-Only key 即可 |
 | `GITHUB_TOKEN` | 否 | 提高 `/api/releases*` 的 GitHub API 限额 |
 | `REPO` | 否 | 默认 `ClosedWHU/Luotopia` |
@@ -310,6 +311,36 @@ npm run build
 
 同样地，`functions/` 不会生效，依赖 `/api/*` 的部分（下载页的版本徽章与更新日志、
 `/status` 的全部数据）会退回到静态占位或错误态。
+
+### EdgeOne Pages（静态文件镜像）
+
+`www-whu-sb.tsinbei.cn`（EdgeOne Pages）从同一仓库构建，定位是**文件分发**——
+App 经由它拉取 hot-update 清单与脚本、`/scales/`、字体、`/_astro/` 产物等——
+不承担网页浏览。镜像项目只需要两个环境变量：
+
+- `MIRROR_ASSETS_ONLY=1`：构建期由 `astro.config.mjs` 的 `assetsOnlyMirror`
+  把全部 HTML 页面从产物中剥离，任何页面 URL 都未命中。唯一保留的是根
+  `404.html`：CF 风格平台以它的存在决定「自定义 404」还是「SPA 重写」（见
+  [404 处理](#404-处理)），留着它才能保证未命中路径全部稳定返回 404 而不是
+  假 200。
+- `HOT_UPDATE_ED25519_PRIVATE_KEY`：prebuild 每次构建都重新生成签名清单，
+  镜像分发的正是这份文件，所以仍然必需。若镜像项目开启了预览部署，同
+  Cloudflare 的纪律：私钥只给生产部署。
+
+EdgeOne 将站点识别为 pure project，`functions/` 不运行：`/api/*`、语言协商、
+深链重写、`_middleware.ts` 的域名黑白名单在镜像上全部不存在——镜像域名不会
+重定向到主域名，这正是镜像成立的前提；那些能力仍由 Cloudflare 主站提供。
+构建命令 `npm run build`（或诊断期的 `npm run prebuild && npm run build`），
+输出目录 `dist`，Node ≥ 22.12。
+
+部署后验证：
+
+```sh
+curl -sI https://www-whu-sb.tsinbei.cn/ | head -1
+# 期望 404（页面不分发）
+curl -sI https://www-whu-sb.tsinbei.cn/hot-update/manifest.json | head -1
+# 期望 200（文件正常分发）
+```
 
 ## 部署后检查
 
