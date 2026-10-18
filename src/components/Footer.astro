@@ -1,8 +1,10 @@
 ---
 import AppIcon from "./AppIcon.astro";
 import { resolveLocale, routeUrl, useTranslations, type RouteKey } from "../i18n/ui";
+import { getBuildInfo } from "../lib/buildInfo";
 
 const year = new Date().getFullYear();
+const build = getBuildInfo();
 
 const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
@@ -110,7 +112,15 @@ const resources: ResourceItem[] = [
     </div>
 
     <div class="lt-reveal mt-8 pt-6 border-t border-glass-divider text-center text-body-small text-outline">
-      &copy; {year} Made with ❤ by ClosedWHU Team · All rights reserved.
+      <p>
+        <span>&copy; {year} Made with ❤ by ClosedWHU Team</span>
+        <span class="mx-1.5" aria-hidden="true">·</span>
+        <span>Code <a href="https://github.com/ClosedWHU/Luotopia/blob/main/LICENSE" class="underline hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">AGPL-3.0-or-later</a></span>
+        <span class="mx-1.5" aria-hidden="true">·</span>
+        <span>Content <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="underline hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a></span>
+        <span class="mx-1.5" aria-hidden="true">·</span>
+        <span><a href={build.commitUrl} class="underline hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">Commit {build.shortHash}</a> built at {build.builtAt}</span>
+      </p>
     </div>
   </div>
 </footer>
