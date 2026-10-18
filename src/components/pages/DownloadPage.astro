@@ -239,6 +239,19 @@ const i18n = {
             />
           </div>
           <div>
+            <h3 class="text-title-small text-on-surface mb-1">Windows</h3>
+            <p
+              set:html={rich("download.install.windows.body", {
+                extractAll: strongHtml(t("download.install.windows.extractAll")),
+                exe: strongHtml("luotopia.exe"),
+              })}
+            />
+            <pre data-lenis-prevent-horizontal class="mt-2 overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># PowerShell：解压并运行
+Expand-Archive luotopia-*-windows-x64.zip -DestinationPath .
+.\luotopia\luotopia.exe</code></pre>
+            <p class="mt-2 text-body-small text-outline">{t("download.install.windows.note")}</p>
+          </div>
+          <div>
             <h3 class="text-title-small text-on-surface mb-1">Linux</h3>
             <p
               set:html={rich("download.install.linux.body", {
