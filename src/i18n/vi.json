@@ -77,6 +77,7 @@
 
   "features.category.coursework": "Môn học và học tập",
   "features.category.campus": "Dịch vụ học đường",
+  "features.category.health": "Sức khỏe",
   "features.category.smart": "Công cụ thông minh",
   "features.category.crossDevice": "Đa thiết bị và tài khoản",
   "features.category.inDevelopment": "Đang phát triển",
@@ -85,9 +86,9 @@
   "features.item.timetable.summary": "Nhập từ nhiều nguồn, quản lý nhiều thời khóa biểu, xem tuần/tháng và nhắc lịch học.",
   "features.item.timetable.description": "Hỗ trợ hệ thống đào tạo đại học, newyjs sau đại học, tệp/mã chia sẻ WakeUp, thời khóa biểu của bên thứ ba và chỉnh sửa thủ công; quản lý nhiều thời khóa biểu theo nhóm, xem tuần/tháng, nhắc lịch học và liên kết với tiện ích màn hình chính.",
 
-  "features.item.agenda.title": "Lịch trình và việc cần làm",
-  "features.item.agenda.summary": "Môn học, công việc và ghi chú ở một nơi, có lặp lại và nhắc nhở.",
-  "features.item.agenda.description": "Các mục chia thành lịch trình, công việc và ghi chú; hỗ trợ quy tắc lặp lại, độ ưu tiên, nhóm danh sách, thao tác vuốt, nhắc lịch học và đồng bộ với tiện ích widget.",
+  "features.item.agenda.title": "Chương trình nghị sự & việc cần làm",
+  "features.item.agenda.summary": "Khóa học, lịch trình, công việc, ghi chú và thuốc men trong một nơi, với lặp lại và nhắc nhở.",
+  "features.item.agenda.description": "Mục được chia thành năm loại — khóa học, lịch trình, công việc, ghi chú và thuốc men — với tính năng lặp lại linh hoạt (nhiều lần trong ngày, theo giờ trong từng ngày trong tuần, theo ngày trong tháng, theo chu kỳ khoảng cách), thao tác vuốt, nhắc nhở lớp học và công việc, cùng dữ liệu chương trình nghị sự được đồng bộ sang tiện ích màn hình chính.",
 
   "features.item.freeClassrooms.title": "Phòng trống",
   "features.item.freeClassrooms.summary": "Tra cứu phòng trống đa tiêu chí, tự động tránh trùng thời khóa biểu.",
@@ -117,13 +118,33 @@
   "features.item.universityCalendar.summary": "Lịch năm học và thời gian học kỳ của WHU, xem bất cứ lúc nào.",
   "features.item.universityCalendar.description": "Hiển thị dữ liệu lịch học vụ của WHU qua các năm: ngày bắt đầu và kết thúc học kỳ, các kỳ nghỉ và kế hoạch giảng dạy, tất cả rõ ràng trong một lần xem.",
 
-  "features.item.courseReviews.title": "Điểm và đánh giá học phần",
-  "features.item.courseReviews.summary": "Phân bố điểm, đánh giá học phần và gửi ẩn danh.",
-  "features.item.courseReviews.description": "Xem phân bố điểm và đánh giá theo từng học phần, hỗ trợ gửi ẩn danh; các mẫu nhỏ được gộp lại để bảo vệ quyền riêng tư, tiếp nối mạch dữ liệu của WHU.sb / WHUCourses.cn.",
+  "features.item.courseReviews.title": "Phân bố điểm & đánh giá",
+  "features.item.courseReviews.summary": "Phân bố điểm, đánh giá khóa học và gửi ẩn danh.",
+  "features.item.courseReviews.description": "Xem cách điểm của một khóa học được phân bố và đọc các đánh giá của nó, hoặc gửi đánh giá của riêng bạn một cách ẩn danh. Các mẫu nhỏ được gộp lại để bảo vệ quyền riêng tư, tiếp nối nguồn dữ liệu của WHU.sb.",
 
   "features.item.xuexitong.title": "Tài khoản Chaoxing",
   "features.item.xuexitong.summary": "Liên kết tài khoản Chaoxing, thông tin đăng nhập lưu an toàn trên máy.",
   "features.item.xuexitong.description": "Hỗ trợ liên kết Chaoxing (Xuexitong) bằng mật khẩu hoặc mã SMS; thông tin đăng nhập được lưu trong bộ nhớ an toàn của thiết bị và cách ly theo tài khoản WHU, tạo nền tảng cho các tính năng môn học và điểm danh sau này.",
+
+  "features.item.xiji.title": "Nền tảng khóa học Xiji",
+  "features.item.xiji.summary": "Một nền tảng khóa học thứ hai với nhắc nhở bài tập và kỳ thi.",
+  "features.item.xiji.description": "Đăng nhập nền tảng khóa học Xiji (PTA) qua CAS hoặc tài khoản của nền tảng, liệt kê các khóa học đã đăng ký, xem mô tả, bài tập và kỳ thi kèm thời hạn, đặt khoảng thời gian nhắc nhở trước, đồng thời đưa hạn nộp bài tập vào chương trình nghị sự và thời khóa biểu của bạn.",
+
+  "features.item.courseSpace.title": "Không gian khóa học",
+  "features.item.courseSpace.summary": "Thư mục khóa học dùng chung với giảng viên và tài nguyên.",
+  "features.item.courseSpace.description": "Tổng hợp các lớp giảng dạy thành một thư mục khóa học thống nhất theo học kỳ, với tên và mã khóa học được chuẩn hóa. Mở một khóa học để xem các lớp và thông tin dùng chung, hồ sơ giảng viên, tài nguyên và trạng thái kiểm duyệt/độ tin cậy; quản trị viên có thể duy trì toàn bộ danh mục và các lớp.",
+
+  "features.item.majorInfo.title": "Ngành học & chương trình đào tạo",
+  "features.item.majorInfo.summary": "Duyệt ngành học, kế hoạch đào tạo và kết quả việc làm.",
+  "features.item.majorInfo.description": "Duyệt hệ thống phân cấp khoa → trường thành viên → ngành học của trường, với mục tiêu đào tạo, định hướng, đặc điểm và kế hoạch giảng dạy, cùng biểu đồ kết quả việc làm (loại hình, tỉnh/thành, nhà tuyển dụng và ngành nghề). Các trường thành viên cung cấp bản xem trước PDF kế hoạch đào tạo ngay trong ứng dụng.",
+
+  "features.item.csEban.title": "CS Yiban",
+  "features.item.csEban.summary": "Giải thưởng, hồ sơ kỷ luật và điểm đánh giá dành cho Khoa Khoa học Máy tính.",
+  "features.item.csEban.description": "Kết nối với nền tảng hành chính Yiban (易办) của Khoa Khoa học Máy tính để xem các giải thưởng và hồ sơ kỷ luật của sinh viên (loại, cấp độ, lý do, điểm, đơn vị ban hành) cùng điểm đánh giá tư tưởng (tổng điểm, mức xếp loại, chi tiết), có lọc theo khoảng ngày; thông tin đăng nhập được lưu trên thiết bị.",
+
+  "features.item.libraryLoans.title": "Mượn sách thư viện",
+  "features.item.libraryLoans.summary": "Tìm kiếm mục lục, mượn, gia hạn, đặt chỗ và nhắc nhở ngày đến hạn.",
+  "features.item.libraryLoans.description": "Một ứng dụng khách OPAC của WHU thuần túy: tìm kiếm mục lục (bộ lọc theo lĩnh vực, năm, ngôn ngữ và loại tài liệu), xem số lượng lưu trữ và ký hiệu xếp giá, đặt giữ với địa điểm nhận và thời hạn, liệt kê các lượt đặt chỗ và mượn hiện tại với gia hạn chỉ bằng một chạm, xem số liệu thống kê lịch sử mượn và nhận nhắc nhở ngày đến hạn, quá hạn trên thiết bị.",
 
   "features.item.ecard.title": "Thẻ E và mã thanh toán",
   "features.item.ecard.summary": "Mã thanh toán gốc tự động làm mới, dùng được cả trên đồng hồ.",
@@ -165,9 +186,49 @@
   "features.item.forum.summary": "Bài viết, bình luận, tệp đính kèm, uy tín và quản trị diễn đàn.",
   "features.item.forum.description": "Diễn đàn cộng đồng hỗ trợ bài viết, bình luận, chuyên mục, tệp đính kèm, tìm kiếm, uy tín, bảng xếp hạng và nhật ký quản trị công khai; tab mặc định ẩn, có thể bật trong Cài đặt → Điều hướng.",
 
+  "features.item.social.title": "Mạng xã hội cộng đồng",
+  "features.item.social.summary": "Hồ sơ, theo dõi và tin nhắn trực tiếp.",
+  "features.item.social.description": "Hồ sơ người dùng công khai, đồ thị theo dõi/chặn và tin nhắn trực tiếp trong ứng dụng, dùng chung một tài khoản với diễn đàn.",
+
+  "features.item.campusNews.title": "Tin tức trường học",
+  "features.item.campusNews.summary": "Theo dõi các nguồn tin trong trường, hỗ trợ đọc ngoại tuyến và tìm kiếm toàn văn.",
+  "features.item.campusNews.description": "Tổng hợp hơn 200 trang web và gần một nghìn chuyên mục tin tức trong trường. Theo dõi theo trang hoặc theo chuyên mục, ghi nhớ trạng thái đã đọc, tìm kiếm trên toàn bộ nội dung và lưu bộ nhớ đệm để đọc ngoại tuyến, kèm chế độ đọc tích hợp và tính năng trích xuất văn bản vẫn hoạt động mượt mà khi không có VPN.",
+
+  "features.item.dining.title": "Ăn uống",
+  "features.item.dining.summary": "Khám phá ẩm thực trong trường với thực đơn, đánh giá và tính năng chọn ngẫu nhiên.",
+  "features.item.dining.description": "Duyệt các địa điểm ăn uống và các tầng nhà ăn trên bản đồ, với tìm kiếm, lọc theo khu vực trong trường, thực đơn kèm giá từng món, xếp hạng và đánh giá, giờ mở cửa và hình ảnh. Tính năng chọn ngẫu nhiên (quán hoặc món) hỗ trợ lọc theo xếp hạng và giá, và bạn có thể đóng góp quán, thực đơn, giờ mở cửa cùng các chỉnh sửa.",
+
+  "features.item.ebike.title": "Xe đạp điện dùng chung",
+  "features.item.ebike.summary": "Liên kết tài khoản xe đạp điện và mở khóa bằng cách quét mã.",
+  "features.item.ebike.description": "Liên kết tài khoản xe đạp điện dùng chung Zhiyin, Mango và các hãng khác, mở khóa bằng cách quét mã (BLE), đồng thời xem trạng thái chuyến đi trực tiếp, số dư ví, thẻ đi xe, lịch sử đơn hàng, cảnh báo đơn chưa thanh toán và bản đồ hành trình.",
+
+  "features.item.lepao.title": "Chạy bộ Lepao",
+  "features.item.lepao.summary": "Hồ sơ chạy bộ và lộ trình GPS của bạn trong trường.",
+  "features.item.lepao.description": "Liên kết tài khoản chạy bộ Lepao trong trường và xem lại lịch sử chạy theo từng năm — quãng đường, thời lượng, tốc độ và tính hợp lệ — kèm bản đồ lộ trình GPS cho từng lần chạy và phân đoạn theo từng kilômét.",
+
+  "features.item.washing.title": "Giặt giũ",
+  "features.item.washing.summary": "Kiểm tra tình trạng máy giặt và đặt lệnh giặt.",
+  "features.item.washing.description": "Duyệt các địa điểm giặt theo khu vực, tòa nhà và tầng, xem tình trạng máy trực tiếp (rảnh, đang chạy hoặc lỗi) và thời gian còn lại, chọn chế độ giặt (giá và số phút) rồi đặt lệnh, sau đó chuyển phần thanh toán sang mini-program của nhà vận hành.",
+
+  "features.item.voteTicket.title": "Giành vé",
+  "features.item.voteTicket.summary": "Giành vé sự kiện và trợ giúp người khác.",
+  "features.item.voteTicket.description": "Duyệt các đợt giành vé sự kiện WHU, xem áp phích, thể lệ và hạn mức, tham gia để tạo mã QR trợ giúp cá nhân, quét hoặc dán mã của người khác để hỗ trợ họ, đồng thời sử dụng sảnh hỗ trợ lẫn nhau hiển thị tình trạng nhận, cho đi và chênh lệch ròng với tính năng hỗ trợ hàng loạt chỉ bằng một chạm.",
+
+  "features.item.medication.title": "Thuốc men",
+  "features.item.medication.summary": "Lịch uống thuốc, tồn kho và theo dõi tuân thủ trên chương trình nghị sự của bạn.",
+  "features.item.medication.description": "Quản lý liều lượng, lần uống kế tiếp và tồn kho còn lại của từng loại thuốc ngay trên chương trình nghị sự, ghi nhận liều dùng thêm, bổ sung tồn kho, xem tóm tắt tuân thủ trong 30 ngày, đồng thời nhập bản sao lưu medTimer hoặc xuất lịch sử dạng CSV.",
+
+  "features.item.mentalHealth.title": "Sức khỏe tinh thần",
+  "features.item.mentalHealth.summary": "Thư viện thang đo tâm lý với kết quả được chấm điểm.",
+  "features.item.mentalHealth.description": "Thư viện thang đo tâm lý được đồng bộ từ xa (hỗ trợ tìm kiếm và lọc theo danh mục). Làm thang đo với chế độ xem theo lô, bản nháp tự động lưu và chuẩn theo giới tính; kết quả hiển thị tổng điểm và điểm theo từng yếu tố, mức độ, biểu đồ radar và cảnh báo khủng hoảng, cùng lịch sử lưu trên thiết bị.",
+
+  "features.item.menstrualCycle.title": "Theo dõi chu kỳ kinh nguyệt",
+  "features.item.menstrualCycle.summary": "Theo dõi và dự đoán chu kỳ chỉ lưu trên thiết bị.",
+  "features.item.menstrualCycle.description": "Ghi nhận lượng máu, triệu chứng, tâm trạng và ghi chú theo từng ngày, với lịch tô màu các ngày đã ghi nhận, ngày dự đoán và ngày dễ thụ thai, dự đoán kỳ kinh tiếp theo/ngày rụng trứng/cửa sổ thụ thai kèm độ tin cậy, số liệu thống kê chu kỳ và điều chỉnh độ dài chu kỳ và kỳ kinh — hoàn toàn ngay trên thiết bị.",
+
   "features.item.aiAssistant.title": "Trợ lý AI",
-  "features.item.aiAssistant.summary": "Agent đa mô hình, có thể thao tác các dịch vụ học đường.",
-  "features.item.aiAssistant.description": "Hỗ trợ nhiều mô hình tích hợp và tùy chỉnh, tệp đính kèm đa phương thức, nhập giọng nói/đọc to, tạo ảnh, tìm kiếm trên mạng, MCP, kỹ năng và trợ lý; cầu nối xác nhận có ba mức thủ công / bán tự động / hoàn toàn tự động, các công cụ có thể tra cứu và quản lý thời khóa biểu, điểm, hộp thư và dữ liệu dịch vụ học đường, đồng thời có thể khởi động thanh toán tiền điện nước và tiền mạng sau khi bạn xác nhận.",
+  "features.item.aiAssistant.summary": "Một tác nhân đa mô hình có thể vận hành các dịch vụ trong trường.",
+  "features.item.aiAssistant.description": "Mô hình tích hợp sẵn và tùy chỉnh, tệp đính kèm đa phương thức, nhập giọng nói trên thiết bị và qua đám mây, đọc to, tạo hình ảnh, tìm kiếm web, MCP, kỹ năng và trợ lý. Cầu nối xác nhận cung cấp chế độ bán tự động và hoàn toàn tự động; các công cụ có thể đọc và quản lý thời khóa biểu, điểm số, hộp thư và dữ liệu dịch vụ trong trường của bạn, đồng thời có thể bắt đầu thanh toán tiện ích hoặc thanh toán mạng sau khi bạn xác nhận.",
 
   "features.item.weather.title": "Thời tiết",
   "features.item.weather.summary": "Dự báo đa nguồn, AQI, lượng mưa và cảnh báo.",
@@ -186,20 +247,20 @@
   "features.item.hotUpdate.description": "Trang web chính thức phân phối các kịch bản phân tích QuickJS có chữ ký Ed25519; khi API của trường thay đổi, bộ phân tích có thể được cập nhật nóng, giảm thời gian chờ ứng dụng phát hành phiên bản mới.",
 
   "features.item.appUpdate.title": "Cập nhật trong ứng dụng",
-  "features.item.appUpdate.summary": "Kiểm tra phiên bản mới và hướng dẫn cài đặt.",
-  "features.item.appUpdate.description": "Kiểm tra cập nhật từ GitHub Releases; trên Android có gợi ý nâng cấp ABI và hướng dẫn cài đặt, trên các nền tảng desktop sẽ nhắc tải phiên bản mới.",
+  "features.item.appUpdate.summary": "Kiểm tra phiên bản mới và được hướng dẫn cài đặt.",
+  "features.item.appUpdate.description": "Kiểm tra bản cập nhật từ GitHub Releases. Trên Android, ứng dụng gợi ý bản nâng cấp ABI phù hợp và hướng dẫn cài đặt; trên máy tính, ứng dụng mở trang phát hành trong trình duyệt của bạn.",
 
   "features.item.appleShortcuts.title": "Phím tắt Apple",
   "features.item.appleShortcuts.summary": "Phím tắt gọi các công cụ đã được kiểm duyệt của ứng dụng.",
   "features.item.appleShortcuts.description": "Phím tắt trên macOS có thể gọi các công cụ đã kiểm duyệt như lịch học vụ, thời khóa biểu, điểm, phòng trống; các thao tác ghi cần được xác nhận.",
 
   "features.item.widgets.title": "Tiện ích màn hình chính",
-  "features.item.widgets.summary": "Bốn tiện ích widget cho Android, iOS và macOS.",
-  "features.item.widgets.description": "Bốn tiện ích widget — danh sách công việc, lớp học hôm nay, sắp bắt đầu và lớp học tuần này — phủ khắp Android, iOS và thanh menu của macOS.",
+  "features.item.widgets.summary": "Bốn tiện ích trên Android, iOS, macOS và Linux.",
+  "features.item.widgets.description": "Danh sách chương trình nghị sự, lớp học hôm nay, đếm ngược và lớp học tuần này — bốn tiện ích bao phủ Android, iOS, thanh menu macOS và khay hệ thống Linux, cùng Live Activities trên iOS.",
 
-  "features.item.watch.title": "Liên kết đồng hồ",
-  "features.item.watch.summary": "Đồng bộ với Apple Watch và đồng hồ Huawei/HarmonyOS.",
-  "features.item.watch.description": "Apple Watch có thể hiển thị mã thanh toán Thẻ E; đồng hồ Huawei/HarmonyOS đồng bộ ảnh chụp nhanh của lịch trình, xe buýt và thời tiết.",
+  "features.item.watch.title": "Đồng hồ đồng hành",
+  "features.item.watch.summary": "Đồng bộ với Apple Watch và đồng hồ Huawei, HarmonyOS, vivo và Xiaomi.",
+  "features.item.watch.description": "Apple Watch có thể hiển thị mã thanh toán E-card và đồng bộ các mục chương trình nghị sự cùng xe buýt đưa đón; đồng hồ Huawei, HarmonyOS, vivo và Xiaomi đồng bộ ảnh chụp nhanh chương trình nghị sự và xe buýt đưa đón.",
 
   "features.item.appShortcuts.title": "Lối tắt ứng dụng",
   "features.item.appShortcuts.summary": "Nhấn giữ biểu tượng để vào ngay các lối vào thường dùng.",
@@ -210,20 +271,16 @@
   "features.item.accountSecurity.description": "CAS của WHU và tài khoản Luotopia tách biệt nhau; hỗ trợ Passkeys, nhiều phiên đăng nhập, niềm tin thiết bị, thông tin xác thực API, khóa điểm bằng sinh trắc học, và có thể tắt thu thập dữ liệu chẩn đoán.",
 
   "features.item.languages.title": "Đa ngôn ngữ",
-  "features.item.languages.summary": "12 ngôn ngữ và định dạng giờ theo khu vực.",
-  "features.item.languages.description": "Hỗ trợ tiếng Trung giản thể, tiếng Trung phồn thể, tiếng Quảng Đông, tiếng Anh, tiếng Nhật, tiếng Hàn, tiếng Pháp, tiếng Tây Ban Nha, tiếng Bồ Đào Nha, tiếng Nga và tiếng Việt, tổng cộng 12 ngôn ngữ.",
+  "features.item.languages.summary": "Mười một ngôn ngữ trên mười hai biến thể chữ viết, với định dạng thời gian bản địa hóa.",
+  "features.item.languages.description": "Tiếng Trung giản thể, tiếng Trung phồn thể, tiếng Quảng Đông (giản thể và phồn thể), tiếng Anh, tiếng Nhật, tiếng Hàn, tiếng Pháp, tiếng Tây Ban Nha, tiếng Bồ Đào Nha, tiếng Nga và tiếng Việt — mười một ngôn ngữ trên mười hai biến thể chữ viết.",
 
   "features.item.multiAccount.title": "Chuyển đổi nhiều tài khoản",
   "features.item.multiAccount.summary": "Thông tin đăng nhập cách ly theo tài khoản WHU và có thể chuyển đổi.",
   "features.item.multiAccount.description": "Thiết bị có thể ghi nhớ nhiều tài khoản WHU và chuyển đổi nhanh; thông tin đăng nhập của VPN, hộp thư, Chaoxing... được cách ly theo từng tài khoản, không dùng lẫn nhau.",
 
   "features.item.thirdPartyAccounts.title": "Liên kết tài khoản bên thứ ba",
-  "features.item.thirdPartyAccounts.summary": "Liên kết ủy quyền các tài khoản bên thứ ba như Ham.",
-  "features.item.thirdPartyAccounts.description": "Quản lý tập trung các tài khoản bên ngoài trong mục \"Tài khoản khác\"; việc liên kết ủy quyền với bên thứ ba như Ham vẫn đang được hoàn thiện.",
-
-  "features.item.libraryLoans.title": "Mượn sách thư viện",
-  "features.item.libraryLoans.summary": "Mượn sách trong kho, gia hạn và nhắc đến hạn.",
-  "features.item.libraryLoans.description": "Dự kiến tích hợp API mượn sách của kho sách, hiển thị các cuốn đang mượn, thời hạn trả, trạng thái gia hạn và hỗ trợ nhắc khi đến hạn.",
+  "features.item.thirdPartyAccounts.summary": "Liên kết được ủy quyền cho các tài khoản bên thứ ba như Ham.",
+  "features.item.thirdPartyAccounts.description": "Quản lý tài khoản bên ngoài tại một nơi duy nhất trong mục Tài khoản khác. Tính năng liên kết và hủy liên kết được ủy quyền cho Ham đã có sẵn, và sẽ có thêm nhiều bên thứ ba khác.",
 
   "features.item.studyMaterials.title": "Chia sẻ tài liệu học tập",
   "features.item.studyMaterials.summary": "Tìm tài liệu theo môn học, giảng viên và học kỳ.",

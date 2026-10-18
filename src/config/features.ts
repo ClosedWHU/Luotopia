@@ -47,6 +47,11 @@ export const featureCategories = [
       { id: "universityCalendar", icon: "calendar_view_day" },
       { id: "courseReviews", icon: "rate_review" },
       { id: "xuexitong", icon: "cast_for_education" },
+      { id: "xiji", icon: "auto_stories" },
+      { id: "courseSpace", icon: "workspaces" },
+      { id: "majorInfo", icon: "account_tree" },
+      { id: "csEban", icon: "military_tech" },
+      { id: "libraryLoans", icon: "menu_book" },
     ],
   },
   {
@@ -62,6 +67,21 @@ export const featureCategories = [
       { id: "campusNetwork", icon: "router" },
       { id: "campusVpn", icon: "vpn_key" },
       { id: "forum", icon: "forum", highlight: true },
+      { id: "social", icon: "group" },
+      { id: "campusNews", icon: "newspaper" },
+      { id: "dining", icon: "restaurant" },
+      { id: "ebike", icon: "electric_bike" },
+      { id: "lepao", icon: "directions_run" },
+      { id: "washing", icon: "local_laundry_service" },
+      { id: "voteTicket", icon: "confirmation_number" },
+    ],
+  },
+  {
+    id: "health",
+    features: [
+      { id: "medication", icon: "medication" },
+      { id: "mentalHealth", icon: "psychology" },
+      { id: "menstrualCycle", icon: "favorite" },
     ],
   },
   {
@@ -85,13 +105,12 @@ export const featureCategories = [
       { id: "accountSecurity", icon: "passkey" },
       { id: "languages", icon: "translate" },
       { id: "multiAccount", icon: "switch_account" },
-      { id: "thirdPartyAccounts", icon: "link", status: "upcoming" },
+      { id: "thirdPartyAccounts", icon: "link" },
     ],
   },
   {
     id: "inDevelopment",
     features: [
-      { id: "libraryLoans", icon: "menu_book", status: "development" },
       { id: "studyMaterials", icon: "folder", status: "development" },
       { id: "gradeEnhancements", icon: "trending_up", status: "development" },
       { id: "recurrenceEnhancements", icon: "repeat", status: "development" },

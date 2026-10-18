@@ -77,6 +77,7 @@
 
   "features.category.coursework": "課程與學業",
   "features.category.campus": "校園服務",
+  "features.category.health": "健康",
   "features.category.smart": "智慧工具",
   "features.category.crossDevice": "跨端與帳號",
   "features.category.inDevelopment": "開發中",
@@ -85,9 +86,9 @@
   "features.item.timetable.summary": "多來源匯入、多課表管理，週月檢視與上課提醒。",
   "features.item.timetable.description": "支援大學部教務、研究生 newyjs、WakeUp 檔案/分享碼、第三方課表與手動編輯；多課表分組管理、週月檢視、上課提醒與桌面小組件聯動。",
 
-  "features.item.agenda.title": "行程與待辦",
-  "features.item.agenda.summary": "課程、任務、備忘集中管理，支援重複與提醒。",
-  "features.item.agenda.description": "事項分為行程、任務與備忘；支援重複規則、優先順序、清單分組、滑動操作、上課提醒和小組件同步。",
+  "features.item.agenda.title": "日程與待辦",
+  "features.item.agenda.summary": "課程、日程、任務、備忘、服藥集中管理，支援重複與提醒。",
+  "features.item.agenda.description": "事項分為課程、日程、任務、備忘與服藥五類；支援彈性重複規則（每日多次、按星期不同時間、月末策略、間隔循環）、滑動操作、課程與任務提醒，日程資料同步至小組件。",
 
   "features.item.freeClassrooms.title": "空閒教室",
   "features.item.freeClassrooms.summary": "多維查詢空閒教室，自動避開課表衝突。",
@@ -118,12 +119,32 @@
   "features.item.universityCalendar.description": "顯示武大歷年校歷資料，學期起訖、假期與教學安排一目瞭然。",
 
   "features.item.courseReviews.title": "課程給分與評價",
-  "features.item.courseReviews.summary": "給分分佈、課程評價與匿名提交。",
-  "features.item.courseReviews.description": "依課程檢視給分分佈與評價，支援匿名提交；小樣本聚合保護隱私，延續 WHU.sb / WHUCourses.cn 的資料脈絡。",
+  "features.item.courseReviews.summary": "給分分布、課程評價與匿名提交。",
+  "features.item.courseReviews.description": "按課程查看給分分布與評價，支援匿名提交；小樣本聚合保護隱私，延續 WHU.sb 的資料脈絡。",
 
   "features.item.xuexitong.title": "超星學習通帳號",
   "features.item.xuexitong.summary": "綁定學習通帳號，憑證本機安全儲存。",
   "features.item.xuexitong.description": "支援學習通（超星）密碼或簡訊登入綁定，憑證保存於本裝置安全儲存並依武大帳號隔離，為後續課程與簽到能力奠定基礎。",
+
+  "features.item.xiji.title": "希冀平台",
+  "features.item.xiji.summary": "接入希冀課程平台，作業與考試提醒。",
+  "features.item.xiji.description": "透過 CAS 或平台帳號登入希冀平台，查看已選課程、課程說明、作業與考試及其截止時間，可設定提醒提前量，並將作業截止日期投射到日程與課表。",
+
+  "features.item.courseSpace.title": "課程空間",
+  "features.item.courseSpace.summary": "課程資訊共享目錄：課程、教師與資源。",
+  "features.item.courseSpace.description": "按學期聚合教學班為統一課程目錄，展示統一課程名稱與編號；進入課程查看教學班與共享資訊、教師主頁、資源共享與審核/信任狀態，管理員可維護全部課程與教學班。",
+
+  "features.item.majorInfo.title": "專業資訊",
+  "features.item.majorInfo.summary": "專業目錄、培養方案與就業去向。",
+  "features.item.majorInfo.description": "瀏覽學部→學院→專業層級，查看培養目標、定位、特色與教學計畫，以及就業去向圖表（去向類型、省份、雇主與行業）；學院可線上預覽培養方案 PDF。",
+
+  "features.item.csEban.title": "CS易辦",
+  "features.item.csEban.summary": "計算機學院的獎懲記錄與思政評價積分查詢。",
+  "features.item.csEban.description": "接入計算機學院易辦平台，查看本科生的獎懲記錄（類別、級別、原因、積分、落款單位）與思政評價積分（總分、等級、明細），支持按日期範圍篩選；帳號密碼僅存本機。",
+
+  "features.item.libraryLoans.title": "圖書借閱",
+  "features.item.libraryLoans.summary": "館藏檢索、借閱、續借、預約與到期提醒。",
+  "features.item.libraryLoans.description": "原生接入 WHU OPAC 館藏系統：檢索館藏（欄位/年份/語種/文獻類型篩選）、查看館藏副本與索書資訊、預約取書（兩次確認）、查看目前借閱並一鍵續借、預約列表、借閱歷史統計與到期/逾期本地提醒。",
 
   "features.item.ecard.title": "珞珈E卡與付款碼",
   "features.item.ecard.summary": "原生付款碼自動重新整理，手錶也能刷。",
@@ -165,9 +186,49 @@
   "features.item.forum.summary": "貼文、留言、附件、聲望與版務管理。",
   "features.item.forum.description": "社群論壇支援貼文、留言、版面、附件、搜尋、聲望、排行榜與公開管理日誌；分頁預設隱藏，可在設定→導覽中開啟。",
 
+  "features.item.social.title": "社群社交",
+  "features.item.social.summary": "個人主頁、追蹤與私訊。",
+  "features.item.social.description": "公開個人主頁，支援追蹤/封鎖關係圖譜與站內私訊，與論壇共用一套帳號。",
+
+  "features.item.campusNews.title": "校園新聞",
+  "features.item.campusNews.summary": "訂閱校內外資訊源，離線閱讀與全文檢索。",
+  "features.item.campusNews.description": "聚合 200 餘站點、近千欄目的校園資訊，可訂閱站點或欄目、標記已讀、全文搜尋與離線快取，內建閱讀模式與正文擷取，VPN 不可用時自動降級。",
+
+  "features.item.dining.title": "美食地圖",
+  "features.item.dining.summary": "校內外美食發掘、菜單、評分與隨機推薦。",
+  "features.item.dining.description": "地圖瀏覽校內外餐飲點與食堂樓層，支援搜尋、校區範圍篩選、菜單與單品價格、評分評價、營業時間與照片，隨機推薦（店鋪或菜品）支援評分與價格過濾，也可提交店鋪、菜單、營業時間與糾錯。",
+
+  "features.item.ebike.title": "共享電動車",
+  "features.item.ebike.summary": "綁定共享電動車帳號，掃碼藍牙開鎖。",
+  "features.item.ebike.description": "綁定知音、芒果等共享電動車帳號，藍牙掃碼開鎖，查看即時騎行狀態、錢包餘額、騎行卡、訂單歷史與未支付訂單提醒，附騎行地圖。",
+
+  "features.item.lepao.title": "步道樂跑",
+  "features.item.lepao.summary": "樂跑成績與跑步軌跡回顧。",
+  "features.item.lepao.description": "綁定步道樂跑帳號，查看歷年跑步記錄（里程、時長、配速、有效性），逐次回放 GPS 軌跡與每公里分段。",
+
+  "features.item.washing.title": "洗衣房",
+  "features.item.washing.summary": "洗衣機狀態查詢與線上購買。",
+  "features.item.washing.description": "按宿舍區/樓棟/樓層瀏覽洗衣點，查看洗衣機即時狀態（空閒/運行/故障）與剩餘時間，選擇洗滌模式（價格/時長）購買，支付跳轉營運商小程序完成。",
+
+  "features.item.voteTicket.title": "搶票助力",
+  "features.item.voteTicket.summary": "校園活動搶票與互助助力。",
+  "features.item.voteTicket.description": "瀏覽學校活動搶票，查看海報、規則與名額，參與產生個人助力 QR code，掃碼或貼上助力他人，互助大廳展示收到/給出/淨值並支援一鍵批次助力。",
+
+  "features.item.medication.title": "服藥管理",
+  "features.item.medication.summary": "基於日程的服藥提醒與餘量管理。",
+  "features.item.medication.description": "在日程之上管理每種藥物的劑量、下次服用時間與剩餘庫存，支援補記一次、補充庫存、30 天依從性彙總，並可匯入 medTimer 備份、匯出 CSV 歷史。",
+
+  "features.item.mentalHealth.title": "心理測評",
+  "features.item.mentalHealth.summary": "心理量表庫與結果解讀。",
+  "features.item.mentalHealth.description": "提供遠端同步的心理測評量表庫（支援搜尋與分類篩選），量表作答支援批次查看、草稿自動儲存與性別分常模，結果含總分、因子分、等級、雷達圖與危機提示，歷史記錄本地儲存。",
+
+  "features.item.menstrualCycle.title": "生理週期",
+  "features.item.menstrualCycle.summary": "本地經期記錄與預測，資料不離機。",
+  "features.item.menstrualCycle.description": "記錄每日經量、症狀、心情與備註，日曆標註實際、預測與易孕期，預測下次經期、排卵日與易孕窗口並給出置信度，附週期統計與可調週期/經期長度設定；純本地儲存。",
+
   "features.item.aiAssistant.title": "AI 助手",
   "features.item.aiAssistant.summary": "多模型 Agent，可操作校園服務。",
-  "features.item.aiAssistant.description": "支援內建與自訂多模型、多模態附件、語音輸入/朗讀、圖像生成、聯網搜尋、MCP、技能與助手；確認橋提供手動/半自動/全自動三檔，工具可查詢和管理課程表、成績、信箱與校園服務資料，並可在使用者確認下發起水電費、網費繳費。",
+  "features.item.aiAssistant.description": "支援內建與自訂多模型、多模態附件、離線與雲端語音輸入/朗讀、圖像生成、聯網搜尋、MCP、技能與助手；確認橋提供半自動/全自動兩檔，工具可查詢和管理課表、成績、信箱與校園服務資料，並可在使用者確認下發起水電費、網費繳費。",
 
   "features.item.weather.title": "天氣",
   "features.item.weather.summary": "多資料來源預報、AQI、降水與預警。",
@@ -185,21 +246,21 @@
   "features.item.hotUpdate.summary": "簽章解析指令碼，介面變化無需發版。",
   "features.item.hotUpdate.description": "官網散布 Ed25519 簽章的 QuickJS 解析指令碼；校園介面變化時可熱更新解析器，減少等待 App 發版。",
 
-  "features.item.appUpdate.title": "應用內更新",
+  "features.item.appUpdate.title": "應用程式內更新",
   "features.item.appUpdate.summary": "檢查新版本並引導安裝。",
-  "features.item.appUpdate.description": "從 GitHub Releases 檢查更新，Android 提供 ABI 升級建議與安裝引導，桌面平台提示下載新版本。",
+  "features.item.appUpdate.description": "從 GitHub Releases 檢查更新，Android 提供 ABI 升級建議與應用程式內下載安裝，桌面平台跳轉瀏覽器打開發佈頁下載。",
 
   "features.item.appleShortcuts.title": "Apple 捷徑",
   "features.item.appleShortcuts.summary": "捷徑呼叫經審核的 App 工具。",
   "features.item.appleShortcuts.description": "macOS 捷徑可呼叫校歷、課程表、成績、空閒教室等經審核工具，寫入操作需要確認。",
 
   "features.item.widgets.title": "桌面小組件",
-  "features.item.widgets.summary": "四款小組件涵蓋 Android/iOS/macOS。",
-  "features.item.widgets.description": "事項清單、今日課程、即將開始、本週課程四款小組件，涵蓋 Android、iOS 與 macOS 選單列。",
+  "features.item.widgets.summary": "四款小組件覆蓋 Android/iOS/macOS/Linux。",
+  "features.item.widgets.description": "事項列表、今日課程、倒數計時、本週課程四款小組件，覆蓋 Android、iOS、macOS 選單列與 Linux 系統匣，並支援 iOS 即時動態。",
 
   "features.item.watch.title": "手錶聯動",
-  "features.item.watch.summary": "Apple Watch 與華為/鴻蒙手錶同步。",
-  "features.item.watch.description": "Apple Watch 可出示E卡付款碼；華為/鴻蒙手錶同步行程、校車與天氣快照。",
+  "features.item.watch.summary": "Apple Watch 與華為/鴻蒙/vivo/小米手錶同步。",
+  "features.item.watch.description": "Apple Watch 可出示 E 卡付款碼，並同步日程與校車；華為/鴻蒙/vivo/小米手錶同步日程、校車快照。",
 
   "features.item.appShortcuts.title": "桌面捷徑",
   "features.item.appShortcuts.summary": "長按圖示直達常用入口。",
@@ -210,20 +271,16 @@
   "features.item.accountSecurity.description": "武大 CAS 與珞家帳號分離；支援 Passkeys、多工作階段、裝置信任、API 憑證、成績生物辨識鎖，診斷遙測可關閉。",
 
   "features.item.languages.title": "多語言",
-  "features.item.languages.summary": "12 種語言與地區化時間格式。",
-  "features.item.languages.description": "支援簡體中文、繁體中文、粵語、英語、日語、韓語、法語、西班牙語、葡萄牙語、俄語、越南語共 12 種語言。",
+  "features.item.languages.summary": "11 種語言、12 個語言變體與地區化時間格式。",
+  "features.item.languages.description": "支援簡體中文、繁體中文、粵語（簡/繁）、英語、日語、韓語、法語、西班牙語、葡萄牙語、俄語、越南語，共 11 種語言、12 個語言變體。",
 
   "features.item.multiAccount.title": "多帳號切換",
   "features.item.multiAccount.summary": "依武大帳號隔離憑證並支援切換。",
   "features.item.multiAccount.description": "裝置可記住多個武大帳號並快速切換；VPN、信箱、學習通等憑證依帳號隔離，互不串用。",
 
   "features.item.thirdPartyAccounts.title": "第三方帳號綁定",
-  "features.item.thirdPartyAccounts.summary": "Ham 等第三方帳號授權綁定。",
-  "features.item.thirdPartyAccounts.description": "在「其他帳號」中集中管理外部帳號；Ham 等第三方授權綁定仍在完善中。",
-
-  "features.item.libraryLoans.title": "圖書借閱",
-  "features.item.libraryLoans.summary": "館藏借閱、續借與到期提醒。",
-  "features.item.libraryLoans.description": "計劃接入館藏借閱 API，顯示目前借閱、到期時間、續借狀態，並支援到期提醒。",
+  "features.item.thirdPartyAccounts.summary": "集中管理 Ham 等第三方帳號授權綁定。",
+  "features.item.thirdPartyAccounts.description": "在「其他帳號」中集中管理外部帳號，已支援 Ham 的授權綁定與解除綁定；更多第三方逐步接入。",
 
   "features.item.studyMaterials.title": "學習資料共享",
   "features.item.studyMaterials.summary": "依課程、教師、學期檢索資料。",
