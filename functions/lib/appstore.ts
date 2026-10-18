@@ -227,6 +227,68 @@ function normalizePem(pem: string): string {
   return s;
 }
 
+/** The base64 PKCS#8 body that actually gets imported — one definition, used
+ * both by the importer and by the failure diagnostics, so a fingerprint can
+ * never describe a different normalization than the signing path used. */
+function normalizedKeyBody(pem: string): string {
+  return normalizePem(pem)
+    .replace(/-----BEGIN PRIVATE KEY-----/g, "")
+    .replace(/-----END PRIVATE KEY-----/g, "")
+    .replace(/\s+/g, "");
+}
+
+async function sha8Hex(text: string): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(text),
+  );
+  return Array.from(new Uint8Array(digest), (b) =>
+    b.toString(16).padStart(2, "0"),
+  )
+    .join("")
+    .slice(0, 8);
+}
+
+/**
+ * Normalise an ECDSA signature to the raw `R||S` form JWS requires.
+ *
+ * WebCrypto specifies that encoding, but vendor edge runtimes are not
+ * uniformly conformant: some return the ASN.1 DER `SEQUENCE{INTEGER,INTEGER}`
+ * instead (~70–72 bytes for P-256), and a JWT carrying it is structurally
+ * valid yet fails Apple's verification — an indistinguishable 401 from the
+ * outside. 64 bytes pass through untouched; a DER sequence is unpacked and
+ * each integer left-padded to 32; anything else is returned unchanged rather
+ * than guessed at.
+ */
+function ecdsaSignatureToRaw(sig: Uint8Array): Uint8Array {
+  if (sig.length === 64) return sig;
+  if (sig.length > 64 && sig[0] === 0x30) {
+    // Short-form length only: P-256 DER signatures are ~70–72 bytes, well
+    // under 128, so the long form cannot legitimately appear here.
+    let offset = 2;
+    const parts: Uint8Array[] = [];
+    for (let i = 0; i < 2; i += 1) {
+      if (sig[offset] !== 0x02) return sig;
+      const len = sig[offset + 1];
+      let value = sig.subarray(offset + 2, offset + 2 + len);
+      offset += 2 + len;
+      // DER pads a leading zero byte when the integer's high bit is set.
+      if (value.length === 33 && value[0] === 0) value = value.subarray(1);
+      if (value.length > 32) return sig;
+      const padded = new Uint8Array(32);
+      padded.set(value, 32 - value.length);
+      parts.push(padded);
+    }
+    if (offset === sig.length) {
+      const raw = new Uint8Array(64);
+      raw.set(parts[0], 0);
+      raw.set(parts[1], 32);
+      return raw;
+    }
+  }
+  return sig;
+}
+
 function base64UrlEncode(input: ArrayBuffer | Uint8Array | string): string {
   let bytes: Uint8Array;
   if (typeof input === "string") {
@@ -246,11 +308,9 @@ function base64UrlEncode(input: ArrayBuffer | Uint8Array | string): string {
 }
 
 async function importEcPrivateKey(pem: string): Promise<CryptoKey> {
-  const body = normalizePem(pem)
-    .replace(/-----BEGIN PRIVATE KEY-----/g, "")
-    .replace(/-----END PRIVATE KEY-----/g, "")
-    .replace(/\s+/g, "");
-  const raw = Uint8Array.from(atob(body), (c) => c.charCodeAt(0));
+  const raw = Uint8Array.from(atob(normalizedKeyBody(pem)), (c) =>
+    c.charCodeAt(0),
+  );
   return crypto.subtle.importKey(
     "pkcs8",
     raw,
@@ -280,12 +340,14 @@ export async function createAppStoreConnectJwt(
   const p = base64UrlEncode(JSON.stringify(payload));
   const signingInput = `${h}.${p}`;
   const key = await importEcPrivateKey(privateKeyPem);
-  const sig = await crypto.subtle.sign(
-    { name: "ECDSA", hash: "SHA-256" },
-    key,
-    new TextEncoder().encode(signingInput),
+  const sig = new Uint8Array(
+    await crypto.subtle.sign(
+      { name: "ECDSA", hash: "SHA-256" },
+      key,
+      new TextEncoder().encode(signingInput),
+    ),
   );
-  return `${signingInput}.${base64UrlEncode(sig)}`;
+  return `${signingInput}.${base64UrlEncode(ecdsaSignatureToRaw(sig))}`;
 }
 
 type JsonApiResource = {
@@ -335,13 +397,57 @@ function firstResource(data: JsonApiList["data"]): JsonApiResource | null {
 }
 
 /**
+ * Non-secret fingerprint of the credentials a failing App Store Connect call
+ * actually used, attached to the failure so it travels in the API response.
+ *
+ * Why this exists: Apple answers every token defect — stale key id, corrupted
+ * issuer UUID, invisible characters that survive `.trim()`, a runtime clock
+ * adrift, a non-conformant ECDSA encoding — with the same generic 401, and the
+ * platform consoles render values that look byte-identical. Every field here
+ * is public or one-way (lengths, prefixes, truncated SHA-256), so the response
+ * stays safe to curl while the fingerprints make "the env vars are the same"
+ * a checkable claim instead of a stalemate. `sigBytes` ≠ 64 indicts the
+ * runtime's ECDSA encoding; `now` far from real time indicts the clock.
+ */
+export type AppStoreConnectDebug = Record<string, string | number>;
+
+async function connectDebugInfo(
+  keyId: string,
+  issuerId: string,
+  privateKeyPem: string,
+  token: string,
+): Promise<AppStoreConnectDebug> {
+  const body = normalizedKeyBody(privateKeyPem);
+  let sigBytes = -1;
+  try {
+    const part = token.split(".")[2] ?? "";
+    sigBytes = atob(part.replace(/-/g, "+").replace(/_/g, "/")).length;
+  } catch {
+    // An undecodable signature segment is itself the finding; keep -1.
+  }
+  return {
+    kid: keyId,
+    kidLen: keyId.length,
+    issHead: issuerId.slice(0, 8),
+    issLen: issuerId.length,
+    keyLen: body.length,
+    keySha8: await sha8Hex(body),
+    sigBytes,
+    now: Math.floor(Date.now() / 1000),
+  };
+}
+
+/**
  * Latest TestFlight (or processing) build via App Store Connect API.
  * Requires APPSTORE_CONNECT=1 + KEY_ID + ISSUER_ID + PRIVATE_KEY.
  */
 export async function fetchAppStoreConnectLatest(
   env: AppStoreEnv,
   bundleId = DEFAULT_BUNDLE_ID,
-): Promise<{ ok: true; info: AppStoreInfo } | { ok: false; status: number; message: string }> {
+): Promise<
+  | { ok: true; info: AppStoreInfo }
+  | { ok: false; status: number; message: string; debug?: AppStoreConnectDebug }
+> {
   const keyId = (env.APPSTORE_CONNECT_KEY_ID || DEFAULT_CONNECT_KEY_ID).trim();
   const issuerId = (env.APPSTORE_CONNECT_ISSUER_ID || "").trim();
   const privateKey = (env.APPSTORE_CONNECT_PRIVATE_KEY || "").trim();
@@ -373,7 +479,18 @@ export async function fetchAppStoreConnectLatest(
       `/v1/apps?filter[bundleId]=${encodeURIComponent(bundleId)}&limit=1`,
       token,
     );
-    if (!apps.ok) return apps;
+    if (!apps.ok) {
+      // Name the key id we actually signed with, and attach the credential
+      // fingerprint (see AppStoreConnectDebug): Apple's 401 is generic, the
+      // consoles look identical, and this is what tells them apart. The kid
+      // is public metadata — it rides in every JWT header and the current
+      // default is committed in this file.
+      return {
+        ...apps,
+        message: `${apps.message} [kid=${keyId}]`,
+        debug: await connectDebugInfo(keyId, issuerId, privateKey, token),
+      };
+    }
     const app = firstResource(apps.json.data);
     if (!app) {
       return {
