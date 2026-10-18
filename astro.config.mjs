@@ -1,6 +1,7 @@
 // @ts-check
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import postcss from 'postcss';
@@ -338,6 +339,67 @@ function statusDevApi() {
   };
 }
 
+/*
+ * Static mirror mode (`MIRROR_ASSETS_ONLY=1`).
+ *
+ * The mirror deployment exists to distribute *files* — hot-update manifests and
+ * scripts, scale data, fonts, CSS/JS bundles — to clients that reach Cloudflare
+ * poorly. It is not a second website: every HTML page is stripped from the build
+ * output, so any page URL on the mirror domain misses while asset paths keep
+ * serving byte-identical files.
+ *
+ * Build time is the only place this can live. The mirror host serves the output
+ * as pure static files and runs nothing from `functions/`, so a runtime switch
+ * would have no code to read it; the environment variable is consumed here, by
+ * the build that the mirror platform runs. The primary deployment simply does
+ * not set it.
+ *
+ * The root `404.html` deliberately survives the prune. Cloudflare-Pages-shaped
+ * platforms choose between "custom 404" and "SPA rewrite" by its presence (see
+ * docs/deployment.md §404 处理): without it, a miss on `/hot-update/typo.json`
+ * would be rewritten to `/` — also gone — and could come back as a bogus 200.
+ * With it, every miss is a deterministic 404. It is the error document, not a
+ * browsable page.
+ */
+const MIRROR_ASSETS_ONLY = ['1', 'true', 'yes', 'on'].includes(
+  (process.env.MIRROR_ASSETS_ONLY ?? '').trim().toLowerCase(),
+);
+
+/** @returns {import('astro').AstroIntegration} */
+function assetsOnlyMirror() {
+  return {
+    name: 'luotopia-assets-only-mirror',
+    hooks: {
+      'astro:build:done': ({ dir, logger }) => {
+        if (!MIRROR_ASSETS_ONLY) return;
+        const root = fileURLToPath(dir);
+        const kept404 = path.join(root, '404.html');
+        let removed = 0;
+        const walk = (current) => {
+          for (const entry of readdirSync(current, { withFileTypes: true })) {
+            const full = path.join(current, entry.name);
+            if (entry.isDirectory()) {
+              walk(full);
+              // Route directories hold nothing but their index.html; drop the
+              // husks so the mirror ships no empty paths.
+              if (readdirSync(full).length === 0) rmSync(full, { recursive: true });
+              continue;
+            }
+            if (entry.name.endsWith('.html') && full !== kept404) {
+              rmSync(full);
+              removed += 1;
+            }
+          }
+        };
+        walk(root);
+        logger.info(
+          `[assets-only-mirror] removed ${removed} HTML page(s); kept 404.html and all assets`,
+        );
+      },
+    },
+  };
+}
+
 /**
  * The locales the site builds, shared with `src/i18n/locales.ts` and
  * `tools/check-i18n.mjs`.
@@ -353,6 +415,7 @@ const PUBLISHED = JSON.parse(
 
 export default defineConfig({
   site: 'https://whu.sb',
+  integrations: [assetsOnlyMirror()],
   prefetch: {
     prefetchAll: true,
     defaultStrategy: 'hover',
