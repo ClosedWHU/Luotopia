@@ -404,6 +404,15 @@ curl -sI "https://whu-homepage-edgeone.tsinbei.cn/api/releases/download/v1.1.0%2
 需要 `env.ASSETS` 绑定且属于主站职责。镜像上的页面行为由 `MIRROR_ASSETS_ONLY`
 存根决定，未命中路径由根 `404.html`（EdgeOne）或函数的纯文本 404（ESA）应答。
 
+**App Store Connect 401 排查**：Apple 对所有令牌缺陷（kid 过期、issuer 含
+不可见字符、运行时时钟漂移、ECDSA 签名编码不合规）回同一条通用 401，控制台
+里的值又看不出差别。`/api/appstore/latest` 的失败响应因此带一个 `debug`
+字段：`kid`/`kidLen`、`issHead`/`issLen`、`keyLen`/`keySha8`（归一化密钥体
+的截断 SHA-256）、`sigBytes`（≠64 说明该运行时的 ECDSA 输出是 DER——签名
+代码已自动转换，这里是双保险）、`now`（对比真实时间查时钟）。全部是公开或
+单向信息，可以放心 curl。跨平台对比同一凭证的指纹即可定位差异（ESA 上可用
+`?connect=1&bundleId=com.does.not.exist` 强制走失败路径拿基线）。
+
 平台产物的离线冒烟：`npm run build && npm run smoke:platforms`——
 `tools/smoke-platform-bundles.mjs` 用净化环境重打产物，再以各平台入口约定
 （ESA `default.fetch`、EdgeOne `onRequest(context)`）驱动，fetch 全部打桩，

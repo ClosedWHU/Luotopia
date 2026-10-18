@@ -25,6 +25,7 @@ import {
   fetchAppStoreByTrackId,
   fetchAppStoreConnectLatest,
   isAppStoreConnectEnabled,
+  type AppStoreConnectDebug,
   type AppStoreEnv,
   type AppStoreInfo,
 } from "../../lib/appstore";
@@ -52,7 +53,11 @@ export async function onRequestGet(context: {
 
   try {
     let connectTried = false;
-    let connectError: { status: number; message: string } | null = null;
+    let connectError: {
+      status: number;
+      message: string;
+      debug?: AppStoreConnectDebug;
+    } | null = null;
 
     if (!forceItunes && (forceConnect || isAppStoreConnectEnabled(env))) {
       connectTried = true;
@@ -60,7 +65,11 @@ export async function onRequestGet(context: {
       if (connect.ok) {
         return json(connect.info, 200, appStoreCacheHeaders());
       }
-      connectError = { status: connect.status, message: connect.message };
+      connectError = {
+        status: connect.status,
+        message: connect.message,
+        debug: connect.debug,
+      };
       // If explicitly ?connect=1, do not silently fall back
       if (forceConnect) {
         return json(
@@ -69,6 +78,7 @@ export async function onRequestGet(context: {
             message: connect.message,
             bundleId,
             source: "appstoreconnect",
+            ...(connect.debug ? { debug: connect.debug } : {}),
           },
           connect.status === 404 ? 404 : connect.status >= 500 ? 502 : connect.status,
           { "Cache-Control": "public, s-maxage=30" },
@@ -101,6 +111,7 @@ export async function onRequestGet(context: {
           bundleId,
           country,
           source: "appstoreconnect",
+          ...(connectError.debug ? { debug: connectError.debug } : {}),
         },
         404,
         {
