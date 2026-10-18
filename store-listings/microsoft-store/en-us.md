@@ -9,16 +9,19 @@ Luotopia
 Luotopia (珞家) is a one-stop digital campus client for students and staff at Wuhan University, bringing coursework, campus services and smart tools together in a single, polished desktop app.
 
 COURSEWORK & STUDIES
-Import your timetable from multiple sources (undergraduate and graduate systems and more), manage several schedules with week/month views and class reminders; keep courses, tasks and notes in one agenda with recurrence and alerts; find free classrooms with automatic conflict detection against your own timetable; reserve library study seats and sports venues; browse the university-wide timetable to find auditable courses that fit your schedule; import grades from multiple channels with GPA calculation and grade trends; plus academic progress, the university calendar, grade-distribution insights and anonymous course reviews.
+Import your timetable from multiple sources (undergraduate and graduate systems and more), manage several schedules with week/month views and class reminders; keep courses, schedules, tasks, notes and medication in one agenda with recurrence and alerts; find free classrooms with automatic conflict detection against your own timetable; reserve library study seats, borrow and renew library books, and book sports venues; browse the university-wide timetable to find auditable courses that fit your schedule; import grades from multiple channels with GPA calculation and grade trends; plus academic progress, the university calendar, grade-distribution insights and anonymous course reviews, course space and major/programme information, and CS Yiban (易办) college affairs.
 
 CAMPUS SERVICES
-Luojia E-card payment code with automatic refresh; live shuttle-bus positions, routes and arrival alerts; a native campus map with place search and facility layers; hospital registration, queue status, invoices and reports; dormitory utility bills and hot-water codes; aggregated campus notifications; direct access to the Smart Luojia portal; campus network plan management; Sangfor aTrust campus VPN; and the community forum "Luojia Shelter".
+Luojia E-card payment code with automatic refresh; live shuttle-bus positions, routes and arrival alerts; a native campus map with place search and facility layers; hospital registration, queue status, invoices and reports; dormitory utility bills and hot-water codes; aggregated campus notifications; direct access to the Smart Luojia portal; campus network plan management; Sangfor aTrust campus VPN; and the community forum "Luojia Shelter". Campus life goes further with campus news, dining, shared e-bikes, Lepao running, laundry, event ticket-grabbing, and community social profiles with direct messages.
+
+HEALTH & WELLBEING
+A medication scheduler over your agenda with dose and stock tracking; a library of psychological self-assessment scales with scored results; and a private, on-device period tracker with cycle prediction.
 
 SMART TOOLS
-A built-in multimodal AI assistant that can carry out campus-service tasks through conversation; multi-source weather with AQI, precipitation and alerts; Coremail campus email with unread badges; a wallpaper center with local, online and Bing daily wallpapers; and signed hot-update scripts that keep features in step with changing campus APIs without new releases.
+A built-in multimodal AI assistant that can carry out campus-service tasks through conversation, with on-device offline speech recognition; multi-source weather with AQI, precipitation and alerts; Coremail campus email with unread badges; a wallpaper center with local, online and Bing daily wallpapers; and signed hot-update scripts that keep features in step with changing campus APIs without new releases.
 
 SECURITY & PRIVACY
-CAS single sign-on, Luotopia accounts and Passkeys; device trust with token binding to defeat credential replay; all credentials encrypted at rest on your device; analytics and crash reporting entirely optional and off by default. Dark mode, 12 languages, and multi-account switching isolated per WHU account.
+CAS single sign-on, Luotopia accounts and Passkeys; device trust with token binding to defeat credential replay; all credentials encrypted at rest on your device; analytics and crash reporting entirely optional and off by default. Dark mode, 11 languages (12 script variants), and multi-account switching isolated per WHU account.
 
 The Luotopia ecosystem spans Windows, macOS, Linux, Android, iOS and HarmonyOS, syncing phone, desktop and watch experiences (widgets and watch companion features are mobile-only).
 
@@ -29,10 +32,12 @@ Luotopia is independently developed by the ClosedWHU team. It is a third-party c
 
 ## Product features (one per line)
 Timetable: multi-source import, multiple schedules, week/month views and class reminders
-Agenda & to-dos: courses, tasks and notes in one place, with recurrence and reminders
+Agenda & to-dos: courses, schedules, tasks, notes and medication, with recurrence and reminders
 Grades: multi-channel import, GPA algorithms and grade trends
-Free classrooms, library study seats and sports venue booking
+Free classrooms, library study seats, library borrowing and sports venue booking
 University-wide timetable with auditable-course matching
+Xuexitong and Xiji course platforms with on-device credential storage
+Course space, major & programme information, and CS Yiban (易办) college affairs
 Luojia E-card payment code with automatic refresh
 Shuttle bus and campus map: live positions, routes and facility layers
 Hospital services, utility bills and campus network in one place
@@ -40,8 +45,11 @@ AI assistant: multimodal chat that can operate campus services
 Coremail campus email and aggregated campus notifications
 Sangfor aTrust campus VPN
 Community forum "Luojia Shelter"
+Campus news, dining, shared e-bikes, Lepao running and laundry
+Medication, mental-health scales and a private period tracker
+Community social profiles, messages and event ticket-grabbing
 Security: CAS / Passkeys / device trust, credentials encrypted on-device, telemetry off by default
-12 languages, multi-account switching, dark mode and signed hot updates
+11 languages, multi-account switching, dark mode and signed hot updates
 
 ## Short title
 Luotopia
