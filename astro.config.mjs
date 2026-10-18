@@ -1,5 +1,5 @@
 // @ts-check
-import { existsSync, readFileSync, readdirSync, rmSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
@@ -344,9 +344,9 @@ function statusDevApi() {
  *
  * The mirror deployment exists to distribute *files* — hot-update manifests and
  * scripts, scale data, fonts, CSS/JS bundles — to clients that reach Cloudflare
- * poorly. It is not a second website: every HTML page is stripped from the build
- * output, so any page URL on the mirror domain misses while asset paths keep
- * serving byte-identical files.
+ * poorly. It is not a second website: every HTML page in the build output is
+ * replaced with a stub that immediately sends the visitor to the same path on
+ * the canonical domain, while asset paths keep serving byte-identical files.
  *
  * Build time is the only place this can live. The mirror host serves the output
  * as pure static files and runs nothing from `functions/`, so a runtime switch
@@ -354,16 +354,50 @@ function statusDevApi() {
  * the build that the mirror platform runs. The primary deployment simply does
  * not set it.
  *
- * The root `404.html` deliberately survives the prune. Cloudflare-Pages-shaped
+ * The redirect is client-side (JS `location.replace`, `<meta refresh>` as the
+ * no-JS fallback) because a static host has no runtime to emit a real 3xx with.
+ * The JS form preserves the query string and hash, which meta refresh cannot;
+ * the baked-in meta target covers the path only. `<link rel=canonical>` points
+ * crawlers at the real page so the mirror never competes with it.
+ *
+ * The root `404.html` deliberately survives untouched. Cloudflare-Pages-shaped
  * platforms choose between "custom 404" and "SPA rewrite" by its presence (see
  * docs/deployment.md §404 处理): without it, a miss on `/hot-update/typo.json`
- * would be rewritten to `/` — also gone — and could come back as a bogus 200.
- * With it, every miss is a deterministic 404. It is the error document, not a
- * browsable page.
+ * would be rewritten to `/` and could come back as a bogus 200. With it, every
+ * genuine miss — a typo, a deleted asset — stays a deterministic 404 instead of
+ * bouncing to the main domain to 404 there.
  */
 const MIRROR_ASSETS_ONLY = ['1', 'true', 'yes', 'on'].includes(
   (process.env.MIRROR_ASSETS_ONLY ?? '').trim().toLowerCase(),
 );
+
+/*
+ * Where mirror page stubs send browsers. Must agree with `MAIN_DOMAIN` in
+ * functions/_middleware.ts — that constant governs the primary deployment,
+ * this one the mirror; `_middleware.ts` is TypeScript and this config cannot
+ * import it (see `PUBLISHED` below). Overridable for staging mirrors; anything
+ * that is not a plain hostname falls back to the default rather than shipping
+ * stubs with an injected target.
+ */
+const MIRROR_MAIN_DOMAIN = /^[a-z0-9.-]+$/.test(
+  (process.env.MIRROR_MAIN_DOMAIN ?? '').trim().toLowerCase(),
+)
+  ? process.env.MIRROR_MAIN_DOMAIN.trim().toLowerCase()
+  : 'www.whu.sb';
+
+/** The document that replaces each page in mirror mode. */
+function mirrorStubHtml(urlPath) {
+  const origin = `https://${MIRROR_MAIN_DOMAIN}`;
+  return (
+    `<!doctype html><html lang="zh-Hans"><head><meta charset="utf-8">` +
+    `<meta name="viewport" content="width=device-width, initial-scale=1">` +
+    `<title>Luotopia</title>` +
+    `<link rel="canonical" href="${origin}${urlPath}">` +
+    `<meta http-equiv="refresh" content="0;url=${origin}${urlPath}">` +
+    `<script>location.replace(${JSON.stringify(origin)} + location.pathname + location.search + location.hash);</script>` +
+    `</head><body></body></html>\n`
+  );
+}
 
 /** @returns {import('astro').AstroIntegration} */
 function assetsOnlyMirror() {
@@ -374,26 +408,29 @@ function assetsOnlyMirror() {
         if (!MIRROR_ASSETS_ONLY) return;
         const root = fileURLToPath(dir);
         const kept404 = path.join(root, '404.html');
-        let removed = 0;
+        let stubbed = 0;
         const walk = (current) => {
           for (const entry of readdirSync(current, { withFileTypes: true })) {
             const full = path.join(current, entry.name);
             if (entry.isDirectory()) {
               walk(full);
-              // Route directories hold nothing but their index.html; drop the
-              // husks so the mirror ships no empty paths.
-              if (readdirSync(full).length === 0) rmSync(full, { recursive: true });
               continue;
             }
-            if (entry.name.endsWith('.html') && full !== kept404) {
-              rmSync(full);
-              removed += 1;
-            }
+            if (!entry.name.endsWith('.html') || full === kept404) continue;
+            const rel = path.relative(root, full).split(path.sep).join('/');
+            // Astro emits routes as `<path>/index.html`; the stub's meta target
+            // is the directory URL, while its JS keeps whatever was requested.
+            const urlPath = rel.endsWith('index.html')
+              ? `/${rel.slice(0, -'index.html'.length)}`
+              : `/${rel}`;
+            writeFileSync(full, mirrorStubHtml(urlPath));
+            stubbed += 1;
           }
         };
         walk(root);
         logger.info(
-          `[assets-only-mirror] removed ${removed} HTML page(s); kept 404.html and all assets`,
+          `[assets-only-mirror] replaced ${stubbed} HTML page(s) with redirects to ` +
+            `https://${MIRROR_MAIN_DOMAIN}; kept 404.html and all assets`,
         );
       },
     },
