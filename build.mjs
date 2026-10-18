@@ -12,7 +12,7 @@
  *
  *   node build.mjs              # every target (needs `dist/` from astro build)
  *   node build.mjs esa          # platform-dist/esa/edge-routine.js
- *   node build.mjs edgeone      # platform-dist/edgeone/{edge-functions,public,package.json}
+ *   node build.mjs edgeone      # platform-dist/edgeone/{<site at the root>,edge-functions,package.json}
  *
  * Cloudflare needs none of this: Pages bundles `functions/` itself and runs
  * the file router natively. Use the npm scripts (`build:esa`, `build:edgeone`)
@@ -76,6 +76,7 @@ const ESA_ENV_NAMES = [
   'UPTIMEROBOT_API_KEY',
   'UPTIMEROBOT_API_URL',
   'GITHUB_TOKEN',
+  'GITHUB_ASSET_MIRROR',
   'REPO',
   'APPSTORE_CONNECT',
   'APPSTORE_CONNECT_ENABLED',
@@ -121,14 +122,21 @@ async function bundleEsa() {
 
 async function bundleEdgeone() {
   const target = join(OUT, 'edgeone');
+  /*
+   * Layout, settled empirically by a real deployment: EdgeOne serves the
+   * output directory itself as the static root and picks `edge-functions/`
+   * up beside it. (The proxy repo's fallback nests the site under `public/`
+   * — that layout serves everything at `/public/...` and 404s the root,
+   * which is exactly the bug this order avoids.) So the site goes in first,
+   * at the root, while `target` does not exist yet and `cp` is unambiguous;
+   * the function bundles then merge in beside it.
+   */
+  await cp(join(ROOT, 'dist'), target, { recursive: true });
   for (const { entry, out } of EDGEONE_ENTRIES) {
     const outfile = join(target, out);
     await mkdir(dirname(outfile), { recursive: true });
     await build({ ...COMMON, entryPoints: [entry], outfile, format: 'esm' });
   }
-  // The static half of the deployment: whatever `astro build` produced (with
-  // MIRROR_ASSETS_ONLY from the platform's env deciding pages-vs-stubs).
-  await cp(join(ROOT, 'dist'), join(target, 'public'), { recursive: true });
   // The Makers CLI expects a package.json next to the function folders in the
   // output directory; a minimal one is enough, and it must not carry the
   // devDependencies or the build would try to install them at the edge.

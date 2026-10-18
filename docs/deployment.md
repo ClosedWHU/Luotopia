@@ -100,6 +100,7 @@ Preview 环境没有运行时 secret，所以：
 | `MIRROR_MAIN_DOMAIN` | 否 | 镜像跳转存根的目标域名，默认 `www.whu.sb`（应与 `functions/_middleware.ts` 的 `MAIN_DOMAIN` 一致）。仅 `MIRROR_ASSETS_ONLY` 启用时使用 |
 | `UPTIMEROBOT_API_KEY` | `/status` 需要 | Read-Only key 即可 |
 | `GITHUB_TOKEN` | 否 | 提高 `/api/releases*` 的 GitHub API 限额 |
+| `GITHUB_ASSET_MIRROR` | 否 | release 资产下载的镜像前缀列表（逗号/空格分隔，按序尝试，如 `https://gh-proxy.com,https://ghfast.top`），全部失败回退 GitHub 直连。**国内边缘部署（EdgeOne/ESA）建议配**，Cloudflare 不配。见[其他部署方式](#其他部署方式) |
 | `REPO` | 否 | 默认 `ClosedWHU/Luotopia` |
 | `APPSTORE_CONNECT` | 否 | `1` 时启用 App Store Connect（TestFlight 构建号） |
 | `APPSTORE_CONNECT_KEY_ID` / `_ISSUER_ID` / `_PRIVATE_KEY` | 启用时需要 | PEM 用字面 `\n` 换行 |
@@ -346,7 +347,10 @@ API 函数面**——App 经由它拉取 hot-update 清单与脚本、`/scales/`
   不经过 dispatch；EdgeOne / ESA 的入口全部是薄适配器，端点不会在平台间漂移。
 - `npm run build:edgeone`（= astro build + `node build.mjs edgeone`）把
   `platform/edgeone/` 的六个入口用 esbuild 打成自包含 JS，连同 `dist/` 组装进
-  `platform-dist/edgeone/{edge-functions/**,public/**,package.json}`。仓库根的
+  `platform-dist/edgeone/`。**站点直接铺在输出目录根部**、`edge-functions/`
+  与之并列（外加一个最小 `package.json`）——这是真实部署实测出的布局：
+  EdgeOne 把输出目录本身当静态根；若再嵌一层 `public/`，整站会跑到
+  `/public/...` 路径下、真实路径全部 404。仓库根的
   `edgeone.json` 已把构建命令和输出目录定好（Makers 只吃 JavaScript，也不解析
   跨目录 TS 导入，所以不能让平台直接跑源码；若控制台不认配置文件就照抄同值）。
   EdgeOne 的环境变量是**运行时**的（函数从 `context.env` 读），上表的
@@ -363,9 +367,37 @@ API 函数面**——App 经由它拉取 hot-update 清单与脚本、`/scales/`
   `config inlined from the build environment: …`；看到 `NO config inlined`
   说明变量没进构建，`/api/status` 会是 `503 not_configured`。
 - ESA 平台限制（handlers 已遵守，改代码时保持）：单次调用 ≤4 个 fetch 子请求
-  （最重的 App Store Connect 路径 3 个；Cache API 读写也计数）；`Host` /
+  （最重的 App Store Connect 路径 3 个，下载在配了镜像且镜像失败时恰好 4 个；
+  Cache API 读写也计数）；`Host` /
   `Connection` 等禁止头不可读写、迭代包含它们的集合也可能抛异常——现有
   handler 只读 `request.url` 和 `request.method`，新路由保持这一点。
+
+**GitHub 下载提速（`GITHUB_ASSET_MIRROR`）**：国内节点直连 GitHub 拉 release
+资产很慢，而函数响应会被平台边缘缓存——所以让慢跳只发生一次。配置镜像前缀
+列表（逗号/空格分隔，按序尝试，如 `https://gh-proxy.com,https://ghfast.top`）
+后，`/api/releases/download/*` 依次按
+`{前缀}/https://github.com/{repo}/releases/download/{tag}/{file}` 拉字节
+（这一步**不经过 GitHub API**，URL 形状是确定的；草稿/不存在的资产镜像处
+自然 404），某个前缀非 200（404/429/5xx/网络错误）就试下一个，全部失败
+回退原有 GitHub API 路径——镜像只是加速器，不是权威源。响应头与直连路径
+一致（`immutable`、7 天边缘缓存），`X-Proxied-From` 报告实际走了哪条路。
+**ESA 上只配一个前缀**：单次调用 ≤4 个子请求，一个镜像的最坏回退链恰好
+贴线，两个镜像会在最深回退路径超限（退化为 502，不会死循环）；EdgeOne 无
+此顾虑。
+
+公共镜像实测（2026-10，联通家宽；**平台节点出口需部署后重测**）：
+`gh-proxy.com`、`ghfast.top`、`ghproxy.net`、`gh.llkk.cc` 可用（吞吐
+40–120 KB/s，其中 gh-proxy.com 还支持 `api.github.com` 透传，列表端点将来
+也可走它）；`gh.ddlc.top` 429、`ghps.cc` 403、`github.moeyy.xyz` /
+`hub.gitmirror.com` 不可达。公共镜像是共享的免费设施，限速和换域名都随时
+发生——生产上更稳的做法是自托管 `hunshcn/gh-proxy`（部署在自己的服务器上，
+把变量指过去），env 变量让换镜像只是改一个值。
+
+```sh
+curl -sI "https://whu-homepage-edgeone.tsinbei.cn/api/releases/download/v1.1.0%2B16/scoop-luotopia.json" | grep -iE "HTTP/|x-proxied-from"
+# 期望 200；X-Proxied-From: gh-proxy.com（配了镜像）或 github-releases（回退/未配）
+# 首拉慢属预期（回源），同一路径第二次应命中边缘缓存显著变快
+```
 
 **`_middleware.ts` 仍是 Cloudflare 专属，这是刻意的**：它的主机规范化会把
 镜像域名自己 302 回主站（镜像就不成立了），语言协商 / 深链重写 / 本地化 404

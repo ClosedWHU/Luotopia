@@ -16,8 +16,12 @@
  * Platform limits worth remembering (all respected by the handlers):
  *   - at most 4 `fetch` subrequests per invocation, and Cache API reads/writes
  *     count against that. The heaviest route is App Store Connect at 3
- *     (apps → builds → appStoreVersions); release download is 3 on its
- *     fallback path; everything else is 1–2.
+ *     (apps → builds → appStoreVersions); release download hits 4 only when a
+ *     configured `GITHUB_ASSET_MIRROR` fails and every fallback runs (mirror →
+ *     release-by-tag → asset API → browser URL) — exactly at budget, which is
+ *     why ESA deployments configure a single mirror prefix; a second one would
+ *     exceed the cap on the deepest fallback (degrades to `fetch_failed`,
+ *     never loops). Everything else is 1–2.
  *   - `Host`, `Connection`, `Upgrade`, `TE`, `Expect`, `Proxy-Connection` and
  *     `DNT` are forbidden request headers: reading, writing **or iterating a
  *     collection that contains them** can throw. No handler here touches
