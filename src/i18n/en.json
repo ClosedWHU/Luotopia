@@ -77,6 +77,7 @@
 
   "features.category.coursework": "Coursework & studies",
   "features.category.campus": "Campus services",
+  "features.category.health": "Health",
   "features.category.smart": "Smart tools",
   "features.category.crossDevice": "Cross-device & accounts",
   "features.category.inDevelopment": "In development",
@@ -86,8 +87,8 @@
   "features.item.timetable.description": "Import from the undergraduate and graduate systems, WakeUp files and share codes, third-party timetables, or edit by hand. Group multiple schedules, switch between week and month views, and get class reminders that stay in sync with your widgets.",
 
   "features.item.agenda.title": "Agenda & to-dos",
-  "features.item.agenda.summary": "Courses, tasks and notes in one place, with recurrence and reminders.",
-  "features.item.agenda.description": "Items come in three kinds — events, tasks and notes — with recurrence rules, priorities, list grouping, swipe actions, class reminders and widget sync.",
+  "features.item.agenda.summary": "Courses, schedules, tasks, notes and medication in one place, with recurrence and reminders.",
+  "features.item.agenda.description": "Items come in five kinds — courses, schedules, tasks, notes and medication — with flexible recurrence (multiple times a day, per-weekday times, month-day rules, interval cycles), swipe actions, class and task reminders, and agenda data synced to widgets.",
 
   "features.item.freeClassrooms.title": "Free classrooms",
   "features.item.freeClassrooms.summary": "Search free rooms on several axes, with your own clashes filtered out.",
@@ -119,11 +120,31 @@
 
   "features.item.courseReviews.title": "Grade distributions & reviews",
   "features.item.courseReviews.summary": "Grade distributions, course reviews and anonymous submission.",
-  "features.item.courseReviews.description": "See how a course's grades are distributed and read its reviews, or submit your own anonymously. Small samples are aggregated to protect privacy, continuing the data lineage of WHU.sb and WHUCourses.cn.",
+  "features.item.courseReviews.description": "See how a course's grades are distributed and read its reviews, or submit your own anonymously. Small samples are aggregated to protect privacy, continuing the data lineage of WHU.sb.",
 
   "features.item.xuexitong.title": "Chaoxing account",
   "features.item.xuexitong.summary": "Bind your Xuexitong account; credentials stay in on-device secure storage.",
   "features.item.xuexitong.description": "Bind Xuexitong (Chaoxing) by password or SMS code. Credentials are kept in this device's secure storage and isolated per WHU account, laying the groundwork for course and check-in features later on.",
+
+  "features.item.xiji.title": "Xiji course platform",
+  "features.item.xiji.summary": "A second course platform with assignment and exam reminders.",
+  "features.item.xiji.description": "Sign in to the Xiji (PTA) course platform via CAS or a platform account, list enrolled courses, view descriptions, assignments and exams with due times, set reminder lead times, and project assignment deadlines into your agenda and timetable.",
+
+  "features.item.courseSpace.title": "Course space",
+  "features.item.courseSpace.summary": "A shared course directory with teachers and resources.",
+  "features.item.courseSpace.description": "Aggregates teaching classes into a unified course directory by term, with standardised course names and numbers. Open a course to see its classes and shared information, teacher profiles, resources and audit/trust status; administrators can maintain the full catalogue and classes.",
+
+  "features.item.majorInfo.title": "Majors & programmes",
+  "features.item.majorInfo.summary": "Browse majors, training plans and employment outcomes.",
+  "features.item.majorInfo.description": "Browse the school's faculty → college → major hierarchy, with training goals, positioning, features and teaching plans, plus employment-outcome charts (type, province, employer and industry). Colleges offer an in-app preview of the training-plan PDF.",
+
+  "features.item.csEban.title": "CS Yiban",
+  "features.item.csEban.summary": "Awards, disciplinary records and evaluation points for the School of Computer Science.",
+  "features.item.csEban.description": "Connects to the School of Computer Science's Yiban (易办) affairs platform to view undergraduate awards and disciplinary records (category, level, reason, points, issuer) and ideological-evaluation points (total, grade, details), with date-range filtering; credentials stay on-device.",
+
+  "features.item.libraryLoans.title": "Library borrowing",
+  "features.item.libraryLoans.summary": "Catalog search, loans, renewals, reservations and due-date reminders.",
+  "features.item.libraryLoans.description": "A native WHU OPAC client: search the catalogue (field, year, language and material filters), view holdings and call numbers, place holds with a pickup location and validity, list current reservations and loans with one-tap renewal, review borrowing-history statistics and get local due-date and overdue reminders.",
 
   "features.item.ecard.title": "Luojia E-card & payment code",
   "features.item.ecard.summary": "A native payment code that refreshes itself — and works from your watch.",
@@ -165,9 +186,49 @@
   "features.item.forum.summary": "Posts, comments, attachments, reputation and moderation.",
   "features.item.forum.description": "A community forum with posts, comments, boards, attachments, search, reputation, leaderboards and a public moderation log. The tab is hidden by default and can be turned on under Settings → Navigation.",
 
+  "features.item.social.title": "Community social",
+  "features.item.social.summary": "Profiles, following and direct messages.",
+  "features.item.social.description": "Public user profiles, a follow/block graph and in-app direct messages, sharing one account with the forum.",
+
+  "features.item.campusNews.title": "Campus news",
+  "features.item.campusNews.summary": "Subscribe to campus sources, with offline reading and full-text search.",
+  "features.item.campusNews.description": "Aggregates 200+ sites and nearly a thousand columns of campus news. Subscribe by site or column, track read state, search across everything and cache for offline reading, with a built-in reading mode and text extraction that degrades gracefully when the VPN is unavailable.",
+
+  "features.item.dining.title": "Dining",
+  "features.item.dining.summary": "Campus food discovery with menus, ratings and a random picker.",
+  "features.item.dining.description": "Browse dining spots and canteen floors on a map, with search, campus scoping, menus with per-item prices, ratings and reviews, opening hours and photos. A random picker (shop or dish) supports rating and price filters, and you can contribute shops, menus, hours and corrections.",
+
+  "features.item.ebike.title": "Shared e-bikes",
+  "features.item.ebike.summary": "Link e-bike accounts and unlock by scanning.",
+  "features.item.ebike.description": "Link Zhiyin, Mango and other shared e-bike accounts, unlock by scanning (BLE), and view live riding status, wallet balance, ride cards, order history, unpaid-order alerts and a riding map.",
+
+  "features.item.lepao.title": "Lepao running",
+  "features.item.lepao.summary": "Your campus running records and GPS tracks.",
+  "features.item.lepao.description": "Bind a Lepao campus-running account and review your per-year run history — distance, duration, pace and validity — with per-run GPS track maps and per-kilometre splits.",
+
+  "features.item.washing.title": "Laundry",
+  "features.item.washing.summary": "Check washer status and order a wash.",
+  "features.item.washing.description": "Browse laundry locations by area, building and floor, view live machine status (idle, running or fault) and remaining time, choose a wash mode (price and minutes) and place an order, then hand off payment to the operator's mini-program.",
+
+  "features.item.voteTicket.title": "Ticket grabbing",
+  "features.item.voteTicket.summary": "Grab event tickets and help others out.",
+  "features.item.voteTicket.description": "Browse WHU event ticket-grabs, view posters, rules and quotas, participate to mint a personal assistance QR, scan or paste someone's code to assist them, and use a mutual-aid hall showing received, given and net standing with one-tap batch assist.",
+
+  "features.item.medication.title": "Medication",
+  "features.item.medication.summary": "Dose schedule, stock and adherence tracking over your agenda.",
+  "features.item.medication.description": "Manage each drug's dose, next intake and remaining stock on top of your agenda, log extra doses, refill stock, review a 30-day adherence summary, and import medTimer backups or export CSV history.",
+
+  "features.item.mentalHealth.title": "Mental health",
+  "features.item.mentalHealth.summary": "A psychological scale library with scored results.",
+  "features.item.mentalHealth.description": "A remotely synced library of psychological scales (search and category filter). Take a scale with batch viewing, auto-saved drafts and sex-specific norms; results show total and factor scores, level, a radar breakdown and crisis flags, with a local history.",
+
+  "features.item.menstrualCycle.title": "Period tracker",
+  "features.item.menstrualCycle.summary": "Local-only cycle tracking and prediction.",
+  "features.item.menstrualCycle.description": "Log flow, symptoms, mood and notes per day, with a calendar shading recorded, predicted and fertile days, next-period/ovulation/fertile-window prediction with confidence, cycle statistics and adjustable cycle and period length — entirely on-device.",
+
   "features.item.aiAssistant.title": "AI assistant",
   "features.item.aiAssistant.summary": "A multi-model agent that can operate campus services.",
-  "features.item.aiAssistant.description": "Built-in and custom models, multimodal attachments, voice input and read-aloud, image generation, web search, MCP, skills and assistants. A confirmation bridge offers manual, semi-automatic and fully automatic modes; the tools can read and manage your timetable, grades, mailbox and campus service data, and can start utility or network payments once you confirm.",
+  "features.item.aiAssistant.description": "Built-in and custom models, multimodal attachments, on-device and cloud voice input, read-aloud, image generation, web search, MCP, skills and assistants. A confirmation bridge offers semi-automatic and fully automatic modes; the tools can read and manage your timetable, grades, mailbox and campus service data, and can start utility or network payments once you confirm.",
 
   "features.item.weather.title": "Weather",
   "features.item.weather.summary": "Multi-source forecasts, AQI, precipitation and alerts.",
@@ -187,19 +248,19 @@
 
   "features.item.appUpdate.title": "In-app updates",
   "features.item.appUpdate.summary": "Check for a new version and be walked through installing it.",
-  "features.item.appUpdate.description": "Checks GitHub Releases for updates. On Android it suggests the right ABI upgrade and guides the install; on desktop it prompts you to download the new version.",
+  "features.item.appUpdate.description": "Checks GitHub Releases for updates. On Android it suggests the right ABI upgrade and guides the install; on desktop it opens the release page in your browser.",
 
   "features.item.appleShortcuts.title": "Apple Shortcuts",
   "features.item.appleShortcuts.summary": "Shortcuts can call the app's audited tools.",
   "features.item.appleShortcuts.description": "macOS Shortcuts can call audited app tools such as the university calendar, timetable, grades and free classrooms. Anything that writes needs confirmation.",
 
   "features.item.widgets.title": "Home-screen widgets",
-  "features.item.widgets.summary": "Four widgets across Android, iOS and macOS.",
-  "features.item.widgets.description": "Agenda list, today's classes, starting soon, and this week's classes — four widgets covering Android, iOS and the macOS menu bar.",
+  "features.item.widgets.summary": "Four widgets across Android, iOS, macOS and Linux.",
+  "features.item.widgets.description": "Agenda list, today's classes, countdown, and this week's classes — four widgets covering Android, iOS, the macOS menu bar and the Linux tray, plus iOS Live Activities.",
 
   "features.item.watch.title": "Watch companion",
-  "features.item.watch.summary": "Syncs with Apple Watch and Huawei / HarmonyOS watches.",
-  "features.item.watch.description": "Apple Watch can present the E-card payment code; Huawei and HarmonyOS watches sync agenda items, shuttle bus and weather snapshots.",
+  "features.item.watch.summary": "Syncs with Apple Watch and Huawei, HarmonyOS, vivo and Xiaomi watches.",
+  "features.item.watch.description": "Apple Watch can present the E-card payment code and sync agenda items and the shuttle bus; Huawei, HarmonyOS, vivo and Xiaomi watches sync agenda and shuttle-bus snapshots.",
 
   "features.item.appShortcuts.title": "App shortcuts",
   "features.item.appShortcuts.summary": "Long-press the icon to jump straight to what you use most.",
@@ -210,8 +271,8 @@
   "features.item.accountSecurity.description": "WHU CAS and Luotopia accounts are kept separate. Passkeys, multiple sessions, device trust, API credentials and a biometric lock on grades are all supported, and diagnostic telemetry can be turned off.",
 
   "features.item.languages.title": "Multiple languages",
-  "features.item.languages.summary": "Twelve languages, with localised time formats.",
-  "features.item.languages.description": "Simplified Chinese, Traditional Chinese, Cantonese, English, Japanese, Korean, French, Spanish, Portuguese, Russian and Vietnamese — twelve languages in all.",
+  "features.item.languages.summary": "Eleven languages across twelve script variants, with localised time formats.",
+  "features.item.languages.description": "Simplified Chinese, Traditional Chinese, Cantonese (simplified and traditional), English, Japanese, Korean, French, Spanish, Portuguese, Russian and Vietnamese — eleven languages across twelve script variants.",
 
   "features.item.multiAccount.title": "Multi-account switching",
   "features.item.multiAccount.summary": "Credentials isolated per WHU account, and switchable.",
@@ -219,11 +280,7 @@
 
   "features.item.thirdPartyAccounts.title": "Third-party account linking",
   "features.item.thirdPartyAccounts.summary": "Authorised linking for third-party accounts such as Ham.",
-  "features.item.thirdPartyAccounts.description": "Manage external accounts in one place under Other accounts. Authorised linking for third parties such as Ham is still being finished.",
-
-  "features.item.libraryLoans.title": "Library loans",
-  "features.item.libraryLoans.summary": "Loans, renewals and due-date reminders.",
-  "features.item.libraryLoans.description": "Planned: a catalogue loan API showing your current loans, due dates and renewal status, with reminders before something falls due.",
+  "features.item.thirdPartyAccounts.description": "Manage external accounts in one place under Other accounts. Authorised linking and unlinking for Ham is available, with more third parties to come.",
 
   "features.item.studyMaterials.title": "Shared study materials",
   "features.item.studyMaterials.summary": "Search materials by course, teacher and term.",

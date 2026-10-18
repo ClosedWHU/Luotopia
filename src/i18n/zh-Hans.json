@@ -77,6 +77,7 @@
 
   "features.category.coursework": "课程与学业",
   "features.category.campus": "校园服务",
+  "features.category.health": "健康",
   "features.category.smart": "智能工具",
   "features.category.crossDevice": "跨端与账号",
   "features.category.inDevelopment": "开发中",
@@ -86,8 +87,8 @@
   "features.item.timetable.description": "支持本科教务、研究生 newyjs、WakeUp 文件/分享码、第三方课表与手动编辑；多课表分组管理、周月视图、课程提醒与桌面小组件联动。",
 
   "features.item.agenda.title": "日程与待办",
-  "features.item.agenda.summary": "课程、任务、备忘集中管理，支持重复与提醒。",
-  "features.item.agenda.description": "事项分为日程、任务与备忘；支持重复规则、优先级、列表分组、滑动操作、课程提醒和小组件同步。",
+  "features.item.agenda.summary": "课程、日程、任务、备忘、服药集中管理，支持重复与提醒。",
+  "features.item.agenda.description": "事项分为课程、日程、任务、备忘与服药五类；支持灵活重复规则（每日多次、按星期不同时间、月末策略、间隔循环）、滑动操作、课程与任务提醒，日程数据同步至小组件。",
 
   "features.item.freeClassrooms.title": "空闲教室",
   "features.item.freeClassrooms.summary": "多维查询空闲教室，自动避开课表冲突。",
@@ -119,11 +120,31 @@
 
   "features.item.courseReviews.title": "课程给分与评价",
   "features.item.courseReviews.summary": "给分分布、课程评价与匿名提交。",
-  "features.item.courseReviews.description": "按课程查看给分分布与评价，支持匿名提交；小样本聚合保护隐私，延续 WHU.sb / WHUCourses.cn 的数据脉络。",
+  "features.item.courseReviews.description": "按课程查看给分分布与评价，支持匿名提交；小样本聚合保护隐私，延续 WHU.sb 的数据脉络。",
 
   "features.item.xuexitong.title": "学习通账号",
   "features.item.xuexitong.summary": "绑定学习通账号，凭据本机安全存储。",
   "features.item.xuexitong.description": "支持学习通（超星）密码或短信登录绑定，凭据保存在本设备安全存储并按武大账号隔离，为后续课程与签到能力打基础。",
+
+  "features.item.xiji.title": "希冀平台",
+  "features.item.xiji.summary": "接入希冀课程平台，作业与考试提醒。",
+  "features.item.xiji.description": "通过 CAS 或平台账号登录希冀平台，查看已选课程、课程说明、作业与考试及其截止时间，可设置提醒提前量，并将作业截止日期投射到日程与课表。",
+
+  "features.item.courseSpace.title": "课程空间",
+  "features.item.courseSpace.summary": "课程信息共享目录：课程、教师与资源。",
+  "features.item.courseSpace.description": "按学期聚合教学班为统一课程目录，展示统一课程名称与编号；进入课程查看教学班与共享信息、教师主页、资源共享与审核/信任状态，管理员可维护全部课程与教学班。",
+
+  "features.item.majorInfo.title": "专业信息",
+  "features.item.majorInfo.summary": "专业目录、培养方案与就业去向。",
+  "features.item.majorInfo.description": "浏览学部→学院→专业层级，查看培养目标、定位、特色与教学计划，以及就业去向图表（去向类型、省份、雇主与行业）；学院可在线预览培养方案 PDF。",
+
+  "features.item.csEban.title": "CS易办",
+  "features.item.csEban.summary": "计算机学院的奖惩记录与思政评价积分查询。",
+  "features.item.csEban.description": "接入计算机学院易办平台，查看本科生的奖惩记录（类别、级别、原因、积分、落款单位）与思政评价积分（总分、等级、明细），支持按日期范围筛选；账号密码仅存本机。",
+
+  "features.item.libraryLoans.title": "图书借阅",
+  "features.item.libraryLoans.summary": "馆藏检索、借阅、续借、预约与到期提醒。",
+  "features.item.libraryLoans.description": "原生接入 WHU OPAC 馆藏系统：检索馆藏（字段/年份/语种/文献类型筛选）、查看馆藏副本与索书信息、预约取书（两次确认）、查看当前借阅并一键续借、预约列表、借阅历史统计与到期/超期本地提醒。",
 
   "features.item.ecard.title": "珞珈E卡与付款码",
   "features.item.ecard.summary": "原生付款码自动刷新，手表也能刷。",
@@ -165,9 +186,49 @@
   "features.item.forum.summary": "帖子、评论、附件、声望与版务管理。",
   "features.item.forum.description": "社区论坛支持帖子、评论、版块、附件、搜索、声望、排行榜与公开管理日志；标签默认隐藏，可在设置→导航中开启。",
 
+  "features.item.social.title": "社区社交",
+  "features.item.social.summary": "个人主页、关注与私信。",
+  "features.item.social.description": "公开个人主页，支持关注/拉黑关系图谱与站内私信，与论坛共享一套账号。",
+
+  "features.item.campusNews.title": "校园新闻",
+  "features.item.campusNews.summary": "订阅校内外资讯源，离线阅读与全文检索。",
+  "features.item.campusNews.description": "聚合 200 余站点、近千栏目的校园资讯，可订阅站点或栏目、标记已读、全文搜索与离线缓存，内置阅读模式与正文提取，VPN 不可用时自动降级。",
+
+  "features.item.dining.title": "美食地图",
+  "features.item.dining.summary": "校内外美食发现、菜单、评分与随机推荐。",
+  "features.item.dining.description": "地图浏览校内外餐饮点与食堂楼层，支持搜索、校区范围筛选、菜单与单品价格、评分评价、营业时间与照片，随机推荐（店铺或菜品）支持评分与价格过滤，也可提交店铺、菜单、营业时间与纠错。",
+
+  "features.item.ebike.title": "共享电动车",
+  "features.item.ebike.summary": "绑定共享电动车账号，扫码蓝牙开锁。",
+  "features.item.ebike.description": "绑定知音、芒果等共享电动车账号，蓝牙扫码开锁，查看实时骑行状态、钱包余额、骑行卡、订单历史与未支付订单提醒，附骑行地图。",
+
+  "features.item.lepao.title": "步道乐跑",
+  "features.item.lepao.summary": "乐跑成绩与跑步轨迹回顾。",
+  "features.item.lepao.description": "绑定步道乐跑账号，查看历年跑步记录（里程、时长、配速、有效性），逐次回放 GPS 轨迹与每公里分段。",
+
+  "features.item.washing.title": "洗衣房",
+  "features.item.washing.summary": "洗衣机状态查询与在线下单。",
+  "features.item.washing.description": "按宿舍区/楼栋/楼层浏览洗衣点，查看洗衣机实时状态（空闲/运行/故障）与剩余时间，选择洗涤模式（价格/时长）下单，支付跳转运营商小程序完成。",
+
+  "features.item.voteTicket.title": "抢票助力",
+  "features.item.voteTicket.summary": "校园活动抢票与互助助力。",
+  "features.item.voteTicket.description": "浏览学校活动抢票，查看海报、规则与名额，参与生成个人助力二维码，扫码或粘贴助力他人，互助大厅展示收到/给出/净值并支持一键批量助力。",
+
+  "features.item.medication.title": "服药管理",
+  "features.item.medication.summary": "基于日程的服药提醒与余量管理。",
+  "features.item.medication.description": "在日程之上管理每种药物的剂量、下次服用时间与剩余库存，支持补记一次、补充库存、30 天依从性汇总，并可导入 medTimer 备份、导出 CSV 历史。",
+
+  "features.item.mentalHealth.title": "心理测评",
+  "features.item.mentalHealth.summary": "心理量表库与结果解读。",
+  "features.item.mentalHealth.description": "提供远程同步的心理测评量表库（支持搜索与分类筛选），量表作答支持批量查看、草稿自动保存与性别分常模，结果含总分、因子分、等级、雷达图与危机提示，历史记录本地保存。",
+
+  "features.item.menstrualCycle.title": "生理周期",
+  "features.item.menstrualCycle.summary": "本地经期记录与预测，数据不离机。",
+  "features.item.menstrualCycle.description": "记录每日经量、症状、心情与备注，日历标注实际、预测与易孕期，预测下次经期、排卵日与易孕窗口并给出置信度，附周期统计与可调周期/经期长度设置；纯本地存储。",
+
   "features.item.aiAssistant.title": "AI 助手",
   "features.item.aiAssistant.summary": "多模型 Agent，可操作校园服务。",
-  "features.item.aiAssistant.description": "支持内置与自定义多模型、多模态附件、语音输入/朗读、图像生成、联网搜索、MCP、技能与助手；确认桥提供手动/半自动/全自动三档，工具可查询和管理课表、成绩、邮箱与校园服务数据，并可在用户确认下发起水电费、网费缴费。",
+  "features.item.aiAssistant.description": "支持内置与自定义多模型、多模态附件、离线与云端语音输入/朗读、图像生成、联网搜索、MCP、技能与助手；确认桥提供半自动/全自动两档，工具可查询和管理课表、成绩、邮箱与校园服务数据，并可在用户确认下发起水电费、网费缴费。",
 
   "features.item.weather.title": "天气",
   "features.item.weather.summary": "多数据源预报、AQI、降水与预警。",
@@ -187,19 +248,19 @@
 
   "features.item.appUpdate.title": "应用内更新",
   "features.item.appUpdate.summary": "检查新版本并引导安装。",
-  "features.item.appUpdate.description": "从 GitHub Releases 检查更新，Android 提供 ABI 升级建议与安装引导，桌面平台提示下载新版本。",
+  "features.item.appUpdate.description": "从 GitHub Releases 检查更新，Android 提供 ABI 升级建议与应用内下载安装，桌面平台跳转浏览器打开发布页下载。",
 
   "features.item.appleShortcuts.title": "Apple 快捷指令",
   "features.item.appleShortcuts.summary": "快捷指令调用经审核的 App 工具。",
   "features.item.appleShortcuts.description": "macOS 快捷指令可调用校历、课程表、成绩、空闲教室等经审核工具，写操作需要确认。",
 
   "features.item.widgets.title": "桌面小组件",
-  "features.item.widgets.summary": "四款小组件覆盖 Android/iOS/macOS。",
-  "features.item.widgets.description": "事项列表、今日课程、即将开始、本周课程四款小组件，覆盖 Android、iOS 与 macOS 菜单栏。",
+  "features.item.widgets.summary": "四款小组件覆盖 Android/iOS/macOS/Linux。",
+  "features.item.widgets.description": "事项列表、今日课程、倒计时、本周课程四款小组件，覆盖 Android、iOS、macOS 菜单栏与 Linux 托盘，并支持 iOS 实况活动。",
 
   "features.item.watch.title": "手表联动",
-  "features.item.watch.summary": "Apple Watch 与华为/鸿蒙手表同步。",
-  "features.item.watch.description": "Apple Watch 可出示 E 卡付款码；华为/鸿蒙手表同步日程、校车与天气快照。",
+  "features.item.watch.summary": "Apple Watch 与华为/鸿蒙/vivo/小米手表同步。",
+  "features.item.watch.description": "Apple Watch 可出示 E 卡付款码，并同步日程与校车；华为/鸿蒙/vivo/小米手表同步日程、校车快照。",
 
   "features.item.appShortcuts.title": "桌面快捷方式",
   "features.item.appShortcuts.summary": "长按图标直达常用入口。",
@@ -210,20 +271,16 @@
   "features.item.accountSecurity.description": "武大 CAS 与珞家账号分离；支持 Passkeys、多会话、设备信任、API 凭据、成绩生物识别锁，诊断遥测可关闭。",
 
   "features.item.languages.title": "多语言",
-  "features.item.languages.summary": "12 种语言与地区化时间格式。",
-  "features.item.languages.description": "支持简体中文、繁体中文、粤语、英语、日语、韩语、法语、西班牙语、葡萄牙语、俄语、越南语共 12 种语言。",
+  "features.item.languages.summary": "11 种语言、12 个语言变体与地区化时间格式。",
+  "features.item.languages.description": "支持简体中文、繁体中文、粤语（简/繁）、英语、日语、韩语、法语、西班牙语、葡萄牙语、俄语、越南语，共 11 种语言、12 个语言变体。",
 
   "features.item.multiAccount.title": "多账号切换",
   "features.item.multiAccount.summary": "按武大账号隔离凭据并支持切换。",
   "features.item.multiAccount.description": "设备可记住多个武大账号并快速切换；VPN、邮箱、学习通等凭据按账号隔离，互不串用。",
 
   "features.item.thirdPartyAccounts.title": "第三方账号绑定",
-  "features.item.thirdPartyAccounts.summary": "Ham 等第三方账号授权绑定。",
-  "features.item.thirdPartyAccounts.description": "在「其他账号」中集中管理外部账号；Ham 等第三方授权绑定仍在完善中。",
-
-  "features.item.libraryLoans.title": "图书借阅",
-  "features.item.libraryLoans.summary": "馆藏借阅、续借与到期提醒。",
-  "features.item.libraryLoans.description": "计划接入馆藏借阅 API，展示当前借阅、到期时间、续借状态，并支持到期提醒。",
+  "features.item.thirdPartyAccounts.summary": "集中管理 Ham 等第三方账号授权绑定。",
+  "features.item.thirdPartyAccounts.description": "在「其他账号」中集中管理外部账号，已支持 Ham 的授权绑定与解绑；更多第三方逐步接入。",
 
   "features.item.studyMaterials.title": "学习资料共享",
   "features.item.studyMaterials.summary": "按课程、教师、学期检索资料。",
