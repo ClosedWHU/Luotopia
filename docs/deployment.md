@@ -87,12 +87,17 @@ Preview 环境没有运行时 secret，所以：
 在 Pages → Settings → Environment variables 配置。本地开发写在 `.dev.vars`
 （参考 `.dev.vars.example`），`.env.example` 是完整清单。
 
+镜像部署共用同一批变量，但读取时机不同：EdgeOne 在**运行时**交给函数
+（`context.env`）；ESA 没有运行时环境变量，`npm run build:esa` 在**构建期**
+把它们内联进产物 banner（见[其他部署方式](#其他部署方式)）。
+
 | 变量 | 必需 | 说明 |
 |------|------|------|
 | `HOT_UPDATE_ED25519_PRIVATE_KEY` | 是 | base64 的 PKCS#8 Ed25519 私钥，`npm run hot-update:init-key` 生成。**只配 Production** |
 | `HOT_UPDATE_ALLOW_UNSIGNED` | 否 | `1` 时允许无密钥构建（只校验、不签名、不写清单）。**只配 Preview**，见 [PR 预览构建](#pr-预览构建) |
 | `HOT_UPDATE_PRODUCTION_BRANCH` | 否 | 生产分支名，默认 `main`。用于拒绝在生产分支上未签名构建 |
-| `MIRROR_ASSETS_ONLY` | 否 | `1` 时从构建产物剥离全部 HTML 页面（仅保留根 `404.html`），把部署变成纯静态文件镜像。**只配镜像项目**，Cloudflare 主站不配。见[其他部署方式](#其他部署方式) |
+| `MIRROR_ASSETS_ONLY` | 否 | `1` 时把构建产物中的全部 HTML 页面替换为跳转到主域名的存根（保留根 `404.html`），把部署变成纯静态文件镜像。**只配镜像项目**，Cloudflare 主站不配。见[其他部署方式](#其他部署方式) |
+| `MIRROR_MAIN_DOMAIN` | 否 | 镜像跳转存根的目标域名，默认 `www.whu.sb`（应与 `functions/_middleware.ts` 的 `MAIN_DOMAIN` 一致）。仅 `MIRROR_ASSETS_ONLY` 启用时使用 |
 | `UPTIMEROBOT_API_KEY` | `/status` 需要 | Read-Only key 即可 |
 | `GITHUB_TOKEN` | 否 | 提高 `/api/releases*` 的 GitHub API 限额 |
 | `REPO` | 否 | 默认 `ClosedWHU/Luotopia` |
@@ -312,35 +317,89 @@ npm run build
 同样地，`functions/` 不会生效，依赖 `/api/*` 的部分（下载页的版本徽章与更新日志、
 `/status` 的全部数据）会退回到静态占位或错误态。
 
-### EdgeOne Pages（静态文件镜像）
+### 静态文件镜像（EdgeOne Pages / 阿里云 ESA）
 
-`www-whu-sb.tsinbei.cn`（EdgeOne Pages）从同一仓库构建，定位是**文件分发**——
-App 经由它拉取 hot-update 清单与脚本、`/scales/`、字体、`/_astro/` 产物等——
-不承担网页浏览。镜像项目只需要两个环境变量：
+`whu-homepage-edgeone.tsinbei.cn`（EdgeOne Pages）从同一仓库构建，定位是**文件分发 +
+API 函数面**——App 经由它拉取 hot-update 清单与脚本、`/scales/`、字体、`/_astro/`
+产物，以及 `/api/*`、`/fonts/gstatic/*` 端点——不承担网页浏览。
+`whu-homepage-esa.tsinbei.cn`（阿里云 ESA）承担同一角色，是
+第二家云的冗余镜像。镜像项目需要的构建期变量：
 
 - `MIRROR_ASSETS_ONLY=1`：构建期由 `astro.config.mjs` 的 `assetsOnlyMirror`
-  把全部 HTML 页面从产物中剥离，任何页面 URL 都未命中。唯一保留的是根
-  `404.html`：CF 风格平台以它的存在决定「自定义 404」还是「SPA 重写」（见
-  [404 处理](#404-处理)），留着它才能保证未命中路径全部稳定返回 404 而不是
-  假 200。
+  把全部 HTML 页面替换为跳转存根——一个几百字节的文档，用 JS
+  `location.replace`（保留 query 和 hash）立即把访客送到主域名的同路径，
+  `<meta refresh>` 兜底无 JS 的场景，`<link rel=canonical>` 告诉爬虫真身
+  在哪。纯静态托管没有运行时，发不出真正的 3xx，存根是静态镜像能做到的
+  等价物。跳转目标用 `MIRROR_MAIN_DOMAIN` 覆盖（默认 `www.whu.sb`）。
+- 根 `404.html` 原样保留：CF 风格平台以它的存在决定「自定义 404」还是
+  「SPA 重写」（见 [404 处理](#404-处理)），留着它，typo 和缺失资源的未
+  命中才是确定的 404，而不是被弹去主域名再 404 一次。
 - `HOT_UPDATE_ED25519_PRIVATE_KEY`：prebuild 每次构建都重新生成签名清单，
   镜像分发的正是这份文件，所以仍然必需。若镜像项目开启了预览部署，同
   Cloudflare 的纪律：私钥只给生产部署。
 
-EdgeOne 将站点识别为 pure project，`functions/` 不运行：`/api/*`、语言协商、
-深链重写、`_middleware.ts` 的域名黑白名单在镜像上全部不存在——镜像域名不会
-重定向到主域名，这正是镜像成立的前提；那些能力仍由 Cloudflare 主站提供。
-构建命令 `npm run build`（或诊断期的 `npm run prebuild && npm run build`），
-输出目录 `dist`，Node ≥ 22.12。
+**函数面怎么上去的**（两家共用一套核心，仿 `../proxy` 的多平台模式）：
+
+- 路由表在 `functions/lib/dispatch.ts`，按 pathname 分发到 `functions/` 里
+  现成的六个处理器（status、appstore/latest、releases、releases/latest、
+  releases/download/*、fonts/gstatic/*）。Cloudflare 继续用它自己的文件路由，
+  不经过 dispatch；EdgeOne / ESA 的入口全部是薄适配器，端点不会在平台间漂移。
+- `npm run build:edgeone`（= astro build + `node build.mjs edgeone`）把
+  `platform/edgeone/` 的六个入口用 esbuild 打成自包含 JS，连同 `dist/` 组装进
+  `platform-dist/edgeone/{edge-functions/**,public/**,package.json}`。仓库根的
+  `edgeone.json` 已把构建命令和输出目录定好（Makers 只吃 JavaScript，也不解析
+  跨目录 TS 导入，所以不能让平台直接跑源码；若控制台不认配置文件就照抄同值）。
+  EdgeOne 的环境变量是**运行时**的（函数从 `context.env` 读），上表的
+  `UPTIMEROBOT_API_KEY`、`GITHUB_TOKEN`、`APPSTORE_*`、`STATUS_*` 配了就生效。
+- `npm run build:esa`（= astro build + `node build.mjs esa`）打出单入口
+  `platform-dist/esa/edge-routine.js`（`export default { fetch }`，ESM——贴
+  service-worker 形式会**静默不执行**）。仓库根的 `esa.jsonc` **覆盖控制台**，
+  `name` 必须与已建的 Pages 项目同名，否则会另建一个；`assets.directory` 为
+  `./dist`，默认路由「命中静态文件返回文件，否则执行函数」正是镜像要的，
+  **不要**配 `assets.notFoundStrategy`。ESA 的环境变量是**构建期**的：
+  `build.mjs` 把控制台「构建信息 → 环境变量」里的值内联成产物 banner
+  （`globalThis.__LUOTOPIA_HOMEPAGE_ENV__`），密钥进产物不进仓库
+  （`platform-dist/` 已 gitignore）。构建日志必须出现
+  `config inlined from the build environment: …`；看到 `NO config inlined`
+  说明变量没进构建，`/api/status` 会是 `503 not_configured`。
+- ESA 平台限制（handlers 已遵守，改代码时保持）：单次调用 ≤4 个 fetch 子请求
+  （最重的 App Store Connect 路径 3 个；Cache API 读写也计数）；`Host` /
+  `Connection` 等禁止头不可读写、迭代包含它们的集合也可能抛异常——现有
+  handler 只读 `request.url` 和 `request.method`，新路由保持这一点。
+
+**`_middleware.ts` 仍是 Cloudflare 专属，这是刻意的**：它的主机规范化会把
+镜像域名自己 302 回主站（镜像就不成立了），语言协商 / 深链重写 / 本地化 404
+需要 `env.ASSETS` 绑定且属于主站职责。镜像上的页面行为由 `MIRROR_ASSETS_ONLY`
+存根决定，未命中路径由根 `404.html`（EdgeOne）或函数的纯文本 404（ESA）应答。
+
+平台产物的离线冒烟：`npm run build && npm run smoke:platforms`——
+`tools/smoke-platform-bundles.mjs` 用净化环境重打产物，再以各平台入口约定
+（ESA `default.fetch`、EdgeOne `onRequest(context)`）驱动，fetch 全部打桩，
+验证无配置 fail-closed、各端点主路径、守卫分支（400/404/405）以及两种配置门
+到达同一行为。
 
 部署后验证：
 
 ```sh
-curl -sI https://www-whu-sb.tsinbei.cn/ | head -1
-# 期望 404（页面不分发）
-curl -sI https://www-whu-sb.tsinbei.cn/hot-update/manifest.json | head -1
+curl -s https://whu-homepage-edgeone.tsinbei.cn/ | head -c 300
+# 期望跳转存根：canonical/meta refresh 指向 https://www.whu.sb/
+curl -sI https://whu-homepage-edgeone.tsinbei.cn/hot-update/manifest.json | head -1
 # 期望 200（文件正常分发）
+curl -s https://whu-homepage-edgeone.tsinbei.cn/api/status | head -c 200
+# 期望 200 快照 JSON；若 503 not_configured，查运行时环境变量
+curl -sI https://whu-homepage-edgeone.tsinbei.cn/typo-page | head -1
+# 期望 404（未命中不跳转，由 404.html 应答）
 ```
+
+两条对镜像域名的硬性要求（App 端以 `AppConfig.kSiteStaticMirrors` 登记，
+TLS 走 `*.tsinbei.cn` 的 pinned 信任区）：
+
+- **证书必须覆盖镜像主机名**：`*.tsinbei.cn` 通配符或包含该主机的 SAN。
+  平台托管证书若只签给旧主机名（改名后未重签），pinned 客户端会以
+  hostname mismatch 拒连——`whu-timetable-esa` 改名后就踩过这一点。
+- **静态路径必须真实应答**：源站回源未生效时全路径 404，镜像等于不存在；
+  App 侧只会静默跳过（回退下一候选），不会报错，所以部署后要用上面的
+  curl 实测，不能只看控制台状态。
 
 ## 部署后检查
 
