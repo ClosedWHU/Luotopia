@@ -26,7 +26,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 const SANITIZED_ENV_NAMES = [
-  'UPTIMEROBOT_API_KEY', 'UPTIMEROBOT_API_URL', 'GITHUB_TOKEN', 'REPO',
+  'UPTIMEROBOT_API_KEY', 'UPTIMEROBOT_API_URL', 'GITHUB_TOKEN', 'GITHUB_ASSET_MIRROR', 'REPO',
   'APPSTORE_CONNECT', 'APPSTORE_CONNECT_ENABLED', 'APPSTORE_CONNECT_KEY_ID',
   'APPSTORE_CONNECT_ISSUER_ID', 'APPSTORE_CONNECT_PRIVATE_KEY', 'APPSTORE_CONNECT_APP_ID',
   'APPSTORE_BUNDLE_ID', 'APPSTORE_COUNTRY', 'APPSTORE_TRACK_ID',
@@ -94,6 +94,21 @@ const GH_RELEASE = {
   assets: [],
 };
 
+const GH_RELEASE_WITH_ASSET = {
+  ...GH_RELEASE,
+  tag_name: 'v1.1.0+16',
+  name: 'v1.1.0+16',
+  assets: [{
+    id: 42,
+    name: 'app.apk',
+    size: 4,
+    download_count: 0,
+    browser_download_url:
+      'https://github.com/ClosedWHU/Luotopia/releases/download/v1.1.0%2B16/app.apk',
+    content_type: 'application/vnd.android.package-archive',
+  }],
+};
+
 const FONT_HEX = 'a'.repeat(64);
 let fetchCalls = [];
 
@@ -106,8 +121,30 @@ globalThis.fetch = async (input) => {
   if (url.includes('api.github.com') && url.includes('/releases/latest')) {
     return Response.json(GH_RELEASE);
   }
+  if (url.includes('api.github.com') && url.includes('/releases/tags/')) {
+    return Response.json(GH_RELEASE_WITH_ASSET);
+  }
+  if (url.includes('api.github.com') && url.includes('/releases/assets/42')) {
+    return new Response(new Uint8Array([4, 3, 2, 1]), {
+      headers: { 'Content-Type': 'application/octet-stream' },
+    });
+  }
   if (url.includes('api.github.com') && url.includes('/releases?')) {
     return Response.json([GH_RELEASE]);
+  }
+  // A healthy gh-proxy-shaped mirror: takes the full GitHub URL as its path.
+  if (url.startsWith('https://mirror.test/https://github.com/')) {
+    return new Response(new Uint8Array([9, 8, 7, 6]), {
+      headers: { 'Content-Type': 'application/octet-stream' },
+    });
+  }
+  // A rate-limited mirror: any non-2xx must fall through to straight GitHub.
+  if (url.startsWith('https://rate-limited.test/')) {
+    return new Response('slow down', { status: 429 });
+  }
+  // A dead mirror: a network failure must fall through the same way.
+  if (url.startsWith('https://dead.test/')) {
+    throw new Error('smoke: mirror unreachable');
   }
   if (url.startsWith(`https://fonts.gstatic.com/s/a/${FONT_HEX}.ttf`)) {
     return new Response(new Uint8Array([0, 1, 0, 1]), {
@@ -234,6 +271,123 @@ for (const { file, path } of EDGEONE_ENTRIES) {
   check(`edgeone: ${file} answers ${path}`, response instanceof Response, `got ${typeof response}`);
 }
 
+/* -------------------------------------------------------------------------- */
+/* GITHUB_ASSET_MIRROR: mirror first, straight GitHub second                   */
+/* -------------------------------------------------------------------------- */
+
+console.log('GITHUB_ASSET_MIRROR (release downloads)');
+const DOWNLOAD_PATH = '/api/releases/download/v1.1.0%2B16/app.apk';
+const MIRROR_URL =
+  'https://mirror.test/https://github.com/ClosedWHU/Luotopia/releases/download/v1.1.0%2B16/app.apk';
+
+async function driveDownload() {
+  fetchCalls.length = 0;
+  const response = await esa.default.fetch(new Request(`${ORIGIN}${DOWNLOAD_PATH}`));
+  return { response, calls: [...fetchCalls] };
+}
+
+// Mirror hit: one subrequest, served from the mirror's host.
+globalThis.__LUOTOPIA_HOMEPAGE_ENV__ = { GITHUB_ASSET_MIRROR: 'https://mirror.test' };
+esa.resetResolvedEnv();
+{
+  const { response, calls } = await driveDownload();
+  check('mirror: hit serves 200 from the mirror',
+    response.status === 200 && response.headers.get('x-proxied-from') === 'mirror.test',
+    `status ${response.status} proxied ${response.headers.get('x-proxied-from')}`);
+  check('mirror: hit spends exactly one subrequest on the mirror URL',
+    calls.length === 1 && calls[0] === MIRROR_URL,
+    JSON.stringify(calls));
+  check('mirror: download headers survive the mirror path',
+    response.headers.get('content-disposition') === 'attachment; filename="app.apk"' &&
+      response.headers.get('x-release-tag') === 'v1.1.0+16');
+}
+
+// A rate-limited mirror falls through to the authoritative GitHub API path.
+globalThis.__LUOTOPIA_HOMEPAGE_ENV__ = { GITHUB_ASSET_MIRROR: 'https://rate-limited.test' };
+esa.resetResolvedEnv();
+{
+  const { response, calls } = await driveDownload();
+  check('mirror: 429 falls through to GitHub',
+    response.status === 200 && response.headers.get('x-proxied-from') === 'github-releases',
+    `status ${response.status} proxied ${response.headers.get('x-proxied-from')}`);
+  check('mirror: fallback resolves via the releases API',
+    calls.some((u) => u.includes('api.github.com') && u.includes('/releases/tags/')),
+    JSON.stringify(calls));
+}
+
+// A dead mirror (network failure) falls through the same way.
+globalThis.__LUOTOPIA_HOMEPAGE_ENV__ = { GITHUB_ASSET_MIRROR: 'https://dead.test' };
+esa.resetResolvedEnv();
+{
+  const { response } = await driveDownload();
+  check('mirror: unreachable falls through to GitHub',
+    response.status === 200 && response.headers.get('x-proxied-from') === 'github-releases');
+}
+
+// A non-https value is ignored instead of downgrading the fetch.
+globalThis.__LUOTOPIA_HOMEPAGE_ENV__ = { GITHUB_ASSET_MIRROR: 'http://insecure.test' };
+esa.resetResolvedEnv();
+{
+  const { response, calls } = await driveDownload();
+  check('mirror: http:// value is ignored',
+    response.status === 200 &&
+      response.headers.get('x-proxied-from') === 'github-releases' &&
+      !calls.some((u) => u.includes('insecure.test')));
+}
+
+// Multiple prefixes: tried in order, the first healthy one serves.
+globalThis.__LUOTOPIA_HOMEPAGE_ENV__ = {
+  GITHUB_ASSET_MIRROR: 'https://rate-limited.test, https://mirror.test',
+};
+esa.resetResolvedEnv();
+{
+  const { response, calls } = await driveDownload();
+  check('mirror list: falls through to the second prefix',
+    response.status === 200 && response.headers.get('x-proxied-from') === 'mirror.test',
+    `status ${response.status} proxied ${response.headers.get('x-proxied-from')}`);
+  check('mirror list: tries prefixes in order and stops at the first 200',
+    calls.length === 2 &&
+      calls[0].startsWith('https://rate-limited.test/') &&
+      calls[1] === MIRROR_URL,
+    JSON.stringify(calls));
+}
+
+// Junk entries are filtered instead of fetched.
+globalThis.__LUOTOPIA_HOMEPAGE_ENV__ = {
+  GITHUB_ASSET_MIRROR: 'http://insecure.test, not-a-url, https://mirror.test',
+};
+esa.resetResolvedEnv();
+{
+  const { response, calls } = await driveDownload();
+  check('mirror list: junk entries are filtered, the https one serves',
+    response.status === 200 &&
+      response.headers.get('x-proxied-from') === 'mirror.test' &&
+      calls.length === 1 && calls[0] === MIRROR_URL,
+    JSON.stringify(calls));
+}
+
+// EdgeOne's runtime env reaches the same handler logic.
+{
+  const entry = await import(
+    pathToFileURL(
+      join(ROOT, 'platform-dist/edgeone/edge-functions/api/releases/download/[[path]].js'),
+    ).href
+  );
+  fetchCalls.length = 0;
+  const response = await entry.onRequest({
+    request: new Request(`${ORIGIN}${DOWNLOAD_PATH}`),
+    env: { GITHUB_ASSET_MIRROR: 'https://mirror.test' },
+  });
+  check('mirror: EdgeOne context.env drives the mirror path',
+    response.status === 200 &&
+      response.headers.get('x-proxied-from') === 'mirror.test' &&
+      fetchCalls.length === 1 && fetchCalls[0] === MIRROR_URL,
+    `status ${response.status}, calls ${JSON.stringify(fetchCalls)}`);
+}
+
+globalThis.__LUOTOPIA_HOMEPAGE_ENV__ = {};
+esa.resetResolvedEnv();
+
 // The dispatch must be identical behind both doors: same path, same answer.
 {
   const statusEntry = await import(
@@ -251,10 +405,15 @@ for (const { file, path } of EDGEONE_ENTRIES) {
 /* Static half of the EdgeOne output                                           */
 /* -------------------------------------------------------------------------- */
 
-for (const relative of ['public/index.html', 'public/404.html', 'package.json']) {
+// The site must sit at the OUTPUT ROOT: a real EdgeOne deployment serves the
+// output directory itself, so a nested public/ shows up as /public/... URLs
+// and 404s every real path (the bug this layout pin prevents).
+for (const relative of ['index.html', '404.html', 'package.json', 'edge-functions/api/status.js']) {
   check(`edgeone output contains ${relative}`,
     existsSync(join(ROOT, 'platform-dist/edgeone', relative)));
 }
+check('edgeone output has no nested public/ (site serves from the root)',
+  !existsSync(join(ROOT, 'platform-dist/edgeone', 'public')));
 
 console.log('');
 if (fetchCalls.length === 0) {

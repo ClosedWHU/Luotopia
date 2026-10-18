@@ -5,6 +5,14 @@
  * Example: /api/releases/download/v1.0.0%2B3/app-arm64-v8a-release.apk
  *
  * Only serves assets that belong to REPO (default ClosedWHU/Luotopia).
+ *
+ * `GITHUB_ASSET_MIRROR` (e.g. `https://gh-proxy.com,https://ghfast.top`)
+ * reroutes the byte fetch through public GitHub download proxies — the
+ * deployment knob for the EdgeOne/ESA mirrors, whose mainland-China egress
+ * reaches GitHub far worse than it reaches a proxy like this. Prefixes are
+ * tried in order, straight GitHub last; whichever answers, the response is
+ * edge-cached here, so the slow hop happens once per asset per POP and every
+ * later download is local.
  */
 
 import {
@@ -32,9 +40,46 @@ function parsePath(raw: string | string[] | undefined): { tag: string; name: str
   return { tag, name };
 }
 
+/**
+ * The deterministic `browser_download_url` shape. Used for the mirror hop,
+ * which is why the mirror path needs no GitHub API call at all: a draft or
+ * never-published asset simply 404s here like it would on github.com, and the
+ * fall-through below still produces the precise API-sourced error.
+ */
+function releaseDownloadUrl(repo: string, tag: string, name: string): string {
+  return `https://github.com/${repo}/releases/download/${encodeURIComponent(tag)}/${encodeURIComponent(name)}`;
+}
+
+/** Shared success tail: stream the upstream body with the download headers. */
+function assetResponse(
+  upstream: Response,
+  name: string,
+  tag: string,
+  contentTypeFallback: string,
+  proxiedFrom: string,
+  contentLengthFallback = "",
+): Response {
+  const contentType = upstream.headers.get("Content-Type") || contentTypeFallback;
+  const contentLength = upstream.headers.get("Content-Length") || contentLengthFallback;
+
+  const headers = new Headers({
+    "Content-Type": contentType,
+    "Content-Disposition": `attachment; filename="${name.replace(/"/g, "")}"`,
+    "Access-Control-Allow-Origin": "*",
+    ...assetCacheHeaders(),
+    "X-Content-Type-Options": "nosniff",
+    "X-Proxied-From": proxiedFrom,
+    "X-Release-Tag": tag,
+  });
+  if (contentLength) headers.set("Content-Length", contentLength);
+
+  // Stream body; do not buffer whole file in memory
+  return new Response(upstream.body, { status: 200, headers });
+}
+
 export async function onRequestGet(context: {
   request: Request;
-  env: { REPO?: string; GITHUB_TOKEN?: string };
+  env: { REPO?: string; GITHUB_TOKEN?: string; GITHUB_ASSET_MIRROR?: string };
   params: { path?: string | string[] };
 }): Promise<Response> {
   const { env, params } = context;
@@ -48,6 +93,47 @@ export async function onRequestGet(context: {
     });
   }
   const { tag, name } = parsed;
+
+  /*
+   * Mirror hops, when configured. `GITHUB_ASSET_MIRROR` takes a comma/space-
+   * separated list of prefixes tried in order — public mirrors are shared
+   * free infrastructure, so one being rate-limited or dead is routine, and
+   * the list is what keeps that a non-event. gh-proxy-shaped proxies take
+   * the full GitHub URL as their path and follow the redirect to the CDN
+   * themselves. Anything other than a clean 200 — 404 while a mirror
+   * revalidates, 429 rate limit, 5xx, network failure — moves to the next
+   * prefix and finally to the authoritative GitHub API path: mirrors are
+   * accelerators, never the source of truth. https-only so a mistyped value
+   * cannot downgrade the fetch.
+   *
+   * ESA budget note: every hop is a subrequest, and ESA caps an invocation at
+   * 4. One mirror keeps the worst case (mirror fails → tag → asset → browser
+   * URL) exactly at the cap; with two mirrors only the deepest fallback can
+   * exceed it, and it degrades to `fetch_failed` rather than looping.
+   */
+  const mirrors = (env.GITHUB_ASSET_MIRROR || "")
+    .split(/[\s,]+/)
+    .map((candidate) => candidate.trim().replace(/\/+$/, ""))
+    .filter((candidate) => candidate.startsWith("https://"));
+  for (const mirror of mirrors) {
+    try {
+      const upstream = await fetch(`${mirror}/${releaseDownloadUrl(repo, tag, name)}`, {
+        headers: { "User-Agent": "Luotopia-Homepage-Pages" },
+        redirect: "follow",
+        cf: {
+          cacheTtl: GH_ASSET_CACHE_TTL,
+          cacheEverything: true,
+          cacheTtlByStatus: { "200-299": GH_ASSET_CACHE_TTL, "404": 120, "500-599": 0 },
+        },
+      } as RequestInit);
+      if (upstream.ok && upstream.body) {
+        return assetResponse(upstream, name, tag, "application/octet-stream", new URL(mirror).host);
+      }
+      await upstream.body?.cancel();
+    } catch {
+      // This mirror is unreachable from this node: try the next one.
+    }
+  }
 
   try {
     // Resolve release by tag (cached at edge)
@@ -121,28 +207,14 @@ export async function onRequestGet(context: {
       );
     }
 
-    const contentType =
-      upstream.headers.get("Content-Type") ||
-      asset.content_type ||
-      "application/octet-stream";
-    const contentLength = upstream.headers.get("Content-Length") || String(asset.size || "");
-
-    const headers = new Headers({
-      "Content-Type": contentType,
-      "Content-Disposition": `attachment; filename="${name.replace(/"/g, "")}"`,
-      "Access-Control-Allow-Origin": "*",
-      ...assetCacheHeaders(),
-      "X-Content-Type-Options": "nosniff",
-      "X-Proxied-From": "github-releases",
-      "X-Release-Tag": tag,
-    });
-    if (contentLength) headers.set("Content-Length", contentLength);
-
-    // Stream body; do not buffer whole file in memory
-    return new Response(upstream.body, {
-      status: 200,
-      headers,
-    });
+    return assetResponse(
+      upstream,
+      name,
+      tag,
+      asset.content_type || "application/octet-stream",
+      "github-releases",
+      String(asset.size || ""),
+    );
   } catch (e) {
     return json(
       { error: "fetch_failed", message: e instanceof Error ? e.message : String(e) },
