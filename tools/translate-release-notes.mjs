@@ -226,7 +226,11 @@ export function toPlainText(text) {
     .replace(/\*\*([^*]+)\*\*/g, "$1")
     .replace(/(^|\s)\*([^*\n]+)\*(?=\s|$)/g, "$1$2")
     .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
-    .replace(/[「」『』]/g, '"')
+    // Corner brackets are deliberately NOT flattened to straight quotes. They
+    // are the correct quotation marks for zh-Hant and ja, they render fine in a
+    // plain-text store field, and replacing them made the zh-Hant summary
+    // disagree with its own body -- the body kept 「洗衣」 while the summary said
+    // "洗衣".
     .replace(/[ \t]{2,}/g, " ")
     .trim();
 }
@@ -319,7 +323,17 @@ export function validate(text, locale, source) {
   return null;
 }
 
-function truncate(text, limit) {
+/**
+ * Cut to [limit] at a clause or sentence boundary.
+ *
+ * A cut that lands on a semicolon leaves it dangling -- "…multi-column
+ * layout;" -- which reads as a typo on a store listing. This happened to every
+ * locale whose summary exceeded Play's 500 characters, because a Chinese
+ * summary written as one semicolon-separated run has no sentence boundary to
+ * prefer. Drop the trailing separator and close the sentence instead, using the
+ * full stop that matches the script the retained text is written in.
+ */
+export function truncate(text, limit) {
   if (text.length <= limit) return text;
   const cut = text.slice(0, limit);
   const at = Math.max(
@@ -328,7 +342,10 @@ function truncate(text, limit) {
     cut.lastIndexOf("；"),
     cut.lastIndexOf("; "),
   );
-  return (at > limit * 0.5 ? cut.slice(0, at + 1) : cut).trim();
+  const head = (at > limit * 0.5 ? cut.slice(0, at + 1) : cut).trim();
+  const stripped = head.replace(/[;；,，、\s]+$/, "");
+  if (stripped === head) return head;
+  return stripped + (/[。！？]/.test(stripped) || CJK.test(stripped) ? "。" : ".");
 }
 
 /**
@@ -462,6 +479,28 @@ function selfTest() {
   check("es also answers to region-suffixed es-es", storeCodes("es").includes("es-es"), true);
   check("fr also answers to region-suffixed fr-fr", storeCodes("fr").includes("fr-fr"), true);
   check("an unmapped locale still yields one usable code", storeCodes("de").length, 1);
+
+  check(
+    "toPlainText keeps CJK corner brackets, which are correct punctuation",
+    toPlainText("新增了「洗衣」與『校園新聞』子应用。"),
+    "新增了「洗衣」與『校園新聞』子应用。",
+  );
+  // Both of these are store-visible defects that shipped once already.
+  check(
+    "truncate does not leave a dangling semicolon",
+    truncate("first clause; second clause; third clause", 30),
+    "first clause; second clause.",
+  );
+  check(
+    "truncate closes a CJK cut with a full-width stop",
+    truncate("第一段內容；第二段內容；第三段內容", 12),
+    "第一段內容；第二段內容。",
+  );
+  check(
+    "truncate leaves an intact sentence alone",
+    truncate("One sentence only.", 50),
+    "One sentence only.",
+  );
 
   const failed = cases.filter((c) => !c.ok);
   for (const c of cases) {
