@@ -2083,6 +2083,9 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+      # actions:read — the cross-run MSIX fetch (msix_run_id) lists and
+      # downloads another run's artifacts, which contents:read alone denies.
+      actions: read
     env:
       STORE_ID: ${{ vars.STORE_ID || '9P29527S1H0H' }}
       API: https://manage.devcenter.microsoft.com/v1.0/my
@@ -2098,8 +2101,9 @@ jobs:
 
       # Cross-run fetch for the store-submit-only retry: the Windows leg was
       # skipped by asset reuse, so the MSIXs come from the run that built
-      # them. Same workflow, so the default token can read them; artifacts
-      # live for the retention period (90 days).
+      # them. download-artifact only reaches another run's artifacts with an
+      # explicit github-token (run 39310534257 matched 0 artifacts without
+      # one); artifacts live for the retention period (90 days).
       - name: Download the Store MSIX artifacts from run ${{ inputs.msix_run_id }}
         if: inputs.msix_run_id != ''
         uses: actions/download-artifact@v8
@@ -2107,6 +2111,7 @@ jobs:
           pattern: store-msix-windows-*
           path: msix
           run-id: ${{ inputs.msix_run_id }}
+          github-token: ${{ github.token }}
 
       - name: Check the Entra secrets and the packages
         env:
