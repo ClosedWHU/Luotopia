@@ -312,14 +312,32 @@ export function validate(text, locale, source) {
   if (locale === "zh-Hant") {
     const simp = [...new Set([...text].filter((c) => SIMPLIFIED_ONLY.includes(c)))];
     if (simp.length) return `residual Simplified characters: ${simp.join("")}`;
-    if (![...text].some((c) => TRADITIONAL_ONLY.includes(c))) {
+    // Require a Traditional-only character only when the source actually had a
+    // Simplified-only one to convert. A short summary can be written entirely in
+    // script-neutral characters -- v1.0.0+6's is eight of them -- and demanding
+    // a Traditional glyph there rejects a correct translation. The residual
+    // check above is what actually catches DeepL echoing the source.
+    if (
+      [...source].some((c) => SIMPLIFIED_ONLY.includes(c)) &&
+      ![...text].some((c) => TRADITIONAL_ONLY.includes(c))
+    ) {
       return "no Traditional-only characters present";
     }
     return null;
   }
   if (locale === "ja") return KANA.test(text) ? null : "no kana in Japanese output";
   if (locale === "ko") return HANGUL.test(text) ? null : "no hangul in Korean output";
-  if (CJK.test(text)) return "residual CJK in a non-CJK locale";
+  // A ratio, not a presence test. Chinese product names have no translation and
+  // legitimately survive into a Latin-script locale -- v1.1.0+15's English keeps
+  // 超星学习通, and rejecting the whole locale over one proper noun threw away
+  // an otherwise correct 4900-character translation. What this must still catch
+  // is the `gtx` failure it was written for: a whole paragraph left in the
+  // source script, which is a large share of the text.
+  const chars = [...text].filter((c) => !/\s/.test(c));
+  const cjk = chars.filter((c) => CJK.test(c)).length;
+  if (chars.length && cjk / chars.length > 0.2) {
+    return `residual CJK in a non-CJK locale (${cjk}/${chars.length} characters)`;
+  }
   return null;
 }
 
@@ -502,6 +520,43 @@ function selfTest() {
     "One sentence only.",
   );
 
+  // Both of these shipped as real false positives during the backfill.
+  check(
+    "a short script-neutral zh-Hant summary is accepted",
+    // v1.0.0+6's summary is eight characters, none of which differ between the
+    // two scripts, so demanding a Traditional glyph rejected a correct output.
+    validate("查看完整提交记录", "zh-Hant", "查看完整提交记录x"),
+    null,
+  );
+  check(
+    "zh-Hant is still rejected when the source had Simplified to convert",
+    validate("量度", "zh-Hant", "数据"),
+    "no Traditional-only characters present",
+  );
+  check(
+    "an untranslatable Chinese product name does not sink a Latin locale",
+    // v1.1.0+15's English keeps 超星学习通, which has no English name. One
+    // proper noun cost the whole 4900-character translation before this.
+    validate("Added the 超星学习通 integration for campus services.", "en", "新增超星学习通整合。"),
+    null,
+  );
+  check(
+    "a whole untranslated paragraph is still caught",
+    validate(
+      "This release adds features. 本版本重做数据面与设计系统，新增考试安排导入功能。",
+      "en",
+      "本版本重做数据面与设计系统，新增考试安排导入功能。",
+    ) !== null,
+    true,
+  );
+  check(
+    "extractSummary on a bullet-only body returns empty",
+    // v1.0.0+5 and v1.0.0+7 are shaped like this: a title, headings and
+    // bullets, with no prose paragraph anywhere.
+    extractSummary("## T\n\n### 新功能\n\n- 第一条\n- 第二条\n"),
+    "",
+  );
+
   const failed = cases.filter((c) => !c.ok);
   for (const c of cases) {
     console.log(`${c.ok ? "ok  " : "FAIL"} ${c.name}`);
@@ -547,9 +602,15 @@ async function main() {
   console.log(
     `source (${SOURCE_LOCALE}): body ${body.length} chars, summary ${sourceSummary.length} chars`,
   );
+  // A body of nothing but bullets has no prose paragraph to summarise, and that
+  // is not an error. The summary exists for the store fields; the website only
+  // needs the body. Translate the body and let the store listings go without
+  // notes rather than publishing nothing at all -- v1.0.0+5 and v1.0.0+7 are
+  // both shaped this way, and both were skipped entirely before this.
   if (!sourceSummary) {
-    console.error(`::error::no summary paragraph found in the release body for ${tag}`);
-    process.exit(1);
+    console.log(
+      `::warning::${tag} has no prose summary; the site gets a translated body, the store listings get nothing`,
+    );
   }
 
   const locales = {
@@ -563,9 +624,13 @@ async function main() {
       const translated = tidyCjkSpacing(await translateBody(locale, body, key));
       const problem = validate(translated, locale, body);
       if (problem) throw new Error(problem);
+      // Mirrors the source: a bullet-only body has no summary in any language,
+      // and that is not a translation failure.
       const summary = toPlainText(extractSummary(translated));
-      if (!summary) throw new Error("no summary paragraph survived translation");
-      const summaryProblem = validate(summary, locale, sourceSummary);
+      if (sourceSummary && !summary) {
+        throw new Error("no summary paragraph survived translation");
+      }
+      const summaryProblem = summary ? validate(summary, locale, sourceSummary) : null;
       if (summaryProblem) throw new Error(`summary: ${summaryProblem}`);
       locales[locale] = {
         status: "translated",
