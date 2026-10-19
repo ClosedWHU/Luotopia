@@ -82,6 +82,16 @@ on:
         required: false
         type: boolean
         default: false
+      rebuild:
+        description: "Rebuild platforms whose assets are already attached to the release. By default a dispatch reuses them and skips those legs, so a partial retry does not rebuild everything; rebuilt assets upload with --clobber and replace the old ones"
+        required: false
+        type: boolean
+        default: false
+      msix_run_id:
+        description: "Store-submit-only retry: run ID of an earlier run of this workflow to fetch the Store MSIX artifacts from, for when the Windows leg is skipped by asset reuse"
+        required: false
+        type: string
+        default: ""
       build_macos:
         description: Build macOS release DMG (on by default for release events; for a DMG-only run dispatch with just this switch on)
         required: false
@@ -196,6 +206,10 @@ jobs:
       build_linux: ${{ steps.ctx.outputs.build_linux }}
       build_ohos: ${{ steps.ctx.outputs.build_ohos }}
       submit_store: ${{ steps.ctx.outputs.submit_store }}
+      reuse_android: ${{ steps.ctx.outputs.reuse_android }}
+      reuse_windows: ${{ steps.ctx.outputs.reuse_windows }}
+      reuse_macos: ${{ steps.ctx.outputs.reuse_macos }}
+      reuse_linux: ${{ steps.ctx.outputs.reuse_linux }}
       linux_arch: ${{ steps.ctx.outputs.linux_arch }}
       linux_formats: ${{ steps.ctx.outputs.linux_formats }}
       ref: ${{ steps.buildref.outputs.ref }}
@@ -211,6 +225,8 @@ jobs:
 
       - name: Resolve
         id: ctx
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           if [ "${{ github.event_name }}" = "release" ]; then
@@ -225,6 +241,7 @@ jobs:
             # A published release ships every channel end to end: the Store
             # MSIX is submitted (and committed) without a manual dispatch.
             SUBMIT_STORE=true
+            REBUILD=false
             BUILD_LINUX=true
             # macOS ships through TestFlight AND as an unsigned DMG on the
             # release, for users outside the beta circle. Dispatch runs opt in
@@ -250,6 +267,7 @@ jobs:
             BUILD_WINDOWS='${{ inputs.build_windows }}'
             WINDOWS_ARCH='${{ inputs.windows_arch }}'
             SUBMIT_STORE='${{ inputs.submit_store }}'
+            REBUILD='${{ inputs.rebuild }}'
             BUILD_MACOS='${{ inputs.build_macos }}'
             BUILD_IOS_TESTFLIGHT='${{ inputs.build_ios_testflight }}'
             BUILD_MACOS_TESTFLIGHT='${{ inputs.build_macos_testflight }}'
@@ -290,6 +308,67 @@ jobs:
               ;;
           esac
           SUBMIT_STORE="${SUBMIT_STORE:-false}"
+          REBUILD="${REBUILD:-false}"
+          # Asset reuse: a dispatch retrying one failed leg must not rebuild
+          # the platforms whose artifacts already hang on the release. A leg
+          # is reused only when its complete asset set is present — a partial
+          # set rebuilds the whole platform. rebuild=true forces fresh builds
+          # (uploads are --clobber, so they replace the old assets). Release
+          # events see a release with no assets yet, so nothing skips there.
+          # The Play AAB and the Store MSIX are workflow artifacts, not
+          # release assets: a reused Android/Windows leg does not regenerate
+          # them — fetch those from the original run (store-submit can pull
+          # the MSIXs cross-run via msix_run_id).
+          REUSE_ANDROID=false
+          REUSE_WINDOWS=false
+          REUSE_MACOS=false
+          REUSE_LINUX=false
+          ASSETS=""
+          if [ "$REBUILD" != true ]; then
+            ASSETS=$(gh release view "$TAG" --repo "$TARGET_REPO" --json assets -q '.assets[].name' 2>/dev/null || true)
+          fi
+          if [ -n "$ASSETS" ]; then
+            if [ "$BUILD_ANDROID" = true ]; then
+              want=3
+              if [ "$ANDROID_ABIS" != all ]; then
+                want=$(tr ',' '\n' <<<"$ANDROID_ABIS" | grep -c .)
+              fi
+              got=$(grep -cF -- '-release.apk' <<<"$ASSETS" || true)
+              # if/fi, not `[ ] &&`: a false && would exit the step under set -e.
+              if [ "$got" -ge "$want" ]; then REUSE_ANDROID=true; fi
+            fi
+            if [ "$BUILD_WINDOWS" = true ]; then
+              REUSE_WINDOWS=true
+              # From the raw arch choice rather than the JSON list: no jq
+              # dependency inside the reuse check.
+              if [ "${WINDOWS_ARCH:-both}" = both ]; then WARCHES="x64 arm64"; else WARCHES="$WINDOWS_ARCH"; fi
+              for arch in $WARCHES; do
+                grep -qF -- "-windows-$arch.zip" <<<"$ASSETS" || REUSE_WINDOWS=false
+              done
+            fi
+            if [ "$BUILD_MACOS" = true ] && grep -qF -- '-macos-arm64.dmg' <<<"$ASSETS"; then
+              REUSE_MACOS=true
+            fi
+            if [ "$BUILD_LINUX" = true ]; then
+              REUSE_LINUX=true
+              if [ "$LINUX_ARCH" = both ]; then LARCHES="x64 arm64"; else LARCHES="$LINUX_ARCH"; fi
+              if [ "$LINUX_FORMATS" = all ]; then
+                LFMTS="tar.gz AppImage deb flatpak"
+              else
+                LFMTS=$(tr ',' ' ' <<<"$LINUX_FORMATS" | sed -e 's/^tar$/tar.gz/' -e 's/^appimage$/AppImage/')
+              fi
+              for a in $LARCHES; do
+                for f in $LFMTS; do
+                  grep -qF -- "-linux-$a.$f" <<<"$ASSETS" || REUSE_LINUX=false
+                done
+              done
+            fi
+            for pair in "android=$REUSE_ANDROID" "windows=$REUSE_WINDOWS" "macos=$REUSE_MACOS" "linux=$REUSE_LINUX"; do
+              if [ "${pair#*=}" = true ]; then
+                echo "::notice::reusing the existing ${pair%%=*} release assets; dispatch with rebuild=true to force fresh builds"
+              fi
+            done
+          fi
           APPLE_ACTION="${APPLE_ACTION:-build}"
           case "$APPLE_ACTION" in build|distribute|status) ;; *) echo "::error::Unknown Apple action"; exit 1 ;; esac
           STRIPPED="${TAG#v}"
@@ -347,9 +426,13 @@ jobs:
           echo "build_linux=$BUILD_LINUX" >> "$GITHUB_OUTPUT"
           echo "build_ohos=$BUILD_OHOS" >> "$GITHUB_OUTPUT"
           echo "submit_store=$SUBMIT_STORE" >> "$GITHUB_OUTPUT"
+          echo "reuse_android=$REUSE_ANDROID" >> "$GITHUB_OUTPUT"
+          echo "reuse_windows=$REUSE_WINDOWS" >> "$GITHUB_OUTPUT"
+          echo "reuse_macos=$REUSE_MACOS" >> "$GITHUB_OUTPUT"
+          echo "reuse_linux=$REUSE_LINUX" >> "$GITHUB_OUTPUT"
           echo "linux_arch=$LINUX_ARCH" >> "$GITHUB_OUTPUT"
           echo "linux_formats=$LINUX_FORMATS" >> "$GITHUB_OUTPUT"
-          echo "Resolved tag=$TAG android=$BUILD_ANDROID($ANDROID_ABIS,$ANDROID_PACKAGES) windows=$BUILD_WINDOWS($WINDOWS_ARCH) macos=$BUILD_MACOS linux=$BUILD_LINUX ohos=$BUILD_OHOS arch=$LINUX_ARCH formats=$LINUX_FORMATS submit_store=$SUBMIT_STORE"
+          echo "Resolved tag=$TAG android=$BUILD_ANDROID($ANDROID_ABIS,$ANDROID_PACKAGES) windows=$BUILD_WINDOWS($WINDOWS_ARCH) macos=$BUILD_MACOS linux=$BUILD_LINUX ohos=$BUILD_OHOS arch=$LINUX_ARCH formats=$LINUX_FORMATS submit_store=$SUBMIT_STORE rebuild=$REBUILD reuse=(android:$REUSE_ANDROID windows:$REUSE_WINDOWS macos:$REUSE_MACOS linux:$REUSE_LINUX)"
 
       # Resolve which commit of the PRIVATE app repo to build. Normally its
       # default branch HEAD whose pubspec version matches the tag. For
@@ -718,7 +801,7 @@ jobs:
     # the short bundle build behind the 20-minute split build.
     name: Android ${{ matrix.package == 'aab' && 'Play AAB' || 'signed split APKs' }}
     needs: context
-    if: needs.context.outputs.build_android == 'true'
+    if: needs.context.outputs.build_android == 'true' && needs.context.outputs.reuse_android != 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -1202,10 +1285,13 @@ jobs:
   macos:
     name: macOS release DMG
     needs: context
-    if: needs.context.outputs.build_macos == 'true'
-    # Xcode 27 on macos-latest currently crashes inside SwiftPM while extracting
-    # some binary artifacts. Keep release builds on the stable Xcode 16 image.
-    runs-on: macos-15
+    if: needs.context.outputs.build_macos == 'true' && needs.context.outputs.reuse_macos != 'true'
+    # Xcode 27 crashes inside SwiftPM while extracting some binary artifacts,
+    # and Xcode 16.4's SwiftPM cannot parse firebase-ios-sdk 13's tools
+    # version (6.2.1), which firebase_messaging 17 pulls in — the v1.2.0+17
+    # DMG died exactly there. Xcode 26.6 threads both needles and is the
+    # version the TestFlight legs build this same tree with.
+    runs-on: macos-26
     permissions:
       contents: write
     env:
@@ -1236,9 +1322,11 @@ jobs:
           cache: true
 
       - name: Select stable Xcode
+        env:
+          XCODE_VERSION: ${{ vars.APPLE_XCODE_VERSION || '26.6' }}
         run: |
-          sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
-          xcodebuild -version | grep -F 'Xcode 16.4'
+          sudo xcode-select -s "/Applications/Xcode_${XCODE_VERSION}.app/Contents/Developer"
+          xcodebuild -version | grep -F "Xcode ${XCODE_VERSION%.*}"
 
       - name: Enable macOS desktop
         run: flutter config --enable-macos-desktop --enable-macos-arm64-only
@@ -1406,7 +1494,7 @@ jobs:
   windows:
     name: Windows ${{ matrix.arch }} zip + MSIX
     needs: context
-    if: needs.context.outputs.build_windows == 'true'
+    if: needs.context.outputs.build_windows == 'true' && needs.context.outputs.reuse_windows != 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -1980,9 +2068,17 @@ jobs:
   store-submit:
     name: Submit MSIX to the Microsoft Store
     needs: [context, windows, translate-notes]
+    # The Windows leg must have produced the MSIX artifacts *in this run*,
+    # unless msix_run_id names an earlier run to fetch them from — the
+    # store-submit-only retry shape, where asset reuse skipped the Windows
+    # leg and this run has no MSIXs of its own.
     if: >-
-      needs.context.outputs.build_windows == 'true' &&
-      needs.context.outputs.submit_store == 'true'
+      !cancelled() &&
+      needs.context.result == 'success' &&
+      needs.translate-notes.result == 'success' &&
+      (needs.windows.result == 'success' || needs.windows.result == 'skipped') &&
+      needs.context.outputs.submit_store == 'true' &&
+      (needs.windows.result == 'success' || inputs.msix_run_id != '')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -1994,10 +2090,23 @@ jobs:
       TARGET_REPO: ${{ needs.context.outputs.target_repo }}
     steps:
       - name: Download the Store MSIX artifacts
+        if: inputs.msix_run_id == ''
         uses: actions/download-artifact@v8
         with:
           pattern: store-msix-windows-*
           path: msix
+
+      # Cross-run fetch for the store-submit-only retry: the Windows leg was
+      # skipped by asset reuse, so the MSIXs come from the run that built
+      # them. Same workflow, so the default token can read them; artifacts
+      # live for the retention period (90 days).
+      - name: Download the Store MSIX artifacts from run ${{ inputs.msix_run_id }}
+        if: inputs.msix_run_id != ''
+        uses: actions/download-artifact@v8
+        with:
+          pattern: store-msix-windows-*
+          path: msix
+          run-id: ${{ inputs.msix_run_id }}
 
       - name: Check the Entra secrets and the packages
         env:
@@ -2018,7 +2127,7 @@ jobs:
           shopt -s nullglob
           packages=(msix/*/*.msix)
           if [ "${#packages[@]}" -eq 0 ]; then
-            echo "::error::the windows job produced no MSIX artifact"
+            echo "::error::the windows job produced no MSIX artifact; if it was skipped by asset reuse, re-dispatch with msix_run_id set to the run that built them"
             exit 1
           fi
           printf 'will submit: %s\n' "${packages[@]}"
@@ -2059,7 +2168,11 @@ jobs:
           pending_id=$(jq -r '.pendingApplicationSubmission.id // empty' <<<"$app")
           if [ -n "${pending_id:-}" ]; then
             echo "deleting pending submission $pending_id"
-            curl -sS -f -X DELETE -H "$auth" \
+            # Content-Length: 0 on every bodyless call below: the Dev Center
+            # API answers a bare POST/DELETE (curl sends no Content-Length)
+            # with 411 Length Required — the failure mode of the job's first
+            # ever live run.
+            curl -sS -f -X DELETE -H "$auth" -H "Content-Length: 0" \
               "$API/applications/$STORE_ID/submissions/$pending_id" || \
               echo "::warning::could not delete pending submission $pending_id; delete it in Partner Center and retry"
           fi
@@ -2067,7 +2180,7 @@ jobs:
           # POST /submissions clones the last published submission, so listing
           # text, pricing, age rating and notes all carry over and only the
           # package list changes here. The response carries the fileUploadUrl.
-          cloned=$(curl -sS -f -X POST -H "$auth" \
+          cloned=$(curl -sS -f -X POST -H "$auth" -H "Content-Length: 0" \
             "$API/applications/$STORE_ID/submissions")
           new_id=$(jq -er '.id' <<<"$cloned")
           upload_url=$(jq -er '.fileUploadUrl' <<<"$cloned")
@@ -2153,7 +2266,7 @@ jobs:
             --data-binary @submission.json \
             "$API/applications/$STORE_ID/submissions/$new_id" > /dev/null
 
-          curl -sS -f -X POST -H "$auth" \
+          curl -sS -f -X POST -H "$auth" -H "Content-Length: 0" \
             "$API/applications/$STORE_ID/submissions/$new_id/commit" > /dev/null
           echo "::notice::Store submission $new_id committed for product $STORE_ID"
           echo "Track it at https://partner.microsoft.com/dashboard/products/$STORE_ID/submissions/$new_id"
@@ -2161,7 +2274,7 @@ jobs:
   linux:
     name: Linux ${{ matrix.arch }} packages (release)
     needs: context
-    if: needs.context.outputs.build_linux == 'true'
+    if: needs.context.outputs.build_linux == 'true' && needs.context.outputs.reuse_linux != 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -2551,7 +2664,7 @@ jobs:
   aur:
     name: Publish luotopia-bin to AUR
     needs: [context, linux]
-    if: needs.context.outputs.build_linux == 'true' && needs.context.outputs.linux_arch == 'both'
+    if: needs.context.outputs.build_linux == 'true' && needs.context.outputs.linux_arch == 'both' && needs.context.outputs.reuse_linux != 'true'
     runs-on: ubuntu-24.04
     container: archlinux:base-devel
     permissions:
@@ -2679,14 +2792,16 @@ jobs:
     needs: [context, macos, windows, linux]
     # `macos` is optional (DMG-only opt-in): skipped counts as pass so the
     # cask is simply left out. `!cancelled()` is required for the result
-    # checks to run at all past a skipped need. The windows/linux success
-    # gates keep the manifests from pointing at half a release.
+    # checks to run at all past a skipped need. Skipped also covers a leg
+    # the asset-reuse check turned off — its artifacts are on the release
+    # all the same. The windows/linux success gates keep the manifests from
+    # pointing at half a release.
     if: >-
       !cancelled() &&
       needs.context.result == 'success' &&
       (needs.macos.result == 'success' || needs.macos.result == 'skipped') &&
-      needs.windows.result == 'success' &&
-      needs.linux.result == 'success' &&
+      (needs.windows.result == 'success' || needs.windows.result == 'skipped') &&
+      (needs.linux.result == 'success' || needs.linux.result == 'skipped') &&
       needs.context.outputs.build_windows == 'true' &&
       needs.context.outputs.build_linux == 'true' &&
       needs.context.outputs.windows_archs == '["x64","arm64"]' &&
