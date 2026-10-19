@@ -78,7 +78,7 @@ on:
           - arm64
         default: both
       submit_store:
-        description: "Submit the MSIX to the Microsoft Store (needs STORE_* + ENTRA_* secrets; uploads and commits a new submission)"
+        description: "Submit the MSIX to the Microsoft Store (needs ENTRA_* secrets; uploads and commits a new submission). Release events always submit; this switch only gates manual dispatches, whose default stays off so a partial retry (e.g. one Windows arch) cannot replace a full submission"
         required: false
         type: boolean
         default: false
@@ -168,7 +168,11 @@ jobs:
     name: Resolve release context
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      # `write`, not `read`: the changelog step calls `gh release edit`, which
+      # needs it. That path had never been exercised because release notes are
+      # hand-written and the step exited early before reaching the edit; it now
+      # runs through, and a read-only token would fail it with a 403.
+      contents: write
     env:
       APP_TOKEN: ${{ secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN }}
     outputs:
@@ -191,6 +195,7 @@ jobs:
       distribute_apple_external: ${{ steps.ctx.outputs.distribute_apple_external }}
       build_linux: ${{ steps.ctx.outputs.build_linux }}
       build_ohos: ${{ steps.ctx.outputs.build_ohos }}
+      submit_store: ${{ steps.ctx.outputs.submit_store }}
       linux_arch: ${{ steps.ctx.outputs.linux_arch }}
       linux_formats: ${{ steps.ctx.outputs.linux_formats }}
       ref: ${{ steps.buildref.outputs.ref }}
@@ -217,6 +222,9 @@ jobs:
             ANDROID_PACKAGES=both
             BUILD_WINDOWS=true
             WINDOWS_ARCH=both
+            # A published release ships every channel end to end: the Store
+            # MSIX is submitted (and committed) without a manual dispatch.
+            SUBMIT_STORE=true
             BUILD_LINUX=true
             # macOS ships through TestFlight AND as an unsigned DMG on the
             # release, for users outside the beta circle. Dispatch runs opt in
@@ -241,6 +249,7 @@ jobs:
             ANDROID_PACKAGES='${{ inputs.android_packages }}'
             BUILD_WINDOWS='${{ inputs.build_windows }}'
             WINDOWS_ARCH='${{ inputs.windows_arch }}'
+            SUBMIT_STORE='${{ inputs.submit_store }}'
             BUILD_MACOS='${{ inputs.build_macos }}'
             BUILD_IOS_TESTFLIGHT='${{ inputs.build_ios_testflight }}'
             BUILD_MACOS_TESTFLIGHT='${{ inputs.build_macos_testflight }}'
@@ -280,6 +289,7 @@ jobs:
               WINDOWS_ARCHS='["x64","arm64"]'
               ;;
           esac
+          SUBMIT_STORE="${SUBMIT_STORE:-false}"
           APPLE_ACTION="${APPLE_ACTION:-build}"
           case "$APPLE_ACTION" in build|distribute|status) ;; *) echo "::error::Unknown Apple action"; exit 1 ;; esac
           STRIPPED="${TAG#v}"
@@ -336,9 +346,10 @@ jobs:
           echo "upload_apple_testflight=$UPLOAD_APPLE_TESTFLIGHT" >> "$GITHUB_OUTPUT"
           echo "build_linux=$BUILD_LINUX" >> "$GITHUB_OUTPUT"
           echo "build_ohos=$BUILD_OHOS" >> "$GITHUB_OUTPUT"
+          echo "submit_store=$SUBMIT_STORE" >> "$GITHUB_OUTPUT"
           echo "linux_arch=$LINUX_ARCH" >> "$GITHUB_OUTPUT"
           echo "linux_formats=$LINUX_FORMATS" >> "$GITHUB_OUTPUT"
-          echo "Resolved tag=$TAG android=$BUILD_ANDROID($ANDROID_ABIS,$ANDROID_PACKAGES) windows=$BUILD_WINDOWS($WINDOWS_ARCH) macos=$BUILD_MACOS linux=$BUILD_LINUX ohos=$BUILD_OHOS arch=$LINUX_ARCH formats=$LINUX_FORMATS"
+          echo "Resolved tag=$TAG android=$BUILD_ANDROID($ANDROID_ABIS,$ANDROID_PACKAGES) windows=$BUILD_WINDOWS($WINDOWS_ARCH) macos=$BUILD_MACOS linux=$BUILD_LINUX ohos=$BUILD_OHOS arch=$LINUX_ARCH formats=$LINUX_FORMATS submit_store=$SUBMIT_STORE"
 
       # Resolve which commit of the PRIVATE app repo to build. Normally its
       # default branch HEAD whose pubspec version matches the tag. For
@@ -360,8 +371,19 @@ jobs:
       # Auto-generate changelog if the release body is empty or too short.
       # Pulls commit history from the PRIVATE app repo (already checked out)
       # and compares against the previous release tag on the PUBLIC homepage repo.
+      #
+      # Runs on workflow_dispatch too, not just on release events: the Store
+      # submission consumes these notes for the store listings and can run from
+      # either trigger (release events always submit; a dispatch submits with
+      # its submit_store switch on), so gating this on the release event alone
+      # would leave those submissions without notes to publish. The tag is
+      # compared in both arms rather than read from `github.event.release`,
+      # which does not exist on a dispatch.
       - name: Auto-generate changelog if needed
-        if: github.event_name == 'release' && github.event.release.tag_name != 'v1.0.1+14'
+        id: changelog
+        if: >-
+          (github.event_name == 'release' && github.event.release.tag_name != 'v1.0.1+14') ||
+          (github.event_name == 'workflow_dispatch' && steps.ctx.outputs.tag != 'v1.0.1+14')
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.ctx.outputs.tag }}
@@ -373,26 +395,38 @@ jobs:
           # Check if body is empty or just whitespace
           if [ -n "$BODY" ] && [ "$(echo "$BODY" | tr -d '[:space:]')" != "" ]; then
             echo "Release already has notes; skipping auto-generation"
-            exit 0
-          fi
-          echo "Release body is empty; generating changelog from app repo commits..."
-          # Find the previous release tag on the homepage repo
-          PREV_TAG=$(gh release list --repo "$TARGET_REPO" --limit 10 --json tagName,isLatest --jq '.[] | select(.tagName != "'"$TAG"'") | .tagName' | head -1 || echo "")
-          if [ -z "$PREV_TAG" ]; then
-            echo "No previous release found; generating from all commits"
-            COMMITS=$(git log --pretty=format:"- %s" -20)
+            CHANGELOG="$BODY"
           else
-            echo "Previous release: $PREV_TAG"
-            # Convert homepage tag (v1.0.1+10) to app tag format for comparison
-            APP_PREV_TAG="${PREV_TAG}"
-            # Get commits from app repo between versions
-            COMMITS=$(git log --pretty=format:"- %s" "${APP_PREV_TAG}..HEAD" 2>/dev/null || git log --pretty=format:"- %s" -20)
+            echo "Release body is empty; generating changelog from app repo commits..."
+            # Find the previous release tag on the homepage repo
+            PREV_TAG=$(gh release list --repo "$TARGET_REPO" --limit 10 --json tagName,isLatest --jq '.[] | select(.tagName != "'"$TAG"'") | .tagName' | head -1 || echo "")
+            if [ -z "$PREV_TAG" ]; then
+              echo "No previous release found; generating from all commits"
+              COMMITS=$(git log --pretty=format:"- %s" -20)
+            else
+              echo "Previous release: $PREV_TAG"
+              # Convert homepage tag (v1.0.1+10) to app tag format for comparison
+              APP_PREV_TAG="${PREV_TAG}"
+              # Get commits from app repo between versions
+              COMMITS=$(git log --pretty=format:"- %s" "${APP_PREV_TAG}..HEAD" 2>/dev/null || git log --pretty=format:"- %s" -20)
+            fi
+            # Generate changelog
+            CHANGELOG="## What's Changed"$'\n\n'"$COMMITS"$'\n\n'"---"$'\n'"*Auto-generated from commit history*"
+            # A release must exist. This workflow is either triggered by
+            # publishing one, or re-run by hand after a platform build failed,
+            # so a tag with no release behind it means the wrong tag was passed.
+            # Fail loudly: continuing would submit to the Store notes that were
+            # never published anywhere, and the i18n asset would have no release
+            # to attach to.
+            gh release view "$TAG" --repo "$TARGET_REPO" >/dev/null 2>&1 || {
+              echo "::error::no GitHub release for $TAG on $TARGET_REPO; refusing to continue"
+              exit 1
+            }
+            gh release edit "$TAG" --repo "$TARGET_REPO" --notes "$CHANGELOG"
+            echo "Updated release notes for $TAG"
           fi
-          # Generate changelog
-          CHANGELOG="## What's Changed"$'\n\n'"$COMMITS"$'\n\n'"---"$'\n'"*Auto-generated from commit history*"
-          # Update release body
-          gh release edit "$TAG" --repo "$TARGET_REPO" --notes "$CHANGELOG"
-          echo "Updated release notes for $TAG"
+
+
 
       - name: Resolve build ref
         id: buildref
@@ -1850,6 +1884,70 @@ jobs:
         run: |
           rm -rf build/debug-info dist
 
+  # Per-locale release notes, published as a release asset beside the
+  # installers.
+  #
+  # The summary paragraph of the hand-written release body is translated into
+  # every locale in `src/i18n/published.json` by `tools/translate-release-notes.mjs`.
+  # Two consumers read the result, and neither needs a new endpoint:
+  #
+  #   - the Store submission below, which looks notes up by listing language
+  #   - the website, through the existing `/api/releases/download/:tag/:filename`
+  #     asset proxy -- already platform-agnostic via `functions/lib/dispatch.ts`,
+  #     so this adds nothing to adapt for EdgeOne or ESA
+  #
+  # Deliberately best-effort. A translation outage must not block a release or a
+  # store submission, so every failure path warns and continues; consumers then
+  # fall back (the store keeps the previous version's notes per language, the
+  # site falls back to zh-Hans).
+  translate-notes:
+    name: Translate release notes
+    needs: context
+    if: needs.context.outputs.tag != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ needs.context.outputs.tag }}
+      TARGET_REPO: ${{ needs.context.outputs.target_repo }}
+    steps:
+      # The workflow's own repo, which is where tools/ lives. The context job
+      # checks out the private app repo instead, so it cannot run this script.
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Translate the summary into the published locales
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DEEPL_API_KEY:-}" ]; then
+            echo "::warning::DEEPL_API_KEY is not set; skipping release-note translation"
+            exit 0
+          fi
+          gh release view "$TAG" --repo "$TARGET_REPO" --json body -q .body > body.md
+          if ! node tools/translate-release-notes.mjs \
+                 --tag "$TAG" --out release-notes-i18n.json < body.md; then
+            echo "::warning::translation failed for $TAG; store listings keep their previous notes"
+          fi
+
+      - name: Publish as a release asset
+        if: hashFiles('release-notes-i18n.json') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # --clobber: re-running a dispatch for the same tag replaces the asset
+          # rather than failing on the existing one.
+          gh release upload "$TAG" release-notes-i18n.json \
+            --repo "$TARGET_REPO" --clobber
+          echo "::notice::published release-notes-i18n.json to $TARGET_REPO@$TAG"
+
   # Microsoft Store submission.
   #
   # Off unless `submit_store` is passed to workflow_dispatch. A commit here
@@ -1881,15 +1979,19 @@ jobs:
   # leaves it unable to commit, and it has to be deleted and re-cloned.
   store-submit:
     name: Submit MSIX to the Microsoft Store
-    needs: [context, windows]
+    needs: [context, windows, translate-notes]
     if: >-
       needs.context.outputs.build_windows == 'true' &&
-      inputs.submit_store == true
+      needs.context.outputs.submit_store == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
     env:
       STORE_ID: ${{ vars.STORE_ID || '9P29527S1H0H' }}
       API: https://manage.devcenter.microsoft.com/v1.0/my
+      TAG: ${{ needs.context.outputs.tag }}
+      TARGET_REPO: ${{ needs.context.outputs.target_repo }}
     steps:
       - name: Download the Store MSIX artifacts
         uses: actions/download-artifact@v8
@@ -1944,6 +2046,7 @@ jobs:
       - name: Clone the submission, upload, commit
         env:
           TOKEN: ${{ steps.token.outputs.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           auth="Authorization: Bearer $TOKEN"
@@ -1988,6 +2091,21 @@ jobs:
             --data-binary "@packages.zip" \
             "$upload_url"
 
+          # Per-locale release notes, published as a release asset by the
+          # translate-notes job. Best-effort: a translation outage must not block
+          # a submission, so a missing asset leaves every listing on the notes
+          # the clone already carries.
+          notes_map='{}'
+          if gh release download "$TAG" --repo "$TARGET_REPO" \
+               --pattern release-notes-i18n.json --dir i18n --clobber >/dev/null 2>&1 &&
+             [ -f i18n/release-notes-i18n.json ]; then
+            notes_map=$(jq -c '.storeListings | with_entries(.value = .value.store)' \
+              i18n/release-notes-i18n.json)
+            echo "release notes resolved for $(jq 'length' <<<"$notes_map") listing language(s)"
+          else
+            echo "::warning::no release-notes-i18n.json on $TARGET_REPO@$TAG; listings keep their previous notes"
+          fi
+
           # Replace the packages: mark every one carried over from the clone for
           # deletion, then append the new entries. The API only requires
           # fileName, fileStatus, minimumDirectXVersion and minimumSystemRam.
@@ -1997,9 +2115,39 @@ jobs:
               '. + [{fileName: $fn, fileStatus: "PendingUpload", minimumDirectXVersion: "None", minimumSystemRam: "None"}]' \
               <<<"$entries")
           done
-          jq -c --argjson entries "$entries" \
-            '(.applicationPackages // []) |= (map(.fileStatus = "PendingDelete") + $entries)' \
+          # Per-language notes, matched by the listing's own language code.
+          #
+          # A language with no translation keeps the clone's notes rather than
+          # being filled with the Simplified source. Writing the source text
+          # into every listing -- the obvious `map_values` version of this --
+          # would put Chinese on the en-us, ja and ko store pages, which is worse
+          # than last version's English. The `//` also covers a listing whose
+          # cloned releaseNotes is null.
+          #
+          # The type guard keeps `with_entries` off a null when a clone carries
+          # no listings object at all.
+          jq -c --argjson entries "$entries" --argjson notes "$notes_map" \
+            '(.applicationPackages // []) |= (map(.fileStatus = "PendingDelete") + $entries)
+             | if ($notes | length) > 0 and ((.listings | type) == "object")
+               then .listings |= with_entries(
+                      .value.releaseNotes = ($notes[.key] // .value.releaseNotes))
+               else . end' \
             <<<"$cloned" > submission.json
+
+          # Visibility on the join between the Store's own listing language
+          # codes and the ones the asset carries. A listing with no translation
+          # correctly keeps its previous notes, but a *code* mismatch -- the
+          # Store saying `fr-fr` where the asset says `fr` -- would look
+          # identical and silently publish nothing new, so name each one.
+          total=$(jq -r '.listings // {} | length' <<<"$cloned")
+          matched=$(jq -r --argjson notes "$notes_map" \
+            '[.listings // {} | keys[] | select($notes[.] != null)] | length' <<<"$cloned")
+          echo "release notes applied to $matched of $total listing language(s)"
+          jq -r --argjson notes "$notes_map" \
+            '.listings // {} | keys[] | select($notes[.] == null)' <<<"$cloned" |
+            while read -r lang; do
+              [ -n "$lang" ] && echo "::warning::no translation for listing language '$lang'; it keeps the previous version's notes"
+            done || true
 
           curl -sS -f -X PUT -H "$auth" -H "Content-Type: application/json" \
             --data-binary @submission.json \

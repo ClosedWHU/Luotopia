@@ -12,9 +12,12 @@
  * Two kinds of string on this page deliberately stay out of the dictionaries:
  *
  * - **The release notes themselves.** They are authored by hand in Chinese and
- *   `/api/releases*` serves one feed with no per-locale variant, so the
- *   changelog body renders exactly what the API returned, in whatever language
- *   the page around it is in. Everything *around* it — the heading that
+ *   `/api/releases*` serves one feed with no per-locale variant. The changelog
+ *   body is now localised out of band instead: `tools/translate-release-notes.mjs`
+ *   publishes a `release-notes-i18n.json` asset on each release and the client
+ *   swaps in the entry for this page's locale, falling back to the hand-written
+ *   body when there is none (an older release, a locale whose translation failed
+ *   validation, or a fetch error). Everything *around* it — the heading that
  *   introduces it, the pager, the loading, empty and failure states, the asset
  *   chips — is localised as usual.
  * - **The install commands.** `brew tap ClosedWHU/luotopia` is not a sentence
@@ -33,6 +36,7 @@ import {
   testFlightUrl,
 } from "../../config/downloads";
 import { resolveLocale, useTranslations, type TranslationKey } from "../../i18n/ui";
+import { DEFAULT_LOCALE } from "../../i18n/locales";
 
 const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
@@ -112,6 +116,7 @@ const releasesLink = linkHtml(
  */
 const i18n = {
   locale,
+  notesSourceLocale: DEFAULT_LOCALE,
   latestCurrent: t("download.latest.current"),
   latestUnavailable: t("download.latest.unavailable"),
   releaseDetails: t("download.latest.details"),
@@ -140,6 +145,7 @@ const i18n = {
     class="relative pb-16 px-4"
     data-download-i18n
     data-i18n-locale={i18n.locale}
+    data-i18n-notes-source-locale={i18n.notesSourceLocale}
     data-i18n-latest-current={i18n.latestCurrent}
     data-i18n-latest-unavailable={i18n.latestUnavailable}
     data-i18n-release-details={i18n.releaseDetails}
@@ -411,6 +417,7 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
     const dataset = root?.dataset ?? {};
     const copy = {
       locale: dataset.i18nLocale ?? "",
+      notesSourceLocale: dataset.i18nNotesSourceLocale ?? "",
       latestCurrent: dataset.i18nLatestCurrent ?? "",
       latestUnavailable: dataset.i18nLatestUnavailable ?? "",
       releaseDetails: dataset.i18nReleaseDetails ?? "",
@@ -935,6 +942,62 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
       void loadTestFlightVersion();
     }
 
+    /*
+     * Per-locale release notes.
+     *
+     * `tools/translate-release-notes.mjs` publishes a `release-notes-i18n.json`
+     * asset beside the installers on every release, carrying a translated body
+     * for each locale in `src/i18n/published.json`. It is fetched through the
+     * existing `/api/releases/download/:tag/:filename` proxy, which already
+     * caches and mirror-hops, so this adds no endpoint and nothing to adapt for
+     * EdgeOne or ESA.
+     *
+     * Three things legitimately produce no translation: a release published
+     * before the asset existed, a locale whose translation failed validation and
+     * was omitted rather than filled with the source text, and a fetch error. All
+     * three fall back to the hand-written body, which is what this page showed
+     * before.
+     *
+     * The source locale never fetches: its body already *is* the hand-written one.
+     */
+    const notesCache = new Map();
+
+    async function localizedNote(tag) {
+      if (notesCache.has(tag)) return notesCache.get(tag);
+      let body = null;
+      try {
+        const r = await fetchWithTimeout(
+          `/api/releases/download/${encodeURIComponent(tag)}/release-notes-i18n.json`,
+          15000,
+        );
+        if (r.ok) {
+          const data = await r.json();
+          const entry = data && data.locales ? data.locales[copy.locale] : null;
+          if (entry && typeof entry.body === "string" && entry.body.trim()) {
+            body = entry.body;
+          }
+        }
+      } catch { /* Keep the hand-written body. */ }
+      notesCache.set(tag, body);
+      return body;
+    }
+
+    // Resolved before rendering so the item template below stays synchronous,
+    // and in parallel because a page lists several releases at once.
+    async function localizedNotes(items) {
+      const out = new Map();
+      if (!copy.locale || copy.locale === copy.notesSourceLocale) return out;
+      const tags = [];
+      for (const rel of items) {
+        if (rel && rel.tag) tags.push(rel.tag);
+      }
+      const bodies = await Promise.all(tags.map(localizedNote));
+      for (let i = 0; i < tags.length; i++) {
+        if (bodies[i]) out.set(tags[i], bodies[i]);
+      }
+      return out;
+    }
+
     // Rapid clicks put several loadChangelog calls in flight at once; a stale
     // response landing late would otherwise overwrite the newer page and leave
     // `page` disagreeing with what is on screen. Only the newest request may
@@ -960,6 +1023,11 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
         hasNext = !!data.hasNext;
         hasPrev = !!data.hasPrev || page > 1;
         const items = data.items || [];
+
+        const notes = await localizedNotes(items);
+        // The notes round-trip is a second await, so the staleness guard has to
+        // run again before anything touches the DOM.
+        if (signal.aborted || requestId !== changelogRequestId) return;
 
         if (items.length === 0) {
           listEl.innerHTML = `<p class="text-body-medium text-outline">${fill(copy.empty, { link: releasesLinkHtml })}</p>`;
@@ -992,7 +1060,7 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
                   <span class="text-body-small text-outline ml-auto">${formatDate(rel.publishedAt)}</span>
                 </div>
                 ${rel.title && rel.title !== ver && rel.title !== rel.tag ? `<p class="text-body-small text-outline mb-3">${escapeHtml(rel.title)}</p>` : ""}
-                <div class="text-body-medium text-on-surface-variant">${formatBody(rel.body)}</div>
+                <div class="text-body-medium text-on-surface-variant">${formatBody(notes.get(rel.tag) || rel.body)}</div>
                 ${assets}
                 ${rel.htmlUrl ? `<p class="mt-4 text-body-small"><a href="${escapeHtml(rel.htmlUrl)}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${copy.viewOnGithub}</a></p>` : ""}
               </article>`;
