@@ -325,7 +325,7 @@ jobs:
           REUSE_LINUX=false
           ASSETS=""
           if [ "$REBUILD" != true ]; then
-            ASSETS=$(gh release view "$TAG" --repo "$TARGET_REPO" --json assets -q '.assets[].name' 2>/dev/null || true)
+            ASSETS=$(gh release view "$TAG" --repo "$TARGET" --json assets -q '.assets[].name' 2>/dev/null || true)
           fi
           if [ -n "$ASSETS" ]; then
             if [ "$BUILD_ANDROID" = true ]; then
