@@ -66,6 +66,7 @@
  *         --tag v1.1.0+16 --out release-notes-i18n.json
  */
 
+import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -664,6 +665,12 @@ async function main() {
     sourceLocale: SOURCE_LOCALE,
     engine: "deepl",
     generatedAt: new Date().toISOString(),
+    // Fingerprint of the exact body bytes this translation was generated
+    // from. The workflow compares it against sha256(body.md) of the current
+    // release body and reuses the attached asset instead of re-calling DeepL
+    // when they match (and no locale was omitted); an asset without this
+    // field predates the fingerprint and simply re-translates once.
+    sourceSha256: createHash("sha256").update(body, "utf8").digest("hex"),
     locales,
     storeListings,
     warnings,

@@ -2019,6 +2019,26 @@ jobs:
             exit 0
           fi
           gh release view "$TAG" --repo "$TARGET_REPO" --json body -q .body > body.md
+          # Quota guard: when the body is byte-identical to what the attached
+          # asset was generated from AND that generation translated every
+          # locale, re-running DeepL would burn ~10 calls per dispatch to
+          # reproduce the same file — reuse the asset instead (it is already
+          # on the release, so there is nothing to re-upload either). An
+          # incomplete previous asset (a locale omitted during an outage)
+          # re-translates to fill the gaps; an asset without sourceSha256
+          # predates the fingerprint and re-translates once.
+          if gh release download "$TAG" --repo "$TARGET_REPO" \
+               --pattern release-notes-i18n.json --dir prev --clobber >/dev/null 2>&1 &&
+             [ -f prev/release-notes-i18n.json ]; then
+            current=$(sha256sum body.md | cut -d' ' -f1)
+            if jq -e --arg h "$current" \
+                 '.sourceSha256 == $h and (.warnings | length) == 0' \
+                 prev/release-notes-i18n.json >/dev/null; then
+              echo "::notice::$TAG notes unchanged since the attached translation; reusing it without calling DeepL"
+              exit 0
+            fi
+            echo "attached translation does not match the current body or omitted locales; re-translating"
+          fi
           if ! node tools/translate-release-notes.mjs \
                  --tag "$TAG" --out release-notes-i18n.json < body.md; then
             echo "::warning::translation failed for $TAG; store listings keep their previous notes"
