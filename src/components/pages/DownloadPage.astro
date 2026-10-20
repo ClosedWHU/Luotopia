@@ -753,9 +753,15 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
       const { switcher, list } = applyArchFilter("windows", installers);
       let html = "";
       if (externalLink) {
+        /* The empty version line is a placeholder, not something
+         * loadMsStoreVersion appends: the arch switcher repaints this whole
+         * container from the stored html string, which would drop an appended
+         * node. The filler only ever writes into an element the template
+         * already put here. */
         html += `<div class="space-y-1.5">
           <p class="text-label-medium text-outline">${copy.windowsStore}</p>
           ${externalLink}
+          <p class="text-body-small text-outline hidden" data-msstore-version></p>
         </div>`;
       }
       if (list.length > 0) {
@@ -839,6 +845,45 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
       } catch { /* Keep the static TestFlight label when Connect is unavailable. */ }
     }
 
+    /*
+     * The Windows card's Store section gets its version the same way the Apple
+     * card gets its beta build: from a Pages Function, here /api/msstore/latest.
+     * A version string is digits and dots - language-neutral, like the platform
+     * names - and the date goes through the page's own locale, so this needs no
+     * dictionary entry. When the Store API answers nothing useful the line stays
+     * hidden and the section keeps its static link.
+     */
+    let msStoreVersion = null;
+
+    function paintMsStoreVersion() {
+      const el = document.querySelector("[data-msstore-version]");
+      if (!el || !msStoreVersion) return;
+      const parts = [msStoreVersion.version];
+      if (msStoreVersion.releaseDateUtc) {
+        parts.push(formatDate(msStoreVersion.releaseDateUtc));
+      }
+      el.textContent = parts.join(" · ");
+      el.classList.remove("hidden");
+    }
+
+    async function loadMsStoreVersion() {
+      if (signal.aborted) return;
+
+      try {
+        const r = await fetchWithTimeout("/api/msstore/latest", 15000);
+        if (!r.ok || signal.aborted) return;
+
+        const info = await r.json();
+        if (info?.error || !info.version) return;
+
+        msStoreVersion = {
+          version: info.version,
+          releaseDateUtc: info.releaseDateUtc || null,
+        };
+        paintMsStoreVersion();
+      } catch { /* Keep the static Store link when the Store API is unavailable. */ }
+    }
+
     async function loadLatest() {
       if (signal.aborted) return;
       // Prefer newest including prerelease so testers see pre builds; badge will mark it
@@ -859,6 +904,7 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
           paintAssets(assetsEl, externalLinkHtml(card));
         });
         void loadTestFlightVersion();
+        void loadMsStoreVersion();
         return;
       }
 
@@ -903,6 +949,7 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
         const externalLink = externalLinkHtml(card);
         cardAssetState[id] = { installers, externalLink, assetsEl };
         paintAssets(assetsEl, cardAssetsHtml(id, installers, externalLink));
+        paintMsStoreVersion();
 
         if (Object.prototype.hasOwnProperty.call(ARCH_FILTER_DEFAULT, id)) {
           // Delegated: the switcher buttons live in innerHTML that is replaced
@@ -927,6 +974,7 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
                 state.assetsEl,
                 cardAssetsHtml(id, state.installers, state.externalLink),
               );
+              paintMsStoreVersion();
               if (hadFocus) {
                 const restored = state.assetsEl.querySelector(
                   `button[data-arch="${nextArch}"]`,
@@ -940,6 +988,7 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
       });
 
       void loadTestFlightVersion();
+      void loadMsStoreVersion();
     }
 
     /*

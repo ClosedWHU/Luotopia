@@ -105,6 +105,7 @@ Preview 环境没有运行时 secret，所以：
 | `APPSTORE_CONNECT` | 否 | `1` 时启用 App Store Connect（TestFlight 构建号） |
 | `APPSTORE_CONNECT_KEY_ID` / `_ISSUER_ID` / `_PRIVATE_KEY` | 启用时需要 | PEM 用字面 `\n` 换行 |
 | `APPSTORE_BUNDLE_ID` / `APPSTORE_COUNTRY` | 否 | 默认 `sb.whu.luotopia` / `cn` |
+| `MSSTORE_PRODUCT_ID` / `MSSTORE_MARKET` | 否 | 默认 `9P29527S1H0H` / `CN`；`/api/msstore/latest` 查询的产品与市场 |
 | `UPTIMEROBOT_API_URL` | 否 | 默认 `https://api.uptimerobot.com/v2/` |
 | `STATUS_COUNT_DAYS` | 否 | 历史天数，默认 90，上限 180 |
 | `STATUS_SHOW_LINKS` | 否 | 是否在页面公开探测地址，默认 `1` |
@@ -113,6 +114,10 @@ Preview 环境没有运行时 secret，所以：
 
 `APPSTORE_CONNECT` 未启用时，`/api/appstore/latest` 会退回公开的 iTunes Lookup
 （不需要 JWT）。
+
+`/api/msstore/latest` 合并两个无文档公开源：badge 工具的 `v8.0/sdk/products`
+（在架状态与元数据）和产品页内嵌态（版本号、发布日期）。后者解析失败时版本字段
+为 null，下载页只保留静态 Store 链接——两个源都无文档担保，降级是设计的一部分。
 
 > [!CAUTION]
 > 密钥只进 Pages 的 secret，不进仓库。`.dev.vars` 与 `.env*`（除 `.example`）都已
