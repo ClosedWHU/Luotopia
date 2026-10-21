@@ -373,8 +373,10 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
   import { normalizeIconSvg } from "../../scripts/icon-svg";
   import downloadIconRaw from "@material-symbols/svg-400/outlined/download.svg?raw";
   import openInNewIconRaw from "@material-symbols/svg-400/outlined/open_in_new.svg?raw";
+  import msStoreIconRaw from "../../assets/icons/store-microsoft-24-filled.svg?raw";
 
   const openInNewIcon = normalizeIconSvg(openInNewIconRaw, "text-base");
+  const openInNewTrailingIcon = normalizeIconSvg(openInNewIconRaw, "text-sm");
   const assetDownloadIcon = normalizeIconSvg(downloadIconRaw, "text-base shrink-0 mt-0.5");
   const changelogDownloadIcon = normalizeIconSvg(downloadIconRaw, "text-sm");
 
@@ -647,10 +649,52 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
       const externalUrl = card.getAttribute("data-external-url") || "";
       if (!externalUrl) return "";
       const externalLabel = card.getAttribute("data-external-label") || copy.externalFallback;
+      /*
+       * The two store channels carry their brand marks: a lone grey arrow
+       * reads as "some hyperlink", while the TestFlight plane and the Store
+       * bag bring the channel's own colour and make each card's install
+       * entry point recognisable at a glance. The marks keep their fills on
+       * their paths, so normalizeIconSvg's root fill=currentColor cannot
+       * grey them out; the arrow moves to the tail as the external-link
+       * affordance. Any other external URL keeps the old arrow-first shape.
+       */
+      const brand = brandIconHtml(externalUrl);
       return `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-body-small text-primary hover:underline no-underline">
-          ${openInNewIcon}
+          ${brand || openInNewIcon}
           <span>${escapeHtml(externalLabel)}</span>
+          ${brand ? `<span class="text-outline">${openInNewTrailingIcon}</span>` : ""}
         </a>`;
+    }
+
+    /*
+     * Channel marks, because Material Symbols - the source every other icon
+     * on this page is read from - has no brand glyphs, and a lone grey arrow
+     * reads as "some hyperlink" rather than an install entry point.
+     *
+     * Provenance, after searching the usual standards: the Store mark is
+     * vendored from Microsoft's own Fluent UI System Icons (MIT, see the
+     * file's header). TestFlight has no public SVG anywhere - simple-icons
+     * v16 never carried it, the Iconify aggregate has zero hits, Wikimedia
+     * Commons has no logo, svgrepo sits behind a bot checkpoint, and tracing
+     * the official PNG (homarr-labs/dashboard-icons, Apache-2.0) yields a
+     * 10-53 KB patchwork because the artwork is gradients, not flats. So the
+     * plane is a flat-vector reconstruction of the official icon's geometry:
+     * squircle plus three-blade propeller, sampled brand blue #1092FF and an
+     * ice-blue blade, which is also what survives at the 18 px this renders.
+     * Brand hues stay hardcoded instead of joining the token palette, which
+     * is for the app's own colours rather than third-party brands.
+     */
+    const TESTFLIGHT_ICON_RAW =
+      '<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5.5" fill="#1092FF"/><g fill="#D3E7F9"><path d="M12 12.4C10.9 11.6 10.25 10.4 10.3 9.0L10.4 6.6C10.45 5.3 11.1 4.4 12 4.4C12.9 4.4 13.55 5.3 13.6 6.6L13.7 9.0C13.75 10.4 13.1 11.6 12 12.4Z"/><path d="M12 12.4C10.9 11.6 10.25 10.4 10.3 9.0L10.4 6.6C10.45 5.3 11.1 4.4 12 4.4C12.9 4.4 13.55 5.3 13.6 6.6L13.7 9.0C13.75 10.4 13.1 11.6 12 12.4Z" transform="rotate(120 12 12.4)"/><path d="M12 12.4C10.9 11.6 10.25 10.4 10.3 9.0L10.4 6.6C10.45 5.3 11.1 4.4 12 4.4C12.9 4.4 13.55 5.3 13.6 6.6L13.7 9.0C13.75 10.4 13.1 11.6 12 12.4Z" transform="rotate(240 12 12.4)"/><circle cx="12" cy="12.4" r="1.2"/></g></svg>';
+
+    function brandIconHtml(url) {
+      if (url.includes("testflight.apple.com")) {
+        return normalizeIconSvg(TESTFLIGHT_ICON_RAW, "text-lg shrink-0");
+      }
+      if (url.includes("apps.microsoft.com")) {
+        return normalizeIconSvg(msStoreIconRaw, "text-lg shrink-0 text-[#0078D4]");
+      }
+      return "";
     }
 
     function paintAssets(assetsEl, html) {
