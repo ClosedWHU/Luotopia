@@ -14,10 +14,15 @@ export function normalizeIconSvg(raw: string, className = "", label?: string): s
     ? `role="img" aria-label="${label.replace(/"/g, "&quot;")}"`
     : 'aria-hidden="true" focusable="false"';
 
-  return raw
-    .replace(/\s+(?:width|height)="[^"]*"/g, "")
-    .replace(
-      "<svg",
-      `<svg class="lt-icon${className ? ` ${className}` : ""}" width="1em" height="1em" fill="currentColor" ${accessibility}`,
-    );
+  /*
+   * Strip width/height and re-stamp the sizing/a11y attributes on the ROOT
+   * tag only. A previous whole-string regex also ate geometry attributes on
+   * children — invisible for Material Symbols and Fluent marks (path-only),
+   * but it silently zeroed the TestFlight squircle's <rect width height>,
+   * leaving just the propeller floating on the card.
+   */
+  return raw.replace(/<svg([^>]*)>/, (_match, attrs: string) => {
+    const cleaned = attrs.replace(/\s+(?:width|height)="[^"]*"/g, "");
+    return `<svg${cleaned} class="lt-icon${className ? ` ${className}` : ""}" width="1em" height="1em" fill="currentColor" ${accessibility}>`;
+  });
 }
