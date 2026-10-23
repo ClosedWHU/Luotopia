@@ -9,6 +9,7 @@
   "nav.download": "Tải về",
   "nav.community": "Cộng đồng",
   "nav.status": "Trạng thái",
+  "nav.docs": "Tài liệu",
   "nav.brand": "Thương hiệu",
   "nav.legal": "Pháp lý",
   "nav.menu": "Menu",
@@ -27,7 +28,7 @@
   "footer.nav.brand": "Tài nguyên thương hiệu",
   "footer.nav.legal": "Thông tin pháp lý",
   "footer.resources.status": "Trạng thái dịch vụ",
-  "footer.resources.docs": "Tài liệu cho nhà phát triển",
+  "footer.resources.docs": "Trung tâm tài liệu",
   "footer.resources.github": "Tổ chức GitHub",
   "footer.resources.repo": "Kho mã nguồn mở của trang này",
 

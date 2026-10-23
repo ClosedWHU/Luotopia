@@ -1,0 +1,248 @@
+/*
+ * Documentation prose & shell styling.
+ *
+ * Everything keys off the shared Layer-1 tokens (tokens.css via global.css),
+ * so the docs follow the marketing site's palette, glass geometry and dark
+ * mode automatically — there is no second design system here. Class names
+ * follow the site's lt-* convention; layout utilities come from Tailwind in
+ * the components themselves, and this file only carries what element-level
+ * rendered markdown needs (set:html/Content output is not scoped-stylable).
+ */
+@import 'remark-github-blockquote-alert/alert.css';
+
+/* ── prose ─────────────────────────────────────────────────────────────── */
+
+.lt-docs-prose {
+  font-size: var(--lt-text-body-medium, 0.9375rem);
+  line-height: 1.75;
+  color: var(--lt-color-on-surface-variant);
+}
+
+.lt-docs-prose > * + * {
+  margin-top: 1em;
+}
+
+.lt-docs-prose h2,
+.lt-docs-prose h3,
+.lt-docs-prose h4 {
+  color: var(--lt-color-on-surface);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  scroll-margin-top: 6rem;
+}
+.lt-docs-prose h2 {
+  font-size: 1.375rem;
+  line-height: 1.35;
+  margin-top: 2.25em;
+  padding-bottom: 0.35em;
+  border-bottom: 1px solid var(--lt-glass-divider);
+}
+.lt-docs-prose h3 {
+  font-size: 1.125rem;
+  margin-top: 1.75em;
+}
+.lt-docs-prose h4 {
+  font-size: 1rem;
+  margin-top: 1.5em;
+}
+
+.lt-docs-prose a {
+  color: var(--lt-color-primary);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+.lt-docs-prose a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.lt-docs-prose strong {
+  color: var(--lt-color-on-surface);
+  font-weight: 600;
+}
+
+.lt-docs-prose ul,
+.lt-docs-prose ol {
+  padding-left: 1.4em;
+}
+.lt-docs-prose ul {
+  list-style: disc;
+}
+.lt-docs-prose ol {
+  list-style: decimal;
+}
+.lt-docs-prose li + li {
+  margin-top: 0.35em;
+}
+.lt-docs-prose li::marker {
+  color: var(--lt-color-outline);
+}
+
+.lt-docs-prose blockquote {
+  border-left: 3px solid var(--lt-color-outline-variant);
+  padding-left: 1em;
+  color: var(--lt-color-on-surface-variant);
+}
+
+/* GitHub-style alerts ([!NOTE] etc., remark-github-blockquote-alert).
+   Two fixes over the plugin defaults:
+   1. The plugin only colors the left rule and the title — on the reading
+      panel that reads as a stray border, so each type also gets a tint of
+      its own hue (same color, much lighter) as background.
+   2. The plugin switches its palette on prefers-color-scheme, but this site
+      switches on the .dark class — the two disagree whenever the visitor
+      overrides the theme, so the GitHub palette is re-pinned here to follow
+      .dark (values are GitHub's own light/dark alert colors). */
+.lt-docs-prose .markdown-alert {
+  --color-border-default: #d0d7de;
+  --color-accent-fg: #0969da;
+  --color-accent-emphasis: #0969da;
+  --color-danger-fg: #d1242f;
+  --color-danger-emphasis: #cf222e;
+  --color-attention-fg: #9a6700;
+  --color-attention-emphasis: #9a6700;
+  --color-done-fg: #8250df;
+  --color-done-emphasis: #8250df;
+  --color-success-fg: #1a7f37;
+  --color-success-emphasis: #1f883d;
+  border-radius: var(--lt-radius-control, 14px);
+  border-left-width: 3px;
+  padding: 0.85em 1.1em;
+}
+html.dark .lt-docs-prose .markdown-alert {
+  --color-border-default: #30363d;
+  --color-accent-fg: #58a6ff;
+  --color-accent-emphasis: #1f6feb;
+  --color-danger-fg: #f85149;
+  --color-danger-emphasis: #da3633;
+  --color-attention-fg: #d29922;
+  --color-attention-emphasis: #9e6a03;
+  --color-done-fg: #a371f3;
+  --color-done-emphasis: #8957e5;
+  --color-success-fg: #3fb950;
+  --color-success-emphasis: #238636;
+}
+.lt-docs-prose .markdown-alert > :first-child {
+  margin-top: 0;
+}
+.lt-docs-prose .markdown-alert > :last-child {
+  margin-bottom: 0;
+}
+.lt-docs-prose .markdown-alert-note {
+  background: color-mix(in srgb, var(--color-accent-fg) 8%, transparent);
+}
+.lt-docs-prose .markdown-alert-tip {
+  background: color-mix(in srgb, var(--color-success-fg) 9%, transparent);
+}
+.lt-docs-prose .markdown-alert-important {
+  background: color-mix(in srgb, var(--color-done-fg) 9%, transparent);
+}
+.lt-docs-prose .markdown-alert-warning {
+  background: color-mix(in srgb, var(--color-attention-fg) 11%, transparent);
+}
+.lt-docs-prose .markdown-alert-caution {
+  background: color-mix(in srgb, var(--color-danger-fg) 8%, transparent);
+}
+
+.lt-docs-prose hr {
+  border: 0;
+  border-top: 1px solid var(--lt-glass-divider);
+  margin: 2em 0;
+}
+
+.lt-docs-prose img {
+  border-radius: var(--lt-radius-nested, 18px);
+  max-width: 100%;
+}
+
+/* Tables: dense reference material is most of the server docs; give them the
+   hairline/tonal treatment the marketing tables use. */
+.lt-docs-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  display: block;
+  overflow-x: auto;
+}
+.lt-docs-prose th,
+.lt-docs-prose td {
+  border: 1px solid var(--lt-color-outline-variant);
+  padding: 0.5em 0.8em;
+  text-align: left;
+  vertical-align: top;
+}
+.lt-docs-prose th {
+  background: color-mix(in srgb, var(--lt-color-primary) 6%, transparent);
+  color: var(--lt-color-on-surface);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.lt-docs-prose tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--lt-color-outline-variant) 12%, transparent);
+}
+
+/* Inline code */
+.lt-docs-prose :not(pre) > code {
+  background: color-mix(in srgb, var(--lt-color-outline-variant) 26%, transparent);
+  border-radius: 6px;
+  padding: 0.15em 0.4em;
+  font-size: 0.85em;
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  color: var(--lt-color-on-surface);
+}
+
+/* Fenced code: shiki dual themes (github-light / github-dark, wired through
+   rehypeShiki in astro.config.mjs). Astro's dual-theme output puts the light
+   palette in literal inline colors and the dark palette in --shiki-dark*
+   variables, so light mode needs no rule — only the .dark swap below. */
+.lt-docs-prose pre.astro-code {
+  border-radius: var(--lt-radius-nested, 18px);
+  padding: 1em 1.2em;
+  overflow-x: auto;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  border: 1px solid var(--lt-glass-divider);
+}
+.lt-docs-prose pre.astro-code code {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+}
+html.dark .lt-docs-prose pre.astro-code,
+html.dark .lt-docs-prose pre.astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}
+
+/* Mermaid: rendered client-side (components/pages/DocsPage.astro); strip the
+   code chrome so the source never flashes as a box. */
+.lt-docs-prose pre.mermaid {
+  background: transparent;
+  border: none;
+  padding: 0;
+  overflow-x: auto;
+  text-align: center;
+}
+
+/* ── shell ─────────────────────────────────────────────────────────────── */
+
+/*
+ * The article panel wears the legal-document treatment (see
+ * LegalDocumentPage.astro): long-form prose sits on the high-opacity reading
+ * panel rather than bare glass — legibility over effect — with the shared
+ * --lt-reading-panel-bg token, the control blur for edge softness and the
+ * standard rim/edge/shadow stack.
+ */
+.lt-docs-panel {
+  background-color: var(--lt-reading-panel-bg);
+  backdrop-filter: blur(var(--lt-glass-blur-control)) saturate(120%);
+  -webkit-backdrop-filter: blur(var(--lt-glass-blur-control)) saturate(120%);
+  box-shadow:
+    inset 0 1px 0 0 var(--lt-glass-rim),
+    inset 0 0 0 0.6px var(--lt-glass-edge),
+    var(--lt-shadow-glass);
+}
+
+/* Keep the sticky sidebar's internal scroll from trapping page scroll on
+   touch: the card scrolls, the page keeps its own momentum. */
+.lt-docs-sidebar {
+  overscroll-behavior: contain;
+}

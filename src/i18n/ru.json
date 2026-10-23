@@ -9,6 +9,7 @@
   "nav.download": "Скачать",
   "nav.community": "Сообщество",
   "nav.status": "Статус",
+  "nav.docs": "Документация",
   "nav.brand": "Бренд",
   "nav.legal": "Документы",
   "nav.menu": "Меню",
@@ -27,7 +28,7 @@
   "footer.nav.brand": "Фирменные материалы",
   "footer.nav.legal": "Правовая информация",
   "footer.resources.status": "Статус сервисов",
-  "footer.resources.docs": "Документация для разработчиков",
+  "footer.resources.docs": "Центр документации",
   "footer.resources.github": "Организация GitHub",
   "footer.resources.repo": "Исходный код этого сайта",
 
