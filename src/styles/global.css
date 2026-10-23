@@ -319,6 +319,27 @@ html[lang="ko"] {
     inset 0 0 0 0.6px var(--lt-glass-edge);
 }
 
+/*
+ * Third-party brand marks on /download (the TestFlight plane; the Microsoft
+ * Store bag is tinted by Tailwind dark: utilities on the link itself). These
+ * marks are injected at runtime, so their theme switch has to live here
+ * rather than in a scoped page style. The hues stay out of the --lt-*
+ * palette — that one is Luotopia's own — but they must still follow the site
+ * theme: a fixed bright azure all but vanishes on the light glass panel, and
+ * the Store's fixed light-mode blue sinks into the dark one. Values are each
+ * brand's own light/dark pair: Apple's HIG system blue (#007AFF / #0A84FF)
+ * with a white propeller in light for a crisp silhouette at 18px, and the
+ * sampled ice-blue blade kept for dark.
+ */
+.lt-tf-mark {
+  --lt-tf-square: #007aff;
+  --lt-tf-blade: #ffffff;
+}
+:root.dark .lt-tf-mark {
+  --lt-tf-square: #0a84ff;
+  --lt-tf-blade: #d3e7f9;
+}
+
 /* ── Scrollbars ──
  *
  * Three scopes, one look: a rounded translucent thumb on a transparent track.
