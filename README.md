@@ -58,7 +58,8 @@
 
 本仓库是官网源码。开发约定、设计 token 与构建目标见
 [docs/development.md](docs/development.md)；部署、环境变量与域名配置见
-[docs/deployment.md](docs/deployment.md)。
+[docs/deployment.md](docs/deployment.md)；站内文档区（`/docs`，与官网同一套
+设计与构建）见 [docs/docs-site.md](docs/docs-site.md)。
 
 ## Star History
 

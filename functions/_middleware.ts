@@ -6,6 +6,7 @@ import {
   matchLocaleTag,
 } from "../src/i18n/locales";
 import { normalizePath, pathInLocale } from "../src/i18n/routes";
+import { resolveDocsRedirect } from "./lib/docs-redirects";
 
 const MAIN_DOMAIN = "www.whu.sb";
 
@@ -54,6 +55,9 @@ const NON_PAGE_PREFIXES = [
   "/.well-known/",
   "/fonts/",
   "/img/",
+  // The documentation site (Starlight subproject under /docs) is zh-Hans
+  // only; locale negotiation must never prefix it (/en/docs does not exist).
+  "/docs",
 ];
 
 /** True for anything that is a file or an endpoint rather than a routable page. */
@@ -156,6 +160,17 @@ function readLangCookie(request: Request): string | undefined {
  * the deep link the page's script maps back onto luotopia://app/<path>.
  */
 const DEEPLINK_DOMAIN = "luotopia.whu.sb";
+
+/**
+ * Former home of the standalone documentation site (ClosedWHU/Luotopia-Docs,
+ * first Docusaurus then Starlight on its own Worker). The docs are now
+ * first-class pages of this site under /docs; once the domain is attached to
+ * this Pages project, every path 301s to its canonical main-domain URL in a
+ * single hop — legacy URLs included, resolved through the same generated map
+ * that powers the on-site redirect table (src/config/docs/redirects.mjs), so
+ * the two lists can never disagree.
+ */
+const DOCS_DOMAIN = "docs.whu.sb";
 
 /** Allowed hosts (local dev + production family). */
 const WHITELIST: string[] = [
@@ -295,6 +310,15 @@ export async function onRequest(context: Context): Promise<Response> {
       );
     }
     return next(request);
+  }
+
+  if (host === DOCS_DOMAIN) {
+    // One hop to the canonical URL; the query survives, and the browser
+    // re-attaches the fragment across the redirect.
+    return Response.redirect(
+      `https://${MAIN_DOMAIN}${resolveDocsRedirect(url.pathname)}${url.search}`,
+      301,
+    );
   }
 
   if (host !== MAIN_DOMAIN) {

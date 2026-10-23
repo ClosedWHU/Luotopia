@@ -1,0 +1,91 @@
+---
+/**
+ * Right-hand "on this page" rail. Headings come from Astro's render()
+ * (h2/h3 only); the active entry is tracked with an IntersectionObserver
+ * through onPageSetup, so it survives Client Router navigations.
+ */
+interface Props {
+  headings: { depth: number; slug: string; text: string }[];
+}
+
+const { headings } = Astro.props;
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+{
+  toc.length > 0 && (
+    <aside class="lt-docs-toc hidden xl:block sticky top-24 self-start" aria-label="本页目录">
+      <p class="lt-navlabel text-label-medium text-outline px-2 pb-2">本页内容</p>
+      <ul class="flex flex-col gap-0.5 border-l border-glass-divider">
+        {toc.map((h) => (
+          <li>
+            <a
+              href={`#${h.slug}`}
+              data-toc-link={h.slug}
+              class:list={[
+                "lt-docs-toclink block py-1 pr-2 text-body-small no-underline text-on-surface-variant transition-colors border-l-2 border-transparent -ml-px",
+                h.depth === 3 ? "pl-6" : "pl-3",
+              ]}
+            >
+              {h.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </aside>
+  )
+}
+
+<script>
+  import { onPageSetup } from "../../scripts/page-lifecycle";
+
+  onPageSetup((signal) => {
+    const links = Array.from(
+      document.querySelectorAll<HTMLAnchorElement>("[data-toc-link]"),
+    );
+    if (links.length === 0) return;
+    const byId = new Map(links.map((link) => [link.dataset.tocLink!, link]));
+    const setActive = (id: string | null) => {
+      for (const link of links) {
+        const active = link.dataset.tocLink === id;
+        link.classList.toggle("lt-docs-toc-active", active);
+        link.setAttribute("aria-current", active ? "true" : "false");
+      }
+    };
+    const targets = [...byId.keys()]
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+    if (targets.length === 0) return;
+
+    /*
+     * The topmost heading above the fold wins — the standard reading-position
+     * heuristic, and sturdier than raw intersection ratios for short sections.
+     */
+    let current: string | null = null;
+    const evaluate = () => {
+      let best: string | null = null;
+      for (const target of targets) {
+        if (target.getBoundingClientRect().top <= 96) best = target.id;
+        else break;
+      }
+      if (best !== current) {
+        current = best;
+        setActive(current);
+      }
+    };
+    evaluate();
+    window.addEventListener("scroll", evaluate, { passive: true, signal });
+    return () => setActive(null);
+  });
+</script>
+
+<style>
+  .lt-docs-toclink:hover {
+    color: var(--lt-color-primary);
+  }
+  :global(.lt-docs-toc-active) {
+    color: var(--lt-color-primary);
+    border-left-color: var(--lt-color-primary);
+    font-weight: 500;
+  }
+</style>

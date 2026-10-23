@@ -267,6 +267,31 @@ npm run check:aasa
 curl -sI https://luotopia.whu.sb/.well-known/apple-app-site-association
 ```
 
+### 文档域名（docs.whu.sb）
+
+文档站原为独立部署（`ClosedWHU/Luotopia-Docs`，自己的 Worker），公开侧
+（user/client 两区）已合并为本站 `/docs` 下的一等公民页面（主站自己的渲染链，
+无文档框架；见 `docs/docs-site.md`）；server/ebike 开发文档随闭源代码转入
+**私有**的 Luotopia-Docs 仓。`docs.whu.sb` 保留为纯跳转域名：中间件把该主机
+上的**所有**路径 301 到 `https://www.whu.sb/docs/...`——user/client 的历史
+URL（旧 Docusaurus 下划线 slug 等）经 `src/config/docs/redirects.mjs` 解析到
+对应页面，**server/ebike 的旧 URL 按前缀落到 `/docs/` 首页**（公开侧已无对应
+页面，首页说明去向）；全部**一跳到位**，不会出现「先跳主域再跳规范页」的
+两跳链。查询串保留，fragment 由浏览器自动带回。
+
+维护要点：
+
+- 需在 Pages 自定义域名绑定 `docs.whu.sb`（与 `luotopia.whu.sb` 同样方式），并
+  **删除旧 `luotopia-docs` Worker 上对该域名的绑定**，否则请求到不了本站中间件。
+- `/docs` 前缀在 `NON_PAGE_PREFIXES` 里：文档只有 zh-Hans，语言协商永不给它加
+  `/en/` 之类前缀（`/en/docs` 不存在）；hreflang 对路由表之外的路径只发
+  x-default。
+- 镜像构建（`MIRROR_ASSETS_ONLY=1`）照常包含文档页面，但它们的 HTML 与其他
+  页面一样被替换为跳回主域的桩（镜像只分发资产）。
+- user/client 页面改名/移动后，同步更新 `src/config/docs/redirects.mjs`，
+  两个消费方（站内 redirects、docs.whu.sb 301）自动同步；server/ebike 前缀
+  的落地兜底在 `functions/lib/docs-redirects.ts`。
+
 ## 服务状态页（/status）
 
 `/status` 取代了原先独立部署的 `status.whu.sb`（Nuxt + naive-ui 的
@@ -493,6 +518,16 @@ curl -sI -H 'accept: text/html' -H 'accept-language: en' \
 
 # 非文档请求不受影响（含 prefetch）：应 200
 curl -sI -H 'accept: */*' -H 'accept-language: en' https://www.whu.sb/ | head -1
+
+# 文档站：应 200，且与语言协商无关（英文 Accept-Language 也不加前缀）
+curl -sI https://www.whu.sb/docs/ | head -1
+curl -sI -H 'accept: text/html' -H 'accept-language: en' https://www.whu.sb/docs/server/ | head -1
+# 站内旧 URL：应重定向到规范地址（静态输出为 meta-refresh 页，目标带 /docs 前缀）
+curl -s https://www.whu.sb/docs/server/cli_reference | grep -o 'url=[^"]*'
+
+# docs.whu.sb 绑定到 Pages 之后：一跳 301 直达最终地址（含历史 URL 解析）
+curl -sI https://docs.whu.sb/server/cli_reference | grep -i '^location'   # -> www.whu.sb/docs/server/cli-reference
+curl -sI https://docs.whu.sb/user/ | grep -i '^location'                  # -> www.whu.sb/docs/user
 ```
 
 `/api/status` 的 `X-Status-Source` 会是 `api`（回源）、`cache`（命中缓存）或

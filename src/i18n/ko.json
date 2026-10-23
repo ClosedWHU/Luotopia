@@ -9,6 +9,7 @@
   "nav.download": "다운로드",
   "nav.community": "커뮤니티",
   "nav.status": "상태",
+  "nav.docs": "문서",
   "nav.brand": "브랜드",
   "nav.legal": "법률 정보",
   "nav.menu": "메뉴",
@@ -27,7 +28,7 @@
   "footer.nav.brand": "브랜드 자료",
   "footer.nav.legal": "법률 정보",
   "footer.resources.status": "서비스 상태",
-  "footer.resources.docs": "개발자 문서",
+  "footer.resources.docs": "문서 센터",
   "footer.resources.github": "GitHub 조직",
   "footer.resources.repo": "이 사이트의 오픈소스 저장소",
 
