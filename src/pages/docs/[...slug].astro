@@ -1,0 +1,29 @@
+---
+/**
+ * One documentation page. Thin route per the site's page convention: data in,
+ * shell out — all presentation lives in components/pages/DocsPage.astro.
+ */
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import DocsPage from "../../components/pages/DocsPage.astro";
+import { pathOf } from "../../config/docs/navigation";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("docs");
+  return entries.map((entry) => ({
+    // entry slugs are full site paths ("docs/server/x"); this route lives at
+    // src/pages/docs/, so the param is the tail.
+    params: { slug: pathOf(entry).replace(/^docs\/?/, "") },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+---
+
+<BaseLayout title={entry.data.title} description={entry.data.description}>
+  <DocsPage entry={entry} headings={headings}>
+    <Content />
+  </DocsPage>
+</BaseLayout>

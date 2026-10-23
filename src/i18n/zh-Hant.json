@@ -9,6 +9,7 @@
   "nav.download": "下載",
   "nav.community": "社群",
   "nav.status": "狀態",
+  "nav.docs": "文檔",
   "nav.brand": "品牌",
   "nav.legal": "法律資訊",
   "nav.menu": "選單",
@@ -27,7 +28,7 @@
   "footer.nav.brand": "品牌資源",
   "footer.nav.legal": "法律資訊",
   "footer.resources.status": "服務狀態",
-  "footer.resources.docs": "開發者文件",
+  "footer.resources.docs": "文檔中心",
   "footer.resources.github": "GitHub 組織",
   "footer.resources.repo": "本站開源倉庫",
 

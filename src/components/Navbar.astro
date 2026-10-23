@@ -25,9 +25,17 @@ const links = [
   { route: "download", label: t("nav.download") },
   { route: "community", label: t("nav.community") },
   { route: "status", label: t("nav.status") },
+  // The docs site (merged from Luotopia-Docs, served under /docs) is zh-Hans only,
+  // so unlike every other entry it has no per-locale URL — one href for all.
+  // Label is the short nav.docs ("文档"), not the footer's "文档中心": eight
+  // items leave no room for the longer form at the breakpoint floor.
+  { href: "/docs/", label: t("nav.docs") },
   { route: "brand", label: t("nav.brand") },
   { route: "legal", label: t("nav.legal") },
 ] as const;
+
+const linkHref = (link: (typeof links)[number]) =>
+  "href" in link ? link.href : routeUrl(locale, link.route);
 
 const path = Astro.url.pathname.replace(/\/+$/, "") || "/";
 /*
@@ -103,12 +111,12 @@ const persistName = `lt-navbar-${locale}`;
           Luotopia
     </a>
 
-    <div class="hidden md:flex items-center gap-0.5">
+    <div class="hidden lg:flex items-center gap-0.5">
       {
         links.map((link) => (
           <a
-            href={routeUrl(locale, link.route)}
-            aria-current={isActive(routeUrl(locale, link.route)) ? "page" : undefined}
+            href={linkHref(link)}
+            aria-current={isActive(linkHref(link)) ? "page" : undefined}
             class="lt-navlink state-layer rounded-control px-3.5 py-2 text-body-large text-on-surface-variant no-underline transition-colors"
           >
             {link.label}
@@ -163,7 +171,7 @@ const persistName = `lt-navbar-${locale}`;
       </button>
     </div>
 
-    <button id="mobile-menu-btn" class="lt-burger md:hidden state-layer rounded-control p-2 text-on-surface-variant cursor-pointer" aria-label={t("nav.menu")} aria-expanded="false" aria-controls="mobile-menu">
+          <button id="mobile-menu-btn" class="lt-burger lg:hidden state-layer rounded-control p-2 text-on-surface-variant cursor-pointer" aria-label={t("nav.menu")} aria-expanded="false" aria-controls="mobile-menu">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
         <path class="lt-burger-l" d="M3 6h18" />
         <path class="lt-burger-m" d="M3 12h18" />
@@ -202,7 +210,7 @@ const persistName = `lt-navbar-${locale}`;
 -->
 <div
   id="mobile-menu"
-  class="lt-mobile-menu fixed z-40 md:hidden"
+    class="lt-mobile-menu fixed z-40 lg:hidden"
   data-open="false"
   transition:persist={`lt-mobile-menu-${locale}`}
 >
@@ -220,8 +228,8 @@ const persistName = `lt-navbar-${locale}`;
       {
         links.map((link) => (
           <a
-            href={routeUrl(locale, link.route)}
-            aria-current={isActive(routeUrl(locale, link.route)) ? "page" : undefined}
+            href={linkHref(link)}
+            aria-current={isActive(linkHref(link)) ? "page" : undefined}
               class="lt-navlink state-layer rounded-control px-3 py-2.5 text-body-large text-on-surface-variant no-underline"
           >
             {link.label}
@@ -364,10 +372,14 @@ const persistName = `lt-navbar-${locale}`;
   /*
    * The current language's endonym, hidden below `lg`.
    *
-   * The bar at `md` (768px) has to fit the brand, seven nav links, this switcher
-   * and the theme toggle inside `max-w-6xl` minus padding, and the link row does
-   * not wrap — it overflows. English already totals 45 characters across the
-   * seven links; French is 54 and Vietnamese 61. Dropping the label to just the
+   * The bar at its desktop floor (`lg`, 1024px — raised from `md` when the
+   * docs entry made eight links; below the floor the burger sheet takes over)
+   * has to fit the brand, eight nav links, this switcher and the theme toggle
+   * inside `max-w-6xl` minus padding, and the link row does not wrap — it
+   * overflows, which at 768–1023px used to stand the labels on their ends
+   * instead of collapsing to the sheet. English already totals ~50 characters
+   * across the eight links; French and Vietnamese run longer. Dropping the
+   * label to just the
    * globe below `lg` buys back ~80px exactly where the budget is tightest, and
    * costs nothing at desktop widths where there is room.
    *
@@ -514,7 +526,7 @@ const persistName = `lt-navbar-${locale}`;
    *
    * `visibility` (not `display`) is what keeps the links out of the tab order
    * while closed, and unlike `display: none` it does not fight Tailwind's
-   * layered `md:hidden` on desktop.
+   * layered `lg:hidden` on desktop.
    */
   .lt-mobile-menu {
     top: 88px;
@@ -601,6 +613,7 @@ const persistName = `lt-navbar-${locale}`;
   .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(5) { --lt-nav-stagger: 0.23s; }
   .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(6) { --lt-nav-stagger: 0.27s; }
   .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(7) { --lt-nav-stagger: 0.31s; }
+.lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(8) { --lt-nav-stagger: 0.35s; }
 
   /*
    * Burger -> X. Each bar rotates about its own midpoint and then slides to the
@@ -865,7 +878,7 @@ const persistName = `lt-navbar-${locale}`;
       // Crossing into the desktop breakpoint hides the trigger, so the sheet would
       // otherwise stay open with nothing on screen to close it.
       window
-        .matchMedia("(min-width: 768px)")
+        .matchMedia("(min-width: 1024px)")
         .addEventListener("change", (e) => { if (e.matches && isOpen()) setSheetOpen(false); }, { signal });
     }
 

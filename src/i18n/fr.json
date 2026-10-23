@@ -9,6 +9,7 @@
   "nav.download": "Télécharger",
   "nav.community": "Communauté",
   "nav.status": "Statut",
+  "nav.docs": "Docs",
   "nav.brand": "Marque",
   "nav.legal": "Légal",
   "nav.menu": "Menu",
@@ -27,7 +28,7 @@
   "footer.nav.brand": "Ressources de marque",
   "footer.nav.legal": "Mentions légales",
   "footer.resources.status": "État du service",
-  "footer.resources.docs": "Documentation pour les développeurs",
+  "footer.resources.docs": "Centre de documentation",
   "footer.resources.github": "Organisation GitHub",
   "footer.resources.repo": "Code source de ce site",
 

@@ -1,0 +1,110 @@
+---
+/**
+ * The docs left rail: the four-topic switcher and the current topic's tree.
+ * One glass card, matching the site's surface language; sticky beside the
+ * article on desktop, a native <details> disclosure at the top of the page on
+ * small screens (open by default, no JS required).
+ */
+import type { DocsNavEntry, DocsTopic } from "../../config/docs/navigation";
+import Icon from "../Icon.astro";
+import DocsTree from "./DocsTree.astro";
+
+interface Props {
+  topics: DocsTopic[];
+  currentTopic: DocsTopic;
+  items: DocsNavEntry[];
+  currentPath: string;
+}
+
+const { topics, currentTopic, items, currentPath } = Astro.props;
+---
+
+<aside class="lt-docs-sidebar self-start lg:sticky lg:top-24">
+  <!--
+    Bare rail, no card: the article carries the reading panel (legal-document
+    treatment) and the sidebar stays quiet chrome beside it — same division as
+    the marketing pages, where content sits on panels and navigation does not.
+
+    The scroller keeps lt-scroll-y for the slim thumb. `data-lenis-prevent`
+    (the site's standard wheel opt-out) is applied *only at lg and up* by the
+    script below: the rail is an internal scroller solely on desktop, where
+    max-height caps it. Below lg it stacks above the article with nothing to
+    scroll internally, and a static prevent attribute would swallow the wheel
+    outright — Lenis stands down and native scroll has no overflow to move,
+    leaving a dead zone exactly where the user is pointing.
+  -->
+  <div class="lt-docs-scroller lt-scroll-y overflow-y-auto flex flex-col gap-3 lg:max-h-[calc(100vh-7.5rem)]">
+    <nav aria-label="文档分区" class="flex flex-col gap-0.5">
+      {
+        topics.map((topic) => (
+          <a
+            href={topic.url}
+            aria-current={topic.id === currentTopic.id ? "page" : undefined}
+            class:list={[
+              "lt-docs-topic flex items-center gap-2.5 rounded-control px-2.5 py-2 text-body-medium no-underline transition-colors state-layer",
+              topic.id === currentTopic.id
+                ? "text-primary font-medium lt-docs-topic-active"
+                : "text-on-surface-variant",
+            ]}
+          >
+            <Icon name={topic.icon} class="text-lg shrink-0" />
+            {topic.label}
+          </a>
+        ))
+      }
+    </nav>
+    <details open class="lt-docs-nav">
+      <summary class="lg:hidden flex items-center gap-1 rounded-control px-2.5 py-2 text-label-large text-on-surface cursor-pointer select-none list-none state-layer border-t border-glass-divider pt-3">
+        <span class="flex-1">目录</span>
+        <Icon name="keyboard_arrow_down" class="lt-docs-caret text-base text-outline" />
+      </summary>
+      <div class="lt-docs-navbody border-t border-glass-divider pt-2 max-lg:pb-1">
+        <DocsTree items={items} currentPath={currentPath} />
+      </div>
+    </details>
+  </div>
+</aside>
+
+<script>
+  import { onPageSetup } from "../../scripts/page-lifecycle";
+
+  /*
+   * Wheel ownership follows the breakpoint: at lg the rail is a capped
+   * internal scroller and opts out of Lenis (data-lenis-prevent) so the wheel
+   * over it moves the tree; below lg the rail is page flow with no internal
+   * overflow, and the attribute must come off or Lenis stands down over an
+   * element that cannot scroll — a wheel dead zone. Lenis reads the attribute
+   * per event, so toggling it live is safe. 1024px is the navbar's desktop
+   * floor too; both track the same lg breakpoint.
+   */
+  onPageSetup((signal) => {
+    const scroller = document.querySelector(".lt-docs-scroller");
+    if (!scroller) return;
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const apply = () => {
+      if (desktop.matches) scroller.setAttribute("data-lenis-prevent", "");
+      else scroller.removeAttribute("data-lenis-prevent");
+    };
+    apply();
+    desktop.addEventListener("change", apply, { signal });
+  });
+</script>
+
+<style>
+  .lt-docs-nav summary::-webkit-details-marker {
+    display: none;
+  }
+  .lt-docs-topic-active {
+    background: color-mix(in srgb, var(--lt-color-primary) 10%, transparent);
+  }
+  @media (min-width: 1024px) {
+    /* Desktop keeps the tree permanently visible: the disclosure is a mobile
+       affordance, and its summary would just be dead chrome. */
+    .lt-docs-nav > summary {
+      display: none;
+    }
+    .lt-docs-nav:not([open]) > .lt-docs-navbody {
+      display: block;
+    }
+  }
+</style>

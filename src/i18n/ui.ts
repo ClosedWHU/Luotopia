@@ -196,15 +196,26 @@ export interface HreflangAlternate {
 export function hreflangAlternates(pathname: string): HreflangAlternate[] {
   const { rest } = splitLocalePrefix(pathname);
   const routeKey = routeKeyForPath(rest);
+
+  /*
+   * Paths outside the route table (the /docs site, ad-hoc utility pages) have
+   * no locale variants at all — claiming ten alternates that 404 would poison
+   * the cluster, so only x-default is emitted. This is the case the doc
+   * comment above describes; before the docs merge nothing ever reached it.
+   */
+  if (!routeKey) {
+    return [{ hreflang: "x-default", href: `${SITE_ORIGIN}${rest}` }];
+  }
+
   const alternates: HreflangAlternate[] = [];
 
   for (const locale of PUBLISHED_LOCALES) {
-    if (routeKey && !isRouteTranslated(locale.code, routeKey)) continue;
-    const path = routeKey ? routeUrl(locale.code, routeKey) : rest;
+    if (!isRouteTranslated(locale.code, routeKey)) continue;
+    const path = routeUrl(locale.code, routeKey);
     alternates.push({ hreflang: locale.hreflang, href: `${SITE_ORIGIN}${path}` });
   }
 
-  const defaultPath = routeKey ? routeUrl(DEFAULT_LOCALE, routeKey) : rest;
+  const defaultPath = routeUrl(DEFAULT_LOCALE, routeKey);
   alternates.push({ hreflang: "x-default", href: `${SITE_ORIGIN}${defaultPath}` });
   return alternates;
 }

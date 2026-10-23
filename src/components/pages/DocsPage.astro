@@ -1,0 +1,137 @@
+---
+/**
+ * The documentation page shell: sidebar rail + article + on-this-page rail,
+ * inside the marketing site's own BaseLayout chrome. This is the whole docs
+ * "framework" — there is no Starlight underneath (see docs/docs-site.md for
+ * why the site renders its docs itself).
+ */
+import type { CollectionEntry } from "astro:content";
+import { getCollection } from "astro:content";
+import { existsSync } from "node:fs";
+import {
+  DOCS_TOPICS,
+  flattenNav,
+  pathOf,
+  resolveTopicNav,
+  topicForSlug,
+} from "../../config/docs/navigation";
+import Icon from "../Icon.astro";
+import DocsSidebar from "../docs/DocsSidebar.astro";
+import DocsToc from "../docs/DocsToc.astro";
+import "../../styles/docs.css";
+
+interface Props {
+  entry: CollectionEntry<"docs">;
+  headings: { depth: number; slug: string; text: string }[];
+}
+
+const { entry, headings } = Astro.props;
+const currentPath = pathOf(entry);
+const topic = topicForSlug(currentPath);
+if (!topic) {
+  throw new Error(`docs page outside any topic: ${currentPath}`);
+}
+const allEntries = await getCollection("docs");
+const nav = resolveTopicNav(topic, allEntries);
+const flat = flattenNav(nav);
+const index = flat.findIndex((link) => link.slug === currentPath);
+const prev = index > 0 ? flat[index - 1] : undefined;
+const next = index >= 0 && index < flat.length - 1 ? flat[index + 1] : undefined;
+// The glob loader's id is content-dir relative without extension and with
+// "/index" stripped ("docs/server" for server/index.md), so the edit link
+// probes which of the two real filenames the entry came from.
+const editBase = `src/content/${entry.id}`;
+const editFile = existsSync(`${editBase}.md`) ? `${editBase}.md` : `${editBase}/index.md`;
+const editUrl = `https://github.com/ClosedWHU/Luotopia/edit/main/${editFile}`;
+---
+
+<div class="lt-docs max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20">
+  <div class="grid gap-8 lg:grid-cols-[17rem_minmax(0,1fr)] xl:grid-cols-[17rem_minmax(0,1fr)_15rem] items-start">
+    <DocsSidebar topics={DOCS_TOPICS} currentTopic={topic} items={nav} currentPath={currentPath} />
+    <!-- The center column: the article rides the same high-opacity reading
+         panel as the legal documents (dense prose over the aurora needs the
+         contrast — see .lt-docs-panel), capped to a readable measure and
+         centered within the space right of the sidebar. Pages without a TOC
+         read as a balanced sheet instead of stranding whitespace on one side.
+         The pager/edit chrome stays outside the panel: it is navigation, not
+         document. -->
+    <div class="min-w-0 flex flex-col gap-5">
+      <article class="lt-docs-panel lt-reveal-lift rounded-group w-full max-w-3xl mx-auto px-5 py-8 sm:px-10 sm:py-11">
+        <header class="mb-8">
+          <nav aria-label="面包屑" class="flex items-center gap-1.5 text-label-medium text-outline mb-3">
+            <a href="/docs/" class="no-underline text-on-surface-variant hover:text-primary transition-colors">文档</a>
+            <Icon name="chevron_right" class="text-sm" />
+            <a href={topic.url} class="no-underline text-on-surface-variant hover:text-primary transition-colors">{topic.label}</a>
+          </nav>
+          <h1 class="text-display-small text-on-surface tracking-tight">{entry.data.title}</h1>
+          {
+            entry.data.description && (
+              <p class="mt-3 text-body-large text-on-surface-variant">{entry.data.description}</p>
+            )
+          }
+        </header>
+
+        <div class="lt-docs-prose">
+          <slot />
+        </div>
+      </article>
+
+      <footer class="w-full max-w-3xl mx-auto flex flex-col gap-3">
+        <div class="grid gap-3 sm:grid-cols-2">
+          {
+            prev ? (
+              <a href={prev.url} class="lt-docs-pager glass rounded-card state-layer lt-lift flex flex-col gap-1 p-4 no-underline text-left">
+                <span class="flex items-center gap-1 text-label-medium text-outline">
+                  <Icon name="chevron_left" class="text-sm" /> 上一页
+                </span>
+                <span class="text-title-small text-on-surface">{prev.label}</span>
+              </a>
+            ) : (
+              <span aria-hidden="true" />
+            )
+          }
+          {
+            next && (
+              <a href={next.url} class="lt-docs-pager glass rounded-card state-layer lt-lift flex flex-col gap-1 p-4 no-underline text-right sm:col-start-2">
+                <span class="flex items-center justify-end gap-1 text-label-medium text-outline">
+                  下一页 <Icon name="chevron_right" class="text-sm" />
+                </span>
+                <span class="text-title-small text-on-surface">{next.label}</span>
+              </a>
+            )
+          }
+        </div>
+        <a
+          href={editUrl}
+          class="lt-docs-edit inline-flex items-center gap-1.5 self-start text-body-small text-on-surface-variant no-underline hover:text-primary transition-colors rounded-control state-layer px-2 py-1.5"
+        >
+          <Icon name="edit" class="text-base" />
+          编辑页面
+        </a>
+      </footer>
+    </div>
+    <DocsToc headings={headings} />
+  </div>
+</div>
+
+<script>
+  import { onPageSetup } from "../../scripts/page-lifecycle";
+
+  /*
+   * Mermaid: ```mermaid blocks arrive as <pre class="mermaid"> (the
+   * rehype-pre-mermaid transform in astro.config.mjs) and render client-side;
+   * the ~1 MB runtime chunk downloads only on pages that actually carry a
+   * diagram. Theme follows the site's .dark class at render time.
+   */
+  onPageSetup(async () => {
+    const blocks = document.querySelectorAll("pre.mermaid:not([data-processed])");
+    if (blocks.length === 0) return;
+    const { default: mermaid } = await import("mermaid");
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: "strict",
+      theme: document.documentElement.classList.contains("dark") ? "dark" : "default",
+    });
+    await mermaid.run({ nodes: Array.from(blocks) });
+  });
+</script>

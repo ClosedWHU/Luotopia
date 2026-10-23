@@ -136,24 +136,17 @@ function renderInlineMd(text: string) {
    * overridden rather than followed. Dense body text over a drifting aurora
    * loses contrast, so this panel sits far higher on the opacity scale than
    * `glass` and keeps a light blur purely for edge softness. Legibility beats
-   * effect — the same tradeoff the app makes with `kAppGlassAlphaLight` 0.88.
+   * effect — the value is the shared --lt-reading-panel-bg token (tokens.css),
+   * which the docs article panel uses too.
    */
   .lt-legal-panel {
-    background-color: var(--lt-legal-panel-bg);
+    background-color: var(--lt-reading-panel-bg);
     backdrop-filter: blur(var(--lt-glass-blur-control)) saturate(120%);
     -webkit-backdrop-filter: blur(var(--lt-glass-blur-control)) saturate(120%);
     box-shadow:
       inset 0 1px 0 0 var(--lt-glass-rim),
       inset 0 0 0 0.6px var(--lt-glass-edge),
       var(--lt-shadow-glass);
-  }
-
-  :global(:root) {
-    --lt-legal-panel-bg: hsl(0 0% 100% / 0.84);
-  }
-
-  :global(:root.dark) {
-    --lt-legal-panel-bg: hsl(220 24% 14% / 0.82);
   }
 
   .lt-sec-rule {

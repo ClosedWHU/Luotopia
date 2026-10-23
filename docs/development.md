@@ -56,22 +56,27 @@ src/
   layouts/        # BaseLayout.astro —— 全站外壳
   pages/          # 路由。legal/ 下有 [slug].astro 动态路由，[lang]/ 下是每个语种的副本
   scripts/        # 客户端运行时：page-lifecycle、icon-svg、icon-source.server
-  styles/         # global.css —— 设计 token 的唯一来源
+  styles/         # tokens.css —— 设计 token 的唯一来源（--lt-*，营销页与文档共用）
+                  # global.css —— Tailwind 入口 + @theme 别名 + 组件规则
+                  # docs.css —— /docs 的 prose 与外壳样式（全部引用 lt token）
+  content/docs/   # 文档内容（content collection，160 篇中文 markdown），见 docs/docs-site.md
 functions/        # Cloudflare Pages Functions
   api/            # /api/releases、/api/appstore、/api/status
   lib/            # 运行时无关的核心逻辑（可被 Node 直接 import）
-  _middleware.ts  # 域名白名单、深链域名重写、404 的表示形式
+  _middleware.ts  # 域名白名单、深链域名重写、docs.whu.sb 301、404 的表示形式
 public/           # 静态资源、.well-known、hot-update、scales
-tools/            # 构建脚本（热更新清单生成、量表清单生成、AASA 校验）
+tools/            # 构建脚本（热更新清单生成、量表清单生成、AASA 校验、
+                  # vite/font-plugins 字体插件）
 ```
 
 内容改动优先落在 `src/config/` 而不是页面里 —— 功能列表、下载平台、友链、法律
 文档都是数据驱动的。
 
-## astro.config.mjs 里的四件事
+## astro.config.mjs 里的几件事
 
-配置里除了 Tailwind 和 i18n 还有四个自定义 Vite 插件，每个都对应一个不写下来就会
-被人「顺手优化掉」的坑：
+配置里除了 Tailwind 和 i18n 还有四个自定义 Vite 插件（两个字体插件抽在
+`tools/vite/font-plugins.mjs`），每个都对应一个不写下来就会被人「顺手优化掉」
+的坑：
 
 **`misansWeights()`** —— MiSans 自带的 `@font-face` 声明的是小米切字体时用的字重
 （Regular 330 / Medium 380 / Bold 630），不是本站请求的值。不重写的话

@@ -9,6 +9,7 @@
   "nav.download": "ダウンロード",
   "nav.community": "コミュニティ",
   "nav.status": "ステータス",
+  "nav.docs": "ドキュメント",
   "nav.brand": "ブランド",
   "nav.legal": "法的情報",
   "nav.menu": "メニュー",
@@ -27,7 +28,7 @@
   "footer.nav.brand": "ブランド資産",
   "footer.nav.legal": "法的情報",
   "footer.resources.status": "サービスステータス",
-  "footer.resources.docs": "開発者ドキュメント",
+  "footer.resources.docs": "ドキュメントセンター",
   "footer.resources.github": "GitHub 組織",
   "footer.resources.repo": "本サイトのオープンソースリポジトリ",
 

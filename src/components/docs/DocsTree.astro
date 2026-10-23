@@ -1,0 +1,69 @@
+---
+/**
+ * Recursive renderer for one topic's resolved sidebar tree
+ * (src/config/docs/navigation.ts). Groups are native <details> — open without
+ * JS, matching the site's disclosure convention (see the Navbar language
+ * panel's rationale).
+ */
+import type { DocsNavEntry } from "../../config/docs/navigation";
+import Icon from "../Icon.astro";
+
+interface Props {
+  items: DocsNavEntry[];
+  currentPath: string;
+}
+
+const { items, currentPath } = Astro.props;
+const Self = Astro.self;
+---
+
+<ul class="lt-docs-tree flex flex-col gap-0.5">
+  {
+    items.map((item) =>
+      item.kind === "link" ? (
+        <li>
+          <a
+            href={item.url}
+            aria-current={item.slug === currentPath ? "page" : undefined}
+            class:list={[
+              "lt-docs-treelink state-layer rounded-control block px-2.5 py-1.5 text-body-small no-underline transition-colors",
+              item.slug === currentPath
+                ? "text-primary font-medium"
+                : "text-on-surface-variant",
+            ]}
+          >
+            {item.label}
+          </a>
+        </li>
+      ) : (
+        <li>
+          <details open class="lt-docs-group">
+            <summary class="lt-docs-grouphead flex items-center gap-1 px-2.5 py-1.5 text-label-large text-on-surface cursor-pointer select-none list-none rounded-control state-layer">
+              <span class="flex-1">{item.label}</span>
+              <Icon name="keyboard_arrow_down" class="lt-docs-caret text-base text-outline" />
+            </summary>
+            <div class="lt-docs-groupbody pl-3 border-l border-glass-divider ml-2.5">
+              <Self items={item.items} currentPath={currentPath} />
+            </div>
+          </details>
+        </li>
+      ),
+    )
+  }
+</ul>
+
+<style>
+  .lt-docs-group summary::-webkit-details-marker {
+    display: none;
+  }
+  .lt-docs-caret {
+    transition: transform 0.2s ease;
+  }
+  .lt-docs-group details:not([open]) > summary .lt-docs-caret,
+  details:not([open]) > summary .lt-docs-caret {
+    transform: rotate(-90deg);
+  }
+  .lt-docs-treelink[aria-current="page"] {
+    background: color-mix(in srgb, var(--lt-color-primary) 10%, transparent);
+  }
+</style>

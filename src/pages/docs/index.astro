@@ -1,0 +1,45 @@
+---
+/**
+ * The documentation landing: the site's own hero grammar (PageHeader wash +
+ * glass cards, exactly like the marketing pages) instead of a docs-framework
+ * splash — /docs is a section of this site, not a tenant of it.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../../components/PageHeader.astro";
+import Icon from "../../components/Icon.astro";
+import { DOCS_TOPICS } from "../../config/docs/navigation";
+import "../../styles/docs.css";
+---
+
+<BaseLayout title="文档" description="珞家：用户指南、客户端与服务端文档">
+  <PageHeader title="Luotopia 文档" subtitle="用户指南、客户端开发、服务端开发与电单车接口参考。" />
+  <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+    <div class="grid gap-4 sm:grid-cols-2">
+      {
+        DOCS_TOPICS.map((topic) => (
+          <a
+            href={topic.url}
+            class="lt-lift state-layer glass rounded-card p-6 flex flex-col gap-3 no-underline group"
+          >
+            <span class="lt-docs-topic-icon inline-flex items-center justify-center w-11 h-11 rounded-nested bg-primary-container text-on-primary-container">
+              <Icon name={topic.icon} class="text-2xl" />
+            </span>
+            <span class="text-title-medium text-on-surface flex items-center gap-1.5">
+              {topic.label}
+              <Icon
+                name="arrow_forward"
+                class="text-base text-outline opacity-0 group-hover:opacity-100 transition-opacity"
+              />
+            </span>
+            <span class="text-body-medium text-on-surface-variant">{topic.blurb}</span>
+          </a>
+        ))
+      }
+    </div>
+    <p class="mt-10 text-body-small text-on-surface-variant">
+      文档开源：欢迎通过任意页面底部的「编辑页面」直接在 GitHub 上修订。旧
+      docs.whu.sb 的用户与客户端文档 URL 会一跳重定向到这里的对应页面；服务端
+      与电单车接口的开发文档随闭源代码存放于私有仓库，不再公开分发。
+    </p>
+  </div>
+</BaseLayout>
