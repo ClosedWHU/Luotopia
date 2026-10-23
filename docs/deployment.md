@@ -12,10 +12,11 @@
 2. 构建配置：
    - **框架预设**：Astro
     - **构建命令**：`npm run build`
-    - **Node 版本**：仓库根目录 `.nvmrc` 固定（Pages 会读它，等价于面板里设
-      `NODE_VERSION`）。astro 7.4 起要求 ≥22.22.0，而 Pages 默认 22.16 —— 2026-10-19
-      的 astro bump 之后连续多次构建失败就是这个原因；升 astro 时必须同步检查
-      `.nvmrc` 与 `package.json` 的 `engines`
+    - **Node 版本**：仓库根目录 `.nvmrc` 固定（Pages 会读它；若面板里设过
+      `NODE_VERSION` 环境变量则**以面板为准**，两处必须一致）。astro 7.4.2 起
+      要求 ≥22.23.4，而 Pages 默认 22.16 —— 2026-10-19 与 2026-10-23（docs
+      合并时 astro 升到 7.4.2）的构建失败都是这个原因；升 astro 时必须同步
+      检查 `.nvmrc`、`package.json` 的 `engines` 和面板 `NODE_VERSION`
     - **构建输出目录**：`dist`
 3. 配置[环境变量](#环境变量)
 4. 部署后在 Pages 设置里绑定自定义域名
