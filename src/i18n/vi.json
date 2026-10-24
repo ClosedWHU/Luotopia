@@ -477,6 +477,8 @@
   "download.changelog.next": "Sau",
   "download.changelog.page": "Trang {page}",
   "download.changelog.viewOnGithub": "Xem trên GitHub",
+  "download.changelog.notesExpand": "Xem toàn bộ ghi chú",
+  "download.changelog.notesCollapse": "Thu gọn",
   "notFound.title": "Không tìm thấy trang",
   "notFound.srOnly": "404, trang này không tồn tại.",
   "notFound.heading": "Trang này không có ở đây",

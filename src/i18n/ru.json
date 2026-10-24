@@ -477,6 +477,8 @@
   "download.changelog.next": "Вперёд",
   "download.changelog.page": "Страница {page}",
   "download.changelog.viewOnGithub": "Посмотреть на GitHub",
+  "download.changelog.notesExpand": "Показать полностью",
+  "download.changelog.notesCollapse": "Свернуть",
   "notFound.title": "Страница не найдена",
   "notFound.srOnly": "404: такой страницы не существует.",
   "notFound.heading": "Этой страницы здесь нет",

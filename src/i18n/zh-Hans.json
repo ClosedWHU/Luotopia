@@ -505,6 +505,8 @@
   "download.changelog.next": "下一页",
   "download.changelog.page": "第 {page} 页",
   "download.changelog.viewOnGithub": "在 GitHub 上查看",
+  "download.changelog.notesExpand": "展开完整说明",
+  "download.changelog.notesCollapse": "收起",
 
   "notFound.title": "页面不存在",
   "notFound.srOnly": "404，页面不存在。",

@@ -477,6 +477,8 @@
   "download.changelog.next": "下一頁",
   "download.changelog.page": "第 {page} 頁",
   "download.changelog.viewOnGithub": "在 GitHub 上檢視",
+  "download.changelog.notesExpand": "展開完整說明",
+  "download.changelog.notesCollapse": "收合",
   "notFound.title": "頁面不存在",
   "notFound.srOnly": "404，頁面不存在。",
   "notFound.heading": "這個頁面不在這裡",
