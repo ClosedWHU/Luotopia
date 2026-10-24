@@ -112,14 +112,21 @@ const resources: ResourceItem[] = [
     </div>
 
     <div class="lt-reveal mt-8 pt-6 border-t border-glass-divider text-center text-body-small text-outline">
-      <p>
-        <span>&copy; {year} Made with ❤ by ClosedWHU Team</span>
-        <span class="mx-1.5" aria-hidden="true">·</span>
-        <span>Code <a href="https://github.com/ClosedWHU/Luotopia/blob/main/LICENSE" class="underline hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">AGPL-3.0-or-later</a></span>
-        <span class="mx-1.5" aria-hidden="true">·</span>
-        <span>Content <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="underline hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a></span>
-        <span class="mx-1.5" aria-hidden="true">·</span>
-        <span><a href={build.commitUrl} class="underline hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">Commit {build.shortHash}</a> built at {build.builtAt}</span>
+      <!--
+        Four items, one per line below `sm`. Joined by `·` they wrap mid-item on
+        a phone and read as a run-on sentence; stacked, each keeps its own line
+        and the separators have nothing left to separate, so they go with them
+        (`hidden sm:inline`). The wide layout is byte-identical to before: at
+        `sm` every span is inline again and the separators come back.
+      -->
+      <p class="space-y-1 sm:space-y-0">
+        <span class="block sm:inline">&copy; {year} Made with ❤ by ClosedWHU Team</span>
+        <span class="hidden mx-1.5 sm:inline" aria-hidden="true">·</span>
+        <span class="block sm:inline">Code <a href="https://github.com/ClosedWHU/Luotopia/blob/main/LICENSE" class="underline hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">AGPL-3.0-or-later</a></span>
+        <span class="hidden mx-1.5 sm:inline" aria-hidden="true">·</span>
+        <span class="block sm:inline">Content <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="underline hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a></span>
+        <span class="hidden mx-1.5 sm:inline" aria-hidden="true">·</span>
+        <span class="block sm:inline"><a href={build.commitUrl} class="underline hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">Commit {build.shortHash}</a> built at {build.builtAt}</span>
       </p>
     </div>
   </div>
