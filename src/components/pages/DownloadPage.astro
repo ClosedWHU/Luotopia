@@ -235,6 +235,7 @@ const i18n = {
         <div class="space-y-2 text-body-medium text-on-surface-variant" data-drawer-group>
           <details class="lt-dl-drawer" open>
             <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <Icon name="android" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">Android</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
@@ -252,6 +253,7 @@ const i18n = {
           </details>
           <details class="lt-dl-drawer">
             <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <Icon name="apple" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">Apple</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
@@ -275,6 +277,7 @@ const i18n = {
           </details>
           <details class="lt-dl-drawer">
             <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <Icon name="windows" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">Windows</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
@@ -295,6 +298,7 @@ Expand-Archive luotopia-*-windows-x64.zip -DestinationPath .
           </details>
           <details class="lt-dl-drawer">
             <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <Icon name="linux" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">Linux</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
@@ -320,6 +324,7 @@ flatpak install --user ./luotopia-*-linux-*.flatpak</code></pre>
           </details>
           <details class="lt-dl-drawer">
             <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <Icon name="harmonyos" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">HarmonyOS</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
@@ -342,9 +347,18 @@ flatpak install --user ./luotopia-*-linux-*.flatpak</code></pre>
       <div class="lt-reveal-lift mt-8 rounded-card glass p-6 sm:p-8">
         <h2 class="text-title-medium text-on-surface mb-2">{t("download.pkg.title")}</h2>
         <p class="text-body-medium text-on-surface-variant mb-4">{t("download.pkg.subtitle")}</p>
+        <!--
+          Marks follow one rule: the brand's own where simple-icons (CC0, the
+          source `icon-source.server.ts` already vendors the platform marks
+          from) carries one, `terminal` where it does not. Scoop and winget have
+          no entry there, and hand-tracing a trademark for two rows of a
+          five-row list is not what this card needs — the generic glyph says
+          "CLI", which is the card's own subtitle.
+        -->
         <div class="space-y-2 text-body-medium text-on-surface-variant" data-drawer-group>
           <details class="lt-dl-drawer" open>
             <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <Icon name="terminal" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">Scoop</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
@@ -360,6 +374,7 @@ scoop update luotopia   # {t("download.pkg.scoop.update")}</code></pre>
           </details>
           <details class="lt-dl-drawer">
             <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <Icon name="homebrew" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">Homebrew</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
@@ -384,6 +399,7 @@ brew install --cask luotopia</code></pre>
           </details>
           <details class="lt-dl-drawer">
             <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <Icon name="nixos" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">Nix</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
@@ -396,6 +412,7 @@ brew install --cask luotopia</code></pre>
           </details>
           <details class="lt-dl-drawer">
             <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <Icon name="archlinux" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">{t("download.pkg.aur.title")}</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
@@ -409,6 +426,7 @@ brew install --cask luotopia</code></pre>
           </details>
           <details class="lt-dl-drawer">
             <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <Icon name="terminal" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">winget</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
