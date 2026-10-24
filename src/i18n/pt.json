@@ -477,6 +477,8 @@
   "download.changelog.next": "Próxima",
   "download.changelog.page": "Página {page}",
   "download.changelog.viewOnGithub": "Ver no GitHub",
+  "download.changelog.notesExpand": "Ver as notas completas",
+  "download.changelog.notesCollapse": "Ver menos",
   "notFound.title": "Página não encontrada",
   "notFound.srOnly": "Erro 404: esta página não existe.",
   "notFound.heading": "Esta página não está aqui",
