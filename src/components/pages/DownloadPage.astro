@@ -238,14 +238,16 @@ const i18n = {
               <h3 class="flex-1 text-title-small text-on-surface">Android</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
-            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
-              <p
-                set:html={rich("download.install.android.body", {
-                  arm64: strongHtml("arm64-v8a"),
-                  armv7: strongHtml("armeabi-v7a"),
-                  x86: strongHtml("x86_64"),
-                })}
-              />
+            <div class="lt-dl-drawer-body">
+              <div class="space-y-2 px-3.5 py-3">
+                <p
+                  set:html={rich("download.install.android.body", {
+                    arm64: strongHtml("arm64-v8a"),
+                    armv7: strongHtml("armeabi-v7a"),
+                    x86: strongHtml("x86_64"),
+                  })}
+                />
+              </div>
             </div>
           </details>
           <details class="lt-dl-drawer">
@@ -253,20 +255,22 @@ const i18n = {
               <h3 class="flex-1 text-title-small text-on-surface">Apple</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
-            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
-              <p
-                set:html={rich("download.install.apple.ios.body", {
-                  lead: strongHtml(t("download.install.apple.ios.lead")),
-                  joinLink: testFlightLink,
-                })}
-              />
-              <p
-                set:html={rich("download.install.apple.macos.body", {
-                  dmg: strongHtml("DMG"),
-                  openWith: strongHtml(t("download.install.apple.openWith")),
-                  xattr: codeHtml("xattr -cr /Applications/Luotopia.app"),
-                })}
-              />
+            <div class="lt-dl-drawer-body">
+              <div class="space-y-2 px-3.5 py-3">
+                <p
+                  set:html={rich("download.install.apple.ios.body", {
+                    lead: strongHtml(t("download.install.apple.ios.lead")),
+                    joinLink: testFlightLink,
+                  })}
+                />
+                <p
+                  set:html={rich("download.install.apple.macos.body", {
+                    dmg: strongHtml("DMG"),
+                    openWith: strongHtml(t("download.install.apple.openWith")),
+                    xattr: codeHtml("xattr -cr /Applications/Luotopia.app"),
+                  })}
+                />
+              </div>
             </div>
           </details>
           <details class="lt-dl-drawer">
@@ -274,17 +278,19 @@ const i18n = {
               <h3 class="flex-1 text-title-small text-on-surface">Windows</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
-            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
-              <p
-                set:html={rich("download.install.windows.body", {
-                  extractAll: strongHtml(t("download.install.windows.extractAll")),
-                  exe: strongHtml("luotopia.exe"),
-                })}
-              />
-              <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># PowerShell：解压并运行
+            <div class="lt-dl-drawer-body">
+              <div class="space-y-2 px-3.5 py-3">
+                <p
+                  set:html={rich("download.install.windows.body", {
+                    extractAll: strongHtml(t("download.install.windows.extractAll")),
+                    exe: strongHtml("luotopia.exe"),
+                  })}
+                />
+                <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># PowerShell：解压并运行
 Expand-Archive luotopia-*-windows-x64.zip -DestinationPath .
 .\luotopia\luotopia.exe</code></pre>
-              <p class="text-body-small text-outline">{t("download.install.windows.note")}</p>
+                <p class="text-body-small text-outline">{t("download.install.windows.note")}</p>
+              </div>
             </div>
           </details>
           <details class="lt-dl-drawer">
@@ -292,14 +298,15 @@ Expand-Archive luotopia-*-windows-x64.zip -DestinationPath .
               <h3 class="flex-1 text-title-small text-on-surface">Linux</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
-            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
-              <p
-                set:html={rich("download.install.linux.body", {
-                  arch: strongHtml(t("download.install.linux.arch")),
-                  format: strongHtml(t("download.install.linux.format")),
-                })}
-              />
-              <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># .tar.gz
+            <div class="lt-dl-drawer-body">
+              <div class="space-y-2 px-3.5 py-3">
+                <p
+                  set:html={rich("download.install.linux.body", {
+                    arch: strongHtml(t("download.install.linux.arch")),
+                    format: strongHtml(t("download.install.linux.format")),
+                  })}
+                />
+                <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># .tar.gz
 tar -xzf luotopia-*-linux-x64.tar.gz &amp;&amp; ./luotopia/luotopia
 # .AppImage
 chmod +x luotopia-*-linux-x64.AppImage &amp;&amp; ./luotopia-*-linux-x64.AppImage
@@ -307,7 +314,8 @@ chmod +x luotopia-*-linux-x64.AppImage &amp;&amp; ./luotopia-*-linux-x64.AppImag
 sudo apt install ./luotopia-*-linux-*.deb
 # .flatpak
 flatpak install --user ./luotopia-*-linux-*.flatpak</code></pre>
-              <p class="text-body-small text-outline">{t("download.install.linux.note")}</p>
+                <p class="text-body-small text-outline">{t("download.install.linux.note")}</p>
+              </div>
             </div>
           </details>
           <details class="lt-dl-drawer">
@@ -315,15 +323,17 @@ flatpak install --user ./luotopia-*-linux-*.flatpak</code></pre>
               <h3 class="flex-1 text-title-small text-on-surface">HarmonyOS</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
-            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
-              <p
-                set:html={rich("download.install.harmony.body", {
-                  hap: codeHtml(".hap"),
-                  signedHap: codeHtml("luotopia-*-harmonyos-arm64-signed.hap"),
-                  sideload: codeHtml("HARMONYOS-SIDELOAD.txt"),
-                })}
-              />
-              <p class="text-body-small text-outline">{t("download.install.harmony.note")}</p>
+            <div class="lt-dl-drawer-body">
+              <div class="space-y-2 px-3.5 py-3">
+                <p
+                  set:html={rich("download.install.harmony.body", {
+                    hap: codeHtml(".hap"),
+                    signedHap: codeHtml("luotopia-*-harmonyos-arm64-signed.hap"),
+                    sideload: codeHtml("HARMONYOS-SIDELOAD.txt"),
+                  })}
+                />
+                <p class="text-body-small text-outline">{t("download.install.harmony.note")}</p>
+              </div>
             </div>
           </details>
         </div>
@@ -338,12 +348,14 @@ flatpak install --user ./luotopia-*-linux-*.flatpak</code></pre>
               <h3 class="flex-1 text-title-small text-on-surface">Scoop</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
-            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
-              <p>{t("download.pkg.scoop.body")}</p>
-              <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>scoop bucket add luotopia https://github.com/ClosedWHU/Luotopia-Dist
+            <div class="lt-dl-drawer-body">
+              <div class="space-y-2 px-3.5 py-3">
+                <p>{t("download.pkg.scoop.body")}</p>
+                <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>scoop bucket add luotopia https://github.com/ClosedWHU/Luotopia-Dist
 scoop install luotopia
 scoop update luotopia   # {t("download.pkg.scoop.update")}</code></pre>
-              <p class="text-body-small text-outline">{t("download.pkg.scoop.note")}</p>
+                <p class="text-body-small text-outline">{t("download.pkg.scoop.note")}</p>
+              </div>
             </div>
           </details>
           <details class="lt-dl-drawer">
@@ -351,21 +363,23 @@ scoop update luotopia   # {t("download.pkg.scoop.update")}</code></pre>
               <h3 class="flex-1 text-title-small text-on-surface">Homebrew</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
-            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
-              <p>{t("download.pkg.brew.body")}</p>
-              <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>brew tap ClosedWHU/luotopia
+            <div class="lt-dl-drawer-body">
+              <div class="space-y-2 px-3.5 py-3">
+                <p>{t("download.pkg.brew.body")}</p>
+                <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>brew tap ClosedWHU/luotopia
 # {t("download.pkg.brew.linux")}
 brew install luotopia
 # {t("download.pkg.brew.macos")}
 brew install --cask luotopia</code></pre>
-              <p
-                class="text-body-small text-outline"
-                set:html={rich("download.pkg.brew.note", {
-                  install: codeHtml("brew install luotopia"),
-                  cask: codeHtml("--cask"),
-                  upgrade: codeHtml("brew upgrade luotopia"),
-                })}
-              />
+                <p
+                  class="text-body-small text-outline"
+                  set:html={rich("download.pkg.brew.note", {
+                    install: codeHtml("brew install luotopia"),
+                    cask: codeHtml("--cask"),
+                    upgrade: codeHtml("brew upgrade luotopia"),
+                  })}
+                />
+              </div>
             </div>
           </details>
           <details class="lt-dl-drawer">
@@ -373,9 +387,11 @@ brew install --cask luotopia</code></pre>
               <h3 class="flex-1 text-title-small text-on-surface">Nix</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
-            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
-              <p>{t("download.pkg.nix.body")}</p>
-              <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>nix profile install github:ClosedWHU/Luotopia-Dist</code></pre>
+            <div class="lt-dl-drawer-body">
+              <div class="space-y-2 px-3.5 py-3">
+                <p>{t("download.pkg.nix.body")}</p>
+                <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>nix profile install github:ClosedWHU/Luotopia-Dist</code></pre>
+              </div>
             </div>
           </details>
           <details class="lt-dl-drawer">
@@ -383,10 +399,12 @@ brew install --cask luotopia</code></pre>
               <h3 class="flex-1 text-title-small text-on-surface">{t("download.pkg.aur.title")}</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
-            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
-              <p>{t("download.pkg.aur.body")}</p>
-              <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>yay -S luotopia-bin</code></pre>
-              <p class="text-body-small text-outline">{t("download.pkg.aur.note")}</p>
+            <div class="lt-dl-drawer-body">
+              <div class="space-y-2 px-3.5 py-3">
+                <p>{t("download.pkg.aur.body")}</p>
+                <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>yay -S luotopia-bin</code></pre>
+                <p class="text-body-small text-outline">{t("download.pkg.aur.note")}</p>
+              </div>
             </div>
           </details>
           <details class="lt-dl-drawer">
@@ -394,13 +412,15 @@ brew install --cask luotopia</code></pre>
               <h3 class="flex-1 text-title-small text-on-surface">winget</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
             </summary>
-            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
-              <p>{t("download.pkg.winget.body")}</p>
-              <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># {t("download.pkg.winget.snippet")}
+            <div class="lt-dl-drawer-body">
+              <div class="space-y-2 px-3.5 py-3">
+                <p>{t("download.pkg.winget.body")}</p>
+                <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># {t("download.pkg.winget.snippet")}
 winget install --manifest .\path\to\manifests\folder</code></pre>
-              <p set:html={rich("download.pkg.winget.merged", { repo: wingetRepoLink })} />
-              <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>winget install ClosedWHU.Luotopia</code></pre>
-              <p class="text-body-small text-outline">{t("download.pkg.winget.note")}</p>
+                <p set:html={rich("download.pkg.winget.merged", { repo: wingetRepoLink })} />
+                <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>winget install ClosedWHU.Luotopia</code></pre>
+                <p class="text-body-small text-outline">{t("download.pkg.winget.note")}</p>
+              </div>
             </div>
           </details>
         </div>
@@ -455,6 +475,14 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
    * layer for free, but it would also clip the focus ring of every link in the
    * body, so the head's corners are spelled out per state instead: all four
    * when closed, where the head *is* the box, and only the top two when open.
+   *
+   * `.lt-dl-drawer-body` is the animation shell and therefore carries no
+   * padding of its own — the padding sits on the div inside it. A border-box
+   * `max-height: 0` cannot squeeze an element's own padding away, so a padded
+   * shell would stop 24px short of closed and every drawer would collapse into
+   * an empty sliver before blinking out. The script writes `max-height` and
+   * `overflow` on the shell while it animates and clears both when it settles,
+   * so an open drawer keeps its natural height and nothing in it stays clipped.
    */
   .lt-dl-drawer {
     border: 1px solid var(--lt-glass-divider);
@@ -501,15 +529,22 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
    * unprefixed `mask-image` on an HTML element is 120+ (PageHeader and HomePage
    * fade the same way, and neither needs the mask to animate).
    *
-   * Nothing here transitions. Height has no portable interpolation on this floor
-   * (`interpolate-size` is 129+, `grid-template-rows: 0fr → 1fr` is 107+), and
-   * the site's other disclosures — `<details>` in the Navbar, the docs sidebar —
-   * snap too.
+   * The height is animated by the script, not by a transition here: the open
+   * end state is "natural height", and `max-height: none` is not an
+   * interpolatable endpoint on this site's Chrome 66 floor (`interpolate-size`
+   * is 129+, animating `grid-template-rows: 0fr → 1fr` is 107+). So the script
+   * measures both ends in pixels and transitions an inline `max-height` between
+   * them — `animateHeight()` below — and the 168px here is the value it reads
+   * back off this rule when it collapses a note, which keeps the number in one
+   * place.
    *
    * `data-clamped` is set to "true" by the script only for a note that really
    * overflows, and "false" is what the template renders, so a short note (or a
-   * measurement that never ran) keeps its full height with no toggle: `overflow`
-   * stays `visible` unless the clamp is on, and nothing can end up unreachable.
+   * measurement that never ran) keeps its full height: `overflow` stays
+   * `visible` unless the clamp is on, and nothing can end up unreachable. Such
+   * a note also gets no toggle — the button is dropped from the DOM rather than
+   * hidden, so its presence means "there is more" and the two states of the
+   * clamp cannot disagree with it.
    */
   .lt-dl-notewrap[data-clamped="true"] .lt-dl-notes {
     /* Eight lines of body-medium (20px line-height). */
@@ -517,14 +552,6 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
     overflow: hidden;
     -webkit-mask-image: linear-gradient(#000 0%, #000 62%, transparent 100%);
     mask-image: linear-gradient(#000 0%, #000 62%, transparent 100%);
-  }
-
-  .lt-dl-notewrap .lt-dl-more {
-    display: none;
-  }
-
-  .lt-dl-notewrap[data-clamped="true"] .lt-dl-more {
-    display: inline-flex;
   }
 
   .lt-dl-more[aria-expanded="true"] .lt-dl-caret {
@@ -1273,12 +1300,87 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
     }
 
     /*
+     * Height animation, shared by both disclosures on this page.
+     *
+     * One end state is always "the element's natural height", which is not an
+     * interpolatable `max-height` value: `interpolate-size: allow-keywords` is
+     * Chrome 129+ and animating `grid-template-rows: 0fr → 1fr` is 107+, against
+     * this bundle's 66 floor. So both ends are measured in pixels and an inline
+     * `max-height` transitions between them, after which the inline styles are
+     * dropped and the element returns to its own height — which is also what
+     * keeps a settled drawer correct when its content reflows later (a font
+     * swap, a rotation, a narrower window).
+     *
+     * `fromPx` is passed in rather than measured here because the caller has
+     * usually just flipped the state that decides the height: by the time this
+     * runs the box is already at its new natural size, so measuring would report
+     * the end state as the start state and the animation away.
+     *
+     * The completion signal is a timer, not `transitionend`. That event does not
+     * fire when a transition is superseded, when reduced motion drops it, or
+     * when the element leaves the document — every changelog page turn replaces
+     * the list's innerHTML — and the drawer handoff below needs the callback to
+     * actually run.
+     *
+     * A second call on the same element supersedes the first: a mid-flight click
+     * starts from wherever the height currently is, and the superseded callback
+     * is dropped rather than run, because it described a state nobody wants any
+     * more (an interrupted close must not still set `open = false`).
+     */
+    const HEIGHT_MS = 280;
+    const HEIGHT_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+    const heightAnims = new Map();
+    const reducedMotion = window.matchMedia
+      ? window.matchMedia("(prefers-reduced-motion: reduce)")
+      : null;
+
+    /**
+     * @param el the element to animate — it must carry no padding of its own,
+     *   since a border-box `max-height: 0` cannot squeeze padding away
+     * @param fromPx the height it is on screen at right now
+     * @param toPx the target height, or null for its natural height
+     * @param onDone runs once el has settled, whether it animated or not
+     */
+    function animateHeight(el, fromPx, toPx, onDone) {
+      const pending = heightAnims.get(el);
+      if (pending) window.clearTimeout(pending);
+      heightAnims.delete(el);
+
+      const settle = () => {
+        const timer = heightAnims.get(el);
+        if (timer) window.clearTimeout(timer);
+        heightAnims.delete(el);
+        el.style.transition = "";
+        el.style.maxHeight = "";
+        el.style.overflow = "";
+        if (onDone) onDone();
+      };
+
+      const to = toPx === null ? el.scrollHeight : toPx;
+      if ((reducedMotion && reducedMotion.matches) || Math.abs(to - fromPx) < 1) {
+        settle();
+        return;
+      }
+
+      el.style.overflow = "hidden";
+      el.style.transition = "none";
+      el.style.maxHeight = fromPx + "px";
+      // Commit the start value before arming the transition, or both writes land
+      // in the same style recalculation and there is nothing to animate.
+      void el.offsetHeight;
+      el.style.transition = "max-height " + HEIGHT_MS + "ms " + HEIGHT_EASE;
+      el.style.maxHeight = to + "px";
+      heightAnims.set(el, window.setTimeout(settle, HEIGHT_MS + 60));
+    }
+
+    /*
      * Clamping the release notes.
      *
-     * The card is rendered as `data-clamped="false"` — full height, no toggle —
-     * and this pass flips it to "true" only where the note genuinely overflows
-     * the clamp, so a one-line note (an empty body renders as the "no release
-     * notes" placeholder) never grows a button that would reveal nothing.
+     * The card is rendered as `data-clamped="false"` — full height, no clamp —
+     * and this pass flips it to "true" only where the note genuinely overflows,
+     * dropping the toggle from the DOM where it does not. A button that reveals
+     * nothing is worse than no button: an empty body renders as the one-line
+     * "no release notes" placeholder, and plenty of releases are a short list.
      *
      * Measuring means clamping first, then comparing `scrollHeight` against the
      * `clientHeight` the clamp produced: the collapsed height lives in the
@@ -1299,10 +1401,12 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
     function clampNotes() {
       listEl.querySelectorAll(".lt-dl-notewrap").forEach((wrap) => {
         const notes = wrap.querySelector(".lt-dl-notes");
-        if (!notes) return;
+        const more = wrap.querySelector(".lt-dl-more");
+        if (!notes || !more) return;
         wrap.setAttribute("data-clamped", "true");
-        const hidden = notes.scrollHeight - notes.clientHeight;
-        wrap.setAttribute("data-clamped", hidden > MIN_HIDDEN_NOTES_PX ? "true" : "false");
+        if (notes.scrollHeight - notes.clientHeight > MIN_HIDDEN_NOTES_PX) return;
+        wrap.setAttribute("data-clamped", "false");
+        more.parentNode.removeChild(more);
       });
     }
 
@@ -1402,10 +1506,6 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
      * Delegated for the reason the arch switcher's listener is: the toggle sits
      * in innerHTML that is replaced on every page turn, while `listEl` itself is
      * static Astro markup, bound once per navigation.
-     *
-     * Both attributes move together — `aria-expanded` for assistive tech,
-     * `data-clamped` for the stylesheet — and the label is swapped rather than
-     * doubled up with a hidden sibling, so the button says what it will do.
      */
     if (listEl) {
       listEl.addEventListener("click", (ev) => {
@@ -1413,37 +1513,116 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
           ev.target && ev.target.closest ? ev.target.closest("[data-notes-toggle]") : null;
         if (!btn || !listEl.contains(btn)) return;
         const wrap = btn.closest(".lt-dl-notewrap");
-        if (!wrap) return;
-        const expanded = btn.getAttribute("aria-expanded") === "true";
-        btn.setAttribute("aria-expanded", expanded ? "false" : "true");
-        wrap.setAttribute("data-clamped", expanded ? "false" : "true");
+        const notes = wrap && wrap.querySelector(".lt-dl-notes");
+        if (!notes) return;
+
+        /*
+         * One boolean drives all three writes, and that is the point: `collapse`
+         * is what this click is about to do, so the button's state, the clamp and
+         * the label all read off the same value and cannot drift apart. They did
+         * once — `data-clamped` was written from the *pre*-click state, which is
+         * the same thing `aria-expanded` was about to become, so the first click
+         * only relabelled the button and the second one did the work.
+         */
+        const collapse = btn.getAttribute("aria-expanded") === "true";
+        // Measured before either attribute moves: this is the height on screen
+        // right now, and flipping `data-clamped` changes it in the same task.
+        const from = notes.getBoundingClientRect().height;
+
+        btn.setAttribute("aria-expanded", collapse ? "false" : "true");
         const label = btn.querySelector("[data-notes-label]");
-        if (label) label.textContent = expanded ? copy.notesExpand : copy.notesCollapse;
+        if (label) label.textContent = collapse ? copy.notesExpand : copy.notesCollapse;
+
+        if (!collapse) {
+          wrap.setAttribute("data-clamped", "false");
+          animateHeight(notes, from, null, null);
+          return;
+        }
+        // The collapsed height is read back off the rule the attribute just
+        // switched on, so 168px lives in the stylesheet and nowhere else. A
+        // non-px answer (rule missing, old kernel) degrades to no animation:
+        // settle() drops the inline style and the clamp takes over.
+        wrap.setAttribute("data-clamped", "true");
+        const clamped = parseFloat(window.getComputedStyle(notes).maxHeight);
+        animateHeight(notes, from, clamped > 0 ? clamped : null, null);
       }, { signal });
     }
 
     /*
-     * Drawer exclusivity — the one thing `<details>` cannot do on this site's
-     * Chrome 66 floor, since `name`-grouped accordions are 120+. Opening a
-     * drawer closes the rest of its own group, so a card never shows five
-     * platforms' install notes at once; closing the open one leaves the group
-     * shut, which is what native grouping does too. The two cards are two
-     * groups, so the visitor can read an install note and a package manager
-     * side by side.
+     * The drawers, animated.
      *
-     * Writing `.open` fires `toggle` on the drawers being closed as well; the
-     * `!drawer.open` guard is what stops that from cascading back.
+     * `<details>` still does the disclosure on its own with JS off. With JS on
+     * the summary's click is taken over, because the body has to be rendered
+     * before it can be measured and native `open` offers no such window — a
+     * closed drawer renders no body at all. `preventDefault()` is what stops the
+     * browser flipping `open` underneath the animation, and it stops the `toggle`
+     * event with it, so the group's exclusivity is driven from here instead of
+     * from a second listener that would race the animation.
+     *
+     * Exclusivity is the one thing `<details>` cannot do on this site's Chrome 66
+     * floor, since `name`-grouped accordions are 120+. The two cards are two
+     * groups, so an install note and a package manager stay readable side by
+     * side, and within a group the handoff is sequential: the drawer that was
+     * clicked finishes opening before the one it replaces starts closing, so the
+     * page never moves twice at once under the cursor.
      */
-    document.querySelectorAll("[data-drawer-group]").forEach((group) => {
-      const drawers = group.querySelectorAll("details.lt-dl-drawer");
-      drawers.forEach((drawer) => {
-        drawer.addEventListener("toggle", () => {
-          if (!drawer.open) return;
-          drawers.forEach((other) => {
-            if (other !== drawer) other.open = false;
-          });
-        }, { signal });
+    function closeDrawer(drawer) {
+      const body = drawer.querySelector(".lt-dl-drawer-body");
+      if (!body) {
+        drawer.open = false;
+        return;
+      }
+      // `open` stays set until the body has finished collapsing: unsetting it
+      // first would remove the very element being measured.
+      animateHeight(body, body.getBoundingClientRect().height, 0, () => {
+        drawer.open = false;
       });
+    }
+
+    document.querySelectorAll("[data-drawer-group]").forEach((group) => {
+      /*
+       * The drawer this group is showing: the one the visitor last clicked, which
+       * is not necessarily the one whose animation just finished. The handoff
+       * closes everything except *this*, and the difference only shows up when a
+       * second click lands while the first drawer is still opening — keying the
+       * handoff to the drawer that opened lets the first one's callback close the
+       * second one, which is the one the visitor actually asked for.
+       */
+      let current = group.querySelector("details.lt-dl-drawer[open]");
+
+      const closeOthers = () => {
+        group.querySelectorAll("details.lt-dl-drawer[open]").forEach((other) => {
+          if (other !== current) closeDrawer(other);
+        });
+      };
+
+      const open = (drawer) => {
+        current = drawer;
+        drawer.open = true;
+        const body = drawer.querySelector(".lt-dl-drawer-body");
+        if (!body) {
+          closeOthers();
+          return;
+        }
+        animateHeight(body, 0, null, closeOthers);
+      };
+
+      group.addEventListener("click", (ev) => {
+        const head =
+          ev.target && ev.target.closest
+            ? ev.target.closest("summary.lt-dl-drawer-head")
+            : null;
+        if (!head || !group.contains(head)) return;
+        const drawer = head.closest("details.lt-dl-drawer");
+        if (!drawer) return;
+        ev.preventDefault();
+        if (drawer.open) {
+          if (current === drawer) current = null;
+          closeDrawer(drawer);
+        } else {
+          open(drawer);
+        }
+      }, { signal });
     });
 
     prevBtn?.addEventListener("click", () => {
@@ -1455,5 +1634,10 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
 
     loadLatest();
     loadChangelog(1);
+
+    return () => {
+      heightAnims.forEach((timer) => window.clearTimeout(timer));
+      heightAnims.clear();
+    };
   });
 </script>
