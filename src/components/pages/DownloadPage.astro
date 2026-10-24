@@ -19,7 +19,7 @@
  *   body when there is none (an older release, a locale whose translation failed
  *   validation, or a fetch error). Everything *around* it — the heading that
  *   introduces it, the pager, the loading, empty and failure states, the asset
- *   chips — is localised as usual.
+ *   chips, the toggle that expands a note — is localised as usual.
  * - **The install commands.** `brew tap ClosedWHU/luotopia` is not a sentence
  *   and a translated command does not run, so the snippets stay literal. The
  *   prose, labels and captions around them move to the dictionary, and so do
@@ -135,6 +135,8 @@ const i18n = {
   loadFailed: t("download.changelog.error"),
   page: t("download.changelog.page"),
   viewOnGithub: t("download.changelog.viewOnGithub"),
+  notesExpand: t("download.changelog.notesExpand"),
+  notesCollapse: t("download.changelog.notesCollapse"),
 };
 ---
 
@@ -164,6 +166,8 @@ const i18n = {
     data-i18n-load-failed={i18n.loadFailed}
     data-i18n-page={i18n.page}
     data-i18n-view-on-github={i18n.viewOnGithub}
+    data-i18n-notes-expand={i18n.notesExpand}
+    data-i18n-notes-collapse={i18n.notesCollapse}
   >
     <div class="max-w-content mx-auto">
       <p id="latest-meta" class="lt-reveal text-body-medium text-outline mb-10">{t("download.latest.loading")}</p>
@@ -216,56 +220,86 @@ const i18n = {
 
       <div class="lt-reveal-lift mt-16 rounded-card glass p-6 sm:p-8">
         <h2 class="text-title-medium text-on-surface mb-4">{t("download.install.title")}</h2>
-        <div class="space-y-4 text-body-medium text-on-surface-variant">
-          <div>
-            <h3 class="text-title-small text-on-surface mb-1">Android</h3>
-            <p
-              set:html={rich("download.install.android.body", {
-                arm64: strongHtml("arm64-v8a"),
-                armv7: strongHtml("armeabi-v7a"),
-                x86: strongHtml("x86_64"),
-              })}
-            />
-          </div>
-          <div>
-            <h3 class="text-title-small text-on-surface mb-1">Apple</h3>
-            <p
-              set:html={rich("download.install.apple.ios.body", {
-                lead: strongHtml(t("download.install.apple.ios.lead")),
-                joinLink: testFlightLink,
-              })}
-            />
-            <p
-              class="mt-1"
-              set:html={rich("download.install.apple.macos.body", {
-                dmg: strongHtml("DMG"),
-                openWith: strongHtml(t("download.install.apple.openWith")),
-                xattr: codeHtml("xattr -cr /Applications/Luotopia.app"),
-              })}
-            />
-          </div>
-          <div>
-            <h3 class="text-title-small text-on-surface mb-1">Windows</h3>
-            <p
-              set:html={rich("download.install.windows.body", {
-                extractAll: strongHtml(t("download.install.windows.extractAll")),
-                exe: strongHtml("luotopia.exe"),
-              })}
-            />
-            <pre data-lenis-prevent-horizontal class="mt-2 overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># PowerShell：解压并运行
+        <!--
+          One drawer per platform, the first one open.
+
+          These five sections used to render flat, which put every platform's
+          install prose, both shell snippets and all three caveats on screen at
+          once — most of it about a platform the visitor is not on. `<details>`
+          keeps the disclosure native, so the copy is reachable with JS off, and
+          matches the convention the Navbar's language panel and the docs sidebar
+          already set. The script below adds only what `<details>` cannot do
+          itself on this site's Chrome 66 floor: the exclusivity, which the
+          `name` attribute would need 120+ for.
+        -->
+        <div class="space-y-2 text-body-medium text-on-surface-variant" data-drawer-group>
+          <details class="lt-dl-drawer" open>
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <h3 class="flex-1 text-title-small text-on-surface">Android</h3>
+              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
+            </summary>
+            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
+              <p
+                set:html={rich("download.install.android.body", {
+                  arm64: strongHtml("arm64-v8a"),
+                  armv7: strongHtml("armeabi-v7a"),
+                  x86: strongHtml("x86_64"),
+                })}
+              />
+            </div>
+          </details>
+          <details class="lt-dl-drawer">
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <h3 class="flex-1 text-title-small text-on-surface">Apple</h3>
+              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
+            </summary>
+            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
+              <p
+                set:html={rich("download.install.apple.ios.body", {
+                  lead: strongHtml(t("download.install.apple.ios.lead")),
+                  joinLink: testFlightLink,
+                })}
+              />
+              <p
+                set:html={rich("download.install.apple.macos.body", {
+                  dmg: strongHtml("DMG"),
+                  openWith: strongHtml(t("download.install.apple.openWith")),
+                  xattr: codeHtml("xattr -cr /Applications/Luotopia.app"),
+                })}
+              />
+            </div>
+          </details>
+          <details class="lt-dl-drawer">
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <h3 class="flex-1 text-title-small text-on-surface">Windows</h3>
+              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
+            </summary>
+            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
+              <p
+                set:html={rich("download.install.windows.body", {
+                  extractAll: strongHtml(t("download.install.windows.extractAll")),
+                  exe: strongHtml("luotopia.exe"),
+                })}
+              />
+              <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># PowerShell：解压并运行
 Expand-Archive luotopia-*-windows-x64.zip -DestinationPath .
 .\luotopia\luotopia.exe</code></pre>
-            <p class="mt-2 text-body-small text-outline">{t("download.install.windows.note")}</p>
-          </div>
-          <div>
-            <h3 class="text-title-small text-on-surface mb-1">Linux</h3>
-            <p
-              set:html={rich("download.install.linux.body", {
-                arch: strongHtml(t("download.install.linux.arch")),
-                format: strongHtml(t("download.install.linux.format")),
-              })}
-            />
-            <pre data-lenis-prevent-horizontal class="mt-2 overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># .tar.gz
+              <p class="text-body-small text-outline">{t("download.install.windows.note")}</p>
+            </div>
+          </details>
+          <details class="lt-dl-drawer">
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <h3 class="flex-1 text-title-small text-on-surface">Linux</h3>
+              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
+            </summary>
+            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
+              <p
+                set:html={rich("download.install.linux.body", {
+                  arch: strongHtml(t("download.install.linux.arch")),
+                  format: strongHtml(t("download.install.linux.format")),
+                })}
+              />
+              <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># .tar.gz
 tar -xzf luotopia-*-linux-x64.tar.gz &amp;&amp; ./luotopia/luotopia
 # .AppImage
 chmod +x luotopia-*-linux-x64.AppImage &amp;&amp; ./luotopia-*-linux-x64.AppImage
@@ -273,71 +307,102 @@ chmod +x luotopia-*-linux-x64.AppImage &amp;&amp; ./luotopia-*-linux-x64.AppImag
 sudo apt install ./luotopia-*-linux-*.deb
 # .flatpak
 flatpak install --user ./luotopia-*-linux-*.flatpak</code></pre>
-            <p class="mt-2 text-body-small text-outline">{t("download.install.linux.note")}</p>
-          </div>
-          <div>
-            <h3 class="text-title-small text-on-surface mb-1">HarmonyOS</h3>
-            <p
-              set:html={rich("download.install.harmony.body", {
-                hap: codeHtml(".hap"),
-                signedHap: codeHtml("luotopia-*-harmonyos-arm64-signed.hap"),
-                sideload: codeHtml("HARMONYOS-SIDELOAD.txt"),
-              })}
-            />
-            <p class="mt-2 text-body-small text-outline">{t("download.install.harmony.note")}</p>
-          </div>
+              <p class="text-body-small text-outline">{t("download.install.linux.note")}</p>
+            </div>
+          </details>
+          <details class="lt-dl-drawer">
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <h3 class="flex-1 text-title-small text-on-surface">HarmonyOS</h3>
+              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
+            </summary>
+            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
+              <p
+                set:html={rich("download.install.harmony.body", {
+                  hap: codeHtml(".hap"),
+                  signedHap: codeHtml("luotopia-*-harmonyos-arm64-signed.hap"),
+                  sideload: codeHtml("HARMONYOS-SIDELOAD.txt"),
+                })}
+              />
+              <p class="text-body-small text-outline">{t("download.install.harmony.note")}</p>
+            </div>
+          </details>
         </div>
       </div>
 
       <div class="lt-reveal-lift mt-8 rounded-card glass p-6 sm:p-8">
         <h2 class="text-title-medium text-on-surface mb-2">{t("download.pkg.title")}</h2>
         <p class="text-body-medium text-on-surface-variant mb-4">{t("download.pkg.subtitle")}</p>
-        <div class="space-y-5 text-body-medium text-on-surface-variant">
-          <div>
-            <h3 class="text-title-small text-on-surface mb-1">Scoop</h3>
-            <p class="mb-2">{t("download.pkg.scoop.body")}</p>
-            <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>scoop bucket add luotopia https://github.com/ClosedWHU/Luotopia-Dist
+        <div class="space-y-2 text-body-medium text-on-surface-variant" data-drawer-group>
+          <details class="lt-dl-drawer" open>
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <h3 class="flex-1 text-title-small text-on-surface">Scoop</h3>
+              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
+            </summary>
+            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
+              <p>{t("download.pkg.scoop.body")}</p>
+              <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>scoop bucket add luotopia https://github.com/ClosedWHU/Luotopia-Dist
 scoop install luotopia
 scoop update luotopia   # {t("download.pkg.scoop.update")}</code></pre>
-            <p class="mt-2 text-body-small text-outline">{t("download.pkg.scoop.note")}</p>
-          </div>
-          <div>
-            <h3 class="text-title-small text-on-surface mb-1">Homebrew</h3>
-            <p class="mb-2">{t("download.pkg.brew.body")}</p>
-            <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>brew tap ClosedWHU/luotopia
+              <p class="text-body-small text-outline">{t("download.pkg.scoop.note")}</p>
+            </div>
+          </details>
+          <details class="lt-dl-drawer">
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <h3 class="flex-1 text-title-small text-on-surface">Homebrew</h3>
+              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
+            </summary>
+            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
+              <p>{t("download.pkg.brew.body")}</p>
+              <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>brew tap ClosedWHU/luotopia
 # {t("download.pkg.brew.linux")}
 brew install luotopia
 # {t("download.pkg.brew.macos")}
 brew install --cask luotopia</code></pre>
-            <p
-              class="mt-2 text-body-small text-outline"
-              set:html={rich("download.pkg.brew.note", {
-                install: codeHtml("brew install luotopia"),
-                cask: codeHtml("--cask"),
-                upgrade: codeHtml("brew upgrade luotopia"),
-              })}
-            />
-          </div>
-          <div>
-            <h3 class="text-title-small text-on-surface mb-1">Nix</h3>
-            <p class="mb-2">{t("download.pkg.nix.body")}</p>
-            <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>nix profile install github:ClosedWHU/Luotopia-Dist</code></pre>
-          </div>
-          <div>
-            <h3 class="text-title-small text-on-surface mb-1">{t("download.pkg.aur.title")}</h3>
-            <p class="mb-2">{t("download.pkg.aur.body")}</p>
-            <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>yay -S luotopia-bin</code></pre>
-            <p class="mt-2 text-body-small text-outline">{t("download.pkg.aur.note")}</p>
-          </div>
-          <div>
-            <h3 class="text-title-small text-on-surface mb-1">winget</h3>
-            <p class="mb-2">{t("download.pkg.winget.body")}</p>
-            <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># {t("download.pkg.winget.snippet")}
+              <p
+                class="text-body-small text-outline"
+                set:html={rich("download.pkg.brew.note", {
+                  install: codeHtml("brew install luotopia"),
+                  cask: codeHtml("--cask"),
+                  upgrade: codeHtml("brew upgrade luotopia"),
+                })}
+              />
+            </div>
+          </details>
+          <details class="lt-dl-drawer">
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <h3 class="flex-1 text-title-small text-on-surface">Nix</h3>
+              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
+            </summary>
+            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
+              <p>{t("download.pkg.nix.body")}</p>
+              <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>nix profile install github:ClosedWHU/Luotopia-Dist</code></pre>
+            </div>
+          </details>
+          <details class="lt-dl-drawer">
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <h3 class="flex-1 text-title-small text-on-surface">{t("download.pkg.aur.title")}</h3>
+              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
+            </summary>
+            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
+              <p>{t("download.pkg.aur.body")}</p>
+              <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>yay -S luotopia-bin</code></pre>
+              <p class="text-body-small text-outline">{t("download.pkg.aur.note")}</p>
+            </div>
+          </details>
+          <details class="lt-dl-drawer">
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+              <h3 class="flex-1 text-title-small text-on-surface">winget</h3>
+              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
+            </summary>
+            <div class="lt-dl-drawer-body space-y-2 px-3.5 py-3">
+              <p>{t("download.pkg.winget.body")}</p>
+              <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># {t("download.pkg.winget.snippet")}
 winget install --manifest .\path\to\manifests\folder</code></pre>
-            <p class="mt-2" set:html={rich("download.pkg.winget.merged", { repo: wingetRepoLink })} />
-            <pre data-lenis-prevent-horizontal class="mt-2 overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>winget install ClosedWHU.Luotopia</code></pre>
-            <p class="mt-2 text-body-small text-outline">{t("download.pkg.winget.note")}</p>
-          </div>
+              <p set:html={rich("download.pkg.winget.merged", { repo: wingetRepoLink })} />
+              <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>winget install ClosedWHU.Luotopia</code></pre>
+              <p class="text-body-small text-outline">{t("download.pkg.winget.note")}</p>
+            </div>
+          </details>
         </div>
       </div>
 
@@ -368,17 +433,127 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
   </section>
 </BaseLayout>
 
+<style is:global>
+  /*
+   * `is:global` because half of this styles DOM the script builds at runtime:
+   * Astro stamps its scoping attribute onto the template at build time, so a
+   * scoped selector would not match one rendered release card (the same
+   * reasoning StatusPage's block gives). Every rule is therefore namespaced
+   * under `lt-dl-`, and every one of them outranks the utilities it sits beside
+   * on specificity rather than on source order — after `flattenCssLayers()`
+   * unwraps Tailwind's layers, order is all that is left of layer precedence,
+   * and a component stylesheet's position relative to the utilities chunk is
+   * not something this file gets to choose.
+   *
+   * ── The two drawer groups ──
+   *
+   * Bordered rows, not inset fills: the shell snippets inside a drawer are
+   * already `.lt-inset`, and a second inset surface around them would be a
+   * box of the same near-white fill inside a box of it. The border is the card.
+   *
+   * No `overflow: hidden` on the drawer. Clipping would round the head's state
+   * layer for free, but it would also clip the focus ring of every link in the
+   * body, so the head's corners are spelled out per state instead: all four
+   * when closed, where the head *is* the box, and only the top two when open.
+   */
+  .lt-dl-drawer {
+    border: 1px solid var(--lt-glass-divider);
+    border-radius: var(--lt-radius-control);
+  }
+
+  .lt-dl-drawer-head {
+    border-radius: var(--lt-radius-control);
+  }
+
+  .lt-dl-drawer[open] > .lt-dl-drawer-head {
+    border-radius: var(--lt-radius-control) var(--lt-radius-control) 0 0;
+    /* Inset shadow rather than `border-bottom`: a border would grow the head
+     * by 1px on every toggle and the whole row would visibly jump. */
+    box-shadow: inset 0 -1px 0 0 var(--lt-glass-divider);
+  }
+
+  /* The native disclosure triangle, in the spelling WebKit needs; `list-none`
+   * on the summary is what removes Firefox's `::marker` (DocsTree does both). */
+  .lt-dl-drawer-head::-webkit-details-marker {
+    display: none;
+  }
+
+  .lt-dl-caret {
+    transition: transform 0.2s ease;
+  }
+
+  .lt-dl-drawer:not([open]) .lt-dl-caret {
+    transform: rotate(-90deg);
+  }
+
+  /*
+   * ── The changelog clamp ──
+   *
+   * One release note is a page of its own, and five of them per page made
+   * /download longer than everything above it put together. Collapsed shows the
+   * head of the note and fades its bottom edge out, so the cut reads as
+   * "continues" instead of as a paragraph that was truncated.
+   *
+   * `mask-image`, not a gradient overlay painted on top: the note sits on glass,
+   * and an opaque-to-transparent fill over it would hide the aurora the card is
+   * refracting. A mask fades the text itself and leaves the panel alone. The
+   * `-webkit-` spelling is the one that works on this site's Chrome 66 floor —
+   * unprefixed `mask-image` on an HTML element is 120+ (PageHeader and HomePage
+   * fade the same way, and neither needs the mask to animate).
+   *
+   * Nothing here transitions. Height has no portable interpolation on this floor
+   * (`interpolate-size` is 129+, `grid-template-rows: 0fr → 1fr` is 107+), and
+   * the site's other disclosures — `<details>` in the Navbar, the docs sidebar —
+   * snap too.
+   *
+   * `data-clamped` is set to "true" by the script only for a note that really
+   * overflows, and "false" is what the template renders, so a short note (or a
+   * measurement that never ran) keeps its full height with no toggle: `overflow`
+   * stays `visible` unless the clamp is on, and nothing can end up unreachable.
+   */
+  .lt-dl-notewrap[data-clamped="true"] .lt-dl-notes {
+    /* Eight lines of body-medium (20px line-height). */
+    max-height: 168px;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(#000 0%, #000 62%, transparent 100%);
+    mask-image: linear-gradient(#000 0%, #000 62%, transparent 100%);
+  }
+
+  .lt-dl-notewrap .lt-dl-more {
+    display: none;
+  }
+
+  .lt-dl-notewrap[data-clamped="true"] .lt-dl-more {
+    display: inline-flex;
+  }
+
+  .lt-dl-more[aria-expanded="true"] .lt-dl-caret {
+    transform: rotate(180deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lt-dl-caret {
+      transition: none;
+    }
+  }
+</style>
+
 <script>
   import { onPageSetup } from "../../scripts/page-lifecycle";
   import { normalizeIconSvg } from "../../scripts/icon-svg";
   import downloadIconRaw from "@material-symbols/svg-400/outlined/download.svg?raw";
   import openInNewIconRaw from "@material-symbols/svg-400/outlined/open_in_new.svg?raw";
+  import caretIconRaw from "@material-symbols/svg-400/outlined/keyboard_arrow_down.svg?raw";
   import msStoreIconRaw from "../../assets/icons/store-microsoft-24-filled.svg?raw";
 
   const openInNewIcon = normalizeIconSvg(openInNewIconRaw, "text-base");
   const openInNewTrailingIcon = normalizeIconSvg(openInNewIconRaw, "text-sm");
   const assetDownloadIcon = normalizeIconSvg(downloadIconRaw, "text-base shrink-0 mt-0.5");
   const changelogDownloadIcon = normalizeIconSvg(downloadIconRaw, "text-sm");
+  /* The changelog's expand/collapse caret. Its rotation is driven by the same
+   * `.lt-dl-caret` rule the build-time `<Icon>` carets in the two drawer groups
+   * use, so the two affordances turn the same way. */
+  const notesCaretIcon = normalizeIconSvg(caretIconRaw, "lt-dl-caret text-sm");
 
   /*
    * The link both changelog failure states point at. Markup, not copy: the
@@ -438,6 +613,8 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
       loadFailed: dataset.i18nLoadFailed ?? "",
       page: dataset.i18nPage ?? "",
       viewOnGithub: dataset.i18nViewOnGithub ?? "",
+      notesExpand: dataset.i18nNotesExpand ?? "",
+      notesCollapse: dataset.i18nNotesCollapse ?? "",
     };
 
     /**
@@ -1095,6 +1272,40 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
       return out;
     }
 
+    /*
+     * Clamping the release notes.
+     *
+     * The card is rendered as `data-clamped="false"` — full height, no toggle —
+     * and this pass flips it to "true" only where the note genuinely overflows
+     * the clamp, so a one-line note (an empty body renders as the "no release
+     * notes" placeholder) never grows a button that would reveal nothing.
+     *
+     * Measuring means clamping first, then comparing `scrollHeight` against the
+     * `clientHeight` the clamp produced: the collapsed height lives in the
+     * stylesheet, and repeating the number here would be a second copy of it
+     * that nothing would notice drifting.
+     *
+     * MIN_HIDDEN is a line and a half rather than a pixel — offering "show full
+     * notes" for a sliver of a last line is noise, and the unclamped state that
+     * follows it hides nothing, since `overflow` only becomes `hidden` together
+     * with the clamp.
+     */
+    const MIN_HIDDEN_NOTES_PX = 30;
+    // `aria-controls` needs an id per note, and the list is replaced wholesale
+    // on every page turn, so a counter that only ever grows cannot collide with
+    // an id still in the document.
+    let notesSeq = 0;
+
+    function clampNotes() {
+      listEl.querySelectorAll(".lt-dl-notewrap").forEach((wrap) => {
+        const notes = wrap.querySelector(".lt-dl-notes");
+        if (!notes) return;
+        wrap.setAttribute("data-clamped", "true");
+        const hidden = notes.scrollHeight - notes.clientHeight;
+        wrap.setAttribute("data-clamped", hidden > MIN_HIDDEN_NOTES_PX ? "true" : "false");
+      });
+    }
+
     // Rapid clicks put several loadChangelog calls in flight at once; a stale
     // response landing late would otherwise overwrite the newer page and leave
     // `page` disagreeing with what is on screen. Only the newest request may
@@ -1150,6 +1361,7 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
                       })
                       .join("")}</div>`
                   : "";
+              const notesId = "lt-dl-notes-" + ++notesSeq;
               return `<article class="rounded-card glass p-6">
                 <div class="flex flex-wrap items-center gap-2 mb-1">
                   <h3 class="text-title-large text-on-surface">${escapeHtml(ver)}</h3>
@@ -1157,13 +1369,20 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
                   <span class="text-body-small text-outline ml-auto">${formatDate(rel.publishedAt)}</span>
                 </div>
                 ${rel.title && rel.title !== ver && rel.title !== rel.tag ? `<p class="text-body-small text-outline mb-3">${escapeHtml(rel.title)}</p>` : ""}
-                <div class="text-body-medium text-on-surface-variant">${formatBody(notes.get(rel.tag) || rel.body)}</div>
+                <div class="lt-dl-notewrap" data-clamped="false">
+                  <div class="lt-dl-notes text-body-medium text-on-surface-variant" id="${notesId}">${formatBody(notes.get(rel.tag) || rel.body)}</div>
+                  <button type="button" class="lt-dl-more state-layer mt-3 inline-flex items-center gap-1 rounded-full lt-inset-raised px-3 py-1 text-label-medium text-primary cursor-pointer" data-notes-toggle aria-expanded="false" aria-controls="${notesId}">
+                    <span data-notes-label>${escapeHtml(copy.notesExpand)}</span>
+                    ${notesCaretIcon}
+                  </button>
+                </div>
                 ${assets}
                 ${rel.htmlUrl ? `<p class="mt-4 text-body-small"><a href="${escapeHtml(rel.htmlUrl)}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${copy.viewOnGithub}</a></p>` : ""}
               </article>`;
             })
             .join("");
         }
+        clampNotes();
         if (focusWasInList) listEl.focus({ preventScroll: true });
 
         if (pager && prevBtn && nextBtn && pageLabel) {
@@ -1178,6 +1397,54 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
         pager?.classList.add("hidden");
       }
     }
+
+    /*
+     * Delegated for the reason the arch switcher's listener is: the toggle sits
+     * in innerHTML that is replaced on every page turn, while `listEl` itself is
+     * static Astro markup, bound once per navigation.
+     *
+     * Both attributes move together — `aria-expanded` for assistive tech,
+     * `data-clamped` for the stylesheet — and the label is swapped rather than
+     * doubled up with a hidden sibling, so the button says what it will do.
+     */
+    if (listEl) {
+      listEl.addEventListener("click", (ev) => {
+        const btn =
+          ev.target && ev.target.closest ? ev.target.closest("[data-notes-toggle]") : null;
+        if (!btn || !listEl.contains(btn)) return;
+        const wrap = btn.closest(".lt-dl-notewrap");
+        if (!wrap) return;
+        const expanded = btn.getAttribute("aria-expanded") === "true";
+        btn.setAttribute("aria-expanded", expanded ? "false" : "true");
+        wrap.setAttribute("data-clamped", expanded ? "false" : "true");
+        const label = btn.querySelector("[data-notes-label]");
+        if (label) label.textContent = expanded ? copy.notesExpand : copy.notesCollapse;
+      }, { signal });
+    }
+
+    /*
+     * Drawer exclusivity — the one thing `<details>` cannot do on this site's
+     * Chrome 66 floor, since `name`-grouped accordions are 120+. Opening a
+     * drawer closes the rest of its own group, so a card never shows five
+     * platforms' install notes at once; closing the open one leaves the group
+     * shut, which is what native grouping does too. The two cards are two
+     * groups, so the visitor can read an install note and a package manager
+     * side by side.
+     *
+     * Writing `.open` fires `toggle` on the drawers being closed as well; the
+     * `!drawer.open` guard is what stops that from cascading back.
+     */
+    document.querySelectorAll("[data-drawer-group]").forEach((group) => {
+      const drawers = group.querySelectorAll("details.lt-dl-drawer");
+      drawers.forEach((drawer) => {
+        drawer.addEventListener("toggle", () => {
+          if (!drawer.open) return;
+          drawers.forEach((other) => {
+            if (other !== drawer) other.open = false;
+          });
+        }, { signal });
+      });
+    });
 
     prevBtn?.addEventListener("click", () => {
       if (page > 1) loadChangelog(page - 1);

@@ -477,6 +477,8 @@
   "download.changelog.next": "次へ",
   "download.changelog.page": "{page} ページ",
   "download.changelog.viewOnGithub": "GitHub で見る",
+  "download.changelog.notesExpand": "全文を表示",
+  "download.changelog.notesCollapse": "折りたたむ",
   "notFound.title": "ページが見つかりません",
   "notFound.srOnly": "404、ページが存在しません。",
   "notFound.heading": "このページ、ここにはありません",

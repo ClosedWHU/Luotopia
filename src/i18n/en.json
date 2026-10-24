@@ -505,6 +505,8 @@
   "download.changelog.next": "Next",
   "download.changelog.page": "Page {page}",
   "download.changelog.viewOnGithub": "View on GitHub",
+  "download.changelog.notesExpand": "Show full notes",
+  "download.changelog.notesCollapse": "Show less",
 
   "notFound.title": "Page not found",
   "notFound.srOnly": "Error 404: this page does not exist.",

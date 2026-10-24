@@ -477,6 +477,8 @@
   "download.changelog.next": "다음",
   "download.changelog.page": "{page}페이지",
   "download.changelog.viewOnGithub": "GitHub에서 보기",
+  "download.changelog.notesExpand": "전체 보기",
+  "download.changelog.notesCollapse": "접기",
   "notFound.title": "페이지를 찾을 수 없음",
   "notFound.srOnly": "404, 페이지가 없습니다.",
   "notFound.heading": "이 페이지는 여기에 없습니다",
