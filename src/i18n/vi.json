@@ -434,6 +434,7 @@
   "download.windows.storeSection": "Microsoft Store · bản cửa hàng",
   "download.windows.zipSection": "Gói zip di động · tải trực tiếp",
   "download.install.windows.body": "Bản zip di động không cần cài đặt: {extractAll}, sau đó mở thư mục luotopia đã giải nén và nhấp đúp vào {exe}. Đừng nhấp đúp {exe} ngay bên trong tệp nén — ứng dụng sẽ không chạy vì thiếu tệp. Nếu SmartScreen cảnh báo ở lần chạy đầu (bản di động không ký mã), chọn \"Thêm thông tin → Vẫn chạy\". Để nâng cấp, giải nén tệp zip mới đè lên thư mục cũ; dữ liệu nằm trong %APPDATA%\\ClosedWHU Team\\Luotopia và không bị mất.",
+  "download.install.windows.snippet": "PowerShell: giải nén và chạy",
   "download.install.windows.extractAll": "hãy giải nén toàn bộ tệp zip trước (chuột phải → Extract All)",
   "download.install.windows.note": "Muốn tự động cập nhật? Hãy cài từ Microsoft Store; mỗi Release đều kèm manifest Scoop / winget.",
   "download.install.title": "Hướng dẫn cài đặt",

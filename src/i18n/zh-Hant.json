@@ -434,6 +434,7 @@
   "download.windows.storeSection": "Microsoft Store · 商店版",
   "download.windows.zipSection": "zip 可攜包 · 直接安裝",
   "download.install.windows.body": "可攜版 zip 免安裝：{extractAll}解壓整個壓縮檔，進入解壓出的 luotopia 資料夾，雙擊 {exe} 執行。請勿在壓縮檔內直接雙擊 {exe}，會因缺少檔案而無法啟動；首次執行若出現 SmartScreen 提示（可攜版未程式碼簽章），選擇「更多資訊 → 仍要執行」。升級即用新 zip 解壓覆蓋舊資料夾；資料儲存於 %APPDATA%\\ClosedWHU Team\\Luotopia，不會遺失。",
+  "download.install.windows.snippet": "PowerShell：解壓並執行",
   "download.install.windows.extractAll": "先右鍵 →「全部解壓縮」",
   "download.install.windows.note": "想要自動更新請從 Microsoft Store 安裝；Scoop / winget 清單隨每個 Release 附上。",
   "download.install.title": "安裝說明",

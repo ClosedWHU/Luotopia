@@ -434,6 +434,7 @@
   "download.windows.storeSection": "Microsoft Store · 스토어 버전",
   "download.windows.zipSection": "zip 포터블 패키지 · 직접 설치",
   "download.install.windows.body": "포터블 zip은 설치가 필요 없습니다. {extractAll}한 후 추출된 luotopia 폴더에서 {exe}를 더블 클릭해 실행하세요. 압축 파일 안에서 바로 {exe}를 실행하면 파일이 누락되어 시작할 수 없습니다. 처음 실행할 때 SmartScreen이 경고하면(포터블 버전은 서명되지 않음) \"추가 정보 → 실행\"을 선택하세요. 업그레이드는 새 zip을 기존 폴더 위에 추출하면 되고, 데이터는 %APPDATA%\\ClosedWHU Team\\Luotopia에 저장되어 유지됩니다.",
+  "download.install.windows.snippet": "PowerShell: 압축 풀고 실행",
   "download.install.windows.extractAll": "먼저 zip 전체를 추출(마우스 오른쪽 버튼 → 모두 추출)",
   "download.install.windows.note": "자동 업데이트를 원하면 Microsoft Store에서 설치하세요. Scoop / winget 매니페스트는 각 Release에 포함됩니다.",
   "download.install.title": "설치 안내",
