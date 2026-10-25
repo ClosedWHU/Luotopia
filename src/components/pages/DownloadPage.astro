@@ -26,6 +26,7 @@
  *   the shell comments inside them, which are prose that happens to sit in a
  *   `<pre>`.
  */
+import { Code } from "astro:components";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHeader from "../PageHeader.astro";
 import Icon from "../Icon.astro";
@@ -99,6 +100,59 @@ const releasesLink = linkHtml(
   "https://github.com/ClosedWHU/Luotopia/releases",
   "GitHub Releases",
 );
+
+/*
+ * The install commands, as data.
+ *
+ * `<Code>` highlights at build time and takes its source as a string, so the
+ * eight snippets move out of the markup — and the translated shell comments
+ * interpolate into them exactly as they did inside the `<code>` tag, which is
+ * the one part of a command that is prose (see the note at the top of this
+ * file).
+ *
+ * `String.raw` on all eight rather than only the two that need it:
+ * `.\luotopia\luotopia.exe` and `.\path\to\manifests\folder` contain `\l`, `\p`
+ * and `\t`, and an ordinary template literal turns that `\t` into a tab and
+ * eats `\l` as a bare `l`. The source still looks right and the command stops
+ * being copy-pasteable. One spelling everywhere means no block has to be
+ * remembered as the special one.
+ */
+const snippets = {
+  windows: String.raw`# PowerShell：解压并运行
+Expand-Archive luotopia-*-windows-x64.zip -DestinationPath .
+.\luotopia\luotopia.exe`,
+  linux: String.raw`# .tar.gz
+tar -xzf luotopia-*-linux-x64.tar.gz && ./luotopia/luotopia
+# .AppImage
+chmod +x luotopia-*-linux-x64.AppImage && ./luotopia-*-linux-x64.AppImage
+# .deb
+sudo apt install ./luotopia-*-linux-*.deb
+# .flatpak
+flatpak install --user ./luotopia-*-linux-*.flatpak`,
+  scoop: String.raw`scoop bucket add luotopia https://github.com/ClosedWHU/Luotopia-Dist
+scoop install luotopia
+scoop update luotopia   # ${t("download.pkg.scoop.update")}`,
+  brew: String.raw`brew tap ClosedWHU/luotopia
+# ${t("download.pkg.brew.linux")}
+brew install luotopia
+# ${t("download.pkg.brew.macos")}
+brew install --cask luotopia`,
+  nix: String.raw`nix profile install github:ClosedWHU/Luotopia-Dist`,
+  aur: String.raw`yay -S luotopia-bin`,
+  wingetDraft: String.raw`# ${t("download.pkg.winget.snippet")}
+winget install --manifest .\path\to\manifests\folder`,
+  winget: String.raw`winget install ClosedWHU.Luotopia`,
+};
+
+/*
+ * Shared by every snippet: the docs' own dual theme (the `rehypeShiki` options
+ * in `astro.config.mjs`), and no default colour, so Shiki paints nothing on the
+ * `<pre>` itself — `.lt-inset` keeps supplying the glass fill and the
+ * `.lt-dl-code` rules below pick which palette the tokens read.
+ */
+const SNIPPET_THEMES = { light: "github-light", dark: "github-dark" };
+const SNIPPET_CLASS =
+  "lt-dl-code overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface";
 
 /*
  * The strings the *script* needs, carried on data attributes.
@@ -289,9 +343,7 @@ const i18n = {
                     exe: strongHtml("luotopia.exe"),
                   })}
                 />
-                <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># PowerShell：解压并运行
-Expand-Archive luotopia-*-windows-x64.zip -DestinationPath .
-.\luotopia\luotopia.exe</code></pre>
+                <Code code={snippets.windows} lang="powershell" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
                 <p class="text-body-small text-outline">{t("download.install.windows.note")}</p>
               </div>
             </div>
@@ -310,14 +362,7 @@ Expand-Archive luotopia-*-windows-x64.zip -DestinationPath .
                     format: strongHtml(t("download.install.linux.format")),
                   })}
                 />
-                <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># .tar.gz
-tar -xzf luotopia-*-linux-x64.tar.gz &amp;&amp; ./luotopia/luotopia
-# .AppImage
-chmod +x luotopia-*-linux-x64.AppImage &amp;&amp; ./luotopia-*-linux-x64.AppImage
-# .deb
-sudo apt install ./luotopia-*-linux-*.deb
-# .flatpak
-flatpak install --user ./luotopia-*-linux-*.flatpak</code></pre>
+                <Code code={snippets.linux} lang="bash" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
                 <p class="text-body-small text-outline">{t("download.install.linux.note")}</p>
               </div>
             </div>
@@ -365,9 +410,7 @@ flatpak install --user ./luotopia-*-linux-*.flatpak</code></pre>
             <div class="lt-dl-drawer-body">
               <div class="space-y-2 px-3.5 py-3">
                 <p>{t("download.pkg.scoop.body")}</p>
-                <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>scoop bucket add luotopia https://github.com/ClosedWHU/Luotopia-Dist
-scoop install luotopia
-scoop update luotopia   # {t("download.pkg.scoop.update")}</code></pre>
+                <Code code={snippets.scoop} lang="powershell" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
                 <p class="text-body-small text-outline">{t("download.pkg.scoop.note")}</p>
               </div>
             </div>
@@ -381,11 +424,7 @@ scoop update luotopia   # {t("download.pkg.scoop.update")}</code></pre>
             <div class="lt-dl-drawer-body">
               <div class="space-y-2 px-3.5 py-3">
                 <p>{t("download.pkg.brew.body")}</p>
-                <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>brew tap ClosedWHU/luotopia
-# {t("download.pkg.brew.linux")}
-brew install luotopia
-# {t("download.pkg.brew.macos")}
-brew install --cask luotopia</code></pre>
+                <Code code={snippets.brew} lang="bash" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
                 <p
                   class="text-body-small text-outline"
                   set:html={rich("download.pkg.brew.note", {
@@ -406,7 +445,7 @@ brew install --cask luotopia</code></pre>
             <div class="lt-dl-drawer-body">
               <div class="space-y-2 px-3.5 py-3">
                 <p>{t("download.pkg.nix.body")}</p>
-                <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>nix profile install github:ClosedWHU/Luotopia-Dist</code></pre>
+                <Code code={snippets.nix} lang="bash" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
               </div>
             </div>
           </details>
@@ -419,7 +458,7 @@ brew install --cask luotopia</code></pre>
             <div class="lt-dl-drawer-body">
               <div class="space-y-2 px-3.5 py-3">
                 <p>{t("download.pkg.aur.body")}</p>
-                <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>yay -S luotopia-bin</code></pre>
+                <Code code={snippets.aur} lang="bash" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
                 <p class="text-body-small text-outline">{t("download.pkg.aur.note")}</p>
               </div>
             </div>
@@ -433,10 +472,9 @@ brew install --cask luotopia</code></pre>
             <div class="lt-dl-drawer-body">
               <div class="space-y-2 px-3.5 py-3">
                 <p>{t("download.pkg.winget.body")}</p>
-                <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code># {t("download.pkg.winget.snippet")}
-winget install --manifest .\path\to\manifests\folder</code></pre>
+                <Code code={snippets.wingetDraft} lang="powershell" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
                 <p set:html={rich("download.pkg.winget.merged", { repo: wingetRepoLink })} />
-                <pre data-lenis-prevent-horizontal class="overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface"><code>winget install ClosedWHU.Luotopia</code></pre>
+                <Code code={snippets.winget} lang="powershell" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
                 <p class="text-body-small text-outline">{t("download.pkg.winget.note")}</p>
               </div>
             </div>
@@ -586,6 +624,23 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
    */
   .lt-dl-notes {
     display: flow-root;
+  }
+
+  /*
+   * Snippet colours. `<Code>` runs Shiki at build time on the docs' own dual
+   * theme with `defaultColor: false`, so each token span carries both palettes
+   * as `--shiki-light` / `--shiki-dark` and stays uncoloured until a rule picks
+   * one — which also leaves the panel's `.lt-inset` fill in charge of the
+   * background instead of the theme's opaque white. The swap reads the `.dark`
+   * class rather than `prefers-color-scheme` because that is how this site
+   * switches theme (`docs.css` does the same for the docs' fenced blocks).
+   */
+  .lt-dl-code span {
+    color: var(--shiki-light);
+  }
+
+  html.dark .lt-dl-code span {
+    color: var(--shiki-dark);
   }
 
   .lt-dl-more[aria-expanded="true"] .lt-dl-caret {
