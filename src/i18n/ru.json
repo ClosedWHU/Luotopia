@@ -434,6 +434,7 @@
   "download.windows.storeSection": "Microsoft Store · версия из магазина",
   "download.windows.zipSection": "Портативный zip · прямая установка",
   "download.install.windows.body": "Портативный zip не требует установки: {extractAll}, затем откройте извлечённую папку luotopia и дважды щёлкните {exe}. Не запускайте {exe} прямо из архива — он не найдёт остальные файлы. Если SmartScreen предупредит при первом запуске (портативная сборка не подписана), выберите «Подробнее → Выполнить». Обновление: извлеките новый zip поверх старой папки; данные хранятся в %APPDATA%\\ClosedWHU Team\\Luotopia и не теряются.",
+  "download.install.windows.snippet": "PowerShell: распаковать и запустить",
   "download.install.windows.extractAll": "сначала извлеките весь архив (правый клик → Извлечь всё)",
   "download.install.windows.note": "Хотите автообновление? Установите из Microsoft Store; манифесты Scoop / winget прилагаются к каждому релизу.",
   "download.install.title": "Примечания к установке",

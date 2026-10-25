@@ -458,6 +458,7 @@
   "download.windows.storeSection": "Microsoft Store · store build",
   "download.windows.zipSection": "Portable zip · direct download",
   "download.install.windows.body": "The portable zip needs no installer: {extractAll}, then open the extracted luotopia folder and double-click {exe}. Never run {exe} directly from inside the zip — it will fail with missing files. If SmartScreen warns on first run (the portable build is unsigned), choose More info → Run. To upgrade, extract the new zip over the old folder; your data lives in %APPDATA%\\ClosedWHU Team\\Luotopia and survives upgrades.",
+  "download.install.windows.snippet": "PowerShell: extract and run",
   "download.install.windows.extractAll": "extract the whole zip first (right-click → Extract All)",
   "download.install.windows.note": "Prefer automatic updates? Install from the Microsoft Store; Scoop / winget manifests ship with every Release.",
 

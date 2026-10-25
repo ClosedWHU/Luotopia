@@ -434,6 +434,7 @@
   "download.windows.storeSection": "Microsoft Store · version Store",
   "download.windows.zipSection": "zip portable · téléchargement direct",
   "download.install.windows.body": "Le zip portable ne nécessite aucune installation : {extractAll}, puis ouvrez le dossier luotopia extrait et double-cliquez sur {exe}. Ne lancez jamais {exe} directement depuis l'archive — il échouera faute de fichiers. Si SmartScreen avertit au premier lancement (la version portable n'est pas signée), choisissez « Plus d'infos → Exécuter ». Pour mettre à jour, extrayez le nouveau zip par-dessus l'ancien dossier ; vos données sont conservées dans %APPDATA%\\ClosedWHU Team\\Luotopia.",
+  "download.install.windows.snippet": "PowerShell : extraire et exécuter",
   "download.install.windows.extractAll": "extrayez d'abord tout le zip (clic droit → Extraire tout)",
   "download.install.windows.note": "Vous préférez les mises à jour automatiques ? Installez depuis le Microsoft Store ; les manifestes Scoop / winget accompagnent chaque Release.",
   "download.install.title": "Instructions d'installation",
