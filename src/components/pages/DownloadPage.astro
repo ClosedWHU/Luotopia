@@ -572,6 +572,22 @@ winget install --manifest .\path\to\manifests\folder</code></pre>
     mask-image: linear-gradient(#000 0%, #000 62%, transparent 100%);
   }
 
+  /*
+   * A formatting context in every state, which is what keeps the note still at
+   * the moment the animation ends. `overflow: hidden` already makes the clamped
+   * box one, and a BFC *contains* its first child's top margin — release notes
+   * usually open on a heading carrying `mt-4`. Clearing the clip when the note
+   * settled let that 16px collapse back out through the top of the box and merge
+   * with the version line's own margin, so the whole body jumped up 4px against
+   * its title on the last frame. `flow-root` is the same containment without the
+   * clipping (58+, inside this site's floor; Safari 12 ignores it and keeps the
+   * jump, which is a seam, not a break). The drawer shell needs no such rule:
+   * its child is the padded div, which has no margin to escape.
+   */
+  .lt-dl-notes {
+    display: flow-root;
+  }
+
   .lt-dl-more[aria-expanded="true"] .lt-dl-caret {
     transform: rotate(180deg);
   }
