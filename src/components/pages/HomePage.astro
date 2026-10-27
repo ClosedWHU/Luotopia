@@ -39,7 +39,7 @@ const heroSrPrefix = t("home.hero.srPrefix");
 ---
 
 <BaseLayout title={t("home.title")}>
-  <section class="relative overflow-hidden pt-[120px] pb-24 px-4">
+  <section class="lt-hero relative overflow-hidden pt-[120px] pb-24 px-4 flex flex-col justify-center">
     <div class="lt-hero-wash" aria-hidden="true"></div>
 
     <div class="relative max-w-content mx-auto flex flex-col items-center text-center">
@@ -82,14 +82,20 @@ const heroSrPrefix = t("home.hero.srPrefix");
         <DownloadButtons variant="hero" />
         <p class="mt-5 text-body-small text-outline">{t("home.hero.platforms")}</p>
       </div>
-
-      <a href="#features" class="lt-scroll-hint" aria-label={t("home.hero.scrollHint")} style="--lt-reveal-delay: 420ms">
-        <Icon name="keyboard_arrow_down" />
-      </a>
     </div>
+
+    {/*
+      A sibling of the content column, not its last child: the hint is anchored
+      to the hero's bottom edge, and the column carries its own `relative` (it
+      has to, to paint over the wash), which would otherwise capture it and pin
+      it 96px higher — back inside the band it is meant to mark the end of.
+    */}
+    <a href="#features" class="lt-scroll-hint" aria-label={t("home.hero.scrollHint")} style="--lt-reveal-delay: 420ms">
+      <Icon name="keyboard_arrow_down" />
+    </a>
   </section>
 
-  <section id="features" class="relative py-24 px-4 scroll-mt-20">
+  <section id="features" class="relative pt-16 pb-24 sm:pt-24 px-4 scroll-mt-20">
     <div class="max-w-content mx-auto">
       <h2 class="lt-reveal text-headline-small text-center text-on-surface mb-3">{t("home.features.title")}</h2>
       <p class="lt-reveal text-body-large text-center text-on-surface-variant max-w-xl mx-auto mb-12" style="--lt-reveal-delay: 60ms">
@@ -138,13 +144,45 @@ const heroSrPrefix = t("home.hero.srPrefix");
 </BaseLayout>
 
 <style>
+  /*
+   * The hero owns the fold.
+   *
+   * Its height used to be purely content-driven — 726px at every viewport — so
+   * what sat under it was whatever the fold happened to have left. On a phone
+   * that was 284px of stacked section padding below the buttons, with only the
+   * first 22px of the next heading in view, against 54px of visible air above
+   * the icon (120 of padding, 66 of it behind the navbar): 54 above, 284 below.
+   * `min-height` makes the box follow the viewport and the section's
+   * `justify-center` puts the mass in the middle of it, so the same 418px of
+   * content is balanced at 844px tall and at 1080.
+   *
+   * `svh`, not `vh`: on a phone `100vh` is the *large* viewport, i.e. the URL
+   * bar collapsed, so the anchored hint below would start its life under the
+   * browser chrome. The `56rem` cap is what stops a 1080p screen from buying
+   * 280px of nothing above and below the content — at the cap the next
+   * section's heading still arrives inside the fold, which is the affordance a
+   * full-height hero otherwise gives up.
+   *
+   * Deliberately no fallback declaration and no `@supports`: an engine without
+   * `svh` (or without `min()`, Chrome 79+) drops the whole declaration as
+   * invalid and the hero keeps the content-driven height it has today. That
+   * path is not left unbalanced either — the features section below trims its
+   * top padding under `sm`, which is what puts the heading inside a phone's
+   * fold when this rule does not apply.
+   */
+  .lt-hero {
+    min-height: min(100svh, 56rem);
+  }
+
   /* A local wash over the page-wide aurora, so the hero carries more chroma
    * than the body copy below it — the same top-down gradient DeepSeek's hero
    * section layers over its shader, built from our own primary/tertiary tones.
    *
-   * Centers are positive viewport fractions on purpose: the hero box is ~1100px
-   * tall, so `at 50% -6%` parks the bloom above the fold and the wash reads as
-   * nothing at all. */
+   * Centers are fractions of the hero box, which is now viewport-sized between
+   * its content height and the 56rem cap, so the blooms scale with it rather
+   * than drifting to the top of a taller box. Negative or zero centres are what
+   * would park a bloom above the fold and leave the wash reading as nothing at
+   * all. */
   .lt-hero-wash {
     position: absolute;
     /* Four sides, not the `inset` shorthand (Chrome 87+): legacy-WebView floor. */
@@ -338,13 +376,28 @@ const heroSrPrefix = t("home.hero.srPrefix");
     color: transparent;
   }
 
+  /*
+   * Anchored to the hero's bottom edge instead of trailing the buttons.
+   *
+   * In flow it sat 3.5rem under the last text and then 96px of section padding
+   * followed, so on a tall fold it floated in the middle of the empty band — the
+   * one element down there, which is exactly what read as "the bottom is empty
+   * apart from an arrow". At the edge it does the job it has: marks where the
+   * fold ends. `left`/`right` with auto margins rather than `inset-inline-start`
+   * (87+) or a centring `translate`, which the bob below already spends.
+   */
   .lt-scroll-hint {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 2.25rem;
     height: 2.25rem;
-    margin-top: 3.5rem;
     border-radius: 999px;
     color: var(--lt-color-outline);
     text-decoration: none;
