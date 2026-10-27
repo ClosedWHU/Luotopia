@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "version": 41,
-  "updatedAt": "2026-10-26T21:22:46.790Z",
-  "expiresAt": "2027-04-24T21:22:46.790Z",
+  "version": 42,
+  "updatedAt": "2026-10-27T21:07:57.024Z",
+  "expiresAt": "2027-04-25T21:07:57.024Z",
   "keyId": "luotopia-hot-update-2026-01",
   "scripts": [
     {
@@ -746,9 +746,9 @@
     {
       "name": "model-metadata-catalog",
       "label": "AI 模型元数据目录",
-      "version": 12,
+      "version": 13,
       "url": "/hot-update/assets/model-metadata-catalog.json.gz",
-      "checksum": "sha256:608c861259bc7eee6d9a2caa2abe00d1530465c914fc069872363b5505c42973",
+      "checksum": "sha256:b5062ded076eadcaad4f7b6a27e2568370e592a7367c0163a5abb9816f194f1c",
       "minAppVersion": "1.1.1"
     },
     {
@@ -760,5 +760,5 @@
       "minAppVersion": "1.1.1"
     }
   ],
-  "signature": "5pLvnbj5yxxGoRnOQfEf1S/jxckIviGBjDPhyqsosfcdAfwj4JSslsoZX0TxqhteMuxkoYnOiCwIzm+LMz3sCA=="
+  "signature": "h9hJOeInp5pxLagDfM7wPocuwp77YnC8lsvsxpEfDoveTff91QZig/j9emSTJ4WneGPd0ATSjktS3z6EKwDwCA=="
 }
