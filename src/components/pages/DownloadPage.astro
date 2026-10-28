@@ -258,7 +258,7 @@ const i18n = {
                       href={p.externalUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      class="flex items-center gap-1 text-body-small text-primary hover:underline no-underline"
+                      class="flex items-center gap-1 py-1.5 text-body-small text-primary hover:underline no-underline"
                     >
                       <Icon name="open_in_new" class="text-base" />
                       <span>{external ?? t("download.external.fallback")}</span>
@@ -288,7 +288,7 @@ const i18n = {
         -->
         <div class="space-y-2 text-body-medium text-on-surface-variant" data-drawer-group>
           <details class="lt-dl-drawer" open>
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
               <Icon name="android" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">Android</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
@@ -306,7 +306,7 @@ const i18n = {
             </div>
           </details>
           <details class="lt-dl-drawer">
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
               <Icon name="apple" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">Apple</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
@@ -330,7 +330,7 @@ const i18n = {
             </div>
           </details>
           <details class="lt-dl-drawer">
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
               <Icon name="windows" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">Windows</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
@@ -349,7 +349,7 @@ const i18n = {
             </div>
           </details>
           <details class="lt-dl-drawer">
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
               <Icon name="linux" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">Linux</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
@@ -368,7 +368,7 @@ const i18n = {
             </div>
           </details>
           <details class="lt-dl-drawer">
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
               <Icon name="harmonyos" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">HarmonyOS</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
@@ -402,7 +402,7 @@ const i18n = {
         -->
         <div class="space-y-2 text-body-medium text-on-surface-variant" data-drawer-group>
           <details class="lt-dl-drawer" open>
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
               <Icon name="terminal" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">Scoop</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
@@ -416,7 +416,7 @@ const i18n = {
             </div>
           </details>
           <details class="lt-dl-drawer">
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
               <Icon name="homebrew" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">Homebrew</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
@@ -437,7 +437,7 @@ const i18n = {
             </div>
           </details>
           <details class="lt-dl-drawer">
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
               <Icon name="nixos" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">Nix</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
@@ -450,7 +450,7 @@ const i18n = {
             </div>
           </details>
           <details class="lt-dl-drawer">
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
               <Icon name="archlinux" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">{t("download.pkg.aur.title")}</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
@@ -464,7 +464,7 @@ const i18n = {
             </div>
           </details>
           <details class="lt-dl-drawer">
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-2.5 cursor-pointer select-none list-none">
+            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
               <Icon name="terminal" class="text-lg text-primary" />
               <h3 class="flex-1 text-title-small text-on-surface">winget</h3>
               <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
@@ -495,14 +495,14 @@ const i18n = {
         <h2 class="text-headline-small text-on-surface mb-2">{t("download.changelog.title")}</h2>
         <p class="text-body-large text-on-surface-variant mb-8">{t("download.changelog.subtitle")}</p>
 
-        <div id="changelog-list" class="space-y-6" tabindex="-1">
+        <div id="changelog-list" class="space-y-6" tabindex="-1" aria-busy="true">
           <p class="text-body-medium text-outline">{t("download.changelog.loading")}</p>
         </div>
 
         <div id="changelog-pager" class="mt-8 flex items-center justify-center gap-3 hidden">
-          <button type="button" id="changelog-prev" class="state-layer rounded-full px-5 py-2 border border-outline text-primary bg-transparent cursor-pointer font-medium disabled:opacity-40 disabled:cursor-not-allowed">{t("download.changelog.prev")}</button>
+          <button type="button" id="changelog-prev" class="state-layer rounded-full px-5 py-2 border border-outline text-primary bg-transparent cursor-pointer font-medium aria-disabled:opacity-40 aria-disabled:cursor-not-allowed">{t("download.changelog.prev")}</button>
           <span id="changelog-page-label" class="text-body-small text-outline"></span>
-          <button type="button" id="changelog-next" class="state-layer rounded-full px-5 py-2 border border-outline text-primary bg-transparent cursor-pointer font-medium disabled:opacity-40 disabled:cursor-not-allowed">{t("download.changelog.next")}</button>
+          <button type="button" id="changelog-next" class="state-layer rounded-full px-5 py-2 border border-outline text-primary bg-transparent cursor-pointer font-medium aria-disabled:opacity-40 aria-disabled:cursor-not-allowed">{t("download.changelog.next")}</button>
         </div>
       </div>
     </div>
@@ -666,9 +666,12 @@ const i18n = {
   const openInNewTrailingIcon = normalizeIconSvg(openInNewIconRaw, "text-sm");
   const assetDownloadIcon = normalizeIconSvg(downloadIconRaw, "text-base shrink-0 mt-0.5");
   const changelogDownloadIcon = normalizeIconSvg(downloadIconRaw, "text-sm");
-  /* The changelog's expand/collapse caret. Its rotation is driven by the same
-   * `.lt-dl-caret` rule the build-time `<Icon>` carets in the two drawer groups
-   * use, so the two affordances turn the same way. */
+  /* The changelog's expand/collapse caret. It borrows `.lt-dl-caret` from the
+   * drawer groups for the transition only — duration and curve — while its
+   * rotation comes from the button's own `aria-expanded` rule (down at rest,
+   * up when expanded). The drawers rotate theirs -90deg when closed instead:
+   * a disclosure points at what it will reveal, a read-more points at what is
+   * below, and the two idioms are not the same arrow. */
   const notesCaretIcon = normalizeIconSvg(caretIconRaw, "lt-dl-caret text-sm");
 
   /*
@@ -952,7 +955,7 @@ const i18n = {
        * affordance. Any other external URL keeps the old arrow-first shape.
        */
       const brand = brandIconHtml(externalUrl);
-      return `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-body-small text-primary hover:underline no-underline">
+      return `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 py-1.5 text-body-small text-primary hover:underline no-underline">
           ${brand || openInNewIcon}
           <span>${escapeHtml(externalLabel)}</span>
           ${brand ? `<span class="text-outline">${openInNewTrailingIcon}</span>` : ""}
@@ -1346,7 +1349,9 @@ const i18n = {
      * before the asset existed, a locale whose translation failed validation and
      * was omitted rather than filled with the source text, and a fetch error. All
      * three fall back to the hand-written body, which is what this page showed
-     * before.
+     * before. A note rendered that way carries `lang` with the source locale, so
+     * a Mandarin paragraph on an English page is at least announced and shaped
+     * as Mandarin instead of inheriting the page's voice.
      *
      * The source locale never fetches: its body already *is* the hand-written one.
      */
@@ -1502,8 +1507,9 @@ const i18n = {
     // Rapid clicks put several loadChangelog calls in flight at once; a stale
     // response landing late would otherwise overwrite the newer page and leave
     // `page` disagreeing with what is on screen. Only the newest request may
-    // touch the DOM. (Deliberately not `disabled` during load: disabling the
-    // focused pager button drops keyboard focus to <body>.)
+    // touch the DOM. The pager stays clickable-throughout for the same reason it
+    // uses `aria-disabled` rather than `disabled` at the ends: a disabled button
+    // that holds focus drops it to <body>.
     let changelogRequestId = 0;
 
     async function loadChangelog(p) {
@@ -1514,6 +1520,7 @@ const i18n = {
       // while loading and after the new page renders.
       const focusWasInList = listEl.contains(document.activeElement);
       listEl.innerHTML = `<p class="text-body-medium text-outline">${copy.loading}</p>`;
+      listEl.setAttribute("aria-busy", "true");
       if (focusWasInList) listEl.focus({ preventScroll: true });
       try {
         const r = await fetchWithTimeout(`/api/releases?page=${p}&per_page=${PER_PAGE}`, 15000);
@@ -1563,8 +1570,8 @@ const i18n = {
                 </div>
                 ${rel.title && rel.title !== ver && rel.title !== rel.tag ? `<p class="text-body-small text-outline mb-3">${escapeHtml(rel.title)}</p>` : ""}
                 <div class="lt-dl-notewrap" data-clamped="false">
-                  <div class="lt-dl-notes text-body-medium text-on-surface-variant" id="${notesId}">${formatBody(notes.get(rel.tag) || rel.body)}</div>
-                  <button type="button" class="lt-dl-more state-layer mt-3 inline-flex items-center gap-1 rounded-full lt-inset-raised px-3 py-1 text-label-medium text-primary cursor-pointer" data-notes-toggle aria-expanded="false" aria-controls="${notesId}">
+                  <div class="lt-dl-notes text-body-medium text-on-surface-variant" id="${notesId}"${notes.get(rel.tag) ? "" : ` lang="${copy.notesSourceLocale}"`}>${formatBody(notes.get(rel.tag) || rel.body)}</div>
+                  <button type="button" class="lt-dl-more state-layer mt-3 inline-flex items-center gap-1 rounded-full lt-inset-raised px-3.5 py-2 text-label-medium text-primary cursor-pointer" data-notes-toggle aria-expanded="false" aria-controls="${notesId}">
                     <span data-notes-label>${escapeHtml(copy.notesExpand)}</span>
                     ${notesCaretIcon}
                   </button>
@@ -1576,17 +1583,27 @@ const i18n = {
             .join("");
         }
         clampNotes();
+        listEl.setAttribute("aria-busy", "false");
         if (focusWasInList) listEl.focus({ preventScroll: true });
 
         if (pager && prevBtn && nextBtn && pageLabel) {
           pager.classList.remove("hidden");
-          prevBtn.disabled = !hasPrev;
-          nextBtn.disabled = !hasNext;
+          /*
+           * `aria-disabled`, not `disabled`: a disabled button that currently
+           * holds focus drops it to <body> when the attribute lands, and the
+           * pager is exactly the control a keyboard user is on when they turn
+           * the page. The click handlers below already refuse to act on the
+           * guarded side, so the attribute is presentation and announcement
+           * only.
+           */
+          prevBtn.setAttribute("aria-disabled", String(!hasPrev));
+          nextBtn.setAttribute("aria-disabled", String(!hasNext));
           pageLabel.textContent = fill(copy.page, { page });
         }
       } catch {
         if (signal.aborted || requestId !== changelogRequestId) return;
         listEl.innerHTML = `<p class="text-body-medium text-outline">${fill(copy.loadFailed, { link: releasesLinkHtml })}</p>`;
+        listEl.setAttribute("aria-busy", "false");
         pager?.classList.add("hidden");
       }
     }

@@ -45,7 +45,7 @@ const i18n = {
 <figure class="lt-reveal-lift glass rounded-group overflow-hidden brand3d" data-brand3d={kind} style={`--lt-reveal-delay:${delay}`}>
   <div class="viewer" style={`aspect-ratio:${aspect}`}>
     <img class="poster" src={poster} alt="" width="256" height="256" />
-    <canvas data-logo3d={kind} data-lenis-prevent aria-label={t("brand.logo3d.canvasAria", { title })}></canvas>
+    <canvas data-logo3d={kind} data-lenis-prevent role="img" aria-label={t("brand.logo3d.canvasAria", { title })}></canvas>
     <span class="tag">{t("brand.logo3d.hint")}</span>
   </div>
   <figcaption class="p-5 sm:p-6">
@@ -58,7 +58,7 @@ const i18n = {
         <span class="lbl">{i18n.pause}</span>
       </button>
       <button type="button" data-act="replay" class="lt-btn lt-inset-raised state-layer inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-label-large text-on-surface cursor-pointer">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
         {t("brand.logo3d.replay")}
       </button>
     </div>

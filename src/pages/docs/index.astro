@@ -11,8 +11,13 @@ import { DOCS_TOPICS } from "../../config/docs/navigation";
 import "../../styles/docs.css";
 ---
 
-<BaseLayout title="文档" description="珞家：用户指南、客户端与服务端文档">
-  <PageHeader title="Luotopia 文档" subtitle="用户指南、客户端开发、服务端开发与电单车接口参考。" />
+<BaseLayout title="文档" description="珞家：用户指南与客户端开发文档">
+  {/* Names the two topics `DOCS_TOPICS` actually renders. The previous copy
+      advertised server-side and e-bike references that moved to the private
+      repository in the 2026-10 split — including in the meta description, which
+      is the sentence a search result shows. The paragraph at the bottom of this
+      page explains where they went. */}
+  <PageHeader title="Luotopia 文档" subtitle="用户指南与客户端开发文档。" />
   <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8 pb-20">
     <div class="grid gap-4 sm:grid-cols-2">
       {
