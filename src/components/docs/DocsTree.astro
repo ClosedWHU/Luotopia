@@ -56,14 +56,32 @@ const Self = Astro.self;
   .lt-docs-group summary::-webkit-details-marker {
     display: none;
   }
+  .lt-docs-treelink[aria-current="page"] {
+    background: color-mix(in srgb, var(--lt-color-primary) 10%, transparent);
+  }
+</style>
+
+<style is:global>
+  /*
+   * Global, not scoped: the caret is `<Icon>` output, i.e. `set:html`, and Astro
+   * cannot stamp a scoping attribute onto markup it never compiles — the scoped
+   * version of these rules matched nothing, so a closed group's caret never
+   * turned and the disclosure read as stateless. `LegalDocumentPage` states the
+   * same rule for its prose, and `DownloadPage` keeps its `.lt-dl-caret` in an
+   * `is:global` block for the same reason. `.lt-docs-caret` is used by this tree
+   * and by the sidebar's disclosure only, so the class name is the namespace.
+   */
   .lt-docs-caret {
     transition: transform 0.2s ease;
   }
-  .lt-docs-group details:not([open]) > summary .lt-docs-caret,
+
   details:not([open]) > summary .lt-docs-caret {
     transform: rotate(-90deg);
   }
-  .lt-docs-treelink[aria-current="page"] {
-    background: color-mix(in srgb, var(--lt-color-primary) 10%, transparent);
+
+  @media (prefers-reduced-motion: reduce) {
+    .lt-docs-caret {
+      transition: none;
+    }
   }
 </style>
