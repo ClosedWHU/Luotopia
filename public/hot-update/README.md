@@ -102,6 +102,8 @@ function parse(rawJson) {
 | `model-metadata-catalog`（AI 模型元数据目录） | **自动**：[.github/workflows/sync-model-metadata.yml](../../.github/workflows/sync-model-metadata.yml) 每天用 [tools/sync-model-metadata.mjs](../../tools/sync-model-metadata.mjs) 从 models.dev、OpenRouter 与 Vercel AI Gateway 重建，只有模型数据真的变了才会重写 `.json.gz` 并递增资产版本，安静日零提交。App 仓库的包内快照（`tool/model_metadata_sync.dart`）不再自己抓源，而是直接下载这里发布的文件 |
 | `campus-news-sources`（校园新闻订阅目录） | **手动**：App 仓库 `tool/news/import_catalog.py` 重建目录后，把 `app/assets/data/campus_news_sources.json.gz` 拷贝到本目录（文件名换成 kebab-case），再走下面的发布步骤。源站改版导致选择器失效时不必等发版 |
 | `water-electric-fee-room-directory`（水电费房间目录） | **手动**：同上，拷贝 `app/assets/data/water_electric_fee_room_directory.json.gz`。新宿舍交付、房间编号变化时更新 |
+| `campus-field-maps`（校园接口字段映射表） | **仅事故时发布**：平时不存在这个文件，客户端用编译进包的候选字段名。某个校园/厂商接口改了字段名时，按 `{"schemaVersion":1,"features":{"<feature>":{"<model>.<field>":["新名","旧名"]}}}` 写一份 `.json.gz` 放到本目录，走下面的发布步骤，几分钟内覆盖全部已安装 App。路径名与 Dart 侧 `fields.keys(...)` 的第一个参数一致（如 `waterElectricFee` 的 `dayUsage.startReading`）。只能改字段名候选，改不了结构；结构性变化要写解析脚本 |
+| `water-control-endpoints`（水控接口配方） | **仅事故时发布**：平时不存在，客户端用编译进包的 `WaterControlEndpoints.defaults`。水控接口改了路径、加密载荷的键、查询参数或取 ticket 的交易码时发布，格式见 `water_control_endpoints.dart` 的 `parseWaterControlEndpoints`。配方只能描述请求形状：host 钉死在客户端，AES 密钥与算法在 `WaterControlCrypto` 里，配方没有任何字段能碰到它们；路径必须是以 `/` 开头的相对路径，占位符只认 `$token` 与 `$classNo`，不认识的写法整份丢弃并回落默认值 |
 
 手动资产的发布步骤：
 
