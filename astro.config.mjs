@@ -241,6 +241,58 @@ function mirrorStubHtml(urlPath) {
 }
 
 /** @returns {import('astro').AstroIntegration} */
+function preloadSharedChunks() {
+  /*
+   * Five chunks are statically imported by (almost) every page script but named
+   * by no HTML: page-lifecycle, prefetch, preload-helper, defineProperty and
+   * icon-svg. The browser discovers them only after fetching and parsing the
+   * entry chunk, which costs a round trip on every page before `onPageSetup`
+   * can run. `rel=modulepreload` puts them in the first parallel wave; the tags
+   * are written here, post-build, because their hashed names do not exist until
+   * then. Pages without module scripts (the redirect stubs) are skipped.
+   */
+  const PREFIXES = ['page-lifecycle.', 'prefetch.', 'preload-helper.', 'defineProperty.', 'icon-svg.'];
+  return {
+    name: 'luotopia-preload-shared-chunks',
+    hooks: {
+      'astro:build:done': ({ dir, logger }) => {
+        const root = fileURLToPath(dir);
+        const astroDir = path.join(root, '_astro');
+        if (!existsSync(astroDir)) return;
+        const chunks = readdirSync(astroDir).filter(
+          (f) => f.endsWith('.js') && PREFIXES.some((p) => f.startsWith(p)),
+        );
+        if (chunks.length === 0) return;
+        let pages = 0;
+        let added = 0;
+        const walk = (current) => {
+          for (const entry of readdirSync(current, { withFileTypes: true })) {
+            const full = path.join(current, entry.name);
+            if (entry.isDirectory()) {
+              walk(full);
+              continue;
+            }
+            if (!entry.name.endsWith('.html')) continue;
+            let html = readFileSync(full, 'utf8');
+            if (!html.includes('type="module"')) continue;
+            const missing = chunks.filter((c) => !html.includes(`/_astro/${c}`));
+            if (missing.length === 0) continue;
+            const at = html.indexOf('</head>');
+            if (at === -1) continue;
+            const tags = missing.map((c) => `<link rel="modulepreload" href="/_astro/${c}">`).join('');
+            writeFileSync(full, html.slice(0, at) + tags + html.slice(at));
+            pages += 1;
+            added += missing.length;
+          }
+        };
+        walk(root);
+        logger.info(`[preload-shared-chunks] ${added} modulepreload hint(s) across ${pages} page(s)`);
+      },
+    },
+  };
+}
+
+/** @returns {import('astro').AstroIntegration} */
 function assetsOnlyMirror() {
   return {
     name: 'luotopia-assets-only-mirror',
@@ -294,7 +346,7 @@ const PUBLISHED = JSON.parse(
 export default defineConfig({
   site: 'https://whu.sb',
   redirects: siteRedirects,
-  integrations: [assetsOnlyMirror()],
+  integrations: [preloadSharedChunks(), assetsOnlyMirror()],
   /*
    * Site-wide markdown processor, configured for the docs collection (the
    * only markdown this project renders — legal pages are .md.ts endpoints

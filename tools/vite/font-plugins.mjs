@@ -174,10 +174,26 @@ export function pruneFontSubsets() {
         return '';
       });
 
-      if (dropped > 0) {
-        this.info?.(`[prune-font-subsets] dropped ${dropped} unused @font-face subsets from ${path.basename(file)}`);
+      /*
+       * Drop the `.woff` half of every surviving `src:`. woff2 is Chrome 36 /
+       * Safari 10 / Firefox 39 / Edge 14 and this site's floor is 66 / 12 / 68 /
+       * 88, so the fallback is unreachable by anything that can run the bundle
+       * at all — yet it doubled the emitted font weight (518 files, ~13.8 MB, a
+       * fifth of dist, mirrored to two more hosts) and put 36 KB of dead `src:`
+       * text in the render-blocking sheet. Blocks whose only source is woff are
+       * left alone rather than emptied.
+       */
+      let stripped = 0;
+      const dewoffed = pruned.replace(/@font-face\s*\{[^}]*\}/g, (block) => {
+        if (!block.includes('.woff2') || !/format\(["']?woff["']?\)/.test(block)) return block;
+        stripped += (block.match(/url\([^)]*\.woff\)\s*format\(["']?woff["']?\)/g) || []).length;
+        return block.replace(/,\s*url\([^)]*\.woff\)\s*format\(["']?woff["']?\)/g, '');
+      });
+
+      if (dropped > 0 || stripped > 0) {
+        this.info?.(`[prune-font-subsets] ${path.basename(file)}: dropped ${dropped} unused subsets, ${stripped} woff fallbacks`);
       }
-      return { code: pruned, map: null };
+      return { code: dewoffed, map: null };
     },
   };
 }
