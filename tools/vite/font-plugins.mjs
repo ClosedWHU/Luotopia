@@ -78,16 +78,43 @@ export function misansWeights() {
  * A character the scan misses degrades to the next face in `--font-sans`
  * (PingFang SC / Microsoft YaHei), so the failure mode is a substituted glyph,
  * not a missing one. Runtime-supplied copy — UptimeRobot monitor names on
- * /status — is the known case, and is exactly why the stack keeps those.
+ * /status, a release note whose per-locale translation is missing and falls
+ * back to the hand-written Chinese — is the known case, and is exactly why the
+ * stack keeps those system faces.
+ *
+ * The charset is per family, not per site: the sheet is shared by all ten
+ * locales, but each CJK family is named by exactly one locale's `--font-sans`
+ * (see FONT_FAMILIES), so a subset covering a character that only, say, the ja
+ * dictionary contains is unreachable dead weight in the MiSans/Noto TC/Noto KR
+ * rules — and vice versa. Pruning against the union of all locales' text (the
+ * previous behaviour) kept every one of those; pruning per family drops them
+ * while leaving each family complete for the pages that can actually select it.
  */
 
-/** CSS modules whose @font-face rules are subset candidates. */
-const SUBSETTED_FONT_CSS = [
-  /\/misans\/lib\/Normal\/[^/]+\.css$/,
-  /\/@fontsource-variable\/plus-jakarta-sans\/[^/]+\.css$/,
-  /\/@fontsource\/noto-sans-tc\/[^/]+\.css$/,
-  /\/@fontsource\/noto-sans-jp\/[^/]+\.css$/,
-  /\/@fontsource\/noto-sans-kr\/[^/]+\.css$/,
+/**
+ * The subsetted families, and the locales whose `--font-sans` can actually
+ * reach each one. global.css's `html[lang]` blocks are the source of truth for
+ * the stacks: MiSans is Simplified-oriented with no `locl`, so only zh-Hans
+ * names it; each Noto regional face is named by exactly one locale; Plus
+ * Jakarta Sans sits first in all ten.
+ *
+ * That mapping is what makes per-family pruning possible. The sheet is shared,
+ * so a subset whose characters no *reachable* locale renders is dead weight on
+ * every page view — MiSans rules for glyphs that exist only in the ja
+ * dictionary, Noto TC rules for Simplified-only characters, and so on. Pruning
+ * against the whole-site charset (what this used to do) cannot see that; it
+ * keeps every subset any locale's text mentions, for every family.
+ *
+ * `docs` marks the families rendered on /docs, which is zh-Hans-only: the 160
+ * markdown articles are a large charset source the other three CJK faces can
+ * never be asked for.
+ */
+const FONT_FAMILIES = [
+  { name: 'misans', css: /\/misans\/lib\/Normal\/[^/]+\.css$/, locales: ['zh-Hans'], docs: true },
+  { name: 'pjs', css: /\/@fontsource-variable\/plus-jakarta-sans\/[^/]+\.css$/, locales: 'all', docs: true },
+  { name: 'noto-tc', css: /\/@fontsource\/noto-sans-tc\/[^/]+\.css$/, locales: ['zh-Hant'], docs: false },
+  { name: 'noto-jp', css: /\/@fontsource\/noto-sans-jp\/[^/]+\.css$/, locales: ['ja'], docs: false },
+  { name: 'noto-kr', css: /\/@fontsource\/noto-sans-kr\/[^/]+\.css$/, locales: ['ko'], docs: false },
 ];
 
 /** Text under `src/` that can contribute rendered characters. */
@@ -105,9 +132,28 @@ function parseUnicodeRange(value) {
   return ranges;
 }
 
-function collectSiteCharset(root) {
+/**
+ * Scan source text into a codepoint set, in one of four slices:
+ *
+ *   `shell`  everything under src/ except the dictionaries and the docs
+ *            collection — i.e. the chrome and literals every locale's pages
+ *            render. Deliberately includes `i18n/locales.ts`: the switcher's
+ *            endonyms (简体中文, 日本語, 한국어…) are CJK rendered on *every*
+ *            page in *every* locale, so every family needs them. Excluding the
+ *            whole i18n directory once dropped exactly those glyphs and the
+ *            navbar fell back to a system face for four characters.
+ *   `docs`   only the docs collection, which renders solely under zh-Hans.
+ *   `dict`   one locale's dictionary.
+ *   `all`    the union, i.e. the old whole-site charset.
+ *
+ * Deriving `shell` by *subtracting* the dictionaries from `all` would be wrong:
+ * a character that appears in both a template and a dictionary has to survive
+ * the template half, so the slices are scanned separately.
+ */
+function collectCharset(root, mode, code) {
   const charset = new Set();
-  const stack = [path.join(root, 'src')];
+  const srcRoot = path.join(root, 'src');
+  const stack = [srcRoot];
   while (stack.length > 0) {
     const dir = stack.pop();
     let entries;
@@ -120,12 +166,22 @@ function collectSiteCharset(root) {
       const full = path.join(dir, entry.name);
       if (entry.isDirectory()) {
         stack.push(full);
-      } else if (CHARSET_SOURCES.test(entry.name)) {
-        try {
-          for (const ch of readFileSync(full, 'utf8')) charset.add(ch.codePointAt(0));
-        } catch {
-          /* unreadable file — over-inclusion elsewhere still covers us */
-        }
+        continue;
+      }
+      if (!CHARSET_SOURCES.test(entry.name)) continue;
+      const rel = path.relative(srcRoot, full).split(path.sep).join('/');
+      const isDict = /^i18n\/[^/]+\.json$/.test(rel);
+      const isDocs = rel.startsWith('content/docs/');
+      const take =
+        mode === 'all' ? true
+        : mode === 'docs' ? isDocs
+        : mode === 'dict' ? rel === `i18n/${code}.json`
+        : !isDict && !isDocs;
+      if (!take) continue;
+      try {
+        for (const ch of readFileSync(full, 'utf8')) charset.add(ch.codePointAt(0));
+      } catch {
+        /* unreadable file — over-inclusion elsewhere still covers us */
       }
     }
   }
@@ -135,7 +191,36 @@ function collectSiteCharset(root) {
 /** @returns {import('vite').Plugin} */
 export function pruneFontSubsets() {
   let root = process.cwd();
-  let charset = null;
+  let scanned = null;
+
+  /*
+   * The charset a family is pruned against: every character a *template* can
+   * render on any page (shared chrome, hardcoded literals, the docs shell),
+   * plus the dictionaries of the locales whose `--font-sans` names the family,
+   * plus the docs collection for the two faces /docs can render. Plus Jakarta
+   * Sans takes the whole-site set — it is first in every stack, so anything
+   * any page renders in Latin is its business.
+   */
+  function familyCharset(family) {
+    scanned ??= {
+      all: collectCharset(root, 'all'),
+      shell: collectCharset(root, 'shell'),
+      docs: collectCharset(root, 'docs'),
+      dicts: new Map(),
+    };
+    if (family.locales === 'all') return scanned.all;
+    const set = new Set(scanned.shell);
+    if (family.docs) for (const cp of scanned.docs) set.add(cp);
+    for (const code of family.locales) {
+      let dict = scanned.dicts.get(code);
+      if (!dict) {
+        dict = collectCharset(root, 'dict', code);
+        scanned.dicts.set(code, dict);
+      }
+      for (const cp of dict) set.add(cp);
+    }
+    return set;
+  }
 
   return {
     name: 'luotopia-prune-font-subsets',
@@ -146,10 +231,11 @@ export function pruneFontSubsets() {
     },
     transform(code, id) {
       const file = id.split('?')[0].replace(/\\/g, '/');
-      if (!SUBSETTED_FONT_CSS.some((pattern) => pattern.test(file))) return null;
+      const family = FONT_FAMILIES.find((f) => f.css.test(file));
+      if (!family) return null;
       if (!code.includes('@font-face')) return null;
 
-      charset ??= collectSiteCharset(root);
+      const charset = familyCharset(family);
       /*
        * Fail open. An empty or tiny set means the scan found nothing — wrong
        * root, moved sources — and pruning against it would strip the whole
@@ -191,7 +277,11 @@ export function pruneFontSubsets() {
       });
 
       if (dropped > 0 || stripped > 0) {
-        this.info?.(`[prune-font-subsets] ${path.basename(file)}: dropped ${dropped} unused subsets, ${stripped} woff fallbacks`);
+        this.info?.(
+          `[prune-font-subsets] ${family.name}/${path.basename(file)}: dropped ${dropped} subsets unreachable by ${
+            family.locales === 'all' ? 'any locale' : family.locales.join('+')
+          }, ${stripped} woff fallbacks`,
+        );
       }
       return { code: dewoffed, map: null };
     },

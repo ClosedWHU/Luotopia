@@ -82,12 +82,18 @@ Medium 380 and the MD3 type scale loses the body/label distinction it is built o
 The plugin rewrites each face's descriptor to a standard weight at import time;
 glyph data and unicode-range subsets are untouched.
 
-**`pruneFontSubsets()`** — MiSans is cut into 56 `unicode-range` subsets *per
-weight*, by character cluster; 172 `@font-face` rules made up 81% of a 293 KB
-shared stylesheet, while the site's twelve pages use 1038 distinct codepoints
-between them. The plugin collects the charset by scanning the **source text** under
-`src/` and drops every subset covering none of it, so the woff2 files behind those
-rules are never emitted either.
+**`pruneFontSubsets()`** — the five families are cut into `unicode-range` subsets
+by character cluster (MiSans ships 56 per weight), and of the four thousand-odd
+`@font-face` rules upstream the site can use a few hundred. The plugin collects
+the charset by scanning the **source text** under `src/` and drops every subset
+covering none of it, so the woff2 files behind those rules are never emitted
+either. The charset is **per family**: what templates and config can render,
+plus the dictionaries of the locales whose `--font-sans` names that family (Plus
+Jakarta Sans sits first in all ten, so it takes the union) — in a stylesheet
+shared by every locale, anything less would leave each locale parsing subsets
+no page of it can select. It also strips the `.woff` half of every surviving
+`src:`: woff2's support floor is far below this site's kernel floor, and those
+518 files were reachable by nothing.
 
 It runs in `transform`, not `generateBundle`, because Vite hashes the CSS *after*
 transform: pruning later would ship post-prune bytes under a pre-prune, `immutable`,
@@ -433,29 +439,38 @@ production renders `legal.privacy.s12.heading`.
 
 ### Two things that bite
 
-**The font pruning counts comments, and ten languages plus regional fonts mostly defeat it.**
+**The font pruning counts comments; the ten-locale pressure is absorbed by pruning per family.**
 `pruneFontSubsets()` scans the source *text* under `src/`, data and comments alike.
-Covering all ten locales means the charset has to include traditional-only hanzi,
-kana, hangul, Cyrillic and Vietnamese Latin Extended Additional. zh-Hant/ja/ko now
-use Noto Sans TC/JP/KR (MiSans is Simplified-oriented and lacks `locl`, so unified
-Han characters render with Simplified glyph shapes). Measured on the built stylesheet:
-629 `@font-face` rules, 534 woff2 files (MiSans 110 + Noto Sans TC 184 + JP 226 +
-KR 124); the whole shared file goes 133 KB → 727 KB raw, 38 → 246 KB gzip, 19.0 →
-90 KB brotli. Font subsets are 86% of the shared CSS by raw bytes and essentially
-all of the growth. The number that transfers is the brotli delta, **+71 KB** on a
-render-blocking file; the +594 KB raw mostly costs parse time, and it is almost
-entirely `unicode-range` hex lists, which is why it compresses about 6.6:1.
+But the stylesheet is shared by all ten locales, so the prune predicate is not
+"the site charset" — it is **family × the locales that can select it**: MiSans is
+named only by zh-Hans's `--font-sans`, each Noto regional face by exactly one
+locale (MiSans is Simplified-oriented and lacks `locl`, so unified Han characters
+would render with Simplified glyph shapes on the others), and Plus Jakarta Sans
+sits first in all ten. Each family's charset is therefore what templates and
+config can render — including `i18n/locales.ts`, whose endonyms the switcher puts
+on every page in every locale — plus that family's locales' dictionaries, plus
+the 160 Chinese docs articles for the two faces /docs can render. A subset whose
+characters live only in some other locale's dictionary is unreachable dead weight
+and goes. Measured on the built stylesheet: 411 `@font-face` rules and 411 woff2
+files (MiSans 62 + Noto Sans TC 86 + JP 154 + KR 106 + PJS 3); the shared file is
+450 KB raw, 146 KB gzip, 53 KB brotli, of which the subsets are 86% by raw bytes
+and the `unicode-range` hex lists 71%.
 
 Three things worth knowing before trying:
 
 - The subsets are **lazy**. `unicode-range` means a browser only downloads the woff2
   behind a rule when a rendered character falls in it, so a Spanish visitor never
   fetches the hangul faces. What grew is the CSS, not the font traffic
-- MiSans is only used on zh-Hans pages; zh-Hant/ja/ko use Noto Sans TC/JP/KR
-  respectively. `--font-sans` puts Plus Jakarta Sans ahead of them, so Latin copy
-  never touches the CJK fonts. Per-locale loading is done, but the CSS is shared,
-  so all pages parse all `@font-face` rules (the font files themselves are lazy,
-  downloaded only when used)
+- The stylesheet is still **one shared file**. Splitting it per locale would save
+  another ~30 KB brotli (a Latin page would parse ~11 KB), but Astro bundles CSS
+  by import graph, not by render tree, so a conditionally rendered component
+  cannot move a family into a locale-only sheet; the only lever is per-route
+  imports across 120 route shells, costing a re-download on every locale switch.
+  Not worth it today
+- Copy that only exists at runtime — UptimeRobot monitor names on /status, a
+  release note falling back to the hand-written Chinese when its translation is
+  missing — is in no charset and renders in the system face, exactly as before
+  the prune existed; that is what the PingFang/YaHei entries in `--font-sans` are for
 - Comments in the i18n modules are English, and where they would otherwise quote
   Chinese source text they paraphrase instead. A comment quoting all ten endonyms
   measured +6 surviving subsets and +6,893 raw bytes on its own

@@ -3,6 +3,12 @@
    * MiSans supplies CJK; Plus Jakarta Sans supplies Latin and sits ahead of it
    * in --font-sans. Both are self-hosted and imported as modules so Vite emits
    * hashed font assets and the MiSans weight-remap plugin can run.
+   *
+   * All of them land in the one shared sheet no matter what: Astro bundles CSS
+   * by import graph, not by render tree, so a per-locale conditional component
+   * cannot move a family into a locale-only stylesheet. The lever that works
+   * inside a shared sheet is `pruneFontSubsets` knowing which locales can reach
+   * each family — see tools/vite/font-plugins.mjs.
    */
   import { ClientRouter } from "astro:transitions";
   import "@fontsource-variable/plus-jakarta-sans/wght.css";

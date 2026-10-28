@@ -84,10 +84,13 @@ tools/            # 构建脚本（热更新清单生成、量表清单生成、
 就没了。插件在 import 时把每个 face 的 descriptor 改写成标准字重，字形数据和
 unicode-range 分片都不动。
 
-**`pruneFontSubsets()`** —— MiSans 按字符簇切成 56 个 `unicode-range` 分片（每个
-字重一份），172 条 `@font-face` 规则占了 293 KB 共享样式表的 81%，而全站十二个页面
-一共只用到 1038 个字形。插件扫 `src/**` 的**源码文本**收集字符集，把覆盖不到任何
-一个字符的分片连同规则一起删掉，对应的 woff2 也就根本不会产出。
+**`pruneFontSubsets()`** —— 五个字族按字符簇切成 `unicode-range` 分片（MiSans 上游 56
+个/字重），四千余条 `@font-face` 规则里站点用得到的只有几百条。插件扫 `src/**` 的
+**源码文本**收集字符集，把覆盖不到任何一个字符的分片连同规则一起删掉，对应的 woff2
+也就根本不会产出。字符集**按字族**取：模板与配置能渲染的字符，加上该字族在
+`--font-sans` 里被点名的那些语种的词典（Plus Jakarta Sans 排第一、十种语种都用，取
+全集）——共享样式表下，裁不掉的就是每个语种都要解析的死分片。顺带把 `src:` 里的
+`.woff` 兜底删掉：woff2 的支持下限远低于本站内核下限，那 518 个文件谁也用不到。
 
 必须在 `transform` 阶段做而不是 `generateBundle`：Vite 是在 transform **之后**算 CSS
 哈希的，晚剪会让剪完的字节顶着剪前的文件名发出，而那个名字是 `immutable`、缓存一年。
@@ -383,24 +386,27 @@ certutil -hashfile dist\legal\terms.md SHA256
 
 ### 两个会咬人的地方
 
-**字体裁剪把注释也算进去，而十种语言加上区域字体基本上取消了这项优化。** `pruneFontSubsets()`
-扫的是 `src/**` 的源码文本，数据和注释一视同仁。全站十种语言意味着字符集必须覆盖繁体
-专有字、假名、谚文、西里尔与越南语拉丁扩展。zh-Hant/ja/ko 现在用 Noto Sans TC/JP/KR
-（MiSans 是简体导向，没有 `locl`，简繁同码位的字会渲染成简体字形）。构建产物实测：
-629 条 `@font-face` 规则、534 个 woff2 文件（MiSans 110 + Noto Sans TC 184 + JP 226 +
-KR 124）；整份共享样式表 133 KB → 727 KB raw、38 → 246 KB gzip、19.0 → 90 KB brotli，
-其中字体分片占 raw 的 86%，也几乎是全部增量。真正传输的增量是 brotli 那 **+71 KB**；
-raw 的 +594 KB 主要是解析成本，而它几乎全是 `unicode-range` 的十六进制列表，所以压缩率
-约 6.6:1。
+**字体裁剪把注释也算进去；十种语言的压力由"按字族裁剪"消化。** `pruneFontSubsets()`
+扫的是 `src/**` 的源码文本，数据和注释一视同仁。但共享样式表意味着每个语种都要解析
+全部 `@font-face`，所以裁剪的谓词不是"全站字符集"，而是**字族 × 能用它的语种**：
+`--font-sans` 里 MiSans 只被 zh-Hans 点名、Noto Sans TC/JP/KR 各只被一个语种点名
+（MiSans 是简体导向，没有 `locl`，简繁同码位的字会渲染成简体字形），于是每个字族的
+字符集 = 模板与配置能渲染的字符（含 `i18n/locales.ts` 的本地名——切换器在每种语种的
+每页都渲染它们）+ 该语种的词典 +（仅 MiSans 与 PJS）`src/content/docs` 的 160 篇中文
+markdown。只出现在别的语种词典里的字，对这个字族就是不可达分片，直接裁掉。构建产物
+实测：411 条 `@font-face` 规则、411 个 woff2 文件（MiSans 62 + Noto Sans TC 86 + JP 154
++ KR 106 + PJS 3）；共享样式表 450 KB raw、146 KB gzip、53 KB brotli，其中字体分片占
+raw 的 86%、`unicode-range` 列表占 71%。
 
 几条相关的约定：
 
 - 分片是**惰性**的。`unicode-range` 决定浏览器只在页面真的渲染到某个字符时才去下对应
   的 woff2，所以西班牙语访客不会下载谚文分片。涨的是 CSS 体积，不是字体流量
-- MiSans 只在 zh-Hans 页面用到；zh-Hant/ja/ko 分别用 Noto Sans TC/JP/KR。`--font-sans`
-  里 Plus Jakarta Sans 排在它们前面，拉丁文案根本走不到 CJK 字体。按语种加载已经做了，
-  但 CSS 是共享的，所以所有页面都会解析全部 `@font-face` 规则（字体文件本身是惰性的，
-  只在用到时才下载）
+- 样式表仍然**全站共享一份**。按语种拆表能再省约 30 KB brotli（拉丁语种降到 ~11 KB），
+  但 Astro 按 import 图打包 CSS、不按渲染树，条件渲染的组件救不了它；唯一的拆法是让
+  120 个路由壳各自 import，代价是每次切语种重下一份表。当前不做
+- 运行时才出现的中文（/status 的监控名、缺译文时回退的手写 release notes）不在任何
+  字符集里，落到系统字体——与裁剪前相同，`--font-sans` 保留 PingFang/雅黑就是为此
 - i18n 相关模块的注释一律英文；要引用中文原文时改成转述，别照抄。一条引用了十种语言
   本地名的注释，实测要多留 6 个分片、6,893 字节
 
