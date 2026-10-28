@@ -16,9 +16,11 @@
  *   files exist under those names and no other.
  * - **Format names and dimensions** (`SVG`, `PNG`, `1024×1024`, `24px`, `8mm`,
  *   `2× / 3×`, `1/4`). Standards and measurements, not sentences.
- * - **`roleEn`** on each mark. The card already shows a fixed Chinese/English
- *   label pair by design; that pairing is the content, so both halves are the
- *   same in every locale.
+ * - **`roleEn`** on each mark. The card shows a bilingual label pair — the
+ *   translated role over the English original — because the pairing is the
+ *   content on a brand page. The English half is suppressed in the English
+ *   locale, where the translated role already is it and the pair would print
+ *   the same sentence twice.
  * - **`Luotopia Blue` and `ClosedWHU Team`** — proper nouns, same reasoning
  *   `downloads.ts` gives for keeping "Android" and "Windows" out of the
  *   dictionaries.
@@ -195,7 +197,17 @@ const i18n = {
                   <h3 class="text-title-medium text-on-surface">
                     {logo.name} · {logo.role}
                   </h3>
-                  <p class="text-body-small text-outline">{logo.roleEn}</p>
+                  {/*
+                    The English line is the second half of a fixed bilingual
+                    pair — on every locale *except* English, where the
+                    translated role already is the English one and the pair
+                    would print "Primary mark" twice, back to back. `lang` so a
+                    non-English voice reads it as English rather than as the
+                    page's language.
+                  */}
+                  {locale !== "en" && (
+                    <p class="text-body-small text-outline" lang="en">{logo.roleEn}</p>
+                  )}
                 </div>
               </div>
 

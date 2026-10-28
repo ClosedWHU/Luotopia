@@ -13,7 +13,14 @@
 /* ── prose ─────────────────────────────────────────────────────────────── */
 
 .lt-docs-prose {
-  font-size: var(--lt-text-body-medium, 0.9375rem);
+  /*
+   * 15px, one step above the site's body-medium (14px), because these are
+   * long-form articles read in a narrow column. It used to be spelled
+   * `var(--lt-text-body-medium, 0.9375rem)` — a token that does not exist (the
+   * real one is `--text-body-medium`, 14px), so the fallback was what rendered
+   * and the name promised the opposite. Literal, with the intent stated.
+   */
+  font-size: 0.9375rem;
   line-height: 1.75;
   color: var(--lt-color-on-surface-variant);
 }

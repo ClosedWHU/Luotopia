@@ -13,6 +13,7 @@
   "nav.brand": "Marca",
   "nav.legal": "Legal",
   "nav.menu": "Menú",
+  "nav.landmark": "Navegación del sitio",
   "nav.themeToggle.aria": "Activar o desactivar el modo oscuro",
   "nav.themeToggle.label": "Alternar entre el modo oscuro y el claro",
 
@@ -37,7 +38,7 @@
 
   "home.title": "Inicio",
   "home.hero.srPrefix": "",
-  "home.hero.words": ["Brillante", "Abierto", "Común", "Eficiente", "Fácil"],
+  "home.hero.words": ["Inteligente", "Abierto", "Compartido", "Eficiente", "Fácil"],
   "home.hero.tail": "Luotopia",
   "home.hero.subtitleLine1": "Los servicios del campus en un solo lugar, con un ecosistema abierto.",
   "home.hero.subtitleLine2": "La plataforma digital integral del campus de la Universidad de Wuhan.",

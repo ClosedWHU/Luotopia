@@ -30,11 +30,13 @@ const MAIN_DOMAIN = "www.whu.sb";
 /**
  * Records an explicit choice, so detection stops overriding it.
  *
- * Only the switcher's `?lang=` link ever writes this. Deriving it from "the path
- * had a locale prefix" would be wrong in the direction that matters: on `/en/`,
- * the nav link to an untranslated page points at the Chinese original, and
- * following it would silently flip the visitor's recorded preference to `zh-Hans`
- * and bounce them back to Chinese on every later visit.
+ * Written client-side by the switcher's click handler (a capture-phase delegate
+ * that runs before navigation), and by the `?lang=` branch below for app deep
+ * links and no-JS callers. Deriving it from "the path had a locale prefix"
+ * would be wrong in the direction that matters: on `/en/`, the nav link to an
+ * untranslated page points at the Chinese original, and following it would
+ * silently flip the visitor's recorded preference to `zh-Hans` and bounce them
+ * back to Chinese on every later visit.
  */
 const LANG_COOKIE = "luotopia_lang";
 const LANG_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
@@ -55,8 +57,9 @@ const NON_PAGE_PREFIXES = [
   "/.well-known/",
   "/fonts/",
   "/img/",
-  // The documentation site (Starlight subproject under /docs) is zh-Hans
-  // only; locale negotiation must never prefix it (/en/docs does not exist).
+  // The documentation site is rendered by this site's own shell under /docs
+  // (no docs framework) and is zh-Hans only; locale negotiation must never
+  // prefix it (/en/docs does not exist).
   "/docs",
 ];
 

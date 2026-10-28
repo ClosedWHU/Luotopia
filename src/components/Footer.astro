@@ -39,7 +39,9 @@ const nav: NavItem[] = [
  *
  * The copyright line below stays English in every locale on purpose:
  * `store-listings/README.md` requires the attribution to be identical in all of
- * them.
+ * them. It carries `lang="en"` for the same reason it stays English — a Mandarin
+ * voice should not attempt "Made with ❤ by ClosedWHU Team" — and the build stamp
+ * names its zone (UTC+8) because nothing on the line says where the clock is.
  */
 const resources: ResourceItem[] = [
   { href: routeUrl(locale, "status"), label: t("footer.resources.status") },
@@ -119,14 +121,14 @@ const resources: ResourceItem[] = [
         (`hidden sm:inline`). The wide layout is byte-identical to before: at
         `sm` every span is inline again and the separators come back.
       -->
-      <p class="space-y-1 sm:space-y-0">
+      <p class="space-y-1 sm:space-y-0" lang="en">
         <span class="block sm:inline">&copy; {year} Made with ❤ by ClosedWHU Team</span>
         <span class="hidden mx-1.5 sm:inline" aria-hidden="true">·</span>
         <span class="block sm:inline">Code <a href="https://github.com/ClosedWHU/Luotopia/blob/main/LICENSE" class="underline hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">AGPL-3.0-or-later</a></span>
         <span class="hidden mx-1.5 sm:inline" aria-hidden="true">·</span>
         <span class="block sm:inline">Content <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="underline hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a></span>
         <span class="hidden mx-1.5 sm:inline" aria-hidden="true">·</span>
-        <span class="block sm:inline"><a href={build.commitUrl} class="underline hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">Commit {build.shortHash}</a> built at {build.builtAt}</span>
+        <span class="block sm:inline"><a href={build.commitUrl} class="underline hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">Commit {build.shortHash}</a> built at {build.builtAt} UTC+8</span>
       </p>
     </div>
   </div>

@@ -62,7 +62,13 @@ const i18n = {
         <figure class="lt-shot overflow-hidden rounded-nested">
           <Picture
             src={slide.src}
-            alt={slide.label}
+            /*
+             * Empty alt on purpose: the `<figcaption>` below names the figure,
+             * and a figure's caption is its accessible name — repeating the same
+             * string in `alt` made a screen reader traverse each slide as
+             * "Timetable, image" then "Timetable", seven times.
+             */
+            alt=""
             formats={["avif", "webp"]}
             widths={[360, 720]}
             /*
@@ -104,10 +110,10 @@ const i18n = {
   </div>
 
   <button id="carousel-prev" class="lt-arrow absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full cursor-pointer" aria-label={t("carousel.prev")}>
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><polyline points="15 18 9 12 15 6"/></svg>
   </button>
   <button id="carousel-next" class="lt-arrow absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full cursor-pointer" aria-label={t("carousel.next")}>
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>
   </button>
 
   <!--

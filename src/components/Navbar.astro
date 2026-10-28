@@ -101,7 +101,7 @@ const persistName = `lt-navbar-${locale}`;
 <!-- Geometry (top/left/right insets, radius, glass) lives entirely in the
      scoped `.lt-navbar` rule below; no positioning utilities here so markup
      and CSS can never disagree about where the bar sits. -->
-<nav id="lt-navbar" class="lt-navbar fixed z-50" transition:persist={persistName}>
+<nav id="lt-navbar" class="lt-navbar fixed z-50" aria-label={t("nav.landmark")} transition:persist={persistName}>
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
     <a href={routeUrl(locale, "home")} class="flex items-center gap-2 text-title-large font-bold text-on-surface no-underline state-layer rounded-control px-2 py-1">
           <!-- Decorative: the wordmark text beside it is the link's accessible
@@ -166,13 +166,13 @@ const persistName = `lt-navbar-${locale}`;
       </details>
 
       <button id="theme-toggle" class="state-layer rounded-control p-2 ml-1 text-on-surface-variant transition-colors cursor-pointer" aria-label={t("nav.themeToggle.aria")} aria-pressed="false">
-        <svg class="dark:hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        <svg class="hidden dark:block" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42"/></svg>
+        <svg class="dark:hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="hidden dark:block" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42"/></svg>
       </button>
     </div>
 
           <button id="mobile-menu-btn" class="lt-burger lg:hidden state-layer rounded-control p-2 text-on-surface-variant cursor-pointer" aria-label={t("nav.menu")} aria-expanded="false" aria-controls="mobile-menu">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false">
         <path class="lt-burger-l" d="M3 6h18" />
         <path class="lt-burger-m" d="M3 12h18" />
         <path class="lt-burger-b" d="M3 18h18" />
@@ -238,9 +238,9 @@ const persistName = `lt-navbar-${locale}`;
       }
 
       <!--
-        Sits at position 8 in the sheet, which matters: the entrance stagger is
-        defined per `nth-child(1)`…`nth-child(7)` on `.lt-navlink`, so this block
-        and the theme button below it get no delay and cannot shift the seven
+        Sits at position 9 in the sheet, which matters: the entrance stagger is
+        defined per `nth-child(1)`…`nth-child(8)` on `.lt-navlink`, so this block
+        and the theme button below it get no delay and cannot shift the eight
         links' timing. A flat grid rather than the desktop's `<details>` — the
         sheet is already a vertical list, and nesting a disclosure inside it would
         put a collapsible region inside a collapsible region.
@@ -623,7 +623,7 @@ const persistName = `lt-navbar-${locale}`;
   .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(5) { --lt-nav-stagger: 0.23s; }
   .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(6) { --lt-nav-stagger: 0.27s; }
   .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(7) { --lt-nav-stagger: 0.31s; }
-.lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(8) { --lt-nav-stagger: 0.35s; }
+  .lt-mobile-menu[data-open="true"] .lt-navlink:nth-child(8) { --lt-nav-stagger: 0.35s; }
 
   /*
    * Burger -> X. Each bar rotates about its own midpoint and then slides to the
