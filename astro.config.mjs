@@ -307,6 +307,17 @@ export default defineConfig({
    * into unified() is what re-enables the plugin pipeline.
    */
   markdown: {
+    /*
+     * Astro's built-in highlighter runs *before* user rehype plugins, so with
+     * the default (`syntaxHighlight: 'shiki'`) a ```mermaid fence reached
+     * `rehypePreMermaid` already rewritten into `<pre class="astro-code">` with
+     * Shiki spans — the plugin's guard could never match, the one diagram in
+     * the docs rendered as a code block, and the ~4 MB of lazy mermaid chunks
+     * were deployed for a code path that never fired. Turning the built-in off
+     * hands every fence to the explicit `rehypeShiki` below (which still
+     * highlights them) and lets the mermaid fence through untouched.
+     */
+    syntaxHighlight: false,
     processor: unified({
       remarkPlugins: [remarkAlert],
       rehypePlugins: [
