@@ -57,7 +57,10 @@ const tests = {
   'datarepo-parser': { input: { body: '<p>学号：</p><p>2021001234</p><p>学生姓名：</p><p>张三</p>' }, expect: { studentId: '2021001234', name: '张三' } },
   'empty-room-parser': { input: { data: [{ cdmc: '教室101', jxl: '理科楼', zws: '60', kszws: '45', jc: '1,2', lh: '1' }] }, expect: { rooms: [{ name: '教室101', totalSeats: 60 }] } },
   'messages-parser': { input: { resultData: { total: 1, rows: [{ msgId: 'test123', msgtitle: 'Test', senderName: 'Admin', sendTime: '2026-01-01', receiptStatus: '0' }] } }, expect: { messages: [{ msgId: 'test123', title: 'Test', isRead: false }], totalCount: 1 } },
-  'transcript-score-parser': { input: { lines: ['武汉大学学生成绩单', '2024学年1学期', '高等数学', '必修', '正常考试', '4.0', '92'] }, expect: { scores: [{ year: 2024, semester: 1, name: '高等数学', credit: 4, score: 92 }] } },
+  // The 免修 row is followed by a normal one on purpose: an unrecognised grade
+  // makes the cross-line join swallow the next course into its name. The 缓考
+  // row locks that guard in — it is dropped, and the row after it survives.
+  'transcript-score-parser': { input: { lines: ['武汉大学学生成绩单', '2024学年1学期', '高等数学', '必修', '正常考试', '4.0', '92', '文化与思辨 公共基础必修 普通 3.0 免修', '普通物理三 专业教育必修 普通 2.0 94', '缓考课程 通识教育选修 普通 2.0 缓考', '马克思主义基本原理 公共基础必修 普通 2.5 85'] }, expect: { scores: [{ year: 2024, semester: 1, name: '高等数学', credit: 4, score: 92 }, { name: '文化与思辨', courseType: '公共基础必修', examType: '免修', credit: 3, score: 90 }, { name: '普通物理三', credit: 2, score: 94 }, { name: '马克思主义基本原理', credit: 2.5, score: 85 }] } },
   'wakeup-parser': { input: { format: 'csv', content: '课程名称,星期,开始节数,结束节数,教师,地点,周次\n高等数学,1,1,2,张三,教室A,1-16', fileName: 'test.csv' }, expect: { name: 'test', items: [{ name: '高等数学', day: 1, startNode: 1, endNode: 2 }] } },
   'third-party-timetable-parser': { input: { source: 'shiguang', data: { name: '测试课表', courses: [{ name: '高等数学', day: 1, startSection: 1, endSection: 2, startTime: '08:00', endTime: '09:35' }] } }, expect: { normalized: true, name: '测试课表', courses: [{ name: '高等数学', day: 1 }] } },
   'sports-reservation-parser': { input: { decoded: { Success: true, Code: 0, Data: { Items: [] } } }, expect: { normalized: { success: true, status: 0 } } },
@@ -118,12 +121,18 @@ const assetLabels = {
   'model-metadata-catalog': 'AI 模型元数据目录',
   'campus-news-sources': '校园新闻订阅目录',
   'water-electric-fee-room-directory': '水电费房间目录',
+  'campus-field-maps': '校园接口字段映射表',
+  'water-control-endpoints': '水控接口配方',
 };
 
 const assetMinAppVersions = {
   'model-metadata-catalog': '1.1.1',
   'campus-news-sources': '1.1.1',
   'water-electric-fee-room-directory': '1.1.1',
+  // First release carrying lib/features/hot_update/data/campus_field_maps.dart.
+  'campus-field-maps': '1.2.1',
+  // First release carrying water_control/data/water_control_endpoints.dart.
+  'water-control-endpoints': '1.2.1',
 };
 
 function canonical(value) {

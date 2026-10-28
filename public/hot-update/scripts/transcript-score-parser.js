@@ -7,22 +7,39 @@ function parse(rawJson) {
 
   var scores = [], year = null, semester = null;
   var header = /^课程\s+课程类型\s+学习类型\s+学分\s+成绩\s*/;
+  // Vocabulary of the 成绩 column. It has to stay complete: a grade these
+  // patterns do not recognise drops its row out of every match, and the
+  // cross-line join below then glues that row onto the next course's name.
+  var gradeTokens = '\\d{1,3}|W|合格|不合格|免修';
+  var creditGroup = '(\\d+(?:\\.\\d+)?)';
+  var typeGroup = '(通识教育|公共基础|专业教育)\\s*(必修|选修)';
   // fullRow: course name + course type + study type + credit + grade.
-  var fullRow = /^(.*?)\s+(通识教育|公共基础|专业教育)\s*(必修|选修)\s+(普通|重修)\s+(\d+(?:\.\d+)?)\s+(\d{1,3}|W|合格|不合格)$/;
+  var fullRow = new RegExp('^(.*?)\\s+' + typeGroup + '\\s+(普通|重修)\\s+' + creditGroup + '\\s+(' + gradeTokens + ')$');
   // reversedRow: same but without the study type (study type on the next line).
-  var reversedRow = /^(.*?)\s*(通识教育|公共基础|专业教育)\s*(必修|选修)\s+(\d+(?:\.\d+)?)\s+(\d{1,3}|W|合格|不合格)$/;
+  var reversedRow = new RegExp('^(.*?)\\s*' + typeGroup + '\\s+' + creditGroup + '\\s+(' + gradeTokens + ')$');
   var courseWithStudyType = /^(.*)\s+(普通|重修)$/;
+  var gradeCell = new RegExp('^(?:' + gradeTokens + ')$');
+  // A line carrying a credit cell and then one more cell. At the cross-line
+  // join below that trailing cell can only be a grade the vocabulary above does
+  // not know — a known one would already have matched fullRow — so the line is
+  // a complete row we cannot read, not the first half of a split one.
+  var creditThenUnknownCell = /(?:^|\s)\d+(?:\.\d+)?\s+\S+$/;
+  // Undergraduate affairs reports an exempted course as a plain 90, so the
+  // transcript import has to agree or the two sources stop deduplicating.
+  var exemption = '免修';
+  var exemptionScore = 90;
 
   function addScore(name, courseType, examType, credit, grade) {
-    var withdrawn = !/^\d{1,3}$/.test(grade);
+    var exempted = grade === exemption;
+    var withdrawn = !exempted && !/^\d{1,3}$/.test(grade);
     scores.push({
       year: year,
       semester: semester,
       name: sanitizeDisplay(name),
       courseType: courseType,
-      examType: examType,
+      examType: exempted ? exemption : examType,
       credit: parseFloat(credit),
-      score: withdrawn ? 0 : parseInt(grade, 10),
+      score: exempted ? exemptionScore : (withdrawn ? 0 : parseInt(grade, 10)),
       isWithdrawn: withdrawn,
       scoreLabel: withdrawn ? (grade === 'W' ? '中期退课' : grade) : null
     });
@@ -62,8 +79,11 @@ function parse(rawJson) {
       continue;
     }
 
-    // Case 4: Dart fallback: full row may be split across adjacent visual lines.
-    var joined = fullRow.exec(line + ' ' + nextLine);
+    // Case 4: Dart fallback: full row may be split across adjacent visual
+    // lines. Refused for a line that already ran out at an unrecognised grade,
+    // which is what keeps such a row from swallowing the next course's name:
+    // dropping one row is recoverable, a course named after two rows is not.
+    var joined = creditThenUnknownCell.test(line) ? null : fullRow.exec(line + ' ' + nextLine);
     if (joined) {
       addScore(joined[1], joined[2] + joined[3], joined[4], joined[5], joined[6]);
       i++;
@@ -76,7 +96,7 @@ function parse(rawJson) {
     var examType = ('' + lines[i + 2]).trim();
     var credit = ('' + lines[i + 3]).trim();
     var grade = ('' + lines[i + 4]).trim();
-    if (/^\d+(?:\.\d+)?$/.test(credit) && /^(?:\d{1,3}|W|合格|不合格)$/.test(grade)) {
+    if (/^\d+(?:\.\d+)?$/.test(credit) && gradeCell.test(grade)) {
       addScore(line, courseType, examType, credit, grade);
       i += 4;
     }
