@@ -25,11 +25,6 @@ import { DEFAULT_LOCALE, getLocale, getLocaleByPathSegment } from "./locales";
  * Every route the navbar and footer link to, plus the ones only reachable by
  * direct URL. Keyed by a stable name so a translated page can be recorded without
  * repeating its path once per locale.
- *
- * Deeper paths (`/legal/terms`, `/legal/privacy`, `/legal/cross-border`) are not
- * listed: they are generated from `src/config/legal.ts`, which is Chinese-only,
- * and no locale other than the default has them. They fall through
- * `hasLocalizedPage()` as "not translated", which is the correct answer.
  */
 export const ROUTES = {
   home: "/",
@@ -142,6 +137,17 @@ export function pathInLocale(pathname: string, locale: string): string {
   const { rest } = splitLocalePrefix(pathname);
   const target = hasLocalizedPage(locale, rest) ? locale : DEFAULT_LOCALE;
   const prefix = getLocale(target)?.path ?? "";
-  if (!prefix) return rest;
-  return `/${prefix}${rest === "/" ? "/" : rest}`;
+  const joined = !prefix ? rest : `/${prefix}${rest === "/" ? "/" : rest}`;
+  /*
+   * Trailing slash on everything but the root, because that is the URL Pages
+   * actually serves: `dist/<route>/index.html` answers at `/features/`, and
+   * `/features` without the slash costs a 308 before the document. Every navbar
+   * link, footer link, switcher target, hero CTA and hreflang alternate used to
+   * pay it — 1,022 of the 1,132 hreflang hrefs pointed at a redirect — while
+   * `LegalIndexPage` appended the slash by hand and was the only link on the
+   * site that did not. Callers that compare against a request pathname must
+   * normalise both sides (`normalizePath` strips the slash); the middleware's
+   * negotiation guard does.
+   */
+  return joined === "/" ? "/" : `${joined.replace(/\/+$/, "")}/`;
 }

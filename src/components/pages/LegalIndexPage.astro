@@ -29,18 +29,19 @@ const ICONS: Record<string, string> = {
  * Each document is a route in its own right, so `routeUrl()` decides whether this
  * locale links to its own translation or to the Chinese original.
  *
- * The trailing slash is preserved: `dist/legal/terms/index.html` is what Pages
- * serves, and `/legal/terms` without it costs a 308. The app builds these URLs
- * itself from `siteBaseUrl` (`app_config.dart`'s `termsOfServiceUrl` and friends)
- * and always unprefixed, which is fine -- the default locale's URL is unchanged
- * by any of this, and `hreflang` is what tells a crawler the two are alternates.
+ * `routeUrl()` carries the trailing slash now — `dist/legal/terms/index.html` is
+ * what Pages serves, and the unslashed form costs a 308 — so this page no longer
+ * appends one by hand. The app builds these URLs itself from `siteBaseUrl`
+ * (`app_config.dart`'s `termsOfServiceUrl` and friends) and always unprefixed,
+ * which is fine -- the default locale's URL is unchanged by any of this, and
+ * `hreflang` is what tells a crawler the two are alternates.
  */
 const DOC_ROUTES: Record<string, RouteKey> = {
   terms: "legalTerms",
   privacy: "legalPrivacy",
   "cross-border": "legalCrossBorder",
 };
-const docHref = (slug: string) => `${routeUrl(locale, DOC_ROUTES[slug] ?? "legal")}/`;
+const docHref = (slug: string) => routeUrl(locale, DOC_ROUTES[slug] ?? "legal");
 ---
 
 <BaseLayout title={t("legal.index.title")} description={t("legal.index.description")}>

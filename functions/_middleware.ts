@@ -416,7 +416,10 @@ export async function onRequest(context: Context): Promise<Response> {
        * the target always equals the input, so nothing is emitted.
        */
       const target = pathInLocale(url.pathname, detected);
-      if (target !== normalizePath(url.pathname)) {
+      // Both sides normalised: `pathInLocale` now returns trailing-slashed paths
+      // (that is the form Pages serves), so comparing raw strings would redirect
+      // every correctly-located request to itself, forever.
+      if (normalizePath(target) !== normalizePath(url.pathname)) {
         return new Response(null, {
           status: 302,
           headers: {
