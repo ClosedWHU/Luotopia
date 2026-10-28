@@ -155,7 +155,7 @@ const i18n = {
     continue in the system browser, instead of a launch attempt that can
     never succeed.
   -->
-  <div id="wechat-mask" data-shown="false" class="lt-open-mask" role="dialog" aria-label={t("open.mask.label")}>
+  <div id="wechat-mask" data-shown="false" class="lt-open-mask" role="dialog" aria-modal="true" aria-label={t("open.mask.label")}>
     <div class="lt-open-mask-card glass rounded-card p-6 text-center">
       <Icon name="north_east" class="text-[40px] text-primary" />
       <p class="mt-3 text-title-medium text-on-surface">{t("open.mask.title")}</p>
@@ -163,7 +163,7 @@ const i18n = {
       <button
         id="wechat-mask-close"
         type="button"
-        class="mt-5 glass-control state-layer inline-flex items-center justify-center rounded-full px-6 py-2 text-label-large text-on-surface cursor-pointer border-none"
+        class="mt-5 lt-inset-raised state-layer inline-flex items-center justify-center rounded-full px-6 py-2 text-label-large text-on-surface cursor-pointer border-none"
       >
         {t("open.mask.close")}
       </button>
@@ -350,11 +350,37 @@ const i18n = {
     var openBtn = document.getElementById("open-app-btn");
     if (openBtn) openBtn.addEventListener("click", launch);
     var maskClose = document.getElementById("wechat-mask-close");
-    if (maskClose) maskClose.addEventListener("click", function () { maskEl.setAttribute("data-shown", "false"); });
+
+    /*
+     * The mask is a full-viewport scrim: while it is up, everything behind it is
+     * invisible but still focusable, so focus has to move in, stay in, and come
+     * back out. `aria-modal` tells assistive tech the same thing the Tab trap
+     * enforces by hand — `inert` on the background would be the one-line answer
+     * but is Chrome 102+, and this page's whole audience is in-app WebViews
+     * older than that.
+     */
+    var stage = document.querySelector(".lt-open-stage");
+    function setMask(shown) {
+      if (!maskEl) return;
+      maskEl.setAttribute("data-shown", shown ? "true" : "false");
+      if (stage) {
+        if (shown) stage.setAttribute("aria-hidden", "true");
+        else stage.removeAttribute("aria-hidden");
+      }
+      if (shown) { if (maskClose) maskClose.focus(); }
+      else if (openBtn) { openBtn.focus(); }
+    }
+    if (maskClose) maskClose.addEventListener("click", function () { setMask(false); });
+    document.addEventListener("keydown", function (e) {
+      if (!maskEl || maskEl.getAttribute("data-shown") !== "true") return;
+      if (e.key === "Escape") setMask(false);
+      // One focusable inside: Tab has nowhere legitimate to go.
+      else if (e.key === "Tab") { e.preventDefault(); if (maskClose) maskClose.focus(); }
+    });
 
     if (needsBrowserHint) {
       // Scheme jumps are dead on arrival here; skip the attempt and explain.
-      if (maskEl) maskEl.setAttribute("data-shown", "true");
+      setMask(true);
       showFallback();
     } else {
       if (!attempted) setTimeout(launch, 400);

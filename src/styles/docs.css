@@ -194,9 +194,18 @@ html.dark .lt-docs-prose .markdown-alert {
 /* Fenced code: shiki dual themes (github-light / github-dark, wired through
    rehypeShiki in astro.config.mjs). Astro's dual-theme output puts the light
    palette in literal inline colors and the dark palette in --shiki-dark*
-   variables, so light mode needs no rule — only the .dark swap below. */
+   variables, so light mode needs no rule — only the .dark swap below.
+
+   The radius is the small rung, not the nested one the panels use, and that is
+   a deliberate exception to the "a rounded container that scrolls is two
+   elements" rule in docs/development.md: that rule exists because a *vertical*
+   bar draws square against the rounded clip for its whole travel, while a code
+   block's bar is horizontal, 8px tall and only reaches the two bottom corners
+   when scrolled to an end. At an 8px radius the square thumb ends land inside
+   a corner that is nearly square anyway; wrapping every one of the 160 docs
+   pages' fences in an extra clip element buys a correction nobody can see. */
 .lt-docs-prose pre.astro-code {
-  border-radius: var(--lt-radius-nested, 18px);
+  border-radius: var(--lt-radius-sm, 8px);
   padding: 1em 1.2em;
   overflow-x: auto;
   font-size: 0.8125rem;
@@ -210,6 +219,29 @@ html.dark .lt-docs-prose pre.astro-code,
 html.dark .lt-docs-prose pre.astro-code span {
   color: var(--shiki-dark) !important;
   background-color: var(--shiki-dark-bg) !important;
+}
+
+/* Tables scroll horizontally and are neither a `pre` nor `.overflow-x-auto`,
+   so none of the three scrollbar scopes in global.css reaches them — they kept
+   ~15px of opaque OS chrome beside every slim translucent thumb on the site.
+   Same recipe as the horizontal scope there. */
+.lt-docs-prose table::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+  background: transparent;
+}
+.lt-docs-prose table::-webkit-scrollbar-track {
+  background: transparent;
+}
+.lt-docs-prose table::-webkit-scrollbar-thumb {
+  background-color: var(--lt-scrollbar-thumb);
+  border-radius: 9999px;
+}
+.lt-docs-prose table::-webkit-scrollbar-thumb:hover {
+  background-color: var(--lt-scrollbar-thumb-hover);
+}
+.lt-docs-prose table::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 /* Mermaid: rendered client-side (components/pages/DocsPage.astro); strip the

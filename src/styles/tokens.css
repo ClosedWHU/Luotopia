@@ -163,7 +163,6 @@
 
   --lt-glass-blur: 10px;
   --lt-glass-blur-control: 8px;
-  --lt-glass-blur-overlay: 20px;
   --lt-glass-blur-navbar: 24px;
   --lt-glass-saturate: 160%;
 
@@ -249,7 +248,6 @@
       hsl(0 0% 100% / 0.03) 42%,
       hsl(211 80% 12% / 0.22)
     );
-  --lt-btn-filled-blur: 12px;
   --lt-btn-filled-shadow:
     inset 0 1px 0 0 hsl(0 0% 100% / 0.44),
     inset 0 -1px 0 0 hsl(211 80% 12% / 0.22),
@@ -392,7 +390,6 @@
     hsl(0 0% 100% / 0.1) 42%,
     hsl(211 70% 14% / 0.16)
   );
-  --lt-btn-filled-blur: 12px;
   --lt-btn-filled-shadow:
     inset 0 1px 0 0 hsl(0 0% 100% / 0.6),
     inset 0 -1px 0 0 hsl(211 60% 10% / 0.28),

@@ -137,7 +137,7 @@ const heroSrPrefix = t("home.hero.srPrefix");
       <div class="lt-reveal-lift glass rounded-group px-6 py-14 sm:px-12 text-center">
         <h2 class="text-headline-small sm:text-headline-medium text-on-surface mb-4">{t("home.cta.title")}</h2>
         <p class="text-body-large text-on-surface-variant mb-9 max-w-md mx-auto">{t("home.cta.subtitle")}</p>
-        <DownloadButtons variant="hero" />
+        <DownloadButtons variant="hero" surface="panel" />
       </div>
     </div>
   </section>
@@ -213,9 +213,12 @@ const heroSrPrefix = t("home.hero.srPrefix");
    * Animations start at first paint with no JS in the loop, so the whole hero
    * choreographs top-down (60 → 420ms) deterministically — and identically
    * after a client-side swap, where the new DOM restarts them just as the
-   * observer would have. `both` fill holds the hidden state through the delay
-   * and the visible state after, which supersedes the class's base styling;
-   * nothing here ever sets `data-revealed`, so the two systems stay decoupled.
+   * observer would have. `backwards` fill holds the hidden state through the
+   * delay and then lets go: the keyframes end at each element's natural state,
+   * so a forwards fill would retain a composited layer on all five hero
+   * elements — including the two CTA pills and the bobbing scroll hint — for
+   * the life of the page. Nothing here ever sets `data-revealed`, so the two
+   * systems stay decoupled.
    *
    * Same glass rule as `.lt-reveal-lift`: the rise variant animates `transform`
    * only. The fade variant is used on pure-text elements (title, subtitle,
@@ -242,11 +245,11 @@ const heroSrPrefix = t("home.hero.srPrefix");
   }
 
   .lt-hero-fade {
-    animation: lt-hero-fade 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms) both;
+    animation: lt-hero-fade 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms) backwards;
   }
 
   .lt-hero-rise {
-    animation: lt-hero-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms) both;
+    animation: lt-hero-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms) backwards;
   }
 
    /*
@@ -407,7 +410,7 @@ const heroSrPrefix = t("home.hero.srPrefix");
      * `transform`, so the two compositions never fight over the same property
      * (and the entrance's transform transition is no longer overridden). */
     animation:
-      lt-hero-fade 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms) both,
+      lt-hero-fade 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms) backwards,
       lt-bob 2.4s ease-in-out infinite;
   }
 

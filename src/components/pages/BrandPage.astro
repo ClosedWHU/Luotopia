@@ -120,7 +120,7 @@ const colors = [
   { name: t("brand.color.luo.name"), role: t("brand.color.luo.role"), hex: "#0B674E", onDark: true },
 ];
 
-const btn = "lt-btn glass-control state-layer inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-label-large text-on-surface no-underline cursor-pointer";
+const btn = "lt-btn lt-inset-raised state-layer inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-label-large text-on-surface no-underline cursor-pointer";
 
 /*
  * The string the *script* writes into a swatch after a copy.
@@ -257,7 +257,7 @@ const i18n = {
               <span class="meta p-4 block">
                 <span class="text-title-small text-on-surface block">{c.name}</span>
                 <span class="text-body-small text-on-surface-variant block">{c.role}</span>
-                <span class="hex text-body-medium block mt-1" style="font-variant-numeric:tabular-nums">{c.hex}</span>
+                <span class="hex text-body-medium block mt-1" style="font-variant-numeric:tabular-nums" aria-live="polite">{c.hex}</span>
               </span>
             </button>
           ))
@@ -418,24 +418,38 @@ const i18n = {
       );
     }
 
+    // The "copied" state reverts on a timer; like every other timer on the site
+    // it is tracked so a navigation inside the 1.2s cannot write to a detached
+    // node (the HomePage rotator keeps the same shape).
+    const copiedTimers = new Set<number>();
+    signal.addEventListener("abort", () => {
+      copiedTimers.forEach((id) => window.clearTimeout(id));
+      copiedTimers.clear();
+    });
+
     document.querySelectorAll<HTMLButtonElement>(".swatch[data-hex]").forEach((sw) => {
       sw.addEventListener(
         "click",
         async () => {
           const hex = sw.dataset.hex || "";
+          let wrote = false;
           try {
             await navigator.clipboard.writeText(hex);
+            wrote = true;
           } catch {
             /* clipboard may be blocked; the HEX is still visible/selectable */
           }
+          if (!wrote) return;
           sw.classList.add("copied");
           const hexEl = sw.querySelector<HTMLElement>(".hex");
           const prev = hexEl?.textContent;
           if (hexEl) hexEl.textContent = fill(sw.dataset.i18nCopied ?? "", { hex });
-          window.setTimeout(() => {
+          const timer = window.setTimeout(() => {
+            copiedTimers.delete(timer);
             sw.classList.remove("copied");
             if (hexEl && prev) hexEl.textContent = prev;
           }, 1200);
+          copiedTimers.add(timer);
         },
         { signal },
       );
