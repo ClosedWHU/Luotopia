@@ -215,11 +215,18 @@ const i18n = {
 
               <p class="text-body-medium text-on-surface-variant mb-5">{logo.meaning}</p>
 
+              {/* `data-astro-prefetch={false}`: the router's hover prefetch does
+                  not distinguish navigation from download, so sweeping the
+                  pointer across these eight buttons queued ~590 KB of
+                  `rel=prefetch` for PNGs the visitor may never save — and a
+                  prefetched image is not even guaranteed reusable by the
+                  `download` request that follows. Same attribute the navbar
+                  uses on the locale switcher. */}
               <div class="flex flex-wrap gap-2">
-                <a href={logo.svg} download class={btn}><Icon name="download" class="text-lg" />SVG</a>
-                <a href={logo.svgWhite} download class={btn}><Icon name="download" class="text-lg" />{t("brand.mark.download.monoSvg")}</a>
-                <a href={logo.png} download class={btn}><Icon name="download" class="text-lg" />{t("brand.mark.download.png")}</a>
-                <a href={logo.icon} download class={btn}><Icon name="download" class="text-lg" />{t("brand.mark.download.appIcon")}</a>
+                <a href={logo.svg} download data-astro-prefetch={false} class={btn}><Icon name="download" class="text-lg" />SVG</a>
+                <a href={logo.svgWhite} download data-astro-prefetch={false} class={btn}><Icon name="download" class="text-lg" />{t("brand.mark.download.monoSvg")}</a>
+                <a href={logo.png} download data-astro-prefetch={false} class={btn}><Icon name="download" class="text-lg" />{t("brand.mark.download.png")}</a>
+                <a href={logo.icon} download data-astro-prefetch={false} class={btn}><Icon name="download" class="text-lg" />{t("brand.mark.download.appIcon")}</a>
               </div>
             </div>
           ))
