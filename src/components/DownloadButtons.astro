@@ -4,9 +4,18 @@ import { resolveLocale, routeUrl, useTranslations } from "../i18n/ui";
 
 export interface Props {
   variant?: "hero" | "default";
+  /**
+   * What the pair sits on. Over the aurora the secondary is a `glass-control`
+   * pill; inside a glass panel — the home page's closing CTA — that would be a
+   * second blur sampling the panel's own fill, the nested-glass case the design
+   * rules call meaningless, so it steps down to the inset rung the panel's own
+   * rows use. The primary needs no such switch: `filled-glass` carries no
+   * backdrop-filter any more.
+   */
+  surface?: "aurora" | "panel";
 }
 
-const { variant = "default" } = Astro.props;
+const { variant = "default", surface = "aurora" } = Astro.props;
 
 const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
@@ -35,7 +44,7 @@ const featuresHref = routeUrl(locale, "features");
  * glass instead of a flat pale pill. See the utility in global.css.
  */
 const primaryClass = `lt-btn lt-btn-filled filled-glass state-layer inline-flex items-center gap-2 rounded-full no-underline font-medium ${size}`;
-const secondaryClass = `lt-btn glass-control state-layer inline-flex items-center gap-2 rounded-full no-underline font-medium text-on-surface ${size}`;
+const secondaryClass = `lt-btn ${surface === "panel" ? "lt-inset-raised" : "glass-control"} state-layer inline-flex items-center gap-2 rounded-full no-underline font-medium text-on-surface ${size}`;
 ---
 
 <div class="flex flex-wrap justify-center gap-3">

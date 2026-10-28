@@ -177,7 +177,7 @@
      * in keeps that handover from reading as a cut. Opacity only — it composites
      * without repainting the field.
      */
-    animation: lt-aurora-in 0.7s ease both;
+    animation: lt-aurora-in 0.7s ease backwards;
   }
 
   @keyframes lt-aurora-in {
@@ -384,6 +384,15 @@
 
           // The library's own visibility pause cannot help here: it works by
           // forcing currentSpeed to 0, which is already 0 in this setup.
+          //
+          // Deliberately not `{ signal }` and not inside `onPageSetup`, unlike
+          // every other listener on the site: the aurora host is
+          // `transition:persist`ed and Astro dedupes this module, so both of
+          // these bind exactly once per document and must SURVIVE client-side
+          // navigations — a per-navigation signal would abort the pause and the
+          // theme re-tint on the first in-site click. Same exemption as the
+          // module-level bindings in BaseLayout and Navbar, which say so in
+          // comments; this one now does too.
           document.addEventListener("visibilitychange", () => {
             if (document.hidden) stop();
             else start();

@@ -305,6 +305,12 @@ const i18n = {
       transition: none;
     }
 
+    /* `transition: none` alone would leave the hover/press scale as an instant
+     * jump; FriendLinks makes the same point for its dialog buttons. */
+    .lt-arrow {
+      scale: none;
+    }
+
     /* Manual navigation still works; it just cuts instead of sliding. */
     #carousel-track {
       transition: none;

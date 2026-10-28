@@ -122,16 +122,26 @@ const editUrl = `https://github.com/ClosedWHU/Luotopia/edit/main/${editFile}`;
    * rehype-pre-mermaid transform in astro.config.mjs) and render client-side;
    * the ~1 MB runtime chunk downloads only on pages that actually carry a
    * diagram. Theme follows the site's .dark class at render time.
+   *
+   * The callback stays synchronous and wraps its own async body: `onPageSetup`
+   * reads a returned function as the teardown, so an `async` callback hands it a
+   * Promise and can never register one. The abort re-check after the import is
+   * the teardown this needs — the dynamic import is a network hop, and a
+   * navigation landing inside it would otherwise run mermaid against nodes from
+   * the document being swapped out.
    */
-  onPageSetup(async () => {
-    const blocks = document.querySelectorAll("pre.mermaid:not([data-processed])");
-    if (blocks.length === 0) return;
-    const { default: mermaid } = await import("mermaid");
-    mermaid.initialize({
-      startOnLoad: false,
-      securityLevel: "strict",
-      theme: document.documentElement.classList.contains("dark") ? "dark" : "default",
-    });
-    await mermaid.run({ nodes: Array.from(blocks) });
+  onPageSetup((signal) => {
+    void (async () => {
+      const blocks = document.querySelectorAll("pre.mermaid:not([data-processed])");
+      if (blocks.length === 0) return;
+      const { default: mermaid } = await import("mermaid");
+      if (signal.aborted) return;
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: "strict",
+        theme: document.documentElement.classList.contains("dark") ? "dark" : "default",
+      });
+      await mermaid.run({ nodes: Array.from(blocks) });
+    })();
   });
 </script>

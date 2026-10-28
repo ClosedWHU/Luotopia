@@ -28,7 +28,7 @@
  * Layer 1 — `--lt-*` raw values in plain `:root` / `:root.dark`. Always
  * emitted, never tree-shaken, and the single place dark mode switches.
  * Layer 2 — `@theme` aliases that teach Tailwind to generate utilities
- * (`text-title-medium`, `bg-surface`, `rounded-card`, `backdrop-blur-glass`).
+ * (`text-title-medium`, `bg-surface`, `rounded-card`).
  *
  * Glass geometry is not invented here: radii come from the app's
  * `AppDesignLayout.glass()` (control 14 / nested 18 / card 28 / group 32) and
@@ -151,11 +151,11 @@
   --radius-card: var(--lt-radius-card);
   --radius-group: var(--lt-radius-group);
 
-  /* ── Blur: kAppGlassBlurSigma / appGlassStyle(blur:) ── */
-  --blur-glass: var(--lt-glass-blur);
-  --blur-glass-control: var(--lt-glass-blur-control);
-  --blur-glass-overlay: var(--lt-glass-blur-overlay);
-  --blur-glass-navbar: var(--lt-glass-blur-navbar);
+  /* ── Blur: kAppGlassBlurSigma / appGlassStyle(blur:) ──
+   * Raw tokens only. There is no `--blur-*` alias layer: nothing on the site
+   * reaches for a `backdrop-blur-*` utility, every blur is applied by the
+   * `glass*` utilities and the navbar rule reading `--lt-glass-blur*` directly,
+   * and an alias nobody uses is a promise the stylesheet does not keep. */
 
   /* ── Elevation ── */
   --shadow-0: 0 0 0 0 transparent;
@@ -255,14 +255,6 @@ html[lang="ko"] {
     --lt-light-y 0.35s ease-out;
 }
 
-@utility glass-overlay {
-  background-image: var(--lt-glass-sheen);
-  background-color: var(--lt-glass-overlay);
-  backdrop-filter: blur(var(--lt-glass-blur-overlay)) saturate(var(--lt-glass-saturate));
-  -webkit-backdrop-filter: blur(var(--lt-glass-blur-overlay)) saturate(var(--lt-glass-saturate));
-  box-shadow: var(--lt-shadow-glass-control);
-}
-
 @utility glass-control {
   background-image: var(--lt-glass-sheen);
   background-color: var(--lt-glass-control);
@@ -271,27 +263,27 @@ html[lang="ko"] {
   box-shadow: var(--lt-shadow-glass-control);
 }
 
-@utility glass-subtle {
-  background-color: var(--lt-glass-subtle);
-  backdrop-filter: blur(var(--lt-glass-blur-control)) saturate(var(--lt-glass-saturate));
-  -webkit-backdrop-filter: blur(var(--lt-glass-blur-control)) saturate(var(--lt-glass-saturate));
-}
-
 /*
  * The filled CTA. Kept as a utility rather than per-component CSS because both
- * DownloadButtons and the FriendLinks dialog render one, and the whole point is
- * that they read as the same object.
+ * DownloadButtons and the FriendLinks dialog render one, and the whole point
+ * is that they read as the same object.
  *
  * Both themes are tinted glass now. Light mode keeps a high-alpha, darkened
- * primary base so the white label stays above AA while the blur, rim and sheen
- * give the pill the same refractive family as the surrounding surfaces.
+ * primary base so the white label stays above AA while the rim and sheen give
+ * the pill the same refractive family as the surrounding surfaces.
+ *
+ * No `backdrop-filter` here, deliberately. The fill is 93% opaque in light and
+ * 80% in dark, so the blur was refracting a backdrop that is 7-20% visible —
+ * below perception — while costing a compositor layer on every CTA and, worse,
+ * putting a nested blur inside every glass panel that hosts one (the home
+ * page's closing CTA, the friend-link dialog), which is the case the glass
+ * rules call meaningless: it samples the panel's own fill. The tint, rim, sheen
+ * and shadow carry the glass read; the blur carried nothing.
  */
 @utility filled-glass {
   background-color: var(--lt-btn-filled-bg);
   background-image: var(--lt-btn-filled-sheen);
   color: var(--lt-btn-filled-fg);
-  backdrop-filter: blur(var(--lt-btn-filled-blur)) saturate(var(--lt-glass-saturate));
-  -webkit-backdrop-filter: blur(var(--lt-btn-filled-blur)) saturate(var(--lt-glass-saturate));
   box-shadow: var(--lt-btn-filled-shadow);
 }
 
@@ -551,11 +543,17 @@ pre::-webkit-scrollbar-corner,
     --lt-glass-sheen: none;
     --lt-glass-glint: transparent;
     --lt-modal-surface: var(--lt-color-surface);
+    /* The two long-form reading surfaces and the inset rows were left out of
+     * this block, so a visitor who asked the OS to reduce transparency still
+     * read the legal documents and every docs article with the aurora showing
+     * through the panel behind the text. */
+    --lt-reading-panel-bg: var(--lt-color-surface);
+    --lt-glass-subtle: var(--lt-color-surface);
   }
 }
 
 @media (forced-colors: active) {
-  :is(.glass, .glass-control, .glass-overlay, .filled-glass, .lt-navbar, .lt-mobile-menu) {
+  :is(.glass, .glass-control, .filled-glass, .lt-navbar, .lt-mobile-menu) {
     border: 1px solid CanvasText;
     background-image: none;
     box-shadow: none;
@@ -915,19 +913,7 @@ html.lenis body {
     backdrop-filter: blur(var(--lt-glass-blur)) saturate(var(--lt-glass-saturate));
   }
 
-  .glass-overlay {
-    backdrop-filter: blur(var(--lt-glass-blur-overlay)) saturate(var(--lt-glass-saturate));
-  }
-
   .glass-control {
     backdrop-filter: blur(var(--lt-glass-blur-control)) saturate(var(--lt-glass-saturate));
-  }
-
-  .glass-subtle {
-    backdrop-filter: blur(var(--lt-glass-blur-control)) saturate(var(--lt-glass-saturate));
-  }
-
-  .filled-glass {
-    backdrop-filter: blur(var(--lt-btn-filled-blur)) saturate(var(--lt-glass-saturate));
   }
 }

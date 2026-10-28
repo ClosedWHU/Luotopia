@@ -384,15 +384,19 @@ const SEAL_SVG = "/img/app-icon.svg";
     -webkit-mask-position: center;
     mask-position: center;
     pointer-events: none;
-    opacity: 0;
-    scale: 0.88;
-    animation: lt-seal-in 1s cubic-bezier(0.22, 1, 0.36, 1) 620ms forwards;
+    /* Visible at rest, hidden only in the keyframe's `from`: the entrance used
+     * to hold its end state with `forwards`, which kept a composited layer for
+     * the seal alive forever. `backwards` holds the *start* through the 620ms
+     * delay, which is the half that was ever load-bearing. */
+    opacity: 1;
+    scale: 1;
+    animation: lt-seal-in 1s cubic-bezier(0.22, 1, 0.36, 1) 620ms backwards;
   }
 
   @keyframes lt-seal-in {
-    to {
-      opacity: 1;
-      scale: 1;
+    from {
+      opacity: 0;
+      scale: 0.88;
     }
   }
 
@@ -484,21 +488,27 @@ const SEAL_SVG = "/img/app-icon.svg";
    * Kernels without the individual transform properties (below Chrome 104) drop
    * `translate` from the keyframes and keep the fade, which is the degradation
    * we want rather than a stuck-invisible cell.
+   *
+   * The visible state lives in the base rule and the hidden one in the
+   * keyframe's `from`, with `backwards` holding it through the per-cell delay.
+   * The previous shape — hidden at rest, `forwards` to visibility — retained a
+   * composited layer per cell for the life of the page, 105 of them on the one
+   * route most likely to be hit by accident on a bad connection.
    */
   .lt-cell {
     position: relative;
     border-radius: calc(var(--lt-404-cell) * 0.32);
-    opacity: 0;
-    translate: 0 calc(var(--lt-404-cell) * 0.5);
+    opacity: 1;
+    translate: 0 0;
     transform: translateZ(calc(var(--lt-hot, 0) * var(--lt-404-cell) * 0.85))
       scale(calc(1 + var(--lt-hot, 0) * 0.1));
-    animation: lt-cell-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-delay, 0ms) forwards;
+    animation: lt-cell-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-delay, 0ms) backwards;
   }
 
   @keyframes lt-cell-in {
-    to {
-      opacity: 1;
-      translate: 0 0;
+    from {
+      opacity: 0;
+      translate: 0 calc(var(--lt-404-cell) * 0.5);
     }
   }
 
@@ -657,19 +667,22 @@ const SEAL_SVG = "/img/app-icon.svg";
   }
 
   .lt-404-fade {
-    animation: lt-404-fade 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms) both;
+    animation: lt-404-fade 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms) backwards;
   }
 
   .lt-404-rise {
-    animation: lt-404-rise 0.75s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms) both;
+    animation: lt-404-rise 0.75s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms) backwards;
   }
 
   /*
-   * `data-shown` and `animation-fill-mode: both` disagree: the fill holds
-   * `transform: none` from first paint, but `display: none` also suppresses the
-   * animation entirely, so a block revealed later restarts from its `from`
-   * keyframe. That is the wanted behaviour — the path chip and the deep-link
-   * card slide in when the script decides they exist, not before.
+   * `data-shown` and the entrance fill interact: `display: none` suppresses the
+   * animation entirely, so a block the script reveals later starts its
+   * animation then, and `backwards` holds the `from` keyframe through the
+   * delay. That is the wanted behaviour — the path chip and the deep-link card
+   * slide in when the script decides they exist, not before. The fill is
+   * `backwards` rather than `both` because the end state is each element's
+   * natural state: a forwards fill would only retain a composited layer for
+   * the rest of the page's life.
    */
 
   @media (prefers-reduced-transparency: reduce) {
@@ -693,8 +706,6 @@ const SEAL_SVG = "/img/app-icon.svg";
   @media (prefers-reduced-motion: reduce) {
     .lt-cell {
       animation: none;
-      opacity: 1;
-      translate: none;
       transform: none;
       filter: none;
     }
@@ -708,13 +719,11 @@ const SEAL_SVG = "/img/app-icon.svg";
       transform: none;
     }
 
-    /* The seal's entrance is what makes it visible at all (`opacity: 0` at
-     * rest), so cancelling the animation has to hand back the end state
-     * explicitly or reduced-motion users get no logo whatsoever. */
+    /* The seal and the cells are visible at rest now (the entrance hides them
+     * only inside the keyframes), so cancelling the animation is all reduced
+     * motion needs — nothing to hand back. */
     .lt-seal {
       animation: none;
-      opacity: 1;
-      scale: none;
       transform: none;
     }
 

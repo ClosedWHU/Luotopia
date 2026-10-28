@@ -111,6 +111,7 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"] as const;
   id="friend-link-dialog"
   class="lt-dialog"
   aria-labelledby="friend-link-dialog-title"
+  aria-modal="true"
   data-i18n-qr-alt={t("community.friend.dialog.qrAlt")}
   data-i18n-qr-alt-generic={t("community.friend.dialog.qrAltGeneric")}
   data-i18n-open-fallback={t("community.friend.dialog.openFallback")}
@@ -301,11 +302,11 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"] as const;
   }
 
   .lt-dialog[open]::backdrop {
-    animation: lt-modal-backdrop-in 240ms ease both;
+    animation: lt-modal-backdrop-in 240ms ease backwards;
   }
 
   .lt-dialog[open] .lt-dialog-card {
-    animation: lt-modal-card-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: lt-modal-card-in 320ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
   }
 
   .lt-dialog[open][data-closing="true"]::backdrop {

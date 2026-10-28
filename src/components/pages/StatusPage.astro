@@ -277,7 +277,7 @@ const i18n = {
             <button
               type="button"
               id="status-refresh"
-              class="lt-st-btn state-layer glass-control rounded-control inline-flex items-center gap-1.5 px-4 py-2 text-label-large text-primary cursor-pointer border-none"
+              class="lt-st-btn state-layer lt-inset-raised rounded-control inline-flex items-center gap-1.5 px-4 py-2 text-label-large text-primary cursor-pointer border-none"
             >
               <span class="lt-st-btn-icon inline-flex" data-role="refresh-icon">
                 <Icon name="refresh" class="text-[18px]" />
@@ -532,8 +532,16 @@ const i18n = {
   }
 
   /* ── Refresh affordances ── */
+  /*
+   * No `opacity` here: the button is a surface on the overview panel, and an
+   * element below opacity 1 is a backdrop root — the glass rules' headline
+   * trap. Dimming the ink and the fill says "unavailable" just as loudly and
+   * leaves the panel's refraction alone for the whole fetch.
+   */
   .lt-st-btn:disabled {
-    opacity: 0.5;
+    color: var(--lt-color-outline);
+    background-color: var(--lt-glass-subtle);
+    box-shadow: inset 0 0 0 0.6px var(--lt-glass-edge);
     cursor: progress;
   }
   .lt-st-page[data-refreshing="true"] .lt-st-btn-icon svg {
@@ -798,6 +806,10 @@ const i18n = {
     .lt-st-card,
     .lt-st-skel,
     .lt-st-bar,
+    /* The tip and the toast slide and scale in; both fire on every failed poll
+     * and every throttle, which is exactly the repetition the query is for. */
+    .lt-st-tip,
+    .lt-st-toast,
     .lt-st-page[data-refreshing="true"] .lt-st-btn-icon svg {
       animation: none;
       transition: none;
@@ -1364,6 +1376,13 @@ const i18n = {
         unknown: copy.overviewTitleUnknown,
       };
       if (titleEl) titleEl.textContent = titles[state] ?? titles.unknown;
+      /*
+       * The <h2> is not a live region, so a screen reader user who lands here
+       * hears "Fetching status…" and never the verdict. The page already owns a
+       * polite region for exactly this, so the resolved title goes through it
+       * once per render.
+       */
+      if (live) live.textContent = titles[state] ?? titles.unknown;
       if (descEl) {
         descEl.textContent =
           state === "up"
@@ -1405,6 +1424,7 @@ const i18n = {
       // that red would claim an outage the page has no evidence for.
       overview!.dataset.state = "unknown";
       if (titleEl) titleEl.textContent = copy.errorTitle;
+      if (live) live.textContent = copy.errorTitle;
       if (descEl) descEl.textContent = message;
       if (chipsEl) chipsEl.innerHTML = "";
       if (metaEl) metaEl.textContent = copy.errorMeta;
@@ -1415,7 +1435,7 @@ const i18n = {
       groupsEl!.innerHTML = `<div class="lt-st-group glass rounded-group p-8 text-center">
         <p class="text-title-medium text-on-surface">${escapeHtml(copy.errorCardTitle)}</p>
         <p class="mt-1.5 text-body-medium text-on-surface-variant">${escapeHtml(message)}</p>
-        <button type="button" id="status-retry" class="lt-st-btn state-layer glass-control rounded-control mt-5 inline-flex items-center gap-1.5 px-4 py-2 text-label-large text-primary cursor-pointer border-none">${escapeHtml(copy.errorRetry)}</button>
+        <button type="button" id="status-retry" class="lt-st-btn state-layer lt-inset-raised rounded-control mt-5 inline-flex items-center gap-1.5 px-4 py-2 text-label-large text-primary cursor-pointer border-none">${escapeHtml(copy.errorRetry)}</button>
       </div>`;
       groupsEl!.setAttribute("aria-busy", "false");
       const retry = document.getElementById("status-retry");

@@ -546,7 +546,6 @@ const persistName = `lt-navbar-${locale}`;
     background-image: var(--lt-glass-sheen);
     box-shadow: var(--lt-shadow-glass);
     visibility: hidden;
-    opacity: 0;
     clip-path: inset(0 0 100% 0);
     transform: translateY(-8px);
     background-color: var(--lt-glass-navbar);
@@ -555,7 +554,6 @@ const persistName = `lt-navbar-${locale}`;
     transition:
       clip-path 0.32s cubic-bezier(0.4, 0, 0.2, 1),
       transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-      opacity 0.2s ease,
       visibility 0s linear 0.32s;
   }
 
@@ -565,23 +563,35 @@ const persistName = `lt-navbar-${locale}`;
    * `overscroll-behavior: contain` keeps a flick at either end from chaining to
    * the document behind the glass, which is the same reason the dialog body has
    * it. Lenis is stopped while the sheet is open, so this scrolls natively.
+   *
+   * The fade lives here, not on the sheet: the sheet is a `backdrop-filter`
+   * surface, and an element below `opacity: 1` is a backdrop root, so fading the
+   * sheet spent the whole open transition sampling nothing and rendering flat.
+   * Fading the scroller does the same anti-sliver job the comment above assigns
+   * to `opacity` — the links are gone before the wipe reaches them — on an
+   * element with no blur to lose.
    */
   .lt-mobile-menu-scroll {
     height: 100%;
     overflow-y: auto;
     overscroll-behavior: contain;
+    opacity: 0;
+    transition: opacity 0.2s ease;
   }
 
   .lt-mobile-menu[data-open="true"] {
     visibility: visible;
-    opacity: 1;
     clip-path: inset(0 0 0 0);
     transform: none;
     transition:
       clip-path 0.42s cubic-bezier(0.22, 1, 0.36, 1),
       transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-      opacity 0.22s ease,
       visibility 0s;
+  }
+
+  .lt-mobile-menu[data-open="true"] .lt-mobile-menu-scroll {
+    opacity: 1;
+    transition: opacity 0.22s ease;
   }
 
   /* Items trail the sheet by a few frames each, so opening reads as one gesture
@@ -782,6 +792,24 @@ const persistName = `lt-navbar-${locale}`;
     const lenis = (window as unknown as { ltLenis?: { stop(): void; start(): void } }).ltLenis;
     if (open) lenis?.stop();
     else lenis?.start();
+
+    /*
+     * Focus follows the sheet. The sheet covers the page at ~96% opacity, so
+     * leaving focus where it was lets Tab walk into links the visitor cannot
+     * see, and closing while focus sat inside used to drop it to <body> — the
+     * keyboard user's next Tab restarts at the top of the document.
+     * `onBeforeNavigation` blurs before calling this with `false`, so the
+     * navigation path still ends unfocused on purpose.
+     */
+    if (open) {
+      const first = sheet.querySelector<HTMLElement>("a[href], button:not([disabled])");
+      if (first) first.focus({ preventScroll: true });
+    } else {
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && sheet.contains(active)) {
+        btn.focus({ preventScroll: true });
+      }
+    }
   }
 
   /*
@@ -872,6 +900,39 @@ const persistName = `lt-navbar-${locale}`;
         "click",
         (e) => {
           if ((e.target as HTMLElement).closest("a")) setSheetOpen(false);
+        },
+        { signal },
+      );
+
+      /*
+       * Tab trap. `inert` on the background would be the one-line answer but is
+       * Chrome 102+, above this site's floor, so the cycle is wrapped by hand:
+       * forward off the sheet's last item returns to the burger, shift-tab off
+       * the burger returns to the sheet's last item. Everything between those
+       * two ends is plain DOM order.
+       */
+      const SHEET_FOCUSABLE = 'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
+      mobileMenu.addEventListener(
+        "keydown",
+        (e) => {
+          if (e.key !== "Tab" || e.shiftKey || !isOpen()) return;
+          const items = mobileMenu.querySelectorAll(SHEET_FOCUSABLE);
+          if (items.length === 0) return;
+          if (document.activeElement === items[items.length - 1]) {
+            e.preventDefault();
+            menuBtn.focus({ preventScroll: true });
+          }
+        },
+        { signal },
+      );
+      menuBtn.addEventListener(
+        "keydown",
+        (e) => {
+          if (e.key !== "Tab" || !e.shiftKey || !isOpen()) return;
+          const items = mobileMenu.querySelectorAll(SHEET_FOCUSABLE);
+          if (items.length === 0) return;
+          e.preventDefault();
+          (items[items.length - 1] as HTMLElement).focus({ preventScroll: true });
         },
         { signal },
       );
