@@ -767,9 +767,9 @@
     {
       "name": "model-metadata-catalog",
       "label": "AI 模型元数据目录",
-      "version": 12,
+      "version": 13,
       "url": "/hot-update/assets/model-metadata-catalog.json.gz",
-      "checksum": "sha256:608c861259bc7eee6d9a2caa2abe00d1530465c914fc069872363b5505c42973",
+      "checksum": "sha256:b5062ded076eadcaad4f7b6a27e2568370e592a7367c0163a5abb9816f194f1c",
       "minAppVersion": "1.1.1"
     },
     {
@@ -781,5 +781,9 @@
       "minAppVersion": "1.1.1"
     }
   ],
+<<<<<<< HEAD
   "signature": "pADVEz90EFTDxigcZSLBOJ/Ro0NKOSdGtL9JVXK6vrXzckyD2Ta6wvVADQU9lrSQHypJP32SedvEBLZOfC3TCg=="
+=======
+  "signature": "h9hJOeInp5pxLagDfM7wPocuwp77YnC8lsvsxpEfDoveTff91QZig/j9emSTJ4WneGPd0ATSjktS3z6EKwDwCA=="
+>>>>>>> 166d42ba8fd05718624b13ef2e7f0dd924e062df
 }
