@@ -15,32 +15,32 @@
  *
  * ## Every row here costs font bytes, and that is now a settled cost
  *
- * `pruneFontSubsets()` in `astro.config.mjs` derives the site charset by scanning
- * source **text** under `src/` — data and comments alike — and drops every
- * `@font-face` subset whose `unicode-range` covers none of it. That is how 172
- * rules became 56 and 81% of a render-blocking stylesheet disappeared.
+ * `pruneFontSubsets()` in `astro.config.mjs` derives each font family's charset
+ * by scanning source **text** under `src/` — data and comments alike — and drops
+ * every `@font-face` subset whose `unicode-range` covers none of it. The charset
+ * is per family: what templates and config can render, plus the dictionaries of
+ * the locales whose `--font-sans` names that family. This file is part of the
+ * template half, which is why the endonyms below survive in every family: the
+ * switcher renders all ten of them on every page in every locale.
  *
- * Ten languages undoes it, by design and not by accident. zh-Hant/ja/ko now use
+ * Ten languages still cost, by design and not by accident. zh-Hant/ja/ko use
  * Noto Sans TC/JP/KR (MiSans is Simplified-oriented and lacks `locl`, so unified
  * Han characters render with Simplified glyph shapes). Measured on the built
- * stylesheet: 629 `@font-face` rules, 534 woff2 files (MiSans 110 + Noto Sans TC
- * 184 + JP 226 + KR 124); the whole shared file goes 133 KB → 727 KB raw, 38 →
- * 246 KB gzip, 19.0 → 90 KB brotli. Font subsets are 86% of the shared CSS by
- * raw bytes and essentially all of the growth.
- *
- * The number that actually transfers is the brotli delta: **+71 KB** on a
- * render-blocking file. The +594 KB raw mostly costs parse time, and it is almost
- * entirely `unicode-range` hex lists, which is why it compresses 6.6:1.
+ * stylesheet after per-family pruning: 411 `@font-face` rules and 411 woff2
+ * files (MiSans 62 + Noto Sans TC 86 + JP 154 + KR 106 + PJS 3); the shared file
+ * is 450 KB raw, 146 KB gzip, 53 KB brotli, of which the subsets are 86% by raw
+ * bytes and the `unicode-range` hex lists 71%.
  *
  * Two consequences worth knowing before "optimising" this:
  *
  * - The subsets are *lazy*. `unicode-range` means a browser only downloads the
  *   woff2 behind a rule when a rendered character falls in it, so a Spanish
- *   visitor never fetches the hangul faces. What grew is the CSS, not the fonts.
- * - MiSans is only used on zh-Hans pages; zh-Hant/ja/ko use Noto Sans TC/JP/KR.
- *   `--font-sans` puts Plus Jakarta Sans ahead of them, so Latin copy never uses
- *   the CJK fonts. Per-locale loading is done, but the CSS is shared, so all
- *   pages parse all `@font-face` rules (the font files themselves are lazy).
+ *   visitor never fetches the hangul faces. What grows is the CSS, not the fonts.
+ * - The CSS is one shared file, so all pages parse every surviving `@font-face`
+ *   rule (the font files themselves are lazy). Splitting per locale would need
+ *   per-route imports across 120 route shells — Astro bundles CSS by import
+ *   graph, not by render tree — for ~30 KB brotli and a re-download on every
+ *   locale switch; see docs/development.md for the measured trade.
  *
  * The same reasoning is why comments in this file are English: a quoted CJK
  * phrase in a comment retains a subset for a glyph no page renders. The endonyms
