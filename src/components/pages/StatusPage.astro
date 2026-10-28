@@ -886,6 +886,20 @@ const i18n = {
     const live = document.getElementById("status-live");
     if (!page || !overview || !groupsEl || !tip || !toastEl) return;
 
+    /*
+     * Both floating layers move to <body>, which is where the CSS comment above
+     * them already claims they live. In the template they are inside <main>,
+     * and <main> is `position: relative; z-index: 10` — a stacking context —
+     * while the navbar is a *sibling* at `z-index: 50`, so the tip's own
+     * `z-index: 70` is capped inside main's context and loses: a day bar in the
+     * top ~150px of the viewport produced a tooltip that was fetched, placed
+     * and announced, behind the navbar's near-opaque glass. `position: fixed`
+     * makes the move layout-neutral; the teardown below keeps client-side
+     * navigation from leaving them on other pages.
+     */
+    document.body.appendChild(tip);
+    document.body.appendChild(toastEl);
+
     const q = (role: string) => overview!.querySelector<HTMLElement>(`[data-role="${role}"]`);
     const titleEl = q("title");
     const descEl = q("desc");
@@ -1754,7 +1768,11 @@ const i18n = {
       window.clearTimeout(tipTimer);
       hideTip();
       toastEl!.dataset.visible = "false";
+      // They were re-parented to <body> above; the swap that triggered this
+      // teardown replaces <main> only, so without this they would follow the
+      // visitor to every other page.
+      tip!.parentNode?.removeChild(tip!);
+      toastEl!.parentNode?.removeChild(toastEl!);
     };
   });
 </script>
-</BaseLayout>
