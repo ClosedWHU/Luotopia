@@ -195,6 +195,23 @@
     0 24px 48px -16px hsl(215 45% 20% / 0.24);
 
   /*
+   * MD3 elevation rungs 3 and 4, in this file's shadow hue. `StatusPage` floats
+   * its tooltip and snackbar on the inverse surface and reaches for these two;
+   * they were spelled `--lt-shadow-3` / `--lt-shadow-4` with no definition
+   * anywhere, so both layers shipped `box-shadow: none` — an invisible break,
+   * because an undefined custom property inside a shadow list invalidates the
+   * declaration quietly. The `--shadow-*` aliases in global.css's `@theme`
+   * cannot be the source: Tailwind tree-shakes unused theme vars, and no
+   * `shadow-3` utility exists to keep them alive.
+   */
+  --lt-shadow-3:
+    0 4px 8px 0 hsl(215 45% 20% / 0.14),
+    0 1px 3px 0 hsl(215 45% 20% / 0.08);
+  --lt-shadow-4:
+    0 6px 12px 0 hsl(215 45% 20% / 0.14),
+    0 2px 4px 0 hsl(215 45% 20% / 0.08);
+
+  /*
    * ── Modal ──
    * A dialog is not just another glass rung: the page behind it has to stop
    * competing with foreground text. The scrim owns the blur, so the card can be
@@ -213,6 +230,13 @@
    * Light CTA glass. The base is darkened toward primary20 before taking 12%
    * transparency, so the aurora can refract without lifting the white label
    * below AA. The sheen is concentrated away from the text baseline.
+   *
+   * No hand-written fallback for `color-mix()` (Chrome 111+): the build's
+   * Lightning CSS already downlevels it to `var(--lt-btn-filled-base)` /
+   * `var(--lt-color-primary)` outside an `@supports (color: color-mix(...))`
+   * guard, i.e. old engines get a solid primary pill with the same white label.
+   * Verified in the emitted sheet; a literal duplicate here would only be a
+   * second answer to a question the toolchain already settles.
    */
   --lt-btn-filled-base: color-mix(in oklab, var(--lt-color-primary) 76%, var(--lt-palette-primary20));
   --lt-btn-filled-bg: color-mix(in srgb, var(--lt-btn-filled-base) 93%, transparent);
@@ -335,6 +359,15 @@
     0 2px 6px 0 rgb(0 0 0 / 0.35),
     0 24px 48px -16px rgb(0 0 0 / 0.7);
 
+  /* Dark counterparts of the light block's rungs 3 and 4; see it for why they
+   * live here rather than in global.css's tree-shaken `@theme`. */
+  --lt-shadow-3:
+    0 4px 8px 0 rgb(0 0 0 / 0.35),
+    0 1px 3px 0 rgb(0 0 0 / 0.25);
+  --lt-shadow-4:
+    0 6px 12px 0 rgb(0 0 0 / 0.4),
+    0 2px 4px 0 rgb(0 0 0 / 0.3);
+
   --lt-modal-scrim: hsl(220 55% 3% / 0.64);
   --lt-modal-surface: hsl(220 24% 12% / 0.86);
   --lt-modal-shadow:
@@ -348,7 +381,8 @@
    * 7.1:1 — far more headroom than the solid primary80/primary20 it replaces
    * (4.2:1, and flat pale blue reads as plastic next to frosted glass).
    * The spare contrast is what pays for the sheen and the 20% of backdrop the
-   * blur gets to refract.
+   * blur gets to refract. The `color-mix()` degradation is handled by the build
+   * (see the light block above): old engines get primary90 opaque.
    */
   --lt-btn-filled-bg: color-mix(in oklab, var(--lt-palette-primary90) 80%, transparent);
   --lt-btn-filled-fg: var(--lt-palette-primary10);
