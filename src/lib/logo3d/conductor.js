@@ -7,7 +7,11 @@
 // luo) always share one instance even though they are separate dynamic imports.
 
 const KEY = '__ltBrandConductor';
-const g = globalThis;
+// `globalThis` is Chrome 71+, above this bundle's floor, and esbuild lowers
+// syntax but not runtime globals — a bare reference would be a ReferenceError
+// at module evaluation on 66-70, taking the whole /brand script chunk with it.
+// `typeof` cannot throw on an undeclared identifier, so this reads safely.
+const g = typeof globalThis !== 'undefined' ? globalThis : window;
 if (!g[KEY]) g[KEY] = { epoch: performance.now(), accumulated: 0, paused: false };
 const s = g[KEY];
 

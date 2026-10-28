@@ -64,7 +64,9 @@ export async function mountLuo(canvas, opts = {}) {
 
   function shapeBBox(shape) {
     const pts = shape.extractPoints(3);
-    const all = [...pts.shape, ...pts.holes.flat()];
+    // `Array.prototype.flat` is Chrome 69+, above this bundle's floor, and
+    // esbuild lowers syntax rather than runtime APIs — concat by hand.
+    const all = pts.holes.reduce((acc, hole) => acc.concat(hole), pts.shape.slice());
     const xs = all.map((p) => p.x);
     return { w: Math.max(...xs) - Math.min(...xs) };
   }
