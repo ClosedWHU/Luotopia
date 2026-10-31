@@ -179,10 +179,12 @@ const i18n = {
   externalFallback: t("download.external.fallback"),
   recommended: t("download.asset.recommended"),
   archFilter: t("download.asset.archFilter"),
-  appleTestFlight: t("download.apple.testFlightSection"),
+  appleStoreSubtitle: t("download.apple.storeSubtitle"),
   appleDmg: t("download.apple.dmgSection"),
-  windowsStore: t("download.windows.storeSection"),
+  appleDmgCaveat: t("download.apple.dmgCaveat"),
+  windowsStoreSubtitle: t("download.windows.storeSubtitle"),
   windowsZip: t("download.windows.zipSection"),
+  windowsZipCaveat: t("download.windows.zipCaveat"),
   noNotes: t("download.changelog.noNotes"),
   loading: t("download.changelog.loading"),
   empty: t("download.changelog.empty"),
@@ -210,10 +212,12 @@ const i18n = {
     data-i18n-external-fallback={i18n.externalFallback}
     data-i18n-recommended={i18n.recommended}
     data-i18n-arch-filter={i18n.archFilter}
-    data-i18n-apple-test-flight={i18n.appleTestFlight}
+    data-i18n-apple-store-subtitle={i18n.appleStoreSubtitle}
     data-i18n-apple-dmg={i18n.appleDmg}
-    data-i18n-windows-store={i18n.windowsStore}
+    data-i18n-apple-dmg-caveat={i18n.appleDmgCaveat}
+    data-i18n-windows-store-subtitle={i18n.windowsStoreSubtitle}
     data-i18n-windows-zip={i18n.windowsZip}
+    data-i18n-windows-zip-caveat={i18n.windowsZipCaveat}
     data-i18n-no-notes={i18n.noNotes}
     data-i18n-loading={i18n.loading}
     data-i18n-empty={i18n.empty}
@@ -571,6 +575,60 @@ const i18n = {
   }
 
   /*
+   * ── The store CTA ──
+   *
+   * The Apple / Windows cards' primary action, rendered by storeCtaHtml: a
+   * full-width raised button so TestFlight / Microsoft Store finally outweigh the
+   * direct DMG / zip rows that used to out-shine them. It is the raised-glass
+   * rung (glass-control fill + sheen), NOT `filled-glass`: the button sits inside
+   * a `.glass` card, where the design rules forbid a nested backdrop-filter, and
+   * the brand marks are coloured (TestFlight's blue squircle, the Store bag's
+   * Fluent blue), so a primary fill would fight them. The 1px primary ring is
+   * what lifts it from an ordinary inset row to "the button" — a plain var(), not
+   * a color-mix, so it survives the Chrome 66 / Safari 12 build target.
+   *
+   * `color` is set for the `state-layer` press/hover tint, which paints
+   * `currentColor`; the label / subtitle spans override it with their own roles.
+   */
+  .lt-dl-store {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.7rem 0.8rem;
+    text-align: left;
+    color: var(--lt-color-on-surface);
+    border-radius: var(--lt-radius-control);
+    background-color: var(--lt-glass-control);
+    background-image: var(--lt-glass-sheen);
+    box-shadow:
+      inset 0 1px 0 0 var(--lt-glass-rim),
+      inset 0 0 0 1px var(--lt-color-primary),
+      0 8px 20px -14px hsl(215 45% 18% / 0.5);
+    transition:
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @media (hover: hover) {
+    .lt-dl-store:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        inset 0 1px 0 0 var(--lt-glass-rim),
+        inset 0 0 0 1px var(--lt-color-primary),
+        0 14px 30px -16px hsl(215 45% 18% / 0.55);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lt-dl-store,
+    .lt-dl-store:hover {
+      transition: none;
+      transform: none;
+    }
+  }
+
+  /*
    * ── The changelog clamp ──
    *
    * One release note is a page of its own, and five of them per page made
@@ -662,9 +720,12 @@ const i18n = {
   import caretIconRaw from "@material-symbols/svg-400/outlined/keyboard_arrow_down.svg?raw";
   import msStoreIconRaw from "../../assets/icons/store-microsoft-24-filled.svg?raw";
 
-  const openInNewIcon = normalizeIconSvg(openInNewIconRaw, "text-base");
-  const openInNewTrailingIcon = normalizeIconSvg(openInNewIconRaw, "text-sm");
   const assetDownloadIcon = normalizeIconSvg(downloadIconRaw, "text-base shrink-0 mt-0.5");
+  /* The de-emphasized direct-download rows (the Apple DMG / Windows zip that sit
+   * below the store CTA): a smaller, muted glyph, so the store button above is
+   * the one that reads as "click me". Android / Linux keep assetDownloadIcon —
+   * there the direct download *is* the primary path. */
+  const directDownloadIcon = normalizeIconSvg(downloadIconRaw, "text-sm shrink-0 opacity-60");
   const changelogDownloadIcon = normalizeIconSvg(downloadIconRaw, "text-sm");
   /* The changelog's expand/collapse caret. It borrows `.lt-dl-caret` from the
    * drawer groups for the transition only — duration and curve — while its
@@ -722,10 +783,12 @@ const i18n = {
       externalFallback: dataset.i18nExternalFallback ?? "",
       recommended: dataset.i18nRecommended ?? "",
       archFilter: dataset.i18nArchFilter ?? "",
-      appleTestFlight: dataset.i18nAppleTestFlight ?? "",
+      appleStoreSubtitle: dataset.i18nAppleStoreSubtitle ?? "",
       appleDmg: dataset.i18nAppleDmg ?? "",
-      windowsStore: dataset.i18nWindowsStore ?? "",
+      appleDmgCaveat: dataset.i18nAppleDmgCaveat ?? "",
+      windowsStoreSubtitle: dataset.i18nWindowsStoreSubtitle ?? "",
       windowsZip: dataset.i18nWindowsZip ?? "",
+      windowsZipCaveat: dataset.i18nWindowsZipCaveat ?? "",
       noNotes: dataset.i18nNoNotes ?? "",
       loading: dataset.i18nLoading ?? "",
       empty: dataset.i18nEmpty ?? "",
@@ -940,25 +1003,50 @@ const i18n = {
         : statusBadge(statusText || copy.noData);
     }
 
-    /** Returns the external-link markup, or "" when the card has none. */
-    function externalLinkHtml(card) {
+    /**
+     * The store CTA — the Apple / Windows cards' one prominent action.
+     *
+     * TestFlight and the Microsoft Store are the *recommended* install path
+     * (signed, auto-updating, no Gatekeeper / SmartScreen / unzip dance), but the
+     * old small inline link read as just another hyperlink and sat above a pile of
+     * direct-download rows that looked more clickable — so visitors kept grabbing
+     * the unsigned DMG / zip and then could not open it. This inverts that: a
+     * full-width raised button (brand mark + a 推荐 eyebrow + the store label + a
+     * benefit subtitle) that is unmistakably the primary action, with the direct
+     * downloads demoted below it (see mutedAssetLinkHtml).
+     *
+     * Returns "" when the card has no external store URL (Android, Linux), which
+     * is what keeps the generic branch of cardAssetsHtml a no-op for them.
+     */
+    function storeCtaHtml(card) {
       const externalUrl = card.getAttribute("data-external-url") || "";
       if (!externalUrl) return "";
-      const externalLabel = card.getAttribute("data-external-label") || copy.externalFallback;
+      const platform = card.getAttribute("data-platform") || "";
+      const label = card.getAttribute("data-external-label") || copy.externalFallback;
+      const subtitle =
+        platform === "apple"
+          ? copy.appleStoreSubtitle
+          : platform === "windows"
+            ? copy.windowsStoreSubtitle
+            : "";
       /*
-       * The two store channels carry their brand marks: a lone grey arrow
-       * reads as "some hyperlink", while the TestFlight plane and the Store
-       * bag bring the channel's own colour and make each card's install
-       * entry point recognisable at a glance. The marks keep their fills on
-       * their paths, so normalizeIconSvg's root fill=currentColor cannot
-       * grey them out; the arrow moves to the tail as the external-link
-       * affordance. Any other external URL keeps the old arrow-first shape.
+       * The brand marks carry their own colours (TestFlight's blue squircle, the
+       * Store bag's Fluent blue) — exactly what a store badge should do, and why
+       * a lone grey arrow was replaced. normalizeIconSvg stamps fill=currentColor
+       * on the root, but the marks keep the fills on their own paths, so the
+       * colour survives; `sizeClass` scales the 1em glyph up to badge size. A URL
+       * that is neither store falls back to the arrow.
        */
-      const brand = brandIconHtml(externalUrl);
-      return `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 py-1.5 text-body-small text-primary hover:underline no-underline">
-          ${brand || openInNewIcon}
-          <span>${escapeHtml(externalLabel)}</span>
-          ${brand ? `<span class="text-outline">${openInNewTrailingIcon}</span>` : ""}
+      const icon =
+        brandIconHtml(externalUrl, "text-[26px]") ||
+        normalizeIconSvg(openInNewIconRaw, "text-[22px] shrink-0");
+      return `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="lt-dl-store state-layer no-underline">
+          ${icon}
+          <span class="min-w-0 flex-1 flex flex-col gap-1">
+            <span class="self-start px-2 py-0.5 rounded-sm bg-primary-container text-on-primary-container text-label-small leading-none">${escapeHtml(copy.recommended)}</span>
+            <span class="text-title-small text-on-surface">${escapeHtml(label)}</span>
+            ${subtitle ? `<span class="text-body-small text-on-surface-variant">${escapeHtml(subtitle)}</span>` : ""}
+          </span>
         </a>`;
     }
 
@@ -984,15 +1072,16 @@ const i18n = {
     const TESTFLIGHT_ICON_RAW =
       '<svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5.5" style="fill:var(--lt-tf-square,#007aff)"/><g style="fill:var(--lt-tf-blade,#fff)"><path d="M12 12.4C10.9 11.6 10.25 10.4 10.3 9.0L10.4 6.6C10.45 5.3 11.1 4.4 12 4.4C12.9 4.4 13.55 5.3 13.6 6.6L13.7 9.0C13.75 10.4 13.1 11.6 12 12.4Z"/><path d="M12 12.4C10.9 11.6 10.25 10.4 10.3 9.0L10.4 6.6C10.45 5.3 11.1 4.4 12 4.4C12.9 4.4 13.55 5.3 13.6 6.6L13.7 9.0C13.75 10.4 13.1 11.6 12 12.4Z" transform="rotate(120 12 12.4)"/><path d="M12 12.4C10.9 11.6 10.25 10.4 10.3 9.0L10.4 6.6C10.45 5.3 11.1 4.4 12 4.4C12.9 4.4 13.55 5.3 13.6 6.6L13.7 9.0C13.75 10.4 13.1 11.6 12 12.4Z" transform="rotate(240 12 12.4)"/><circle cx="12" cy="12.4" r="1.2"/></g></svg>';
 
-    function brandIconHtml(url) {
+    function brandIconHtml(url, sizeClass) {
+      const size = sizeClass || "text-lg";
       if (url.includes("testflight.apple.com")) {
-        return normalizeIconSvg(TESTFLIGHT_ICON_RAW, "text-lg shrink-0 lt-tf-mark");
+        return normalizeIconSvg(TESTFLIGHT_ICON_RAW, `${size} shrink-0 lt-tf-mark`);
       }
       if (url.includes("apps.microsoft.com")) {
         // Fluent's own light/dark brand pair: the light-mode #0078D4 reads
         // well on the glass panel but sinks into the dark one, where Fluent
         // itself switches to the brighter accent.
-        return normalizeIconSvg(msStoreIconRaw, "text-lg shrink-0 text-[#0078D4] dark:text-[#4CC2FF]");
+        return normalizeIconSvg(msStoreIconRaw, `${size} shrink-0 text-[#0078D4] dark:text-[#4CC2FF]`);
       }
       return "";
     }
@@ -1051,6 +1140,28 @@ const i18n = {
         </a>`;
     }
 
+    /**
+     * The de-emphasized direct-download row, for the Apple DMG and Windows zip
+     * that sit *below* the store CTA. Same link and same target as the prominent
+     * assetLinkHtml, but muted: on-surface-variant rather than primary, a smaller
+     * dimmed glyph, one line instead of two, and no 推荐 badge — that signal now
+     * belongs to the store button above, and repeating it on the unsigned /
+     * needs-extracting fallback is exactly what sent visitors the wrong way
+     * before. The full filename stays on the tooltip. Android / Linux keep
+     * assetLinkHtml, because there the direct download *is* the primary path.
+     */
+    function mutedAssetLinkHtml(a) {
+      const title =
+        a.label ||
+        [a.archLabel || a.arch, a.formatLabel].filter(Boolean).join(" · ") ||
+        a.name;
+      return `<a href="${escapeHtml(a.url)}" title="${escapeHtml(a.name)}" class="flex items-center gap-1.5 text-body-small text-on-surface-variant hover:text-primary hover:underline no-underline" download>
+          ${directDownloadIcon}
+          <span class="truncate min-w-0">${escapeHtml(title)}</span>
+          <span class="shrink-0 text-outline">· ${formatSize(a.size)}</span>
+        </a>`;
+    }
+
     function archSwitcherHtml(id) {
       const seg = (key) => {
         const active = archChoice[id] === key;
@@ -1062,57 +1173,57 @@ const i18n = {
     }
 
     /**
-     * The Apple card carries two different distribution channels - the
-     * TestFlight link and (since DMGs ship on releases) direct-download
-     * assets - which read as one confusing pile when listed flat. Split them
-     * into labeled sections; the outer .platform-assets space-y then spaces
-     * the sections, and each section keeps the tight link rhythm.
+     * The Apple card carries two distribution channels that are NOT equals:
+     * TestFlight (signed, auto-updating, the recommended path) and the direct
+     * unsigned DMG (which trips Gatekeeper and needs the right-click → Open
+     * ritual). The old flat layout listed them under look-alike headers, so
+     * visitors kept picking the DMG. The store CTA therefore leads, full width
+     * and raised, and the DMG drops below a divider into muted rows with a
+     * caveat that names what it costs to use.
      * The asset label says macOS because DMGs are the only public Apple
      * asset; IPAs stay TestFlight-only.
      */
-    function appleCardHtml(installers, externalLink) {
-      let html = "";
-      if (externalLink) {
-        html += `<div class="space-y-1.5">
-          <p class="text-label-medium text-outline">${copy.appleTestFlight}</p>
-          ${externalLink}
-        </div>`;
-      }
+    function appleCardHtml(installers, storeCta) {
+      let html = storeCta;
       if (installers.length > 0) {
-        html += `<div class="space-y-1.5 ${externalLink ? "pt-2 border-t border-outline-variant" : ""}">
+        html += `<div class="space-y-1.5 ${storeCta ? "pt-3 border-t border-outline-variant" : ""}">
           <p class="text-label-medium text-outline">${copy.appleDmg}</p>
-          ${installers.map(assetLinkHtml).join("")}
+          ${installers.map(mutedAssetLinkHtml).join("")}
+          <p class="text-body-small text-outline">${copy.appleDmgCaveat}</p>
         </div>`;
       }
       return html;
     }
 
     /**
-     * Windows ships two channels the same way Apple does: the Microsoft Store
-     * MSIX (Store-signed, never a GitHub asset) and the portable zip. Mirror
-     * `appleCardHtml`, but the zip section still gets the x64 / arm64 switcher
-     * the Apple DMG never needed.
+     * Windows mirrors Apple: the Microsoft Store MSIX (Store-signed,
+     * auto-updating, never a GitHub asset) leads as the store CTA, and the
+     * portable zip — which needs extracting and trips SmartScreen — drops below a
+     * divider into muted rows with a caveat. The zip section still gets the
+     * x64 / arm64 switcher the Apple DMG never needed, and the Store version line
+     * still hangs off the CTA (part of the stored html, so the switcher's repaint
+     * does not drop it).
      */
-    function windowsCardHtml(installers, externalLink) {
+    function windowsCardHtml(installers, storeCta) {
       const { switcher, list } = applyArchFilter("windows", installers);
       let html = "";
-      if (externalLink) {
+      if (storeCta) {
         /* The empty version line is a placeholder, not something
          * loadMsStoreVersion appends: the arch switcher repaints this whole
          * container from the stored html string, which would drop an appended
          * node. The filler only ever writes into an element the template
          * already put here. */
         html += `<div class="space-y-1.5">
-          <p class="text-label-medium text-outline">${copy.windowsStore}</p>
-          ${externalLink}
+          ${storeCta}
           <p class="text-body-small text-outline hidden" data-msstore-version></p>
         </div>`;
       }
       if (list.length > 0) {
-        html += `<div class="space-y-1.5 ${externalLink ? "pt-2 border-t border-outline-variant" : ""}">
+        html += `<div class="space-y-1.5 ${storeCta ? "pt-3 border-t border-outline-variant" : ""}">
           <p class="text-label-medium text-outline">${copy.windowsZip}</p>
           ${switcher}
-          ${list.map(assetLinkHtml).join("")}
+          ${list.map(mutedAssetLinkHtml).join("")}
+          <p class="text-body-small text-outline">${copy.windowsZipCaveat}</p>
         </div>`;
       }
       return html;
@@ -1146,11 +1257,11 @@ const i18n = {
       };
     }
 
-    function cardAssetsHtml(id, installers, externalLink) {
-      if (id === "apple") return appleCardHtml(installers, externalLink);
-      if (id === "windows") return windowsCardHtml(installers, externalLink);
+    function cardAssetsHtml(id, installers, storeCta) {
+      if (id === "apple") return appleCardHtml(installers, storeCta);
+      if (id === "windows") return windowsCardHtml(installers, storeCta);
       const { switcher, list } = applyArchFilter(id, installers);
-      return externalLink + switcher + list.map(assetLinkHtml).join("");
+      return storeCta + switcher + list.map(assetLinkHtml).join("");
     }
 
     /**
@@ -1245,7 +1356,7 @@ const i18n = {
           const assetsEl = card.querySelector(".platform-assets");
           if (!badges || !assetsEl) return;
           paintBadges(badges, "", false, copy.noData);
-          paintAssets(assetsEl, externalLinkHtml(card));
+          paintAssets(assetsEl, storeCtaHtml(card));
         });
         void loadTestFlightVersion();
         void loadMsStoreVersion();
@@ -1290,9 +1401,9 @@ const i18n = {
           platformAssets = platformAssets.concat(byPlatform[source] || []);
         }
         const installers = platformAssets.filter((a) => !a.meta);
-        const externalLink = externalLinkHtml(card);
-        cardAssetState[id] = { installers, externalLink, assetsEl };
-        paintAssets(assetsEl, cardAssetsHtml(id, installers, externalLink));
+        const storeCta = storeCtaHtml(card);
+        cardAssetState[id] = { installers, storeCta, assetsEl };
+        paintAssets(assetsEl, cardAssetsHtml(id, installers, storeCta));
         paintMsStoreVersion();
 
         if (Object.prototype.hasOwnProperty.call(ARCH_FILTER_DEFAULT, id)) {
@@ -1316,7 +1427,7 @@ const i18n = {
               archChoice[id] = nextArch;
               paintAssets(
                 state.assetsEl,
-                cardAssetsHtml(id, state.installers, state.externalLink),
+                cardAssetsHtml(id, state.installers, state.storeCta),
               );
               paintMsStoreVersion();
               if (hadFocus) {
