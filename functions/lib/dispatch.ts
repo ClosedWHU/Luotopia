@@ -25,6 +25,7 @@
  */
 
 import { onRequestGet as appstoreLatestGet } from "../api/appstore/latest";
+import { onRequestGet as msstoreLatestGet } from "../api/msstore/latest";
 import { onRequestGet as releaseDownloadGet } from "../api/releases/download/[[path]]";
 import { onRequestGet as releasesIndexGet } from "../api/releases/index";
 import { onRequestGet as releasesLatestGet } from "../api/releases/latest";
@@ -80,6 +81,9 @@ export async function routeApiRequest(
   }
   if (pathname === "/api/appstore/latest") {
     return appstoreLatestGet({ request, env });
+  }
+  if (pathname === "/api/msstore/latest") {
+    return msstoreLatestGet({ request, env });
   }
   if (pathname === "/api/releases") {
     return releasesIndexGet({ request, env });
