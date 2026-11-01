@@ -1,4 +1,4 @@
-/** `/hot-update/*` — EdgeOne Makers entry. Thin delegator; see `../delegate.ts`. */
+/** `/hot-update/manifest.json` — EdgeOne Makers entry. Thin delegator; see `../delegate.ts`. */
 
 import { delegate, type EdgeOneContext } from "../delegate";
 
