@@ -145,6 +145,20 @@ async function bundleEdgeone() {
    * the function bundles then merge in beside it.
    */
   await cp(join(ROOT, 'dist'), target, { recursive: true });
+  /*
+   * Drop the static /hot-update/ copy so the [[default]] catch-all owns the
+   * prefix. EdgeOne, empirically, serves a prefix from its static files whenever
+   * the output directory has that directory and does NOT fall through to a
+   * same-prefix edge function for a file that is absent — it just 404s. So while
+   * dist/hot-update/ (scripts, rare assets) was present, the manifest/catalog
+   * proxy never ran: /hot-update/manifest.json hit the static handler and 404'd.
+   * With the static copy gone, /hot-update/ is a pure-function prefix — every
+   * request hits the catch-all and is proxied from the canonical origin, which
+   * serves scripts and rare assets statically and the two R2-backed files from
+   * the bucket. (This is why the earlier [[path]] attempt failed twice over: the
+   * name was wrong AND the static copy shadowed it.)
+   */
+  await rm(join(target, 'hot-update'), { recursive: true, force: true });
   for (const { entry, out } of EDGEONE_ENTRIES) {
     const outfile = join(target, out);
     await mkdir(dirname(outfile), { recursive: true });
