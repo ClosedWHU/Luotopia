@@ -118,10 +118,22 @@ delta 压缩的目录 blob 与随之而来的 bot commit 就不再进仓库历�
    与 `publish-hot-update.yml` 用 `wrangler r2 object get/put --remote` 搬运这两个
    文件，account id 从 secret 读取（不再内联）。
 
-EdgeOne / ESA 镜像**不需要** R2 凭证：它们经 `functions/lib/hot-update-origin.ts`
-从源站 `www.whu.sb`（即上面的 Cloudflare 函数）代理 `/hot-update/*` 并在各自边缘
-缓存，与 gstatic 字体代理同构。镜像重新部署（`npm run build:edgeone` /
-`build:esa`）后即生效。
+EdgeOne / ESA 镜像**不需要** R2 凭证：两者都从源站 `www.whu.sb`（即上面的
+Cloudflare 函数）代理这两个文件并在边缘缓存，但机制不同——
+
+- **ESA**：非静态路径统一走共享 `dispatch.ts` → `functions/lib/hot-update-origin.ts`
+  （与 gstatic 代理同构）。
+- **EdgeOne**：它只把**无扩展名**路径交给 edge function，`.json`/`.gz` 这类带扩展名
+  路径只按静态文件处理（`[[path]]`/`[[default]]` catch-all 与精确路由实测都不路由，
+  只有 `/api/status` 这种无扩展名精确路由生效）。所以改用**项目根目录的
+  `middleware.ts`**——EdgeOne 中间件在静态路由**之前**运行、可直接返回 Response，
+  用 `matcher` 钉住这两个路径代理回源；scripts / rare assets 不匹配 matcher，仍走
+  静态副本。⚠️ `middleware.ts` 必须放在**项目根**（与 `edgeone.json` 同级）：放到
+  构建输出根目录会被 EdgeOne 当普通静态文件（`/middleware.js` 可下载）而不执行。
+
+镜像重新部署（`npm run build:edgeone` / `build:esa`）后即生效。（同一限制也意味着
+EdgeOne 上既有的 `fonts/gstatic/*`、`api/releases/download/*` catch-all 其实一直没
+生效——它们同样需要改用 middleware，属独立问题。）
 
 > [!CAUTION]
 > 密钥只进 Pages 的 secret，不进仓库。`.dev.vars` 与 `.env*`（除 `.example`）都已

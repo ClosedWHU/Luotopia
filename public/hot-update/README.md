@@ -14,7 +14,7 @@ hot-update/
     └── water-electric-fee-room-directory.json.gz  # 手动——提交到 git，静态发布
 ```
 
-**两类文件，两种发布路径。** 解析脚本与手动数据资产照旧提交到 git、随官网构建静态发布。而 `manifest.json` 与 `model-metadata-catalog.json.gz` 不再入 git：目录是一份 ~137 KB 的 gzip，几乎无法 delta 压缩，且上游模型列表天天在动，过去等于每天往仓库塞一个 blob + 一条 bot commit。二者现在发布到 R2（桶 `whu-sb-bucket`，key 前缀 `hot-update/`），在 Cloudflare 由 [functions/hot-update/[[path]].ts](../../functions/hot-update/%5B%5Bpath%5D%5D.ts) 通过 `HOT_UPDATE_R2` binding 读取，在 EdgeOne / ESA 镜像由 [functions/lib/hot-update-origin.ts](../../functions/lib/hot-update-origin.ts) 从源站 `www.whu.sb` 代理并边缘缓存（与 gstatic 字体代理同构）。URL 路径不变，App 端无需改动。
+**两类文件，两种发布路径。** 解析脚本与手动数据资产照旧提交到 git、随官网构建静态发布。而 `manifest.json` 与 `model-metadata-catalog.json.gz` 不再入 git：目录是一份 ~137 KB 的 gzip，几乎无法 delta 压缩，且上游模型列表天天在动，过去等于每天往仓库塞一个 blob + 一条 bot commit。二者现在发布到 R2（桶 `whu-sb-bucket`，key 前缀 `hot-update/`），在 Cloudflare 由 [functions/hot-update/[[path]].ts](../../functions/hot-update/%5B%5Bpath%5D%5D.ts) 通过 `HOT_UPDATE_R2` binding 读取，在 ESA 镜像由 [functions/lib/hot-update-origin.ts](../../functions/lib/hot-update-origin.ts)（经共享 dispatch）从源站 `www.whu.sb` 代理并边缘缓存；EdgeOne 因平台只把**无扩展名**路径交给 edge function（`.json`/`.gz` 只按静态文件处理），改由项目根的 [middleware.ts](../../middleware.ts)——在静态路由之前运行——按 matcher 代理这两个路径。URL 路径不变，App 端无需改动。
 
 `manifest.json` 由 [tools/generate-hot-update-manifest.mjs](../../tools/generate-hot-update-manifest.mjs) 生成并签名，唯一写入方是两个工作流：[sync-model-metadata.yml](../../.github/workflows/sync-model-metadata.yml)（每日重建目录后发布）与 [publish-hot-update.yml](../../.github/workflows/publish-hot-update.yml)（脚本或手动资产变更后重签发布）。手工编辑无效，签名失效的清单会被客户端整体丢弃。
 

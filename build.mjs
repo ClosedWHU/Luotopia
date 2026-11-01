@@ -61,16 +61,18 @@ const EDGEONE_ENTRIES = [
     entry: 'platform/edgeone/fonts/gstatic/[[path]].ts',
     out: 'edge-functions/fonts/gstatic/[[path]].js',
   },
-  // No /hot-update/ entry, deliberately. EdgeOne Makers routes extension-bearing
-  // paths (.json, .gz, .js, .ttf) to static-file handling ONLY and never to an
-  // edge function — verified empirically: a [[path]] catch-all, a [[default]]
-  // catch-all, and exact manifest.json / model-metadata-catalog.json.gz routes
-  // all returned EdgeOne's bare 404 (static present or not), while the
-  // extension-less /api/status routes fine. So the two R2-backed files cannot be
-  // proxied on this mirror. EdgeOne serves the committed scripts and rare assets
-  // statically, and the app fails over to ESA (first in its mirror order) or the
-  // origin for manifest.json / the catalog. See functions/lib/hot-update-origin.ts
-  // (the ESA/proxy path) and the hot-update note in docs/deployment.md.
+  // No /hot-update/ entry here, deliberately. EdgeOne Makers routes
+  // extension-bearing paths (.json, .gz, .js, .ttf) to static-file handling ONLY
+  // and never to an edge function — verified: a [[path]] catch-all, a [[default]]
+  // catch-all, and exact manifest.json / model-metadata-catalog.json.gz routes all
+  // return EdgeOne's bare 404 (static present or not), while the extension-less
+  // /api/status routes fine. The two R2-backed files are served instead by the
+  // project-root middleware (middleware.ts), which runs BEFORE static routing and
+  // may return a Response directly, so it proxies exactly those two paths from the
+  // origin; the committed scripts and rare assets are unmatched by its matcher and
+  // keep serving from the static copy. See middleware.ts and the hot-update note
+  // in docs/deployment.md. (The same limitation is why the gstatic and
+  // releases/download catch-alls above do not actually run on EdgeOne.)
 ];
 
 /**
