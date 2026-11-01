@@ -61,23 +61,16 @@ const EDGEONE_ENTRIES = [
     entry: 'platform/edgeone/fonts/gstatic/[[path]].ts',
     out: 'edge-functions/fonts/gstatic/[[path]].js',
   },
-  {
-    // Exact routes, not a catch-all. EdgeOne only reliably routes exact function
-    // files here: neither a `[[path]]` nor a `[[default]]` catch-all registered
-    // (every /hot-update/* miss returned EdgeOne's bare 404, and a probe proved
-    // the function never ran), while the exact route /api/status works. These two
-    // R2-backed files have no static copy in dist, so they do not conflict with
-    // the static /hot-update/ tree and route to these functions; the committed
-    // scripts and rare assets keep serving statically. The file names are
-    // multi-dot (manifest.json.ts -> manifest.json.js); EdgeOne strips only the
-    // trailing .js, so the route is /hot-update/manifest.json.
-    entry: 'platform/edgeone/hot-update/manifest.json.ts',
-    out: 'edge-functions/hot-update/manifest.json.js',
-  },
-  {
-    entry: 'platform/edgeone/hot-update/assets/model-metadata-catalog.json.gz.ts',
-    out: 'edge-functions/hot-update/assets/model-metadata-catalog.json.gz.js',
-  },
+  // No /hot-update/ entry, deliberately. EdgeOne Makers routes extension-bearing
+  // paths (.json, .gz, .js, .ttf) to static-file handling ONLY and never to an
+  // edge function — verified empirically: a [[path]] catch-all, a [[default]]
+  // catch-all, and exact manifest.json / model-metadata-catalog.json.gz routes
+  // all returned EdgeOne's bare 404 (static present or not), while the
+  // extension-less /api/status routes fine. So the two R2-backed files cannot be
+  // proxied on this mirror. EdgeOne serves the committed scripts and rare assets
+  // statically, and the app fails over to ESA (first in its mirror order) or the
+  // origin for manifest.json / the catalog. See functions/lib/hot-update-origin.ts
+  // (the ESA/proxy path) and the hot-update note in docs/deployment.md.
 ];
 
 /**
@@ -149,20 +142,6 @@ async function bundleEdgeone() {
    * the function bundles then merge in beside it.
    */
   await cp(join(ROOT, 'dist'), target, { recursive: true });
-  /*
-   * Drop the static /hot-update/ copy so the exact-route functions can own the
-   * two R2-backed paths. EdgeOne serves a prefix from its static files whenever
-   * the output directory has that directory and does NOT route a same-prefix edge
-   * function for a file that is absent — it just 404s. So with dist/hot-update/
-   * present, the exact-route manifest.json / catalog functions were shadowed and
-   * 404'd (and a catch-all never registered under either [[path]] or [[default]]).
-   * Without the static copy the exact routes are the only match and proxy from the
-   * origin. Trade-off: the committed scripts and rare assets are no longer static
-   * on this mirror, so EdgeOne 404s them and the app fails over to ESA (first in
-   * its mirror order) / the origin — which is what it already does for the
-   * manifest, so hot-updates are unaffected.
-   */
-  await rm(join(target, 'hot-update'), { recursive: true, force: true });
   for (const { entry, out } of EDGEONE_ENTRIES) {
     const outfile = join(target, out);
     await mkdir(dirname(outfile), { recursive: true });
