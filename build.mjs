@@ -61,16 +61,17 @@ const EDGEONE_ENTRIES = [
     entry: 'platform/edgeone/fonts/gstatic/[[path]].ts',
     out: 'edge-functions/fonts/gstatic/[[path]].js',
   },
-  // No /hot-update/ entry, deliberately. EdgeOne Makers routes extension-bearing
-  // paths (.json, .gz, .js, .ttf) to static-file handling ONLY and never to an
-  // edge function — verified empirically: a [[path]] catch-all, a [[default]]
-  // catch-all, and exact manifest.json / model-metadata-catalog.json.gz routes
-  // all returned EdgeOne's bare 404 (static present or not), while the
-  // extension-less /api/status routes fine. So the two R2-backed files cannot be
-  // proxied on this mirror. EdgeOne serves the committed scripts and rare assets
-  // statically, and the app fails over to ESA (first in its mirror order) or the
-  // origin for manifest.json / the catalog. See functions/lib/hot-update-origin.ts
-  // (the ESA/proxy path) and the hot-update note in docs/deployment.md.
+  {
+    // Multi-level catch-all for /hot-update/*, spelled `[[default]]` per
+    // EdgeOne's own routing docs (EdgeOne does not register Cloudflare's
+    // `[[path]]`). Paired with dropping the static /hot-update/ copy below:
+    // EdgeOne serves a prefix from static whenever the output dir has that
+    // directory and never falls through to a same-prefix function, so the static
+    // copy must go or it shadows this catch-all. With it gone, every
+    // /hot-update/* request hits the catch-all and is proxied from the origin.
+    entry: 'platform/edgeone/hot-update/[[default]].ts',
+    out: 'edge-functions/hot-update/[[default]].js',
+  },
 ];
 
 /**
@@ -142,6 +143,13 @@ async function bundleEdgeone() {
    * the function bundles then merge in beside it.
    */
   await cp(join(ROOT, 'dist'), target, { recursive: true });
+  // Drop the static /hot-update/ copy so the [[default]] catch-all (registered in
+  // EDGEONE_ENTRIES below) owns the prefix. EdgeOne serves a prefix from static
+  // whenever the output dir has that directory and never falls through to a
+  // same-prefix function, so leaving dist/hot-update/ in place shadows the
+  // catch-all and the R2-backed manifest/catalog 404. Without it, every
+  // /hot-update/* request reaches the catch-all and is proxied from the origin.
+  await rm(join(target, 'hot-update'), { recursive: true, force: true });
   for (const { entry, out } of EDGEONE_ENTRIES) {
     const outfile = join(target, out);
     await mkdir(dirname(outfile), { recursive: true });
