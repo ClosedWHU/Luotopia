@@ -147,6 +147,21 @@ async function bundleEdgeone() {
     await mkdir(dirname(outfile), { recursive: true });
     await build({ ...COMMON, entryPoints: [entry], outfile, format: 'esm' });
   }
+  /*
+   * Middleware at the output root. EdgeOne runs middleware before static
+   * routing, which is the ONLY way to serve the two R2-backed /hot-update files
+   * here: the platform routes extension-bearing paths (.json, .gz) to static
+   * handling and never to an edge function, so the dispatcher proxy that works on
+   * ESA cannot run as an EdgeOne function. The middleware matches just those two
+   * paths and proxies them; scripts and rare assets are unmatched and stay
+   * static. See platform/edgeone/middleware.ts.
+   */
+  await build({
+    ...COMMON,
+    entryPoints: ['platform/edgeone/middleware.ts'],
+    outfile: join(target, 'middleware.js'),
+    format: 'esm',
+  });
   // The Makers CLI expects a package.json next to the function folders in the
   // output directory; a minimal one is enough, and it must not carry the
   // devDependencies or the build would try to install them at the edge.
