@@ -53,26 +53,16 @@ const EDGEONE_ENTRIES = [
   { entry: 'platform/edgeone/api/appstore/latest.ts', out: 'edge-functions/api/appstore/latest.js' },
   { entry: 'platform/edgeone/api/releases/index.ts', out: 'edge-functions/api/releases/index.js' },
   { entry: 'platform/edgeone/api/releases/latest.ts', out: 'edge-functions/api/releases/latest.js' },
-  {
-    entry: 'platform/edgeone/api/releases/download/[[path]].ts',
-    out: 'edge-functions/api/releases/download/[[path]].js',
-  },
-  {
-    entry: 'platform/edgeone/fonts/gstatic/[[path]].ts',
-    out: 'edge-functions/fonts/gstatic/[[path]].js',
-  },
-  // No /hot-update/ entry here, deliberately. EdgeOne Makers routes
-  // extension-bearing paths (.json, .gz, .js, .ttf) to static-file handling ONLY
-  // and never to an edge function — verified: a [[path]] catch-all, a [[default]]
-  // catch-all, and exact manifest.json / model-metadata-catalog.json.gz routes all
-  // return EdgeOne's bare 404 (static present or not), while the extension-less
-  // /api/status routes fine. The two R2-backed files are served instead by the
-  // project-root middleware (middleware.ts), which runs BEFORE static routing and
-  // may return a Response directly, so it proxies exactly those two paths from the
-  // origin; the committed scripts and rare assets are unmatched by its matcher and
-  // keep serving from the static copy. See middleware.ts and the hot-update note
-  // in docs/deployment.md. (The same limitation is why the gstatic and
-  // releases/download catch-alls above do not actually run on EdgeOne.)
+  // No extension-bearing entries, deliberately. EdgeOne routes paths with an
+  // extension (.json/.gz/.js/.ttf/.apk…) to static-file handling and NEVER to an
+  // edge function — a [[path]] catch-all, a [[default]] catch-all, and exact
+  // multi-dot routes all return its bare 404 (verified live), while the four
+  // extension-less routes above work. This site's three extension-bearing dynamic
+  // routes — /hot-update/manifest.json + the catalog, /fonts/gstatic/*, and
+  // /api/releases/download/* — are served instead by the project-root
+  // middleware.ts, which runs BEFORE static routing and reverse-proxies them from
+  // the origin. So there are no edge-function entries for them here (the old
+  // gstatic / releases-download [[path]] entries were dead — they never ran).
 ];
 
 /**

@@ -28,55 +28,52 @@ outweighs the benefit (see [404 handling](#404-handling)).
 | Step | Purpose | On failure |
 |------|---------|-----------|
 | `check:aasa` | Validates `public/.well-known/apple-app-site-association` | Build aborts |
-| `hot-update:generate` | Generates and signs `public/hot-update/manifest.json` | Build aborts without a signing key |
+| `hot-update:verify-scripts` | Runs every parser script's test vectors (does **not** generate or sign a manifest) | Build aborts if a script lacks a test vector or fails it |
 | `scales:generate` | Generates `public/scales/manifest.json` (unsigned) | Build aborts on invalid scale data |
 
-So `HOT_UPDATE_ED25519_PRIVATE_KEY` is a **required** secret rather than an
-optional one — but only for production builds, see below.
+The build itself **no longer signs a manifest**: `prebuild` runs only
+`hot-update:verify-scripts` (every parser script's test vectors; the build aborts if one
+is missing or fails). The manifest and the model catalog now live in R2, and signing
+happens only in the two GitHub Actions workflows `sync-model-metadata.yml` and
+`publish-hot-update.yml`, both of which run on `main` alone (schedule / push). So:
 
-### PR preview builds
+- `HOT_UPDATE_ED25519_PRIVATE_KEY` is no longer a Pages environment variable but a
+  **GitHub Actions secret**. Pages builds — PR previews included — never need it, and the
+  old `HOT_UPDATE_ALLOW_UNSIGNED` / `HOT_UPDATE_PRODUCTION_BRANCH` "unsigned preview"
+  mechanism is **retired**: the build does not sign, so PR previews are green by default.
+  (The unsigned branch still exists in the generator; the build just never triggers it.)
 
-Pages builds a preview deployment for every pull request. Preview environments get no
-secrets by default, so `hot-update:generate` throws and the whole build goes red —
-every PR carries a failing check, and a wall of red Xs teaches people to stop reading
-them.
+This resolves the original security concern structurally: the key was the one secret in
+the repo whose leak is remote code execution (the parser scripts it signs run inside
+**every installed app**); it now lives only in main-branch workflows and is **never
+exposed to PR code**, rather than depending on a "do not set it in Preview" discipline.
+The App Store Connect group likewise stays Production-only.
 
-**Do not put `HOT_UPDATE_ED25519_PRIVATE_KEY` in the Preview environment.** This is
-the one secret in the repository whose leak is remote code execution: the parser
-scripts it signs run inside **every installed app**. A preview build executes the PR's
-own code, so anyone who can open a pull request can add a line to the workflow or a
-build script and read the key out. An App Store Connect key can be revoked and
-reissued; this one means rotating the signing public key, shipping a release, and
-waiting for every client to update.
+### Hot-update R2 (manifest and model catalog)
 
-The fix is to make the requirement conditional rather than to relax it: **nobody reads
-a preview deployment's manifest**, so there is nothing to sign. Add one variable to the
-Pages **Preview** environment (Preview only — not "All environments"):
+The signed `manifest.json` and the daily-rebuilt `model-metadata-catalog.json.gz` are not
+in git; they are published to the R2 bucket `whu-sb-bucket` (keys under `hot-update/`),
+which keeps a ~137 KB never-delta-compresses gzip and its daily bot commit out of the
+history. See [public/hot-update/README.md](../public/hot-update/README.md). Two things are
+required:
 
-```
-HOT_UPDATE_ALLOW_UNSIGNED=1
-```
+1. **Pages R2 binding** (Cloudflare origin read): Pages → `luotopia-homepage` → Settings →
+   Functions → R2 bindings, add `HOT_UPDATE_R2` → `whu-sb-bucket`.
+   `functions/hot-update/[[path]].ts` reads the two files through it.
+2. **GitHub Actions secrets `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`**: the token
+   needs R2 write for the account; the two workflows move the files with
+   `wrangler r2 object get/put --remote`.
 
-With it set, a keyless build will:
-
-- still run every validation — the test-vector completeness check, checksums, version
-  arithmetic — so a PR that adds a parser script without a test vector fails exactly as
-  it would in production
-- **not** write `manifest.json`, leaving the committed signed manifest in place. Not
-  writing it, rather than writing an unsigned one, is the point: an unsigned manifest
-  would deploy something every app rejects, and would leave a ready-made unsigned file
-  sitting in the build directory
-- print explicit warnings
-
-Production behaviour is unchanged: no key, no build.
-
-There is a second guard, for the case where someone sets the variable on **All
-environments** to save a click. Cloudflare injects `CF_PAGES` and `CF_PAGES_BRANCH`, so
-the script refuses an unsigned build when it finds itself on the production branch
-(override the name with `HOT_UPDATE_PRODUCTION_BRANCH`, default `main`). Without that,
-one dashboard mistake would silently stop production manifests being signed — scripts
-change, the manifest is never re-signed, hot updates stop reaching clients, and the
-build stays green.
+The mirrors need no R2 credentials — they proxy the two files from the origin
+(`www.whu.sb`) and edge-cache them, but by different mechanisms: **ESA** routes every
+non-static path through the shared `dispatch.ts` → `functions/lib/hot-update-origin.ts`;
+**EdgeOne** routes extension-bearing paths to static-file handling only (never to an edge
+function), so it uses the project-root **`middleware.ts`**, which runs before static
+routing and proxies them (its matcher also covers `/fonts/gstatic/*` and
+`/api/releases/download/*`, whose edge-function catch-alls likewise never ran there).
+`middleware.ts` must sit at the **project root** (beside `edgeone.json`) — a copy at the
+build-output root is served as a static `/middleware.js`, not executed. Mirrors pick all
+this up on redeploy (`npm run build:edgeone` / `build:esa`).
 
 ### What does not work on a preview
 
@@ -98,9 +95,7 @@ them in `.dev.vars` (see `.dev.vars.example`); `.env.example` is the full list.
 
 | Variable | Required | Notes |
 |----------|----------|-------|
-| `HOT_UPDATE_ED25519_PRIVATE_KEY` | Yes | base64 PKCS#8 Ed25519 private key, generated by `npm run hot-update:init-key`. **Production only** |
-| `HOT_UPDATE_ALLOW_UNSIGNED` | No | `1` permits a keyless build (validate only — no signature, no manifest write). **Preview only**, see [PR preview builds](#pr-preview-builds) |
-| `HOT_UPDATE_PRODUCTION_BRANCH` | No | Production branch name, default `main`; used to refuse unsigned builds on it |
+| ~~`HOT_UPDATE_*`~~ | — | No longer Pages variables. The signing key `HOT_UPDATE_ED25519_PRIVATE_KEY` and the R2 credentials `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` are **GitHub Actions secrets** used by the sync/publish workflows; `HOT_UPDATE_ALLOW_UNSIGNED` / `HOT_UPDATE_PRODUCTION_BRANCH` are retired (the build no longer signs). See [Hot-update R2](#hot-update-r2-manifest-and-model-catalog). |
 | `UPTIMEROBOT_API_KEY` | For `/status` | A Read-Only key is enough |
 | `GITHUB_TOKEN` | No | Raises the GitHub API limit for `/api/releases*` |
 | `REPO` | No | Defaults to `ClosedWHU/Luotopia` |
