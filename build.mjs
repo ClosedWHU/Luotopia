@@ -140,21 +140,6 @@ async function bundleEdgeone() {
    * the function bundles then merge in beside it.
    */
   await cp(join(ROOT, 'dist'), target, { recursive: true });
-  /*
-   * Drop the static /hot-update/ copy so the edge-function catch-all owns the
-   * whole prefix. EdgeOne routes a prefix to its static files whenever the output
-   * directory has that directory, and a static directory shadows a same-prefix
-   * `[[path]]` function — so with dist/hot-update/ present, EdgeOne served the
-   * committed scripts statically and 404'd the two R2-backed files
-   * (manifest.json, model-metadata-catalog.json.gz) that are no longer in the
-   * tree, never invoking the proxy. Removing the static copy makes /hot-update/
-   * a pure-function prefix like /fonts/gstatic/ (which has no static files and
-   * proxies fine): every /hot-update/* request now hits the catch-all and is
-   * proxied from the origin, which serves scripts/rare assets statically and the
-   * two R2 files from the bucket. ESA needs no such step — its single-routine
-   * model already runs the function for any path with no static file.
-   */
-  await rm(join(target, 'hot-update'), { recursive: true, force: true });
   for (const { entry, out } of EDGEONE_ENTRIES) {
     const outfile = join(target, out);
     await mkdir(dirname(outfile), { recursive: true });
