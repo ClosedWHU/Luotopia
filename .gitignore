@@ -41,6 +41,17 @@ pnpm-debug.log*
 # wrangler
 .wrangler/
 
+# Hot-update artifacts published to R2, not git. The signed manifest and the
+# daily-churning model-metadata catalog (a ~137 KB gzip that never
+# delta-compresses) are served from R2 by functions/hot-update/[[path]].ts and
+# proxied from there by the EdgeOne/ESA mirrors; the sync/publish workflows move
+# them with `wrangler r2 object get/put`. They stay on disk locally so the
+# generator can read them, but committing them put a blob and a bot commit in the
+# history every day. Parser scripts and the rare data assets beside them ARE
+# still committed. See public/hot-update/README.md.
+public/hot-update/manifest.json
+public/hot-update/assets/model-metadata-catalog.json.gz
+
 # claude agent config
 AGENTS.md
 CLAUDE.md

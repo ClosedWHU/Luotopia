@@ -124,6 +124,29 @@ Preview 环境没有运行时 secret，所以：
 （在架状态与元数据）和产品页内嵌态（版本号、发布日期）。后者解析失败时版本字段
 为 null，下载页只保留静态 Store 链接——两个源都无文档担保，降级是设计的一部分。
 
+### 热更新 R2（manifest 与模型目录）
+
+签名的 `manifest.json` 与每日重建的 `model-metadata-catalog.json.gz` 不入 git，
+发布在 R2 桶 `whu-sb-bucket`（key 前缀 `hot-update/`）。这样每天 ~137 KB、无法
+delta 压缩的目录 blob 与随之而来的 bot commit 就不再进仓库历史。见
+[public/hot-update/README.md](../public/hot-update/README.md)。
+
+需要两处配置：
+
+1. **Pages R2 binding**（Cloudflare 主站读取用）：Pages → `luotopia-homepage` →
+   Settings → Functions → R2 bindings，新增变量名 `HOT_UPDATE_R2` 绑定到
+   `whu-sb-bucket`。`functions/hot-update/[[path]].ts` 靠它读取这两个文件；缺失时
+   函数会回落到静态资源（而它们已被移出 git），因此**必须在部署前配好**。
+2. **GitHub Actions secrets `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`**
+   （工作流读写 R2 用）：token 需对该账户有 R2 写权限。`sync-model-metadata.yml`
+   与 `publish-hot-update.yml` 用 `wrangler r2 object get/put --remote` 搬运这两个
+   文件，account id 从 secret 读取（不再内联）。
+
+EdgeOne / ESA 镜像**不需要** R2 凭证：它们经 `functions/lib/hot-update-origin.ts`
+从源站 `www.whu.sb`（即上面的 Cloudflare 函数）代理 `/hot-update/*` 并在各自边缘
+缓存，与 gstatic 字体代理同构。镜像重新部署（`npm run build:edgeone` /
+`build:esa`）后即生效。
+
 > [!CAUTION]
 > 密钥只进 Pages 的 secret，不进仓库。`.dev.vars` 与 `.env*`（除 `.example`）都已
 > gitignore。历史上 `status` 子项目把带真实 key 的 `.env` 提交进了 git —— gitignore

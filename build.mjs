@@ -61,6 +61,14 @@ const EDGEONE_ENTRIES = [
     entry: 'platform/edgeone/fonts/gstatic/[[path]].ts',
     out: 'edge-functions/fonts/gstatic/[[path]].js',
   },
+  {
+    // Prefix catch-all, safe here for the reason the root one is not: the
+    // dispatcher proxies every /hot-update/* path from the canonical origin
+    // rather than falling through to EdgeOne's own static copy, so nothing sits
+    // unservable in front of an asset (the gstatic entry is the same shape).
+    entry: 'platform/edgeone/hot-update/[[path]].ts',
+    out: 'edge-functions/hot-update/[[path]].js',
+  },
 ];
 
 /**

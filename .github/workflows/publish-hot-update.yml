@@ -1,0 +1,84 @@
+name: Publish hot-update manifest
+
+# Regenerates and re-signs the hot-update manifest whenever a committed input to
+# it changes — a parser script, a rare manually-published data asset, or the
+# generator itself — and publishes it to R2. The model-metadata catalog is NOT
+# rebuilt here (that is sync-model-metadata.yml's daily job); this only reads the
+# catalog currently in R2 so its checksum carries into the regenerated manifest.
+#
+# This is the other half of moving the manifest out of git. Scripts and the rare
+# data assets are still committed (reviewed, and test-vector-gated at build time
+# by `hot-update:verify-scripts`), but the signed manifest that indexes their
+# checksums now lives in R2. Merging a change to any of them triggers this so the
+# published manifest tracks the deployed files.
+#
+# Deploy skew, and why it is safe: the static scripts ship via the Pages/mirror
+# build while the manifest ships here, so for a few seconds around a merge the two
+# can disagree. A client that fetches a manifest whose checksum does not match the
+# script bytes it downloads simply rejects them (fail-closed) and picks the pair
+# up on its next check — never a corrupt apply.
+#
+# The catalog and manifest are gitignored, so the `public/hot-update/assets/**`
+# filter below only ever matches the committed rare assets, never the daily
+# catalog (which is untracked and published solely by sync-model-metadata.yml).
+#
+# Secrets: HOT_UPDATE_ED25519_PRIVATE_KEY (sign), CLOUDFLARE_API_TOKEN (R2),
+# CLOUDFLARE_ACCOUNT_ID (the account that owns the bucket).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'public/hot-update/scripts/**'
+      - 'public/hot-update/assets/**'
+      - 'tools/generate-hot-update-manifest.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-hot-update
+  cancel-in-progress: false
+
+env:
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  R2_BUCKET: whu-sb-bucket
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Fetch published catalog + manifest from R2
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          npx wrangler r2 object get "$R2_BUCKET/hot-update/assets/model-metadata-catalog.json.gz" \
+            --file=public/hot-update/assets/model-metadata-catalog.json.gz --remote
+          npx wrangler r2 object get "$R2_BUCKET/hot-update/manifest.json" \
+            --file=public/hot-update/manifest.json --remote
+
+      - name: Regenerate and verify the signed manifest
+        run: |
+          npm run hot-update:generate
+          npm run hot-update:verify
+        env:
+          HOT_UPDATE_ED25519_PRIVATE_KEY: ${{ secrets.HOT_UPDATE_ED25519_PRIVATE_KEY }}
+
+      - name: Publish manifest to R2
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          npx wrangler r2 object put "$R2_BUCKET/hot-update/manifest.json" \
+            --file=public/hot-update/manifest.json \
+            --content-type=application/json --remote

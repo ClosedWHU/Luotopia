@@ -272,6 +272,47 @@ async function collectAssets(existing) {
   }));
 }
 
+/**
+ * Run one parser against its test vector in the QuickJS-equivalent sandbox the
+ * client uses (same injected globals, same `parse(JSON)` contract). Shared by
+ * the full manifest verification and the scripts-only build check.
+ */
+function runScriptTestVector(name, source, testInput, testExpect) {
+  try {
+    const context = vm.createContext({ JSON, Math, Number, String, Object, Array, RegExp, parseInt, parseFloat, isFinite, isNaN });
+    new vm.Script(source).runInContext(context, { timeout: 1000 });
+    const outputText = new vm.Script(`parse(${JSON.stringify(JSON.stringify(testInput))})`).runInContext(context, { timeout: 1000 });
+    const output = JSON.parse(outputText);
+    if (!matchesExpected(output, testExpect)) throw new Error('output mismatch');
+  } catch (error) {
+    throw new Error(`Test vector failed for ${name}: ${error.message}`);
+  }
+}
+
+/**
+ * Scripts-only check, run by `prebuild`.
+ *
+ * The signed manifest and the model-metadata catalog now live in R2, not in the
+ * repository, so a build checkout has neither on disk and the full
+ * [verifyManifest] cannot run here. What the build *does* ship is the parser
+ * scripts themselves — committed static files served straight off the origin and
+ * the mirrors — so the one thing worth gating a deploy on is that each still
+ * passes its test vector. That is exactly this: read every script from disk, run
+ * it against its registered vector, fail the build on any that does not. The
+ * manifest signature and asset checksums are verified where they are produced, in
+ * the publish workflow (see `--verify`).
+ */
+async function verifyScriptsOnly() {
+  const files = (await readdir(scriptsDir)).filter((name) => name.endsWith('.js')).sort();
+  for (const file of files) {
+    const name = file.slice(0, -3);
+    if (!tests[name]) throw new Error(`Missing test vector for ${name}`);
+    const source = await readFile(path.join(scriptsDir, file), 'utf8');
+    runScriptTestVector(name, source, tests[name].input, tests[name].expect);
+  }
+  console.log(`[hot-update] ${files.length} script(s) passed their test vectors`);
+}
+
 async function verifyManifest() {
   const privateKey = await loadPrivateKey();
   const publicKey = createPublicKey(privateKey);
@@ -280,16 +321,8 @@ async function verifyManifest() {
   delete manifest.signature;
   if (!verify(null, Buffer.from(canonical(manifest)), publicKey, signature)) throw new Error('Manifest signature verification failed');
   for (const script of manifest.scripts || []) {
-    try {
-      const source = await readFile(path.join(scriptsDir, `${script.name}.js`), 'utf8');
-      const context = vm.createContext({ JSON, Math, Number, String, Object, Array, RegExp, parseInt, parseFloat, isFinite, isNaN });
-      new vm.Script(source).runInContext(context, { timeout: 1000 });
-      const outputText = new vm.Script(`parse(${JSON.stringify(JSON.stringify(script.testInput))})`).runInContext(context, { timeout: 1000 });
-      const output = JSON.parse(outputText);
-      if (!matchesExpected(output, script.testExpect)) throw new Error('output mismatch');
-    } catch (error) {
-      throw new Error(`Test vector failed for ${script.name}: ${error.message}`);
-    }
+    const source = await readFile(path.join(scriptsDir, `${script.name}.js`), 'utf8');
+    runScriptTestVector(script.name, source, script.testInput, script.testExpect);
   }
   for (const asset of manifest.assets || []) {
     const fileName = `${asset.name}.json.gz`;
@@ -321,4 +354,5 @@ function matchesExpected(actual, expected) {
 
 if (process.argv.includes('--init-key')) await initKey();
 else if (process.argv.includes('--verify')) await verifyManifest();
+else if (process.argv.includes('--verify-scripts')) await verifyScriptsOnly();
 else await generate();

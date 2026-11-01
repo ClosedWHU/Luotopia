@@ -30,6 +30,7 @@ import { onRequestGet as releasesIndexGet } from "../api/releases/index";
 import { onRequestGet as releasesLatestGet } from "../api/releases/latest";
 import { onRequestGet as statusGet } from "../api/status";
 import { onRequestGet as gstaticFontGet } from "../fonts/gstatic/[[path]]";
+import { onRequestGet as hotUpdateOriginGet } from "./hot-update-origin";
 
 /** Every handler reads its config from this bag; each narrows it as needed. */
 export type ApiEnv = Record<string, string | undefined>;
@@ -58,7 +59,11 @@ export async function routeApiRequest(
   const pathname =
     url.pathname.length > 1 ? url.pathname.replace(/\/+$/, "") : url.pathname;
 
-  if (!pathname.startsWith("/api/") && !pathname.startsWith("/fonts/gstatic/")) {
+  if (
+    !pathname.startsWith("/api/") &&
+    !pathname.startsWith("/fonts/gstatic/") &&
+    !pathname.startsWith("/hot-update/")
+  ) {
     return null;
   }
   // Cloudflare's router only ever calls `onRequestGet` for these two methods;
@@ -97,6 +102,15 @@ export async function routeApiRequest(
   if (pathname === "/fonts/gstatic" || pathname.startsWith("/fonts/gstatic/")) {
     const rest = pathname.slice("/fonts/gstatic".length).replace(/^\//, "");
     return gstaticFontGet({ request, params: { path: rest } });
+  }
+  if (pathname === "/hot-update" || pathname.startsWith("/hot-update/")) {
+    // Mirror path: the signed manifest.json and the model-metadata catalog .gz
+    // live in R2 and are not static files here, so the whole prefix is proxied
+    // from the canonical origin (which reads R2). On ESA the committed scripts
+    // and rare assets are served before the routine runs, so only those two ever
+    // arrive; on EdgeOne the catch-all cannot fall through to static, so scripts
+    // arrive too and are proxied. See functions/lib/hot-update-origin.ts.
+    return hotUpdateOriginGet({ request, env });
   }
   // An unmatched /api/* or /fonts/gstatic/* path: no route, no asset — 404
   // rather than `null`, because the platform already proved it has nothing

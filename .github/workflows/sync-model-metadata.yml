@@ -1,17 +1,28 @@
 name: Sync model metadata catalog
 
 # Rebuilds the AI model metadata catalog from models.dev, OpenRouter and the
-# Vercel AI Gateway and publishes it as a hot-update data asset. The sync
-# tool only rewrites the .gz when models or source metadata actually changed,
-# so a daily run costs nothing when the model landscape is quiet; when it did
-# change, the manifest regeneration bumps the asset version and Cloudflare
-# Pages ships both on the next production deploy. Clients pick the update up
-# on their next hot-update check (12 h throttle), so daily is the interval
-# that matches end-to-end staleness — anything faster is absorbed by the
-# client throttle, anything slower holds back new-model context windows.
+# Vercel AI Gateway and publishes it — with a freshly signed manifest — to R2.
 #
-# Requires the HOT_UPDATE_ED25519_PRIVATE_KEY repository secret (same value
-# as the Cloudflare Production variable) to sign the regenerated manifest.
+# Neither the catalog nor the manifest is committed to git any more. The catalog
+# is a ~137 KB gzip that never delta-compresses and changes whenever the upstream
+# model landscape moves (in practice: daily), so versioning it in the repo added a
+# blob and a bot commit every day. It now lives in R2 (bucket whu-sb-bucket, keys
+# under hot-update/), served on Cloudflare by functions/hot-update/[[path]].ts and
+# proxied from there by the EdgeOne/ESA mirrors. This job is the only writer.
+#
+# Flow: pull the published catalog + manifest from R2 (so the sync's change
+# detection and the manifest's version continuity compare against what clients
+# actually have), rebuild the catalog, regenerate + verify the signed manifest,
+# push both back. When the model data is unchanged the sync leaves the catalog
+# bytes alone, so generate() reproduces a byte-identical manifest and the two
+# puts are idempotent no-ops — a quiet day writes the same objects and bumps
+# nothing.
+#
+# Secrets required:
+#   HOT_UPDATE_ED25519_PRIVATE_KEY  signs the manifest (same value as the
+#                                   Cloudflare Production variable)
+#   CLOUDFLARE_API_TOKEN            R2 read/write for whu-sb-bucket
+#   CLOUDFLARE_ACCOUNT_ID           the account that owns the bucket
 
 on:
   schedule:
@@ -20,11 +31,15 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: sync-model-metadata
   cancel-in-progress: false
+
+env:
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  R2_BUCKET: whu-sb-bucket
 
 jobs:
   sync:
@@ -40,6 +55,19 @@ jobs:
 
       - run: npm ci
 
+      # Pull what clients currently have, so change detection and manifest version
+      # continuity compare against the published state rather than an empty tree.
+      # Strict: if R2 is unreachable this fails loudly and the next run retries,
+      # rather than regenerating against nothing and clobbering the live objects.
+      - name: Fetch published catalog + manifest from R2
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          npx wrangler r2 object get "$R2_BUCKET/hot-update/assets/model-metadata-catalog.json.gz" \
+            --file=public/hot-update/assets/model-metadata-catalog.json.gz --remote
+          npx wrangler r2 object get "$R2_BUCKET/hot-update/manifest.json" \
+            --file=public/hot-update/manifest.json --remote
+
       - name: Rebuild the catalog
         run: node tools/sync-model-metadata.mjs
 
@@ -50,14 +78,13 @@ jobs:
         env:
           HOT_UPDATE_ED25519_PRIVATE_KEY: ${{ secrets.HOT_UPDATE_ED25519_PRIVATE_KEY }}
 
-      - name: Publish changes
+      - name: Publish catalog + manifest to R2
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
-          if [ -z "$(git status --porcelain -- public/hot-update)" ]; then
-            echo 'Catalog unchanged; nothing to publish.'
-            exit 0
-          fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add public/hot-update/assets public/hot-update/manifest.json
-          git commit -m 'chore(hot-update): refresh the AI model metadata catalog'
-          git push
+          npx wrangler r2 object put "$R2_BUCKET/hot-update/assets/model-metadata-catalog.json.gz" \
+            --file=public/hot-update/assets/model-metadata-catalog.json.gz \
+            --content-type=application/gzip --remote
+          npx wrangler r2 object put "$R2_BUCKET/hot-update/manifest.json" \
+            --file=public/hot-update/manifest.json \
+            --content-type=application/json --remote
