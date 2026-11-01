@@ -32,47 +32,23 @@ truth，面板里配好的环境变量与绑定会被文件覆盖 —— 风险�
 | 步骤 | 作用 | 失败后果 |
 |------|------|----------|
 | `check:aasa` | 校验 `public/.well-known/apple-app-site-association` 格式 | 构建中止 |
-| `hot-update:generate` | 生成并签名 `public/hot-update/manifest.json` | 缺签名密钥时构建中止 |
+| `hot-update:verify-scripts` | 跑全部解析器脚本的测试向量（**不**生成/签名清单） | 脚本缺测试向量或运行失败时构建中止 |
 | `scales:generate` | 生成 `public/scales/manifest.json`（不签名） | 量表数据非法时构建中止 |
 
-也就是说 `HOT_UPDATE_ED25519_PRIVATE_KEY` 是**必需**的 secret，不是可选项 ——
-但只对生产构建必需，见下。
+构建本身**不再签名清单**：`prebuild` 只跑 `hot-update:verify-scripts`（执行全部解析器
+脚本的测试向量，缺向量或运行失败即中止构建）。清单与模型目录已移到 R2，签名只发生在
+`sync-model-metadata.yml` / `publish-hot-update.yml` 两个 GitHub Actions 工作流里，二者
+都只在 `main` 上运行（schedule / push）。因此：
 
-### PR 预览构建
+- `HOT_UPDATE_ED25519_PRIVATE_KEY` 不再是 Pages 环境变量，而是 **GitHub Actions secret**
+  （已配置）。Pages 构建（含 PR preview）根本不需要它，`HOT_UPDATE_ALLOW_UNSIGNED` /
+  `HOT_UPDATE_PRODUCTION_BRANCH` 那套「preview 未签名」机制随之退役——构建不签名，PR
+  preview 天然绿。（生成器里仍保留未签名分支，只是不再被构建触发。）
 
-Pages 会给每个 PR 建一次 preview 部署。Preview 环境默认拿不到 secret，于是
-`hot-update:generate` 抛错、整次构建红掉 —— 每个 PR 都是红叉，久了就没人看红叉了。
-
-**不要把 `HOT_UPDATE_ED25519_PRIVATE_KEY` 配到 Preview 环境。** 这是本仓库里唯一
-一个泄露后果是「远程代码执行」的密钥：它签名的解析器脚本会在**每一台已安装的 App**
-里执行。而 preview 构建跑的是 PR 的代码 —— 任何能开 PR 的人都能在 workflow 或构建
-脚本里加一行把它读出来。App Store Connect 密钥能吊销重发，这个密钥泄露要轮换签名
-公钥、发版、等所有客户端更新。
-
-正确做法是让「必须签名」这件事变成有条件的：**preview 部署的清单没有任何人读**，
-所以没什么可签的。在 Pages 的 **Preview** 环境（只 Preview，不要选 All
-environments）加一个变量：
-
-```
-HOT_UPDATE_ALLOW_UNSIGNED=1
-```
-
-设置之后，缺密钥的构建会：
-
-- 照常跑完所有校验 —— 测试向量齐全性检查、checksum、版本号计算，所以「新增解析器
-  脚本却忘了配测试向量」在 PR 上依然会失败
-- **不写** `manifest.json`，保留仓库里已提交的那份签名清单。不写而不是写一份未签名
-  的，是因为写了等于让 preview 部署一个所有 App 都会拒收的清单，还会在构建目录里
-  留一份现成的未签名文件
-- 打印明确的警告
-
-生产构建的行为完全不变：没有密钥就失败。
-
-还有一道防线，防止有人图省事把这个变量配在 **All environments** 上：Cloudflare 会
-注入 `CF_PAGES` 与 `CF_PAGES_BRANCH`，脚本发现自己在生产分支上就直接拒绝未签名构建
-（分支名可用 `HOT_UPDATE_PRODUCTION_BRANCH` 覆盖，默认 `main`）。否则一次面板误操作
-就会让生产清单悄悄停止更新 —— 脚本改了、清单没签、热更新不再到达任何客户端，而构建
-是绿的。
+这在结构上解决了原来的安全顾虑：该密钥是本仓库唯一一个泄露后果为「远程代码执行」的
+密钥（它签名的解析器脚本会在每一台已安装 App 里执行）。如今它只出现在 main 分支的
+workflow 中，**PR 代码永远接触不到**——不再依赖「别把它配到 Preview」这种纪律约束。
+App Store Connect 那组密钥同理仍只配 Production、不进 Preview。
 
 ### Preview 上哪些功能不可用
 
@@ -393,9 +369,10 @@ API 函数面**——App 经由它拉取 hot-update 清单与脚本、`/scales/`
 - 根 `404.html` 原样保留：CF 风格平台以它的存在决定「自定义 404」还是
   「SPA 重写」（见 [404 处理](#404-处理)），留着它，typo 和缺失资源的未
   命中才是确定的 404，而不是被弹去主域名再 404 一次。
-- `HOT_UPDATE_ED25519_PRIVATE_KEY`：prebuild 每次构建都重新生成签名清单，
-  镜像分发的正是这份文件，所以仍然必需。若镜像项目开启了预览部署，同
-  Cloudflare 的纪律：私钥只给生产部署。
+- ~~`HOT_UPDATE_ED25519_PRIVATE_KEY`~~：**不再需要**。prebuild 现在只跑
+  `hot-update:verify-scripts`（不签名）；签名清单与模型目录已移到 R2，镜像经
+  `functions/lib/hot-update-origin.ts` 从源站 `www.whu.sb` 代理（见上文「热更新 R2」
+  小节）。镜像构建全程不接触私钥，也就没有「私钥只给生产部署」这条纪律了。
 
 **函数面怎么上去的**（两家共用一套核心，仿 `../proxy` 的多平台模式）：
 
@@ -409,8 +386,14 @@ API 函数面**——App 经由它拉取 hot-update 清单与脚本、`/scales/`
   与之并列（外加一个最小 `package.json`）——这是真实部署实测出的布局：
   EdgeOne 把输出目录本身当静态根；若再嵌一层 `public/`，整站会跑到
   `/public/...` 路径下、真实路径全部 404。仓库根的
-  `edgeone.json` 已把构建命令和输出目录定好（Makers 只吃 JavaScript，也不解析
-  跨目录 TS 导入，所以不能让平台直接跑源码；若控制台不认配置文件就照抄同值）。
+   `edgeone.json` 已把构建命令和输出目录定好（Makers 只吃 JavaScript，也不解析
+   跨目录 TS 导入，所以不能让平台直接跑源码；若控制台不认配置文件就照抄同值）。
+   它还钉了 `nodeVersion: 24.18.0`：astro 7.4.2 要求 node ≥22.23.4，而 EdgeOne
+   预装版本里 22.x 最高只有 22.21.1（不满足），根 `.nvmrc` 的精确值 22.23.4 又不在
+   预装列表、无法自动下载切换（构建会报 `Failed to switch to Node.js 22.23.4`）；
+   `edgeone.json` 的 `nodeVersion` 会覆盖 `.nvmrc` 与项目设置，故选一个满足 astro 的
+   预装 24.x。升级 astro 或改 `.nvmrc` 时，记得同步检查这个值仍是 EdgeOne 预装且
+   ≥ astro 要求。
   EdgeOne 的环境变量是**运行时**的（函数从 `context.env` 读），上表的
   `UPTIMEROBOT_API_KEY`、`GITHUB_TOKEN`、`APPSTORE_*`、`STATUS_*` 配了就生效。
 - `npm run build:esa`（= astro build + `node build.mjs esa`）打出单入口
