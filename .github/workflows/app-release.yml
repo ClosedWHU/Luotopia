@@ -2004,7 +2004,7 @@ jobs:
       # checks out the private app repo instead, so it cannot run this script.
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
 
