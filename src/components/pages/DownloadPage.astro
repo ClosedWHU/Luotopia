@@ -577,15 +577,23 @@ const i18n = {
   /*
    * ── The store CTA ──
    *
-   * The Apple / Windows cards' primary action, rendered by storeCtaHtml: a
-   * full-width raised button so TestFlight / Microsoft Store finally outweigh the
-   * direct DMG / zip rows that used to out-shine them. It is the raised-glass
-   * rung (glass-control fill + sheen), NOT `filled-glass`: the button sits inside
-   * a `.glass` card, where the design rules forbid a nested backdrop-filter, and
-   * the brand marks are coloured (TestFlight's blue squircle, the Store bag's
-   * Fluent blue), so a primary fill would fight them. The 1px primary ring is
-   * what lifts it from an ordinary inset row to "the button" — a plain var(), not
-   * a color-mix, so it survives the Chrome 66 / Safari 12 build target.
+    * The Apple / Windows cards' primary action, rendered by storeCtaHtml: a
+    * full-width raised button so TestFlight / Microsoft Store finally outweigh the
+    * direct DMG / zip rows that used to out-shine them. It is the raised-glass
+    * rung (glass-control fill + sheen), NOT `filled-glass`: the button sits inside
+    * a `.glass` card, where the design rules forbid a nested backdrop-filter, and
+    * the brand marks are coloured (TestFlight's blue squircle, the Store bag's
+    * Fluent blue), so a primary fill would fight them. The 1px primary ring is
+    * what lifts it from an ordinary inset row to "the button" — a plain var(), not
+    * a color-mix, so it survives the Chrome 66 / Safari 12 build target.
+    *
+    * The ring is the *whole* edge treatment: no `--lt-glass-rim` hairline on top
+    * of it. Box shadows stack first-painted-on-top, so the rim the glass rungs
+    * carry landed on the ring's top edge only and overwrote it there — in light
+    * mode a white 85% line over #005BAC, which read as one pale edge against
+    * three blue ones. Dark mode hid it (its rim is white at 16%), so the seam
+    * only ever showed on the light theme. The sheen still supplies the lit-from-
+    * above read the rim was standing in for.
    *
    * `color` is set for the `state-layer` press/hover tint, which paints
    * `currentColor`; the label / subtitle spans override it with their own roles.
@@ -602,7 +610,6 @@ const i18n = {
     background-color: var(--lt-glass-control);
     background-image: var(--lt-glass-sheen);
     box-shadow:
-      inset 0 1px 0 0 var(--lt-glass-rim),
       inset 0 0 0 1px var(--lt-color-primary),
       0 8px 20px -14px hsl(215 45% 18% / 0.5);
     transition:
@@ -614,7 +621,6 @@ const i18n = {
     .lt-dl-store:hover {
       transform: translateY(-2px);
       box-shadow:
-        inset 0 1px 0 0 var(--lt-glass-rim),
         inset 0 0 0 1px var(--lt-color-primary),
         0 14px 30px -16px hsl(215 45% 18% / 0.55);
     }
