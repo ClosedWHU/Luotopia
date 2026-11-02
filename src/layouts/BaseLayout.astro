@@ -347,45 +347,165 @@
     lenis?.start();
   });
 
+  /*
+   * The scene light.
+   *
+   * One pointer, every glass surface: each card is told where the light falls in
+   * its own local percentages and which way its lit edge faces, so a cursor
+   * sitting between two cards lights the near edge of both and each glint lands
+   * where the cursor actually is. The aurora behind them already drifts on its
+   * own; this is the half that answers the pointer.
+   *
+   * It used to be one `pointermove` listener per card, gated on `.lt-lift`,
+   * which lit only the card under the cursor and left everything else — the two
+   * big install/package panels on /download, every changelog card — permanently
+   * at the resting corner. Hence "the background moves but the cards are lit
+   * from a fixed lamp".
+   *
+   * Two things worth not "fixing" later:
+   *
+   * - The local coordinates are deliberately **not** clamped to 0-100%. A
+   *   cursor 800px left of a card resolves to something like -260%, which puts
+   *   the 480px glint entirely outside the box: distance falloff falls out of
+   *   the geometry. Clamping to the box would pin the glint to the near edge and
+   *   light every card on the page at full strength, and modulating the colour
+   *   instead would need `color-mix()` (111+) to keep the theme tokens.
+   * - Values are percentages and degrees, never px. All three properties are
+   *   registered in global.css (`<length-percentage>` / `<angle>`) so they
+   *   interpolate, and a length cannot tween into a percentage — mixing units
+   *   silently downgrades the transition to the discrete snap @property was
+   *   added to remove.
+   */
   onPageSetup((signal) => {
-    const glass = Array.from(document.querySelectorAll<HTMLElement>(".glass.lt-lift, .lt-lift .glass"));
-    const pointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const fine = window.matchMedia("(hover: hover) and (pointer: fine)");
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let frame = 0;
-    let active: HTMLElement | null = null;
 
-    const reset = () => {
-      cancelAnimationFrame(frame);
-      active?.style.removeProperty("--lt-light-x");
-      active?.style.removeProperty("--lt-light-y");
-      active = null;
+    /* Beyond this distance from a card's nearest edge the glint is outside the
+     * box anyway and the edge wash is the only term left, so the card goes back
+     * to its resting light instead of carrying a stale direction. Measured from
+     * the edge rather than the centre: a panel spanning the viewport is "near"
+     * wherever the cursor is along it. */
+    const REACH = 1200;
+    /* Keeps the percentages finite on a small card the cursor is far from. The
+     * value is well past where the glint has left the box. */
+    const CLAMP = 1000;
+
+    let surfaces: HTMLElement[] = [];
+    let frame = 0;
+    let scanFrame = 0;
+    let pointerX = 0;
+    let pointerY = 0;
+
+    const scan = () => {
+      surfaces = Array.from(document.querySelectorAll<HTMLElement>(".glass"));
     };
 
-    glass.forEach((surface) => {
-      surface.addEventListener("pointermove", (event) => {
-        if (!pointer.matches || motion.matches || event.pointerType === "touch") return;
-        if (active !== surface) reset();
-        active = surface;
-        cancelAnimationFrame(frame);
-        frame = requestAnimationFrame(() => {
-          const bounds = surface.getBoundingClientRect();
-          // Percentages, not px: both variables are registered as
-          // <length-percentage> in global.css so the glint eases back to its
-          // resting corner on pointerleave, and a length cannot interpolate
-          // into a percentage — mixing units would silently downgrade the
-          // transition to the old discrete snap.
-          const x = bounds.width ? ((event.clientX - bounds.left) / bounds.width) * 100 : 18;
-          const y = bounds.height ? ((event.clientY - bounds.top) / bounds.height) * 100 : 0;
-          surface.style.setProperty("--lt-light-x", `${x.toFixed(2)}%`);
-          surface.style.setProperty("--lt-light-y", `${y.toFixed(2)}%`);
-        });
-      }, { signal, passive: true });
-      surface.addEventListener("pointerleave", reset, { signal });
-    });
+    const unlight = (surface: HTMLElement) => {
+      surface.style.removeProperty("--lt-light-x");
+      surface.style.removeProperty("--lt-light-y");
+      surface.style.removeProperty("--lt-light-angle");
+    };
 
-    motion.addEventListener("change", reset, { signal });
-    pointer.addEventListener("change", reset, { signal });
-    return reset;
+    const rest = () => {
+      cancelAnimationFrame(frame);
+      frame = 0;
+      surfaces.forEach(unlight);
+    };
+
+    const paint = () => {
+      frame = 0;
+      if (!surfaces.length) return;
+      const clamp = (value: number) => Math.max(-CLAMP, Math.min(CLAMP, value));
+      /* Every rect first, then every write. Interleaving them would invalidate
+       * style on the first write and force a reflow on the second read — twenty
+       * cards is twenty reflows a frame instead of one. */
+      const rects = surfaces.map((surface) => surface.getBoundingClientRect());
+      for (let i = 0; i < surfaces.length; i++) {
+        const rect = rects[i];
+        const surface = surfaces[i];
+        if (!rect.width || !rect.height) continue;
+        const dx = pointerX - (rect.left + rect.width / 2);
+        const dy = pointerY - (rect.top + rect.height / 2);
+        const nearest = Math.max(
+          Math.abs(dx) - rect.width / 2,
+          Math.abs(dy) - rect.height / 2,
+          0,
+        );
+        if (nearest > REACH) {
+          unlight(surface);
+          continue;
+        }
+        const x = clamp(((pointerX - rect.left) / rect.width) * 100);
+        const y = clamp(((pointerY - rect.top) / rect.height) * 100);
+        /* 0deg is up and turns clockwise, and a gradient's bright start is the
+         * side *opposite* its angle — so point away from the cursor to light the
+         * edge facing it. `atan2(dx, -dy)` is the CSS convention (y down on
+         * screen, y up in the angle space); the half turn is the flip. */
+        const angle = ((Math.atan2(dx, -dy) * 180) / Math.PI + 540) % 360;
+        surface.style.setProperty("--lt-light-x", `${x.toFixed(2)}%`);
+        surface.style.setProperty("--lt-light-y", `${y.toFixed(2)}%`);
+        surface.style.setProperty("--lt-light-angle", `${angle.toFixed(1)}deg`);
+      }
+    };
+
+    const schedule = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(paint);
+    };
+
+    const onMove = (event: PointerEvent) => {
+      if (!fine.matches || motion.matches || event.pointerType === "touch") return;
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      schedule();
+    };
+
+    /* The pointer leaving the window: `pointerout` with no `relatedTarget` is
+     * the reliable spelling, since `pointerleave` does not bubble and its target
+     * is whatever element the cursor happened to be over. */
+    const onOut = (event: PointerEvent) => {
+      if (event.relatedTarget || event.pointerType === "touch") return;
+      rest();
+    };
+
+    scan();
+    document.addEventListener("pointermove", onMove, { signal, passive: true });
+    document.addEventListener("pointerout", onOut, { signal, passive: true });
+    /* Repaint while the page scrolls: the light is anchored to a point on the
+     * page, so a card sliding under a stationary cursor has to have its local
+     * coordinates recomputed or the glint rides along with the card. */
+    window.addEventListener("scroll", schedule, { signal, passive: true });
+    window.addEventListener("resize", schedule, { signal, passive: true });
+    window.addEventListener("blur", rest, { signal });
+    motion.addEventListener("change", rest, { signal });
+    fine.addEventListener("change", rest, { signal });
+
+    /* The changelog's release cards are built at runtime, and a NodeList taken
+     * at setup never sees them. Re-scan when the tree changes, coalesced to one
+     * pass per frame — the notes inject a lot of HTML in one go. */
+    let observer: MutationObserver | undefined;
+    if ("MutationObserver" in window) {
+      observer = new MutationObserver(() => {
+        if (scanFrame) return;
+        scanFrame = requestAnimationFrame(() => {
+          scanFrame = 0;
+          scan();
+          schedule();
+        });
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    return () => {
+      cancelAnimationFrame(frame);
+      cancelAnimationFrame(scanFrame);
+      frame = 0;
+      scanFrame = 0;
+      observer?.disconnect();
+      observer = undefined;
+      surfaces.forEach(unlight);
+      surfaces = [];
+    };
   });
 
   onPageSetup(() => {
