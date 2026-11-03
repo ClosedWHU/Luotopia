@@ -2255,6 +2255,14 @@ jobs:
           done
           # Per-language notes, matched by the listing's own language code.
           #
+          # `releaseNotes` lives under `baseListing`, not on the listing itself:
+          # the submission schema is listings[code] = {baseListing: {title,
+          # description, releaseNotes, ...}, platformOverrides}. Writing the
+          # shorter path adds a key the API has never heard of and drops it on
+          # the floor -- the PUT still returns 200 and the listing publishes
+          # with whatever `baseListing.releaseNotes` the clone carried, which
+          # for an app first submitted through Partner Center is empty.
+          #
           # A language with no translation keeps the clone's notes rather than
           # being filled with the Simplified source. Writing the source text
           # into every listing -- the obvious `map_values` version of this --
@@ -2268,7 +2276,8 @@ jobs:
             '(.applicationPackages // []) |= (map(.fileStatus = "PendingDelete") + $entries)
              | if ($notes | length) > 0 and ((.listings | type) == "object")
                then .listings |= with_entries(
-                      .value.releaseNotes = ($notes[.key] // .value.releaseNotes))
+                      .value.baseListing.releaseNotes =
+                        ($notes[.key] // .value.baseListing.releaseNotes))
                else . end' \
             <<<"$cloned" > submission.json
 
@@ -2278,14 +2287,30 @@ jobs:
           # Store saying `fr-fr` where the asset says `fr` -- would look
           # identical and silently publish nothing new, so name each one.
           total=$(jq -r '.listings // {} | length' <<<"$cloned")
-          matched=$(jq -r --argjson notes "$notes_map" \
-            '[.listings // {} | keys[] | select($notes[.] != null)] | length' <<<"$cloned")
-          echo "release notes applied to $matched of $total listing language(s)"
           jq -r --argjson notes "$notes_map" \
             '.listings // {} | keys[] | select($notes[.] == null)' <<<"$cloned" |
             while read -r lang; do
               [ -n "$lang" ] && echo "::warning::no translation for listing language '$lang'; it keeps the previous version's notes"
             done || true
+
+          # Count the notes that actually landed in the payload, not the codes
+          # that could have matched. The join above cannot see a schema change:
+          # it matched 10 of 10 languages on the submission that shipped 1.2.0
+          # with empty notes everywhere, because the value was written one level
+          # too high and the API ignored it. Re-read submission.json and require
+          # every expected note to be there verbatim, so a moved or renamed
+          # field fails the job instead of publishing a silent no-op.
+          applied=$(jq -r --argjson notes "$notes_map" \
+            '[.listings // {} | to_entries[]
+              | select($notes[.key] != null and .value.baseListing.releaseNotes == $notes[.key])]
+             | length' submission.json)
+          expected=$(jq -r --argjson notes "$notes_map" \
+            '[.listings // {} | keys[] | select($notes[.] != null)] | length' <<<"$cloned")
+          echo "release notes written into $applied of $total listing language(s)"
+          if [ "$applied" -ne "$expected" ]; then
+            echo "::error::release notes reached $applied of $expected listing language(s); the submission schema moved -- check listings[].baseListing.releaseNotes"
+            exit 1
+          fi
 
           curl -sS -f -X PUT -H "$auth" -H "Content-Type: application/json" \
             --data-binary @submission.json \

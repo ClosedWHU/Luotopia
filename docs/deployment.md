@@ -97,8 +97,9 @@ Preview 环境没有运行时 secret，所以：
 （不需要 JWT）。
 
 `/api/msstore/latest` 合并两个无文档公开源：badge 工具的 `v8.0/sdk/products`
-（在架状态与元数据）和产品页内嵌态（版本号、发布日期）。后者解析失败时版本字段
-为 null，下载页只保留静态 Store 链接——两个源都无文档担保，降级是设计的一部分。
+（在架状态与元数据）和 DisplayCatalog 的 `v7.0/products`（版本号、发布日期）。
+后者解析失败时版本字段为 null，下载页只保留静态 Store 链接——两个源都无文档
+担保，降级是设计的一部分。
 
 ### 热更新 R2（manifest 与模型目录）
 

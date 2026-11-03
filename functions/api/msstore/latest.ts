@@ -3,9 +3,9 @@
  *
  * Microsoft Store parity for /api/appstore/latest: catalog metadata from the
  * badge-tool endpoint (availability, title, publisher, package family name,
- * logo) merged with the version and release date parsed off the product page's
- * embedded state. See functions/lib/msstore.ts for why those two sources and
- * why every field but `available` may legitimately be null.
+ * logo) merged with the version and release date from DisplayCatalog. See
+ * functions/lib/msstore.ts for why those two sources and why every field but
+ * `available` may legitimately be null.
  *
  * Env:
  *   MSSTORE_PRODUCT_ID (default 9P29527S1H0H)
@@ -17,7 +17,7 @@ import {
   DEFAULT_MARKET,
   DEFAULT_PRODUCT_ID,
   fetchMsStoreCatalog,
-  fetchMsStorePageState,
+  fetchMsStoreVersionState,
   msStoreCacheHeaders,
   msStoreUrl,
   type MsStoreEnv,
@@ -63,9 +63,9 @@ export async function onRequestGet(context: {
       );
     }
 
-    // A page-state miss degrades to null version fields, not to an error: the
-    // catalog half alone still proves the listing exists in this market.
-    const page = await fetchMsStorePageState(productId, market);
+    // A DisplayCatalog miss degrades to null version fields, not to an error:
+    // the catalog half alone still proves the listing exists in this market.
+    const versions = await fetchMsStoreVersionState(productId, market);
 
     const info: MsStoreInfo = {
       source: "msstore",
@@ -76,8 +76,8 @@ export async function onRequestGet(context: {
       publisher: catalog.catalog.publisher,
       packageFamilyName: catalog.catalog.packageFamilyName,
       logoUrl: catalog.catalog.logoUrl,
-      version: page.version,
-      releaseDateUtc: page.releaseDateUtc,
+      version: versions.version,
+      releaseDateUtc: versions.releaseDateUtc,
       storeUrl: msStoreUrl(productId),
     };
     return json(info, 200, msStoreCacheHeaders());

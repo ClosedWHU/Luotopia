@@ -46,6 +46,7 @@ Store ID `9P29527S1H0H`，PFN `HsukqiLee.14123401AC9F8_0rs1mmxqjy20y`。
 
 ## 下次提交新版本时
 
-1. 各语言的「此版本的新增功能」不再留空：填入本次变更（可按 release notes 摘要翻译到 10 语言）。
+1. 各语言的「此版本的新增功能」不再留空：`app-release.yml` 的 `store-submit` 会写入 `listings[code].baseListing.releaseNotes`（译文来自 `translate-notes` 发布的 `release-notes-i18n.json`）。手动提交时也必须填在 `baseListing` 里——写在 listing 顶层不是 schema 字段，API 会静默丢弃并沿用上一版的空值。
+
 2. MSIX 版本升 patch 段（Store 保留 d 段且要求版本不回退，同为 a.b.c.0 的两次提交无法区分）——见 app-release.yml 的 MSIX 步骤注释与 app 仓库 packaging/README.md。
 3. 功能有增删时同步 10 份文案的说明与产品功能列表（先改 zh-cn，再同步翻译），并核对 features.ts 中「开发中」是否已转正。
