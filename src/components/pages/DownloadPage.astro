@@ -31,9 +31,10 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHeader from "../PageHeader.astro";
 import Icon from "../Icon.astro";
 import {
+  descKey,
   externalLabelKey,
-  platformKeys,
   platforms,
+  testFlightCode,
   testFlightUrl,
 } from "../../config/downloads";
 import { resolveLocale, useTranslations, type TranslationKey } from "../../i18n/ui";
@@ -180,6 +181,9 @@ const i18n = {
   recommended: t("download.asset.recommended"),
   archFilter: t("download.asset.archFilter"),
   appleStoreSubtitle: t("download.apple.storeSubtitle"),
+  appleInviteCode: t("download.apple.inviteCode"),
+  appleInviteCodeCopy: t("download.apple.inviteCodeCopy"),
+  appleInviteCodeCopied: t("download.apple.inviteCodeCopied"),
   appleDmg: t("download.apple.dmgSection"),
   appleDmgCaveat: t("download.apple.dmgCaveat"),
   windowsStoreSubtitle: t("download.windows.storeSubtitle"),
@@ -213,6 +217,9 @@ const i18n = {
     data-i18n-recommended={i18n.recommended}
     data-i18n-arch-filter={i18n.archFilter}
     data-i18n-apple-store-subtitle={i18n.appleStoreSubtitle}
+    data-i18n-apple-invite-code={i18n.appleInviteCode}
+    data-i18n-apple-invite-code-copy={i18n.appleInviteCodeCopy}
+    data-i18n-apple-invite-code-copied={i18n.appleInviteCodeCopied}
     data-i18n-apple-dmg={i18n.appleDmg}
     data-i18n-apple-dmg-caveat={i18n.appleDmgCaveat}
     data-i18n-windows-store-subtitle={i18n.windowsStoreSubtitle}
@@ -233,7 +240,6 @@ const i18n = {
       <div id="platform-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {
           platforms.map((p, i) => {
-            const keys = platformKeys(p.id);
             /*
              * The external-install link's copy, or `undefined` where the card
              * has no such link — the same presence test `p.externalLabel` was
@@ -247,10 +253,11 @@ const i18n = {
                 data-platform={p.id}
                 data-external-url={p.externalUrl ?? ""}
                 data-external-label={external ?? ""}
+                data-invite-code={p.id === "apple" ? testFlightCode : ""}
               >
                 <span class="lt-icon-chip text-primary text-[22px] mb-3.5"><Icon name={p.icon} /></span>
                 <h2 class="text-title-medium text-on-surface">{p.name}</h2>
-                <p class="text-body-medium text-on-surface-variant mt-1">{t(keys.desc)}</p>
+                <p class="text-body-medium text-on-surface-variant mt-1">{t(descKey(p.id))}</p>
                 <div class="mt-4 flex flex-wrap gap-1.5 items-center platform-badges">
                   <span class="inline-block px-2.5 py-0.5 rounded-sm lt-inset text-on-surface-variant text-label-medium">
                     {p.id === "apple" ? t("download.platform.apple.badge") : t("download.badge.loading")}
@@ -269,7 +276,6 @@ const i18n = {
                     </a>
                   )}
                 </div>
-                <p class="mt-2 text-body-small text-outline">{t(keys.note)}</p>
               </div>
             );
           })
@@ -321,6 +327,11 @@ const i18n = {
                   set:html={rich("download.install.apple.ios.body", {
                     lead: strongHtml(t("download.install.apple.ios.lead")),
                     joinLink: testFlightLink,
+                  })}
+                />
+                <p
+                  set:html={rich("download.install.apple.inviteCode", {
+                    code: codeHtml(testFlightCode),
                   })}
                 />
                 <p
@@ -758,6 +769,7 @@ const i18n = {
     let latestPrerelease = false;
 
     const latestMeta = document.getElementById("latest-meta");
+    const grid = document.getElementById("platform-grid");
     const listEl = document.getElementById("changelog-list");
     const pager = document.getElementById("changelog-pager");
     const prevBtn = document.getElementById("changelog-prev");
@@ -790,6 +802,9 @@ const i18n = {
       recommended: dataset.i18nRecommended ?? "",
       archFilter: dataset.i18nArchFilter ?? "",
       appleStoreSubtitle: dataset.i18nAppleStoreSubtitle ?? "",
+      appleInviteCode: dataset.i18nAppleInviteCode ?? "",
+      appleInviteCodeCopy: dataset.i18nAppleInviteCodeCopy ?? "",
+      appleInviteCodeCopied: dataset.i18nAppleInviteCodeCopied ?? "",
       appleDmg: dataset.i18nAppleDmg ?? "",
       appleDmgCaveat: dataset.i18nAppleDmgCaveat ?? "",
       windowsStoreSubtitle: dataset.i18nWindowsStoreSubtitle ?? "",
@@ -1046,7 +1061,7 @@ const i18n = {
       const icon =
         brandIconHtml(externalUrl, "text-[26px]") ||
         normalizeIconSvg(openInNewIconRaw, "text-[22px] shrink-0");
-      return `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="lt-dl-store state-layer no-underline">
+      const cta = `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="lt-dl-store state-layer no-underline">
           ${icon}
           <span class="min-w-0 flex-1 flex flex-col gap-1">
             <span class="self-start px-2 py-0.5 rounded-sm bg-primary-container text-on-primary-container text-label-small leading-none">${escapeHtml(copy.recommended)}</span>
@@ -1054,6 +1069,28 @@ const i18n = {
             ${subtitle ? `<span class="text-body-small text-on-surface-variant">${escapeHtml(subtitle)}</span>` : ""}
           </span>
         </a>`;
+      /*
+       * The TestFlight public link's invite code, straight under the button that
+       * uses it. The link only carries the code as a URL segment, so the common
+       * sequence — open the link on a phone without TestFlight, install it, open
+       * it — lands on an "enter your invite code" field with no way back to the
+       * link. Quiet by design (the CTA is this card's one loud element): a plain
+       * row, the code in the mono face so 0/O and 1/l cannot be misread, and the
+       * whole row a copy button, which on a phone is the only gesture that helps
+       * (the code is needed in another app). `-mx-1 px-1` hangs the press tint
+       * 4px outside the text column, so the label still lines up with the CTA
+       * and the section labels around it.
+       */
+      const inviteCode =
+        platform === "apple" ? card.getAttribute("data-invite-code") || "" : "";
+      const invite = inviteCode
+        ? `<button type="button" data-invite-copy="${escapeHtml(inviteCode)}" class="state-layer -mx-1 flex w-full cursor-pointer items-center gap-1.5 rounded-sm px-1 py-1 text-left text-body-small text-on-surface-variant">
+            <span class="shrink-0">${escapeHtml(copy.appleInviteCode)}</span>
+            <span class="font-mono tracking-wide text-on-surface">${escapeHtml(inviteCode)}</span>
+            <span class="ml-auto shrink-0 text-outline" data-invite-hint>${escapeHtml(copy.appleInviteCodeCopy)}</span>
+          </button>`
+        : "";
+      return cta + invite;
     }
 
     /*
@@ -1184,15 +1221,16 @@ const i18n = {
      * unsigned DMG (which trips Gatekeeper and needs the right-click → Open
      * ritual). The old flat layout listed them under look-alike headers, so
      * visitors kept picking the DMG. The store CTA therefore leads, full width
-     * and raised, and the DMG drops below a divider into muted rows with a
-     * caveat that names what it costs to use.
+     * and raised, and the DMG drops below it into muted rows with a caveat that
+     * names what it costs to use. The section label is what separates the two
+     * channels — a hairline rule above it said the same thing twice.
      * The asset label says macOS because DMGs are the only public Apple
      * asset; IPAs stay TestFlight-only.
      */
     function appleCardHtml(installers, storeCta) {
       let html = storeCta;
       if (installers.length > 0) {
-        html += `<div class="space-y-1.5 ${storeCta ? "pt-3 border-t border-outline-variant" : ""}">
+        html += `<div class="space-y-1.5 ${storeCta ? "pt-1.5" : ""}">
           <p class="text-label-medium text-outline">${copy.appleDmg}</p>
           ${installers.map(mutedAssetLinkHtml).join("")}
           <p class="text-body-small text-outline">${copy.appleDmgCaveat}</p>
@@ -1204,8 +1242,8 @@ const i18n = {
     /**
      * Windows mirrors Apple: the Microsoft Store MSIX (Store-signed,
      * auto-updating, never a GitHub asset) leads as the store CTA, and the
-     * portable zip — which needs extracting and trips SmartScreen — drops below a
-     * divider into muted rows with a caveat. The zip section still gets the
+     * portable zip — which needs extracting and trips SmartScreen — drops below
+     * it into muted rows with a caveat. The zip section still gets the
      * x64 / arm64 switcher the Apple DMG never needed, and the Store version line
      * still hangs off the CTA (part of the stored html, so the switcher's repaint
      * does not drop it).
@@ -1225,7 +1263,7 @@ const i18n = {
         </div>`;
       }
       if (list.length > 0) {
-        html += `<div class="space-y-1.5 ${storeCta ? "pt-3 border-t border-outline-variant" : ""}">
+        html += `<div class="space-y-1.5 ${storeCta ? "pt-1.5" : ""}">
           <p class="text-label-medium text-outline">${copy.windowsZip}</p>
           ${switcher}
           ${list.map(mutedAssetLinkHtml).join("")}
@@ -1848,6 +1886,43 @@ const i18n = {
       }, { signal });
     });
 
+    /*
+     * Copy the TestFlight invite code.
+     *
+     * Delegated off the grid, not bound to the row: loadLatest replaces the
+     * whole `.platform-assets` innerHTML, and a direct binding would go with it.
+     * A clipboard failure is silent on purpose — the code is on screen in the
+     * row and again as plain text in the Apple install drawer, so a browser
+     * without `navigator.clipboard` (or one that denies the write) leaves the
+     * visitor able to read it off and type it.
+     */
+    let inviteHintTimer = 0;
+    grid?.addEventListener(
+      "click",
+      (ev) => {
+        const btn =
+          ev.target && ev.target.closest
+            ? ev.target.closest("[data-invite-copy]")
+            : null;
+        if (!btn || !grid.contains(btn)) return;
+        const code = btn.getAttribute("data-invite-copy") || "";
+        if (!code || !navigator.clipboard) return;
+        navigator.clipboard.writeText(code).then(
+          () => {
+            const hint = btn.querySelector("[data-invite-hint]");
+            if (!hint) return;
+            hint.textContent = copy.appleInviteCodeCopied;
+            window.clearTimeout(inviteHintTimer);
+            inviteHintTimer = window.setTimeout(() => {
+              hint.textContent = copy.appleInviteCodeCopy;
+            }, 1600);
+          },
+          () => {},
+        );
+      },
+      { signal },
+    );
+
     prevBtn?.addEventListener("click", () => {
       if (page > 1) loadChangelog(page - 1);
     }, { signal });
@@ -1861,6 +1936,7 @@ const i18n = {
     return () => {
       heightAnims.forEach((timer) => window.clearTimeout(timer));
       heightAnims.clear();
+      window.clearTimeout(inviteHintTimer);
     };
   });
 </script>

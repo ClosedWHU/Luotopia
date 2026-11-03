@@ -3,7 +3,7 @@ import type { TranslationKey } from "../i18n/ui";
 /**
  * Platform *structure*. The copy is not here.
  *
- * `desc`, `note` and `externalLabel` used to be inline Chinese strings, which
+ * `desc` and `externalLabel` used to be inline Chinese strings, which
  * made this file the only place the download cards' prose existed. Localisation
  * moves the words and keeps the rest: `id` is now the join key onto
  * `src/i18n/<locale>.json`, so this file still decides which platforms there
@@ -20,7 +20,7 @@ import type { TranslationKey } from "../i18n/ui";
  * union of literal ids rather than `string` — see the key helpers below.
  */
 export interface PlatformDownload {
-  /** Join key: `download.platform.<id>.{desc,note,externalLabel}`. */
+  /** Join key: `download.platform.<id>.{desc,externalLabel}`. */
   readonly id: string;
   /** Platform proper noun, rendered as the card's heading. Not translated. */
   readonly name: string;
@@ -35,12 +35,20 @@ export interface PlatformDownload {
 
 export const testFlightUrl = "https://testflight.apple.com/join/dMwZT97V";
 
+/**
+ * The public link's invite code — the trailing path segment, and what
+ * TestFlight's own "enter a code" field accepts. Derived rather than written
+ * out a second time, so regenerating the link cannot leave a stale code on the
+ * download page.
+ */
+export const testFlightCode = testFlightUrl.slice(testFlightUrl.lastIndexOf("/") + 1);
+
 export const microsoftStoreUrl = "https://apps.microsoft.com/detail/9P29527S1H0H";
 
 /**
  * Deliberately unannotated, as in `features.ts`: widening it to
  * `readonly PlatformDownload[]` would erase the literal `id`s that `as const`
- * preserved, and `platformKeys(p.id)` at the call site would stop typechecking
+ * preserved, and `descKey(p.id)` at the call site would stop typechecking
  * against the dictionary's key set.
  */
 export const platforms = [
@@ -72,32 +80,31 @@ export const platforms = [
 export type PlatformId = (typeof platforms)[number]["id"];
 
 /**
- * The two dictionary keys every platform card renders.
+ * The card's one-line summary key.
  *
- * Typed as template literals over `PlatformId` and narrowed to `TranslationKey`,
- * so `t(platformKeys(p.id).desc)` is checked against the default locale's key
+ * Typed as a template literal over `PlatformId` and narrowed to `TranslationKey`,
+ * so `t(descKey(p.id))` is checked against the default locale's key
  * set: add a platform here and forget its copy in `zh-Hans.json`, and the call
  * site stops typechecking instead of rendering the raw key. (`astro build` does
  * not typecheck — `tools/check-i18n.mjs` enforces the same invariant at build
  * time, and it is that script which fails CI.)
+ *
+ * There used to be a second key per platform, `note`, holding a compatibility
+ * or package-format line under the summary. Both repeated what the card's own
+ * asset rows and the install drawer already said, so the minimum OS version now
+ * rides in `desc` and the fourth row is gone.
  */
-export function platformKeys(id: PlatformId): {
-  desc: TranslationKey;
-  note: TranslationKey;
-} {
-  return {
-    desc: `download.platform.${id}.desc` as TranslationKey,
-    note: `download.platform.${id}.note` as TranslationKey,
-  };
+export function descKey(id: PlatformId): TranslationKey {
+  return `download.platform.${id}.desc` as TranslationKey;
 }
 
 /**
  * The external-install link's dictionary key.
  *
- * A separate helper rather than a third field of `platformKeys()` because only
- * the platforms that ship an `externalUrl` render one (Apple, Windows).
- * Deriving all three for every card would put two keys per platform in the
- * dictionaries that no page ever reads.
+ * A separate helper rather than a second key derived for every card, because
+ * only the platforms that ship an `externalUrl` render one (Apple, Windows).
+ * Deriving both for all four would put a key per platform in the dictionaries
+ * that no page ever reads.
  */
 export function externalLabelKey(id: PlatformId): TranslationKey {
   return `download.platform.${id}.externalLabel` as TranslationKey;
