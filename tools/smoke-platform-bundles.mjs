@@ -19,7 +19,7 @@
  */
 
 import { spawnSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -244,13 +244,18 @@ await runSuite('esa', (request) => esa.default.fetch(request));
 /* -------------------------------------------------------------------------- */
 
 console.log('EdgeOne Makers entries (platform-dist/edgeone/edge-functions/**)');
+/*
+ * The four extension-less routes, and only those: EdgeOne sends any path with an
+ * extension to static-file handling and never to an edge function, so the
+ * gstatic-fonts and releases/download [[path]] bundles this list used to drive
+ * were dead code and are gone (see EDGEONE_ENTRIES in build.mjs). The routes
+ * they nominally covered are checked against the middleware below.
+ */
 const EDGEONE_ENTRIES = [
   { file: 'api/status.js', path: '/api/status' },
   { file: 'api/appstore/latest.js', path: '/api/appstore/latest' },
   { file: 'api/releases/index.js', path: '/api/releases' },
   { file: 'api/releases/latest.js', path: '/api/releases/latest' },
-  { file: 'api/releases/download/[[path]].js', path: '/api/releases/download/only-one-segment' },
-  { file: 'fonts/gstatic/[[path]].js', path: `/fonts/gstatic/s/a/${FONT_HEX}.ttf` },
 ];
 
 for (const { file, path } of EDGEONE_ENTRIES) {
@@ -269,6 +274,43 @@ for (const { file, path } of EDGEONE_ENTRIES) {
     typeof mod.onRequest === 'function' && typeof mod.default === 'function');
   const response = await onRequest({ request: new Request(`${ORIGIN}${path}`), env: {} });
   check(`edgeone: ${file} answers ${path}`, response instanceof Response, `got ${typeof response}`);
+}
+
+/* -------------------------------------------------------------------------- */
+/* The extension-bearing routes: the project-root middleware, not a bundle      */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * /hot-update/*, /fonts/gstatic/* and /api/releases/download/* reach no edge
+ * function on EdgeOne, so the project-root middleware.ts reverse-proxies them
+ * from the origin — that is why the list above has four entries and not six.
+ *
+ * Nothing here can drive it: the middleware is TypeScript that no target
+ * bundles (Cloudflare compiles it at deploy, EdgeOne from the project root), so
+ * there is no artifact to import. What CAN be checked offline is that it still
+ * claims those routes, which is the invariant the missing bundles depend on.
+ * Regex over the source, deliberately brittle in the loud direction — the same
+ * stance check-i18n takes with locales.ts and features.ts: if the shape changes
+ * and a pattern stops matching, this fails instead of quietly checking nothing.
+ */
+{
+  const middleware = readFileSync(join(ROOT, 'middleware.ts'), 'utf8');
+  const matcher = /matcher:\s*\[([\s\S]*?)\]/.exec(middleware);
+  check('middleware: exports a matcher', Boolean(matcher));
+  const claimed = matcher ? matcher[1] : '';
+  for (const route of [
+    '/hot-update/manifest.json',
+    '/hot-update/assets/model-metadata-catalog.json.gz',
+    '/fonts/gstatic/:path*',
+    '/api/releases/download/:path*',
+  ]) {
+    check(`middleware: matcher claims ${route}`, claimed.includes(`"${route}"`));
+  }
+  const prefixes = /PROXIED_PREFIXES\s*=\s*\[([\s\S]*?)\]/.exec(middleware);
+  check('middleware: proxies both extension-bearing prefixes',
+    Boolean(prefixes) &&
+    prefixes[1].includes('"/fonts/gstatic/"') &&
+    prefixes[1].includes('"/api/releases/download/"'));
 }
 
 /* -------------------------------------------------------------------------- */
@@ -366,22 +408,28 @@ esa.resetResolvedEnv();
     JSON.stringify(calls));
 }
 
-// EdgeOne's runtime env reaches the same handler logic.
+/*
+ * EdgeOne's runtime env reaches the same handler logic.
+ *
+ * This used to drive the releases/download bundle with GITHUB_ASSET_MIRROR, but
+ * that bundle no longer exists: EdgeOne never routed the extension-bearing path
+ * to a function, and the middleware that serves it now is TypeScript nothing
+ * bundles. `REPO` on a route that does have a bundle proves the same plumbing —
+ * it is an env value the handler interpolates into its upstream URL, so a
+ * context.env that went unread shows up as the default repo in fetchCalls.
+ */
 {
   const entry = await import(
-    pathToFileURL(
-      join(ROOT, 'platform-dist/edgeone/edge-functions/api/releases/download/[[path]].js'),
-    ).href
+    pathToFileURL(join(ROOT, 'platform-dist/edgeone/edge-functions/api/releases/latest.js')).href
   );
   fetchCalls.length = 0;
   const response = await entry.onRequest({
-    request: new Request(`${ORIGIN}${DOWNLOAD_PATH}`),
-    env: { GITHUB_ASSET_MIRROR: 'https://mirror.test' },
+    request: new Request(`${ORIGIN}/api/releases/latest`),
+    env: { REPO: 'smoke/edgeone-env' },
   });
-  check('mirror: EdgeOne context.env drives the mirror path',
+  check('env: EdgeOne context.env reaches the handler',
     response.status === 200 &&
-      response.headers.get('x-proxied-from') === 'mirror.test' &&
-      fetchCalls.length === 1 && fetchCalls[0] === MIRROR_URL,
+      fetchCalls.length === 1 && fetchCalls[0].includes('/repos/smoke/edgeone-env/'),
     `status ${response.status}, calls ${JSON.stringify(fetchCalls)}`);
 }
 
