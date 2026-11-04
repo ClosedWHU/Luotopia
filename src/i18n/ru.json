@@ -70,6 +70,12 @@
   "carousel.announce.withLabels": "{span} из {total}: {labels}",
   "carousel.announce.bare": "{span} из {total}",
   "carousel.announce.separator": ", ",
+  "carousel.form.phone": "Телефон",
+  "carousel.form.tablet": "Планшет",
+  "carousel.form.desktop": "Компьютер",
+  "carousel.theme.auto": "Авто",
+  "carousel.theme.light": "Светлая",
+  "carousel.theme.dark": "Тёмная",
 
   "features.title": "Функции",
   "features.header": "Обзор функций",

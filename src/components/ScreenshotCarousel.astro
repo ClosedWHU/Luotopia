@@ -1,24 +1,36 @@
 ---
 import { Picture } from "astro:assets";
-import scheduleShot from "../assets/screenshots/schedule.png";
-import campusShot from "../assets/screenshots/campus.png";
-import aiAssistantShot from "../assets/screenshots/ai-assistant.png";
-import weatherDetailShot from "../assets/screenshots/weather-detail.png";
-import weatherAqiShot from "../assets/screenshots/weather-aqi.png";
-import busShot from "../assets/screenshots/bus.png";
-import wallpaperShot from "../assets/screenshots/wallpaper.png";
+import phoneSchedule from "../assets/screenshots/phone/schedule.png";
+import phoneCampus from "../assets/screenshots/phone/campus.png";
+import phoneAi from "../assets/screenshots/phone/ai.png";
+import phoneBus from "../assets/screenshots/phone/bus.png";
+import phoneWeather from "../assets/screenshots/phone/weather.png";
+import phoneWallpaper from "../assets/screenshots/phone/wallpaper.png";
+import tabletSchedule from "../assets/screenshots/tablet/schedule.png";
+import tabletCampus from "../assets/screenshots/tablet/campus.png";
+import tabletAi from "../assets/screenshots/tablet/ai.png";
+import tabletBus from "../assets/screenshots/tablet/bus.png";
+import tabletWeather from "../assets/screenshots/tablet/weather.png";
+import tabletWallpaper from "../assets/screenshots/tablet/wallpaper.png";
+import desktopSchedule from "../assets/screenshots/desktop/schedule.png";
+import desktopCampus from "../assets/screenshots/desktop/campus.png";
+import desktopAi from "../assets/screenshots/desktop/ai.png";
+import desktopBus from "../assets/screenshots/desktop/bus.png";
+import desktopWeather from "../assets/screenshots/desktop/weather.png";
+import desktopWallpaper from "../assets/screenshots/desktop/wallpaper.png";
 import { resolveLocale, useTranslations } from "../i18n/ui";
 
 const t = useTranslations(resolveLocale(Astro.currentLocale));
 
 const slides = [
-  { label: t("carousel.slide.timetable"), src: scheduleShot },
-  { label: t("carousel.slide.campus"), src: campusShot },
-  { label: t("carousel.slide.ai"), src: aiAssistantShot },
-  { label: t("carousel.slide.weather"), src: weatherDetailShot },
-  { label: t("carousel.slide.aqi"), src: weatherAqiShot },
-  { label: t("carousel.slide.bus"), src: busShot },
-  { label: t("carousel.slide.wallpaper"), src: wallpaperShot },
+  { name: "schedule", label: t("carousel.slide.timetable"), phone: phoneSchedule, tablet: tabletSchedule, desktop: desktopSchedule },
+  { name: "campus", label: t("carousel.slide.campus"), phone: phoneCampus, tablet: tabletCampus, desktop: desktopCampus },
+  { name: "ai", label: t("carousel.slide.ai"), phone: phoneAi, tablet: tabletAi, desktop: desktopAi },
+  { name: "weather", label: t("carousel.slide.weather"), phone: phoneWeather, tablet: tabletWeather, desktop: desktopWeather },
+  { name: "bus", label: t("carousel.slide.bus"), phone: phoneBus, tablet: tabletBus, desktop: desktopBus },
+  { name: "home", label: "Home", phone: phoneWallpaper, tablet: tabletWallpaper, desktop: desktopWallpaper },
+  { name: "list", label: "My day", phone: phoneWallpaper, tablet: tabletWallpaper, desktop: desktopWallpaper },
+  { name: "theme", label: "Appearance", phone: phoneWallpaper, tablet: tabletWallpaper, desktop: desktopWallpaper },
 ];
 
 /*
@@ -39,6 +51,12 @@ const i18n = {
   announceWithLabels: t("carousel.announce.withLabels"),
   announceBare: t("carousel.announce.bare"),
   separator: t("carousel.announce.separator"),
+  phone: t("carousel.form.phone"),
+  tablet: t("carousel.form.tablet"),
+  desktop: t("carousel.form.desktop"),
+  themeAuto: "Auto",
+  themeLight: "Light",
+  themeDark: "Dark",
 };
 ---
 
@@ -53,15 +71,49 @@ const i18n = {
   data-i18n-announce-range={i18n.announceRange}
   data-i18n-announce-single={i18n.announceSingle}
   data-i18n-announce-with-labels={i18n.announceWithLabels}
-  data-i18n-announce-bare={i18n.announceBare}
-  data-i18n-separator={i18n.separator}
->
-  <div id="carousel-track" class="flex transition-transform duration-500 ease-out">
-    {slides.map((slide) => (
-      <div class="shrink-0 w-full sm:w-1/2 lg:w-1/4 p-1.5">
+   data-i18n-announce-bare={i18n.announceBare}
+   data-i18n-separator={i18n.separator}
+   data-i18n-form-phone={i18n.phone}
+   data-i18n-form-tablet={i18n.tablet}
+   data-i18n-form-desktop={i18n.desktop}
+   data-i18n-theme-auto={i18n.themeAuto}
+   data-i18n-theme-light={i18n.themeLight}
+  data-i18n-theme-dark={i18n.themeDark}
+  data-shot-locale={Astro.currentLocale ?? "zh-Hans"}
+  >
+  <div class="lt-form-toolbar flex items-center justify-center gap-2 px-4 pt-4 pb-3" data-carousel-form-controls>
+    <div class="lt-form-switcher flex items-center gap-1 rounded-full lt-inset-raised p-1">
+      <button class="lt-form-toggle state-layer rounded-full px-3 py-1.5 text-label-small" type="button" data-form="phone">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M10 18h4"/></svg>
+        <span></span>
+      </button>
+      <button class="lt-form-toggle state-layer rounded-full px-3 py-1.5 text-label-small" type="button" data-form="tablet">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M10 18h4"/></svg>
+        <span></span>
+      </button>
+      <button class="lt-form-toggle state-layer rounded-full px-3 py-1.5 text-label-small" type="button" data-form="desktop">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M8 21h8M12 17v4"/></svg>
+        <span></span>
+      </button>
+    </div>
+    <div class="lt-theme-switcher flex items-center gap-1 rounded-full lt-inset-raised p-1" data-carousel-theme-controls>
+      <button class="lt-theme-toggle state-layer rounded-full px-2.5 py-1 text-label-small" type="button" data-theme="auto"><span></span></button>
+      <button class="lt-theme-toggle state-layer rounded-full px-2.5 py-1 text-label-small" type="button" data-theme="light"><span></span></button>
+      <button class="lt-theme-toggle state-layer rounded-full px-2.5 py-1 text-label-small" type="button" data-theme="dark"><span></span></button>
+    </div>
+  </div>
+
+  <div class="lt-carousel-viewport">
+    <div id="carousel-track" class="flex transition-transform duration-500 ease-out">
+      {slides.map((slide) => (
+        <div class="shrink-0 p-1.5">
         <figure class="lt-shot overflow-hidden rounded-nested">
-          <Picture
-            src={slide.src}
+           <Picture
+             src={slide.phone}
+             data-phone-src={slide.phone.src}
+             data-tablet-src={slide.tablet.src}
+             data-desktop-src={slide.desktop.src}
+             data-shot-name={slide.name}
             /*
              * Empty alt on purpose: the `<figcaption>` below names the figure,
              * and a figure's caption is its accessible name — repeating the same
@@ -99,14 +151,15 @@ const i18n = {
             quality={72}
             loading="lazy"
             decoding="async"
-            class="w-full h-auto object-cover object-center aspect-[9/16] max-h-[500px]"
+             class="lt-shot-image w-full h-auto object-cover object-center"
           />
           <figcaption class="lt-shot-caption px-3 py-2 text-center text-label-large text-on-surface">
             {slide.label}
           </figcaption>
         </figure>
-      </div>
-    ))}
+        </div>
+      ))}
+    </div>
   </div>
 
   <button id="carousel-prev" class="lt-arrow absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full cursor-pointer" aria-label={t("carousel.prev")}>
@@ -143,7 +196,7 @@ const i18n = {
       hover-only pause fails keyboard and touch users outright. Hidden under
       reduced motion, where autoplay never starts (see script).
     -->
-    <button id="carousel-pause" class="lt-pause" type="button" aria-label={i18n.pause}>
+    <button id="carousel-pause" class="lt-pause" type="button" aria-label={i18n.pause} aria-pressed="false">
       <svg data-glyph="pause" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
       <svg data-glyph="play" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l10.5-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z"/></svg>
     </button>
@@ -174,6 +227,14 @@ const i18n = {
     transition: box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
+  .lt-carousel-viewport {
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, black 7%, black 93%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, black 7%, black 93%, transparent 100%);
+  }
+
   /* Pointer-gated: hover styles stick after taps on touch devices. */
   @media (hover: hover) {
     .lt-shot:hover {
@@ -186,6 +247,122 @@ const i18n = {
   .lt-shot-caption {
     background-color: var(--lt-glass-overlay);
     border-top: 0.6px solid var(--lt-glass-edge);
+  }
+
+  [data-carousel-form-controls] {
+    z-index: 2;
+  }
+
+  .lt-form-toolbar {
+    position: relative;
+    z-index: 3;
+    flex-wrap: nowrap;
+  }
+
+  .lt-form-switcher,
+  .lt-theme-switcher {
+    flex: none;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 640px) {
+    .lt-form-toolbar {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+
+  .lt-form-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--lt-color-on-surface-variant);
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .lt-form-toggle[data-active="true"] {
+    color: var(--lt-color-on-primary-container);
+    background-color: var(--lt-color-primary-container);
+  }
+
+  .lt-theme-toggle {
+    color: var(--lt-color-on-surface-variant);
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .lt-theme-toggle[data-active="true"] {
+    color: var(--lt-color-on-primary-container);
+    background-color: var(--lt-color-primary-container);
+  }
+
+  #carousel-track {
+    --carousel-gap: 0.75rem;
+    gap: var(--carousel-gap);
+    align-items: flex-start;
+    will-change: transform;
+    min-height: 0;
+    width: max-content;
+  }
+
+  #carousel-track > div {
+    flex: 0 0 100%;
+    min-width: 0;
+  }
+
+  .lt-shot-image {
+    display: block;
+    height: auto;
+    aspect-ratio: 1170 / 2532;
+  }
+
+  [data-carousel-root][data-form="phone"] #carousel-track > div {
+    flex-basis: calc((var(--carousel-width, 100%) - (var(--phone-cols, 1) - 1) * var(--carousel-gap)) / var(--phone-cols, 1));
+  }
+
+  [data-carousel-root][data-form="phone"] #carousel-track {
+    width: var(--carousel-width, 100%);
+  }
+
+  [data-carousel-root][data-form="tablet"] #carousel-track > div {
+    flex-basis: min(48vw, 31rem);
+  }
+
+  [data-carousel-root][data-form="desktop"] #carousel-track > div {
+    flex-basis: min(72vw, 58rem);
+  }
+
+  [data-carousel-root][data-form="tablet"] #carousel-track,
+  [data-carousel-root][data-form="desktop"] #carousel-track {
+    width: max-content;
+  }
+
+  @media (min-width: 640px) {
+    [data-carousel-root][data-form="phone"] #carousel-track > div {
+      flex-basis: 50%;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    [data-carousel-root][data-form="phone"] #carousel-track > div {
+      flex-basis: 25%;
+    }
+  }
+
+  [data-carousel-root][data-form="tablet"] .lt-shot,
+  [data-carousel-root][data-form="desktop"] .lt-shot {
+    border-radius: var(--lt-radius-card);
+  }
+
+  [data-carousel-root][data-form="tablet"] .lt-shot-image {
+    aspect-ratio: 1668 / 2388;
+  }
+
+  [data-carousel-root][data-form="desktop"] .lt-shot-image {
+    aspect-ratio: 2880 / 1800;
   }
 
   .lt-arrow {
@@ -288,7 +465,13 @@ const i18n = {
     border-radius: 999px;
     box-shadow: inset 0 0 0 0.6px var(--lt-glass-edge);
     cursor: pointer;
-    transition: color 0.25s ease;
+    transition: color 0.25s ease, background-color 0.25s ease, scale 0.25s ease;
+  }
+
+  .lt-pause[data-paused="true"] {
+    color: var(--lt-color-on-primary-container);
+    background-color: var(--lt-color-primary-container);
+    box-shadow: inset 0 0 0 1px var(--lt-color-primary);
   }
 
   @media (hover: hover) {
@@ -339,10 +522,17 @@ const i18n = {
     const pauseBtn = document.getElementById("carousel-pause");
     const status = document.querySelector<HTMLElement>("[data-carousel-status]");
     const dots = Array.from(document.querySelectorAll<HTMLElement>(".lt-dot"));
+    const formControls = Array.from(
+      document.querySelectorAll<HTMLButtonElement>("[data-carousel-form-controls] [data-form]"),
+    );
+    const themeControls = Array.from(
+      document.querySelectorAll<HTMLButtonElement>("[data-carousel-theme-controls] [data-theme]"),
+    );
     if (!track || !prev || !next) return;
 
     const total = dots.length;
     const container = track.parentElement;
+    const root = track.closest<HTMLElement>("[data-carousel-root]");
     const controls = document.querySelector<HTMLElement>("[data-carousel-controls]");
     /*
      * Slide names read back out of the rendered figcaptions rather than passed
@@ -364,7 +554,6 @@ const i18n = {
      * grammar is translated along with the words instead of being baked into
      * concatenation here.
      */
-    const root = container as HTMLElement | null;
     const dataset = root?.dataset ?? {};
     const copy = {
       pause: dataset.i18nPause ?? "",
@@ -374,7 +563,125 @@ const i18n = {
       announceWithLabels: dataset.i18nAnnounceWithLabels ?? "",
       announceBare: dataset.i18nAnnounceBare ?? "",
       separator: dataset.i18nSeparator ?? "",
+      forms: {
+        phone: dataset.i18nFormPhone ?? "Phone",
+        tablet: dataset.i18nFormTablet ?? "Tablet",
+        desktop: dataset.i18nFormDesktop ?? "Desktop",
+      },
+      themes: {
+        auto: dataset.i18nThemeAuto ?? "Auto",
+        light: dataset.i18nThemeLight ?? "Light",
+        dark: dataset.i18nThemeDark ?? "Dark",
+      },
     };
+
+    let selectedTheme = "auto";
+    let selectedForm = "phone";
+    themeControls.forEach((button) => {
+      const theme = button.dataset.theme ?? "auto";
+      const label = button.querySelector("span");
+      if (label) label.textContent = copy.themes[theme as keyof typeof copy.themes] ?? theme;
+      button.setAttribute("aria-pressed", "false");
+      button.addEventListener("click", () => {
+        selectedTheme = theme;
+        applyTheme();
+      }, { signal });
+    });
+
+    function applyTheme() {
+      root?.setAttribute("data-carousel-theme", selectedTheme);
+      themeControls.forEach((button) => {
+        const active = button.dataset.theme === selectedTheme;
+        button.setAttribute("aria-pressed", String(active));
+        button.dataset.active = String(active);
+      });
+      applyThemeImages();
+    }
+
+    function effectiveTheme() {
+      if (selectedTheme !== "auto") return selectedTheme;
+      return document.documentElement.classList.contains("dark") ? "dark" : "light";
+    }
+
+    function applyThemeImages() {
+      const theme = effectiveTheme();
+      const locale = root?.dataset.shotLocale ?? "zh-Hans";
+      track.querySelectorAll<HTMLImageElement>("img[data-shot-name]").forEach((image) => {
+        const name = image.dataset.shotName;
+        if (!name) return;
+        const source = `/screenshots/${locale}/${theme}/${selectedForm}/${name}.webp`;
+        image.parentElement?.querySelectorAll("source").forEach((candidate) => {
+          candidate.removeAttribute("srcset");
+        });
+        image.src = source;
+        image.removeAttribute("srcset");
+      });
+    }
+    applyTheme();
+
+    const themeObserver = new MutationObserver(() => {
+      if (selectedTheme === "auto") applyThemeImages();
+    });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    signal.addEventListener("abort", () => themeObserver.disconnect());
+
+    let formLocked = false;
+    formControls.forEach((button) => {
+      const form = button.dataset.form ?? "phone";
+      const label = button.querySelector("span");
+      if (label) label.textContent = copy.forms[form as keyof typeof copy.forms] ?? form;
+      button.setAttribute("aria-pressed", "false");
+      button.addEventListener("click", () => {
+        selectedForm = form;
+        formLocked = true;
+        applyForm();
+      }, { signal });
+    });
+
+    function formForViewport() {
+      if (window.innerWidth >= 1024) return "desktop";
+      if (window.innerWidth >= 640) return "tablet";
+      return "phone";
+    }
+
+    function applyForm() {
+      const form = selectedForm;
+      root?.setAttribute("data-form", form);
+      track.querySelectorAll<HTMLImageElement>("img[data-phone-src]").forEach((image) => {
+        const source = image.dataset[`${form}Src`] ?? image.dataset.phoneSrc;
+        if (!source || image.src.endsWith(source)) return;
+        // Astro's <Picture> emits <source> siblings for its initial srcset.
+        // Once the user chooses a form factor, let the explicit image URL own
+        // the selection; leaving those siblings active would make the browser
+        // immediately pick the old phone candidate again on the next layout.
+        image.parentElement?.querySelectorAll("source").forEach((candidate) => {
+          candidate.removeAttribute("srcset");
+        });
+        image.src = source;
+        image.removeAttribute("srcset");
+        // The server-rendered phone Picture carries width/height attributes.
+        // Leaving those dimensions on the swapped tablet/desktop source makes
+        // the first desktop layout reserve a portrait-sized image box.
+        image.removeAttribute("width");
+        image.removeAttribute("height");
+        image.loading = form === "phone" ? "lazy" : "eager";
+      });
+      applyThemeImages();
+      formControls.forEach((button) => {
+        const active = button.dataset.form === form;
+        button.setAttribute("aria-pressed", String(active));
+        button.dataset.active = String(active);
+      });
+    }
+
+    selectedForm = formForViewport();
+    applyForm();
+
+    const trackResizeObserver = typeof ResizeObserver === "function"
+      ? new ResizeObserver(() => update())
+      : null;
+    trackResizeObserver?.observe(track);
+    signal.addEventListener("abort", () => trackResizeObserver?.disconnect());
 
     /**
      * `{name}` substitution.
@@ -409,6 +716,7 @@ const i18n = {
     let inView = false;
 
     function getCols() {
+      if (selectedForm !== "phone") return 1;
       if (window.innerWidth < 640) return 1;
       if (window.innerWidth < 1024) return 2;
       return 4;
@@ -416,10 +724,20 @@ const i18n = {
 
     function update() {
       const cols = getCols();
+      if (container && root) {
+        root.style.setProperty("--carousel-width", `${container.clientWidth}px`);
+        root.style.setProperty("--phone-cols", String(cols));
+      }
       const max = Math.max(0, total - cols);
       if (current > max) current = max;
-      const pct = 100 / cols;
-      track.style.transform = `translateX(-${current * pct}%)`;
+      const activeSlide = track.children[current] as HTMLElement | undefined;
+      const viewportWidth = container?.clientWidth ?? 0;
+      const slideWidth = activeSlide?.getBoundingClientRect().width ?? 0;
+      const target = selectedForm === "phone"
+        ? (activeSlide?.offsetLeft ?? 0)
+        : (activeSlide?.offsetLeft ?? 0) - (viewportWidth - slideWidth) / 2;
+      const maxOffset = Math.max(0, track.scrollWidth - viewportWidth);
+      track.style.transform = `translateX(-${Math.min(maxOffset, Math.max(0, target))}px)`;
       dots.forEach((dot, i) => {
         const active = i >= current && i < current + cols;
         dot.dataset.active = String(active);
@@ -443,10 +761,12 @@ const i18n = {
       // The slide after the visible window is the next one autoplay will show;
       // its `loading="lazy"` image may not have been near the viewport yet,
       // which used to slide in as a white frame. Promote it to eager.
-      const upcoming = track.children[Math.min(current + cols, total - 1)]?.querySelector("img");
-      if (upcoming instanceof HTMLImageElement && upcoming.loading === "lazy") {
-        upcoming.loading = "eager";
-      }
+      const visibleEnd = Math.min(current + cols + 1, total);
+      track.querySelectorAll<HTMLImageElement>("img[data-phone-src]").forEach((image, index) => {
+        if (index >= current && index < visibleEnd && image.loading === "lazy") {
+          image.loading = "eager";
+        }
+      });
     }
 
     function advance() {
@@ -483,6 +803,8 @@ const i18n = {
       else startAutoplay();
       if (pauseBtn) {
         pauseBtn.setAttribute("aria-label", paused ? copy.play : copy.pause);
+        pauseBtn.setAttribute("aria-pressed", String(paused));
+        pauseBtn.dataset.paused = String(paused);
         const play = pauseBtn.querySelector<SVGElement>('[data-glyph="play"]');
         const pause = pauseBtn.querySelector<SVGElement>('[data-glyph="pause"]');
         if (play) play.hidden = !paused;
@@ -587,7 +909,13 @@ const i18n = {
 
     window.addEventListener("resize", () => {
       window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(update, 100);
+      resizeTimer = window.setTimeout(() => {
+        if (!formLocked) {
+          selectedForm = formForViewport();
+          applyForm();
+        }
+        update();
+      }, 100);
     }, { signal });
 
     // Pointer-gated hover: on touch, `pointerenter` also fires ahead of a tap,

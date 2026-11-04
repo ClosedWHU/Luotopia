@@ -70,6 +70,12 @@
   "carousel.announce.withLabels": "{span} sur {total} : {labels}",
   "carousel.announce.bare": "{span} sur {total}",
   "carousel.announce.separator": ", ",
+  "carousel.form.phone": "Téléphone",
+  "carousel.form.tablet": "Tablette",
+  "carousel.form.desktop": "Ordinateur",
+  "carousel.theme.auto": "Auto",
+  "carousel.theme.light": "Clair",
+  "carousel.theme.dark": "Sombre",
 
   "features.title": "Fonctions",
   "features.header": "Toutes les fonctions",

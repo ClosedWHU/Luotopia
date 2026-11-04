@@ -70,6 +70,12 @@
   "carousel.announce.withLabels": "{span}／全 {total} 枚：{labels}",
   "carousel.announce.bare": "{span}／全 {total} 枚",
   "carousel.announce.separator": "・",
+  "carousel.form.phone": "スマホ",
+  "carousel.form.tablet": "タブレット",
+  "carousel.form.desktop": "デスクトップ",
+  "carousel.theme.auto": "自動",
+  "carousel.theme.light": "ライト",
+  "carousel.theme.dark": "ダーク",
 
   "features.title": "機能",
   "features.header": "機能一覧",

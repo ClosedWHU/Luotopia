@@ -70,6 +70,12 @@
   "carousel.announce.withLabels": "{span}，共 {total} 張：{labels}",
   "carousel.announce.bare": "{span}，共 {total} 張",
   "carousel.announce.separator": "、",
+  "carousel.form.phone": "手機",
+  "carousel.form.tablet": "平板",
+  "carousel.form.desktop": "電腦",
+  "carousel.theme.auto": "自動",
+  "carousel.theme.light": "淺色",
+  "carousel.theme.dark": "深色",
 
   "features.title": "功能",
   "features.header": "功能全覽",

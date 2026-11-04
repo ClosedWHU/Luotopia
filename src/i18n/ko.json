@@ -70,6 +70,12 @@
   "carousel.announce.withLabels": "{span}, 총 {total}개: {labels}",
   "carousel.announce.bare": "{span}, 총 {total}개",
   "carousel.announce.separator": ", ",
+  "carousel.form.phone": "휴대전화",
+  "carousel.form.tablet": "태블릿",
+  "carousel.form.desktop": "데스크톱",
+  "carousel.theme.auto": "자동",
+  "carousel.theme.light": "라이트",
+  "carousel.theme.dark": "다크",
 
   "features.title": "기능",
   "features.header": "기능 전체 보기",

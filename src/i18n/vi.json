@@ -70,6 +70,12 @@
   "carousel.announce.withLabels": "{span} trong tổng số {total}: {labels}",
   "carousel.announce.bare": "{span} trong tổng số {total}",
   "carousel.announce.separator": ", ",
+  "carousel.form.phone": "Điện thoại",
+  "carousel.form.tablet": "Máy tính bảng",
+  "carousel.form.desktop": "Máy tính",
+  "carousel.theme.auto": "Tự động",
+  "carousel.theme.light": "Sáng",
+  "carousel.theme.dark": "Tối",
 
   "features.title": "Tính năng",
   "features.header": "Toàn bộ tính năng",

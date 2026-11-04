@@ -70,6 +70,12 @@
   "carousel.announce.withLabels": "{span} of {total}: {labels}",
   "carousel.announce.bare": "{span} of {total}",
   "carousel.announce.separator": ", ",
+  "carousel.form.phone": "Phone",
+  "carousel.form.tablet": "Tablet",
+  "carousel.form.desktop": "Desktop",
+  "carousel.theme.auto": "Auto",
+  "carousel.theme.light": "Light",
+  "carousel.theme.dark": "Dark",
 
   "features.title": "Features",
   "features.header": "Feature overview",
