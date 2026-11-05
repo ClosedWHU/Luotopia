@@ -47,9 +47,9 @@
   "home.features.title": "Core features",
   "home.features.subtitle": "Timetable, agenda, bookings, E-card, shuttle bus, map, forum and AI — everything campus life needs, in one place.",
   "home.preview.title": "App preview",
-  "home.preview.subtitle": "Real screens, not renders.",
+  "home.preview.subtitle": "See how to check your timetable, plan your day and use campus services.",
   "home.cta.title": "Try it now",
-  "home.cta.subtitle": "Free, open and clean — campus life, made simple.",
+  "home.cta.subtitle": "Download for free and keep your timetable, plans and everyday campus services in one place.",
 
   "carousel.roleDescription": "carousel",
   "carousel.label": "App screenshots",
@@ -65,6 +65,9 @@
   "carousel.slide.aqi": "Air quality",
   "carousel.slide.bus": "Shuttle bus",
   "carousel.slide.wallpaper": "Wallpaper centre",
+  "carousel.slide.home": "Today",
+  "carousel.slide.list": "Tasks",
+  "carousel.slide.aiOverview": "AI workspace",
   "carousel.announce.range": "Slides {from} to {to}",
   "carousel.announce.single": "Slide {from}",
   "carousel.announce.withLabels": "{span} of {total}: {labels}",
@@ -79,7 +82,7 @@
 
   "features.title": "Features",
   "features.header": "Feature overview",
-  "features.subtitle": "What ships today, what is coming next, and what is still being built",
+  "features.subtitle": "Find features for your studies and campus life, with details on what's available and what's planned.",
   "features.status.upcoming": "Coming soon",
   "features.status.development": "In development",
 
@@ -378,7 +381,7 @@
 
   "community.title": "Community",
   "community.header": "Community",
-  "community.subtitle": "Join us and help build a better digital campus ecosystem",
+  "community.subtitle": "Share your experience, get help and suggest improvements.",
 
   "community.qqGroup.title": "QQ group",
   "community.qqGroup.body": "Join the Luotopia users' group for the latest news and help.",
@@ -506,7 +509,7 @@
   "download.releases.more": "You can also go straight to {link} for every past version and its release notes.",
 
   "download.changelog.title": "Changelog",
-  "download.changelog.subtitle": "Release history from GitHub Releases",
+  "download.changelog.subtitle": "See new features and fixes in each version on GitHub Releases.",
   "download.changelog.loading": "Loading…",
   "download.changelog.noNotes": "No release notes",
   "download.changelog.empty": "No releases yet. Please see {link}.",

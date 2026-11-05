@@ -16,7 +16,7 @@ type Context = {
 };
 
 const CACHE_CONTROL = "public, max-age=31536000, immutable";
-const VALID_PATH = /^(?:en|es|fr|ja|ko|pt|ru|vi|zh-Hans|zh-Hant)\/(?:auto|light|dark)\/(?:phone|tablet|desktop)\/(?:ai|campus|bus|weather|schedule|home|list|theme)\.webp$/;
+const VALID_PATH = /^(?:en|es|fr|ja|ko|pt|ru|vi|zh-Hans|zh-Hant)\/(?:auto|light|dark)\/(?:phone|tablet|desktop)\/(?:schedule|agenda|ai|forum|campus|score|empty-classroom|seat-reservation|payment|water-control|school-net|vpn|medical-service|news)\.webp$/;
 
 export async function onRequestGet(context: Context): Promise<Response> {
   const raw = context.params.path;

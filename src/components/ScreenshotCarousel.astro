@@ -1,36 +1,27 @@
 ---
-import { Picture } from "astro:assets";
-import phoneSchedule from "../assets/screenshots/phone/schedule.png";
-import phoneCampus from "../assets/screenshots/phone/campus.png";
-import phoneAi from "../assets/screenshots/phone/ai.png";
-import phoneBus from "../assets/screenshots/phone/bus.png";
-import phoneWeather from "../assets/screenshots/phone/weather.png";
-import phoneWallpaper from "../assets/screenshots/phone/wallpaper.png";
-import tabletSchedule from "../assets/screenshots/tablet/schedule.png";
-import tabletCampus from "../assets/screenshots/tablet/campus.png";
-import tabletAi from "../assets/screenshots/tablet/ai.png";
-import tabletBus from "../assets/screenshots/tablet/bus.png";
-import tabletWeather from "../assets/screenshots/tablet/weather.png";
-import tabletWallpaper from "../assets/screenshots/tablet/wallpaper.png";
-import desktopSchedule from "../assets/screenshots/desktop/schedule.png";
-import desktopCampus from "../assets/screenshots/desktop/campus.png";
-import desktopAi from "../assets/screenshots/desktop/ai.png";
-import desktopBus from "../assets/screenshots/desktop/bus.png";
-import desktopWeather from "../assets/screenshots/desktop/weather.png";
-import desktopWallpaper from "../assets/screenshots/desktop/wallpaper.png";
 import { resolveLocale, useTranslations } from "../i18n/ui";
 
-const t = useTranslations(resolveLocale(Astro.currentLocale));
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+// Mirrors have no R2 binding; published galleries use the canonical endpoint.
+const screenshotOrigin = import.meta.env.DEV ? "" : "https://www.whu.sb";
+const screenshotUrl = (form: string, name: string) => `${screenshotOrigin}/screenshots/${locale}/light/${form}/${name}.webp`;
 
 const slides = [
-  { name: "schedule", label: t("carousel.slide.timetable"), phone: phoneSchedule, tablet: tabletSchedule, desktop: desktopSchedule },
-  { name: "campus", label: t("carousel.slide.campus"), phone: phoneCampus, tablet: tabletCampus, desktop: desktopCampus },
-  { name: "ai", label: t("carousel.slide.ai"), phone: phoneAi, tablet: tabletAi, desktop: desktopAi },
-  { name: "weather", label: t("carousel.slide.weather"), phone: phoneWeather, tablet: tabletWeather, desktop: desktopWeather },
-  { name: "bus", label: t("carousel.slide.bus"), phone: phoneBus, tablet: tabletBus, desktop: desktopBus },
-  { name: "home", label: "Home", phone: phoneWallpaper, tablet: tabletWallpaper, desktop: desktopWallpaper },
-  { name: "list", label: "My day", phone: phoneWallpaper, tablet: tabletWallpaper, desktop: desktopWallpaper },
-  { name: "theme", label: "Appearance", phone: phoneWallpaper, tablet: tabletWallpaper, desktop: desktopWallpaper },
+  { name: "schedule", label: t("features.item.timetable.title") },
+  { name: "agenda", label: t("features.item.agenda.title") },
+  { name: "ai", label: t("features.item.aiAssistant.title") },
+  { name: "forum", label: t("features.item.forum.title") },
+  { name: "campus", label: t("carousel.slide.campus") },
+  { name: "score", label: t("features.item.grades.title") },
+  { name: "empty-classroom", label: t("features.item.freeClassrooms.title") },
+  { name: "seat-reservation", label: t("features.item.librarySeats.title") },
+  { name: "payment", label: t("features.item.ecard.title") },
+  { name: "water-control", label: t("features.item.utilities.title") },
+  { name: "school-net", label: t("features.item.campusNetwork.title") },
+  { name: "vpn", label: t("features.item.campusVpn.title") },
+  { name: "medical-service", label: t("features.item.hospital.title") },
+  { name: "news", label: t("features.item.campusNews.title") },
 ];
 
 /*
@@ -54,14 +45,14 @@ const i18n = {
   phone: t("carousel.form.phone"),
   tablet: t("carousel.form.tablet"),
   desktop: t("carousel.form.desktop"),
-  themeAuto: "Auto",
-  themeLight: "Light",
-  themeDark: "Dark",
+   themeAuto: t("carousel.theme.auto"),
+   themeLight: t("carousel.theme.light"),
+   themeDark: t("carousel.theme.dark"),
 };
 ---
 
 <div
-  class="lt-carousel glass relative overflow-hidden rounded-group pb-10"
+   class="lt-carousel glass relative overflow-hidden rounded-group pb-16 sm:pb-10"
   role="group"
   aria-roledescription={t("carousel.roleDescription")}
   aria-label={t("carousel.label")}
@@ -78,9 +69,10 @@ const i18n = {
    data-i18n-form-desktop={i18n.desktop}
    data-i18n-theme-auto={i18n.themeAuto}
    data-i18n-theme-light={i18n.themeLight}
-  data-i18n-theme-dark={i18n.themeDark}
-  data-shot-locale={Astro.currentLocale ?? "zh-Hans"}
-  >
+   data-i18n-theme-dark={i18n.themeDark}
+   data-shot-locale={Astro.currentLocale ?? "zh-Hans"}
+   data-shot-origin={screenshotOrigin}
+   >
   <div class="lt-form-toolbar flex items-center justify-center gap-2 px-4 pt-4 pb-3" data-carousel-form-controls>
     <div class="lt-form-switcher flex items-center gap-1 rounded-full lt-inset-raised p-1">
       <button class="lt-form-toggle state-layer rounded-full px-3 py-1.5 text-label-small" type="button" data-form="phone">
@@ -108,11 +100,11 @@ const i18n = {
       {slides.map((slide) => (
         <div class="shrink-0 p-1.5">
         <figure class="lt-shot overflow-hidden rounded-nested">
-           <Picture
-             src={slide.phone}
-             data-phone-src={slide.phone.src}
-             data-tablet-src={slide.tablet.src}
-             data-desktop-src={slide.desktop.src}
+           <img
+             src={screenshotUrl("phone", slide.name)}
+             data-phone-src={screenshotUrl("phone", slide.name)}
+             data-tablet-src={screenshotUrl("tablet", slide.name)}
+             data-desktop-src={screenshotUrl("desktop", slide.name)}
              data-shot-name={slide.name}
             /*
              * Empty alt on purpose: the `<figcaption>` below names the figure,
@@ -121,34 +113,8 @@ const i18n = {
              * "Timetable, image" then "Timetable", seven times.
              */
             alt=""
-            formats={["avif", "webp"]}
-            widths={[360, 720]}
-            /*
-             * Crop at build time to the ratio the CSS actually shows.
-             *
-             * The captures are 1024×2284 (ratio 0.448) but the rendered box is
-             * `aspect-[9/16]` capped at 500px, so `object-cover` was discarding
-             * roughly a sixth of every downloaded image. Astro's service derives
-             * srcset heights from the *source* ratio unless both width and height
-             * are given — with only `widths`, it emitted 720×1606 and shipped the
-             * pixels it knew would be cropped.
-             *
-             * Naming a 9:16 target makes `getTargetDimensions` return it
-             * untouched, so `widths` scales against 0.5625 and sharp crops to
-             * cover. It also moves the `src` fallback off the full-size original
-             * (a 462 KB PNG for the campus shot) onto the 720 variant.
-             *
-             * 9/16 rather than the mobile box's own ~0.74: above 1024px the
-             * 500px cap does not bind and the slide really is 9:16, so cropping
-             * tighter would start cutting the *sides* off the screenshot there.
-             * This is the ratio that is lossless at the largest breakpoint.
-             */
-            width={720}
-            height={1280}
-            fit="cover"
-            position="center"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            quality={72}
+             width="720"
+             height="1280"
             loading="lazy"
             decoding="async"
              class="lt-shot-image w-full h-auto object-cover object-center"
@@ -177,7 +143,7 @@ const i18n = {
     the alternative allowance in 2.5.8 (an undersized target whose 24px circle
     intersects no other target's) demands the same centre-to-centre distance.
   -->
-  <div class="absolute bottom-3.5 left-1/2 -translate-x-1/2 flex items-center gap-0" data-carousel-controls>
+   <div class="lt-carousel-controls absolute bottom-3.5 left-1/2 -translate-x-1/2 flex items-center gap-0" data-carousel-controls>
     {slides.map((_, i) => (
       <button
         class="lt-dot"
@@ -197,8 +163,8 @@ const i18n = {
       reduced motion, where autoplay never starts (see script).
     -->
     <button id="carousel-pause" class="lt-pause" type="button" aria-label={i18n.pause} aria-pressed="false">
-      <svg data-glyph="pause" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
-      <svg data-glyph="play" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l10.5-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z"/></svg>
+       <svg data-glyph="pause" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+       <svg data-glyph="play" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l10.5-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z"/></svg>
     </button>
   </div>
 
@@ -231,8 +197,6 @@ const i18n = {
     position: relative;
     overflow: hidden;
     min-height: 0;
-    -webkit-mask-image: linear-gradient(to right, transparent 0, black 7%, black 93%, transparent 100%);
-    mask-image: linear-gradient(to right, transparent 0, black 7%, black 93%, transparent 100%);
   }
 
   /* Pointer-gated: hover styles stick after taps on touch devices. */
@@ -302,6 +266,7 @@ const i18n = {
   #carousel-track {
     --carousel-gap: 0.75rem;
     gap: var(--carousel-gap);
+    padding-inline: 0.75rem;
     align-items: flex-start;
     will-change: transform;
     min-height: 0;
@@ -324,7 +289,7 @@ const i18n = {
   }
 
   [data-carousel-root][data-form="phone"] #carousel-track {
-    width: var(--carousel-width, 100%);
+    width: calc(var(--carousel-width, 100%) - 1.5rem);
   }
 
   [data-carousel-root][data-form="tablet"] #carousel-track > div {
@@ -468,10 +433,18 @@ const i18n = {
     transition: color 0.25s ease, background-color 0.25s ease, scale 0.25s ease;
   }
 
+  .lt-pause svg[hidden] { display: none; }
+
+  @media (max-width: 420px) {
+    .lt-carousel-controls {
+      width: min(calc(100% - 1rem), 20rem);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+
   .lt-pause[data-paused="true"] {
-    color: var(--lt-color-on-primary-container);
-    background-color: var(--lt-color-primary-container);
-    box-shadow: inset 0 0 0 1px var(--lt-color-primary);
+    color: var(--lt-color-primary);
   }
 
   @media (hover: hover) {
@@ -604,12 +577,13 @@ const i18n = {
     }
 
     function applyThemeImages() {
-      const theme = effectiveTheme();
-      const locale = root?.dataset.shotLocale ?? "zh-Hans";
-      track.querySelectorAll<HTMLImageElement>("img[data-shot-name]").forEach((image) => {
-        const name = image.dataset.shotName;
-        if (!name) return;
-        const source = `/screenshots/${locale}/${theme}/${selectedForm}/${name}.webp`;
+       const theme = effectiveTheme();
+       const locale = root?.dataset.shotLocale ?? "zh-Hans";
+       const origin = root?.dataset.shotOrigin ?? "";
+       track.querySelectorAll<HTMLImageElement>("img[data-shot-name]").forEach((image) => {
+         const name = image.dataset.shotName;
+         if (!name) return;
+         const source = `${origin}/screenshots/${locale}/${theme}/${selectedForm}/${name}.webp`;
         image.parentElement?.querySelectorAll("source").forEach((candidate) => {
           candidate.removeAttribute("srcset");
         });

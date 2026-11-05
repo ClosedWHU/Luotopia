@@ -47,9 +47,9 @@
   "home.features.title": "核心功能",
   "home.features.subtitle": "课表、日程、预约、E 卡、校车、地图、论坛与 AI —— 校园生活所需，尽在一处。",
   "home.preview.title": "应用预览",
-  "home.preview.subtitle": "真实界面，非渲染图。",
+  "home.preview.subtitle": "看看如何查课表、安排日程、使用常用校园服务。",
   "home.cta.title": "立即体验",
-  "home.cta.subtitle": "免费、开放、纯净，让校园生活更简单。",
+  "home.cta.subtitle": "免费下载，把课表、日程与常用校园服务放在一起。",
 
   "carousel.roleDescription": "轮播",
   "carousel.label": "应用界面截图",
@@ -65,6 +65,9 @@
   "carousel.slide.aqi": "空气质量",
   "carousel.slide.bus": "校车",
   "carousel.slide.wallpaper": "壁纸中心",
+  "carousel.slide.home": "今日安排",
+  "carousel.slide.list": "待办清单",
+  "carousel.slide.aiOverview": "AI 工作区",
   "carousel.announce.range": "第 {from} 到 {to} 张",
   "carousel.announce.single": "第 {from} 张",
   "carousel.announce.withLabels": "{span}，共 {total} 张：{labels}",
@@ -79,7 +82,7 @@
 
   "features.title": "功能",
   "features.header": "功能全览",
-  "features.subtitle": "已上线能力、即将上线更新与开发中方向",
+  "features.subtitle": "查找学习与校园生活所需的功能，了解当前可用内容与后续计划。",
   "features.status.upcoming": "即将上线",
   "features.status.development": "开发中",
 
@@ -378,7 +381,7 @@
 
   "community.title": "社区",
   "community.header": "社区",
-  "community.subtitle": "加入我们，一起构建更好的校园数字生态",
+  "community.subtitle": "交流使用经验、获取帮助，也欢迎反馈你的建议。",
 
   "community.qqGroup.title": "QQ 群",
   "community.qqGroup.body": "加入 Luotopia 用户交流群，获取最新动态和帮助。",
@@ -506,7 +509,7 @@
   "download.releases.more": "你也可以直接访问{link}查看所有历史版本和发布说明。",
 
   "download.changelog.title": "更新日志",
-  "download.changelog.subtitle": "来自 GitHub Releases 的发布历史",
+  "download.changelog.subtitle": "查看 GitHub Releases 中各版本的新功能与修复。",
   "download.changelog.loading": "加载中…",
   "download.changelog.noNotes": "暂无说明",
   "download.changelog.empty": "暂无发布记录。请访问 {link}。",
