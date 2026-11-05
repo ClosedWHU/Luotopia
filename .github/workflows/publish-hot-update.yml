@@ -32,6 +32,8 @@ on:
       - 'public/hot-update/scripts/**'
       - 'public/hot-update/assets/**'
       - 'tools/generate-hot-update-manifest.mjs'
+      - 'tools/sync-toolkit.mjs'
+      - 'vendor/luotopia-toolkit/**'
   workflow_dispatch:
 
 permissions:

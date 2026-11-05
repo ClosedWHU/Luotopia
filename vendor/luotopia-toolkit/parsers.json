@@ -1,0 +1,234 @@
+{
+  "package": "@luotopia/toolkit",
+  "version": "0.1.0",
+  "license": "AGPL-3.0-or-later",
+  "parsers": {
+    "score-parser": {
+      "apiVersion": 1,
+      "checksum": "sha256:c9a62b08513599df86ffc0845f7f15dd5d3b82d4fe2ea40fb7ec1f93e8afc294",
+      "source": "// Parses raw score data from the academic system into a normalized score list.\nfunction parse(rawJson) {\n  var data = JSON.parse(rawJson);\n  var items = data.items || [];\n  var result = [];\n\n  for (var i = 0; i < items.length; i++) {\n    var item = items[i];\n\n    // The academic system uses Hanyu Pinyin abbreviations for field names.\n    // xnm = 学年名 (academic year), e.g. \"2024\".\n    var xnmStr = (item.xnm || '').toString();\n    // kcmc = 课程名称 (course name).\n    var kcmc = (item.kcmc || '').toString().trim();\n    // jsxm = 教师姓名 / jsxmmc = 教师姓名 名称 code; teacher name.\n    var jsxm = (item.jsxm || item.jsxmmc || '').toString().trim();\n    // jxbmc = 教学班名称 code; teaching class id used as course id.\n    var jxbmc = (item.jxbmc || '').toString().trim();\n    // xf = 学分 (credit).\n    var xfStr = (item.xf || '').toString();\n    // kcxzmc = 课程性质名称 code; course nature (e.g. 必修/选修).\n    var kcxzmc = (item.kcxzmc || '').toString().trim();\n    // bfzcj = 最终成绩 (final grade) raw value.\n    var bfzcjStr = (item.bfzcj || '').toString();\n    // kkbmmc = 开课部门名称 code; department offering the course.\n    var kkbmmc = (item.kkbmmc || '').toString().trim();\n    // xqm = 学期名 (semester code, see below).\n    var xqmStr = (item.xqm || '').toString();\n    // cjbz = 成绩标志 (grade status); \"中期退课\" means midterm withdrawal.\n    var cjbz = (item.cjbz || '').toString();\n    // ksxz / ksxzmc = 考试性质 / 考试性质名称 (exam type).\n    var examType = ((item.ksxz || item.ksxzmc || '') + '' || '正常考试').trim();\n\n    var yearVal = parseInt(xnmStr, 10) || -1;\n    var credit = parseFloat(xfStr);\n\n    // Map the academic system's semester code to 1/2/3 (3 => 1, 12 => 2, 16 => 3).\n    var rawSemester = parseInt(xqmStr, 10) || -1;\n    var normalizedSemester = 1;\n    if (rawSemester === 3) normalizedSemester = 1;\n    else if (rawSemester === 12) normalizedSemester = 2;\n    else if (rawSemester === 16) normalizedSemester = 3;\n\n    // A midterm withdrawal is flagged either by cjbz or by cj === 'W'.\n    // cj = 成绩 (grade) raw value, used here only for the 'W' case.\n    var isMidtermWithdraw = cjbz === '\\u4e2d\\u671f\\u9000\\u8bfe' || (item.cj || '').toString() === 'W';\n    var parsedScore = parseInt(bfzcjStr, 10);\n\n    // Skip rows without a valid year/credit, or without a score (unless withdrawn).\n    if (yearVal <= 0 || isNaN(credit)) continue;\n    if (isNaN(parsedScore) && !isMidtermWithdraw) continue;\n\n    result.push({\n      year: yearVal,\n      semester: normalizedSemester,\n      name: kcmc,\n      instructor: jsxm,\n      courseId: jxbmc,\n      credit: credit,\n      courseType: kcxzmc,\n      score: isNaN(parsedScore) ? 0 : parsedScore,\n      courseCollege: kkbmmc,\n      isSpoiler: isMidtermWithdraw,\n      spoilerLabel: isMidtermWithdraw ? '\\u4e2d\\u671f\\u9000\\u8bfe' : null,\n      examType: examType\n    });\n  }\n  return JSON.stringify({ scores: result });\n}\n",
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "score-parser API v1 output",
+        "type": "object",
+        "required": [
+          "scores"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "scores": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "year",
+                "semester",
+                "name",
+                "instructor",
+                "courseId",
+                "credit",
+                "courseType",
+                "score",
+                "courseCollege",
+                "isSpoiler",
+                "spoilerLabel",
+                "examType"
+              ],
+              "properties": {
+                "year": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "semester": {
+                  "enum": [
+                    1,
+                    2,
+                    3
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "instructor": {
+                  "type": "string"
+                },
+                "courseId": {
+                  "type": "string"
+                },
+                "credit": {
+                  "type": "number"
+                },
+                "courseType": {
+                  "type": "string"
+                },
+                "score": {
+                  "type": "integer"
+                },
+                "courseCollege": {
+                  "type": "string"
+                },
+                "isSpoiler": {
+                  "type": "boolean"
+                },
+                "spoilerLabel": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "examType": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "smoke": {
+        "input": {
+          "items": [
+            {
+              "xnm": "2024",
+              "xqm": "3",
+              "kcmc": "高等数学",
+              "jsxmmc": "张三",
+              "jxbmc": "001",
+              "xf": "4.0",
+              "kcxzmc": "必修",
+              "bfzcj": "92",
+              "kkbmmc": "数学学院",
+              "cjbz": "",
+              "ksxz": "正常考试"
+            }
+          ]
+        },
+        "expect": {
+          "scores": [
+            {
+              "year": 2024,
+              "semester": 1,
+              "name": "高等数学",
+              "score": 92
+            }
+          ]
+        }
+      },
+      "cases": [
+        {
+          "name": "spring and summer codes, instructor alias and input order",
+          "input": {
+            "items": [
+              {
+                "xnm": "2025",
+                "xqm": "12",
+                "kcmc": " 物理 ",
+                "jsxmmc": "李老师",
+                "xf": "2.5",
+                "bfzcj": "85"
+              },
+              {
+                "xnm": "2025",
+                "xqm": "16",
+                "kcmc": "暑期课程",
+                "jsxm": "王老师",
+                "xf": "1",
+                "bfzcj": "70"
+              }
+            ]
+          },
+          "expect": {
+            "scores": [
+              {
+                "year": 2025,
+                "semester": 2,
+                "name": "物理",
+                "instructor": "李老师",
+                "credit": 2.5,
+                "score": 85
+              },
+              {
+                "year": 2025,
+                "semester": 3,
+                "name": "暑期课程",
+                "instructor": "王老师",
+                "score": 70
+              }
+            ]
+          }
+        },
+        {
+          "name": "withdrawal survives a missing numeric grade",
+          "input": {
+            "items": [
+              {
+                "xnm": "2025",
+                "xqm": "3",
+                "kcmc": "退课示例",
+                "xf": "2",
+                "cj": "W"
+              }
+            ]
+          },
+          "expect": {
+            "scores": [
+              {
+                "year": 2025,
+                "semester": 1,
+                "name": "退课示例",
+                "score": 0,
+                "isSpoiler": true,
+                "spoilerLabel": "中期退课"
+              }
+            ]
+          }
+        },
+        {
+          "name": "invalid rows are dropped without losing the following valid row",
+          "input": {
+            "items": [
+              {
+                "xnm": "bad",
+                "xf": "2",
+                "bfzcj": "90"
+              },
+              {
+                "xnm": "2025",
+                "xf": "bad",
+                "bfzcj": "90"
+              },
+              {
+                "xnm": "2025",
+                "xf": "2",
+                "bfzcj": "待发布"
+              },
+              {
+                "xnm": "2025",
+                "xf": "2",
+                "bfzcj": "60",
+                "kcmc": "保留课程"
+              }
+            ]
+          },
+          "expect": {
+            "scores": [
+              {
+                "name": "保留课程",
+                "score": 60
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty result",
+          "input": {
+            "items": []
+          },
+          "expect": {
+            "scores": []
+          }
+        }
+      ]
+    }
+  }
+}

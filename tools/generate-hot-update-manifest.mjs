@@ -3,6 +3,7 @@ import { readFile, writeFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import vm from 'node:vm';
+import { verifyToolkitSnapshot } from './sync-toolkit.mjs';
 
 const root = path.resolve(import.meta.dirname, '..');
 const scriptsDir = path.join(root, 'public', 'hot-update', 'scripts');
@@ -48,9 +49,10 @@ if (allowUnsigned && isPagesProduction) {
   );
 }
 
+const toolkit = await verifyToolkitSnapshot();
 const tests = {
   'course-parser': { input: { kbList: [{ kcmc: '高等数学', xqj: '1', jcs: '1-2', zcd: '1-2周', jxbmc: '001', cdmc: '教室A', xm: '张三', kcxz: '必修', xf: '4.0', kssj: '08:00', jssj: '09:35' }] }, expect: { courses: [{ title: '高等数学', weekday: 1, classFrom: 1, classTo: 2 }] } },
-  'score-parser': { input: { items: [{ xnm: '2024', xqm: '3', kcmc: '高等数学', jsxmmc: '张三', jxbmc: '001', xf: '4.0', kcxzmc: '必修', bfzcj: '92', kkbmmc: '数学学院', cjbz: '', ksxz: '正常考试' }] }, expect: { scores: [{ year: 2024, semester: 1, name: '高等数学', score: 92 }] } },
+  'score-parser': toolkit.parsers['score-parser'].smoke,
   'study-status-course-parser': { input: { items: [{ KCMC: '高等数学', KCXZMC: '必修', XF: '4.0', CJ: '92', JD: '4.0', MAXCJ: '92', XDZT: '4', KCLBMC: '基础课' }] }, expect: { courses: [{ name: '高等数学', credit: 4, score: 92, status: 'passed' }] } },
   'study-status-index-parser': { input: { html: "<p class='title1' id='pABC123DEF456ABC123DEF456ABC123DE'>必修课程&nbsp;</p>" }, expect: { names: { ABC123DEF456ABC123DEF456ABC123DE: '必修课程' } } },
   'school-net-parser': { input: { operation: 'landing', html: '<button id="suspend">暂停</button>' }, expect: { operation: 'landing', status: 'active' } },
@@ -309,6 +311,9 @@ async function verifyScriptsOnly() {
     if (!tests[name]) throw new Error(`Missing test vector for ${name}`);
     const source = await readFile(path.join(scriptsDir, file), 'utf8');
     runScriptTestVector(name, source, tests[name].input, tests[name].expect);
+    for (const fixture of toolkit.parsers[name]?.cases || []) {
+      runScriptTestVector(name, source, fixture.input, fixture.expect);
+    }
   }
   console.log(`[hot-update] ${files.length} script(s) passed their test vectors`);
 }
