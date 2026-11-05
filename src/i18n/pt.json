@@ -53,6 +53,9 @@
 
   "carousel.roleDescription": "carrossel",
   "carousel.label": "Capturas de tela do app",
+  "carousel.enlarge": "Ampliar {name}",
+  "carousel.close": "Fechar prévia",
+  "carousel.zoom": "Ver em resolução completa",
   "carousel.prev": "Slide anterior",
   "carousel.next": "Próximo slide",
   "carousel.pause": "Pausar a reprodução automática",

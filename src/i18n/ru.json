@@ -53,6 +53,9 @@
 
   "carousel.roleDescription": "карусель",
   "carousel.label": "Скриншоты приложения",
+  "carousel.enlarge": "Увеличить: {name}",
+  "carousel.close": "Закрыть просмотр",
+  "carousel.zoom": "Показать в полном разрешении",
   "carousel.prev": "Предыдущий слайд",
   "carousel.next": "Следующий слайд",
   "carousel.pause": "Приостановить автовоспроизведение",

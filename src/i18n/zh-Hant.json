@@ -53,6 +53,9 @@
 
   "carousel.roleDescription": "輪播",
   "carousel.label": "應用介面截圖",
+  "carousel.enlarge": "放大檢視{name}",
+  "carousel.close": "關閉預覽",
+  "carousel.zoom": "以原始解析度檢視",
   "carousel.prev": "上一張",
   "carousel.next": "下一張",
   "carousel.pause": "暫停自動輪播",

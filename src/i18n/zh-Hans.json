@@ -53,6 +53,9 @@
 
   "carousel.roleDescription": "轮播",
   "carousel.label": "应用界面截图",
+  "carousel.enlarge": "放大查看{name}",
+  "carousel.close": "关闭预览",
+  "carousel.zoom": "按原始分辨率查看",
   "carousel.prev": "上一张",
   "carousel.next": "下一张",
   "carousel.pause": "暂停自动轮播",

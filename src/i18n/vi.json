@@ -53,6 +53,9 @@
 
   "carousel.roleDescription": "băng chuyền",
   "carousel.label": "Ảnh chụp giao diện ứng dụng",
+  "carousel.enlarge": "Phóng to {name}",
+  "carousel.close": "Đóng bản xem trước",
+  "carousel.zoom": "Xem ở độ phân giải gốc",
   "carousel.prev": "Ảnh trước",
   "carousel.next": "Ảnh tiếp theo",
   "carousel.pause": "Tạm dừng tự động chuyển ảnh",

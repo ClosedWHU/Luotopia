@@ -53,6 +53,9 @@
 
   "carousel.roleDescription": "캐러셀",
   "carousel.label": "앱 스크린샷",
+  "carousel.enlarge": "{name} 확대 보기",
+  "carousel.close": "미리보기 닫기",
+  "carousel.zoom": "원본 해상도로 보기",
   "carousel.prev": "이전 슬라이드",
   "carousel.next": "다음 슬라이드",
   "carousel.pause": "자동 재생 일시정지",

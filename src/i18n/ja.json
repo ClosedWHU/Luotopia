@@ -53,6 +53,9 @@
 
   "carousel.roleDescription": "カルーセル",
   "carousel.label": "アプリのスクリーンショット",
+  "carousel.enlarge": "{name}を拡大表示",
+  "carousel.close": "プレビューを閉じる",
+  "carousel.zoom": "元の解像度で表示",
   "carousel.prev": "前のスライド",
   "carousel.next": "次のスライド",
   "carousel.pause": "自動再生を停止",

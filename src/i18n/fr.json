@@ -53,6 +53,9 @@
 
   "carousel.roleDescription": "carrousel",
   "carousel.label": "Captures d'écran de l'application",
+  "carousel.enlarge": "Agrandir {name}",
+  "carousel.close": "Fermer l’aperçu",
+  "carousel.zoom": "Afficher en pleine résolution",
   "carousel.prev": "Diapositive précédente",
   "carousel.next": "Diapositive suivante",
   "carousel.pause": "Suspendre la lecture automatique",

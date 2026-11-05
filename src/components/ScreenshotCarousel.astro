@@ -52,7 +52,7 @@ const i18n = {
 ---
 
 <div
-   class="lt-carousel glass relative overflow-hidden rounded-group pb-16 sm:pb-10"
+   class="lt-carousel glass relative overflow-hidden rounded-group"
   role="group"
   aria-roledescription={t("carousel.roleDescription")}
   aria-label={t("carousel.label")}
@@ -99,7 +99,8 @@ const i18n = {
     <div id="carousel-track" class="flex transition-transform duration-500 ease-out">
       {slides.map((slide) => (
         <div class="shrink-0 p-1.5">
-        <figure class="lt-shot overflow-hidden rounded-nested">
+         <figure class="lt-shot overflow-hidden rounded-nested">
+           <a class="lt-shot-open" href={screenshotUrl("phone", slide.name)} target="_blank" rel="noopener" data-shot-open aria-label={t("carousel.enlarge", { name: slide.label })}>
            <img
              src={screenshotUrl("phone", slide.name)}
              data-phone-src={screenshotUrl("phone", slide.name)}
@@ -113,12 +114,13 @@ const i18n = {
              * "Timetable, image" then "Timetable", seven times.
              */
             alt=""
-             width="720"
-             height="1280"
+             width="1170"
+             height="2532"
             loading="lazy"
             decoding="async"
-             class="lt-shot-image w-full h-auto object-cover object-center"
-          />
+              class="lt-shot-image"
+           />
+           </a>
           <figcaption class="lt-shot-caption px-3 py-2 text-center text-label-large text-on-surface">
             {slide.label}
           </figcaption>
@@ -126,7 +128,6 @@ const i18n = {
         </div>
       ))}
     </div>
-  </div>
 
   <button id="carousel-prev" class="lt-arrow absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full cursor-pointer" aria-label={t("carousel.prev")}>
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><polyline points="15 18 9 12 15 6"/></svg>
@@ -134,16 +135,11 @@ const i18n = {
   <button id="carousel-next" class="lt-arrow absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full cursor-pointer" aria-label={t("carousel.next")}>
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><polyline points="9 18 15 12 9 6"/></svg>
   </button>
+  </div>
 
-  <!--
-    `gap-0` is deliberate, not an oversight. Each dot button is a 24×24 CSS px
-    hit box (WCAG 2.5.8), so the buttons already supply their own spacing; a
-    gap on top would push the row past 200px. The visible marks stay small —
-    what changed is that the *pitch* between them had to grow to 24px, because
-    the alternative allowance in 2.5.8 (an undersized target whose 24px circle
-    intersects no other target's) demands the same centre-to-centre distance.
-  -->
-   <div class="lt-carousel-controls absolute bottom-3.5 left-1/2 -translate-x-1/2 flex items-center gap-0" data-carousel-controls>
+  <!-- Keep 24px dot targets; narrow screens use two centered rows. -->
+   <div class="lt-carousel-controls" data-carousel-controls>
+    <div class="lt-carousel-dots" style={`--dot-count: ${slides.length}`}>
     {slides.map((_, i) => (
       <button
         class="lt-dot"
@@ -155,8 +151,9 @@ const i18n = {
         tabindex={i === 0 ? 0 : -1}
         aria-current={i === 0 ? "true" : undefined}
         aria-label={t("carousel.dot", { index: i + 1, label: slides[i].label })}
-      ></button>
-    ))}
+       ></button>
+     ))}
+    </div>
     <!--
       WCAG 2.2.2: auto-advancing content needs a user-reachable pause, and
       hover-only pause fails keyboard and touch users outright. Hidden under
@@ -171,13 +168,38 @@ const i18n = {
   <!--
     Announces slide changes, but only the ones the user caused — see announce()
     in the script. Feeding autoplay into a live region would have a screen
-    reader interrupt whatever the user is doing every five seconds, which is
+    reader interrupt whatever the user is doing on every advance, which is
     worse than saying nothing.
   -->
   <p class="sr-only" role="status" aria-live="polite" data-carousel-status></p>
 </div>
 
+<dialog class="lt-shot-dialog" aria-labelledby="shot-preview-title" data-shot-dialog>
+  <div class="lt-shot-dialog-header">
+    <p id="shot-preview-title" class="text-title-medium text-on-surface"></p>
+    <button type="button" class="lt-pause state-layer" data-shot-zoom aria-label={t("carousel.zoom")} aria-pressed="false">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6M7 10h6M10 7v6"/></svg>
+    </button>
+    <button type="button" class="lt-pause state-layer" data-shot-close aria-label={t("carousel.close")} autofocus>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+  <div class="lt-shot-dialog-body lt-scroll-y" data-lenis-prevent>
+    <div class="lt-shot-dialog-stage" data-shot-stage>
+      <img class="lt-shot-dialog-image" alt="" draggable="false" data-shot-preview />
+    </div>
+  </div>
+</dialog>
+
 <style>
+  .lt-carousel {
+    --shot-height: calc(100vh - 16rem);
+    --shot-ratio: 0.4621;
+  }
+
+  [data-carousel-root][data-form="tablet"] { --shot-ratio: 0.6985; }
+  [data-carousel-root][data-form="desktop"] { --shot-ratio: 1.6; }
+
   /*
    * The panel is glass, so everything inside it inherits a blurred backdrop —
    * which means the nested surfaces must NOT blur again. A second
@@ -186,6 +208,9 @@ const i18n = {
    * only.
    */
   .lt-shot {
+    width: 100%;
+    max-width: calc(var(--shot-height) * var(--shot-ratio));
+    margin: 0 auto;
     background-color: var(--lt-glass-subtle);
     box-shadow:
       inset 0 0 0 0.6px var(--lt-glass-edge),
@@ -211,7 +236,13 @@ const i18n = {
   .lt-shot-caption {
     background-color: var(--lt-glass-overlay);
     border-top: 0.6px solid var(--lt-glass-edge);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
+
+  .lt-shot-open { display: block; cursor: zoom-in; }
+  .lt-shot-open:focus-visible { outline: 2px solid var(--lt-color-primary); outline-offset: -2px; }
 
   [data-carousel-form-controls] {
     z-index: 2;
@@ -280,8 +311,8 @@ const i18n = {
 
   .lt-shot-image {
     display: block;
+    width: 100%;
     height: auto;
-    aspect-ratio: 1170 / 2532;
   }
 
   [data-carousel-root][data-form="phone"] #carousel-track > div {
@@ -320,14 +351,6 @@ const i18n = {
   [data-carousel-root][data-form="tablet"] .lt-shot,
   [data-carousel-root][data-form="desktop"] .lt-shot {
     border-radius: var(--lt-radius-card);
-  }
-
-  [data-carousel-root][data-form="tablet"] .lt-shot-image {
-    aspect-ratio: 1668 / 2388;
-  }
-
-  [data-carousel-root][data-form="desktop"] .lt-shot-image {
-    aspect-ratio: 2880 / 1800;
   }
 
   .lt-arrow {
@@ -422,7 +445,9 @@ const i18n = {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-left: 0.35rem;
+    flex: none;
+    min-width: 32px;
+    min-height: 32px;
     padding: 0.4rem;
     color: var(--lt-color-on-surface-variant);
     background-color: var(--lt-glass-overlay);
@@ -430,28 +455,77 @@ const i18n = {
     border-radius: 999px;
     box-shadow: inset 0 0 0 0.6px var(--lt-glass-edge);
     cursor: pointer;
-    transition: color 0.25s ease, background-color 0.25s ease, scale 0.25s ease;
+    transition: scale 0.25s ease;
   }
 
   .lt-pause svg[hidden] { display: none; }
 
-  @media (max-width: 420px) {
-    .lt-carousel-controls {
-      width: min(calc(100% - 1rem), 20rem);
-      flex-wrap: wrap;
-      justify-content: center;
-    }
+  .lt-carousel-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    gap: 0.5rem;
   }
 
-  .lt-pause[data-paused="true"] {
-    color: var(--lt-color-primary);
+  .lt-carousel-dots { display: grid; grid-template-columns: repeat(var(--dot-count), 1.5rem); }
+  @media (max-width: 480px) {
+    .lt-carousel-dots { grid-template-columns: repeat(7, 1.5rem); }
   }
 
-  @media (hover: hover) {
-    .lt-pause:hover {
-      color: var(--lt-color-primary);
-    }
+  .lt-shot-dialog {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: calc(100% - 2rem);
+    max-width: 100rem;
+    height: calc(100% - 2rem);
+    max-height: calc(100% - 2rem);
+    margin: auto;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--lt-glass-edge);
+    border-radius: var(--lt-radius-card);
+    background: var(--lt-color-surface);
+    color: var(--lt-color-on-surface);
   }
+
+  .lt-shot-dialog:not([open]) { display: none; }
+  .lt-shot-dialog[open] { display: flex; flex-direction: column; }
+  .lt-shot-dialog::backdrop { background: rgb(0 0 0 / 0.65); }
+  .lt-shot-dialog-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+  .lt-shot-dialog-header p { flex: 1; min-width: 0; }
+  .lt-shot-dialog-body {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    margin: 0 1rem 1rem;
+  }
+  .lt-shot-dialog-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+  .lt-shot-dialog-image {
+    display: block;
+    flex: none;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    user-select: none;
+    object-fit: contain;
+  }
+  .lt-shot-dialog[data-zoomed="true"] .lt-shot-dialog-body { cursor: grab; }
+  .lt-shot-dialog .lt-shot-dialog-body[data-dragging] { cursor: grabbing; }
 
   /* Applied for exactly one frame at the autoplay loop point — see advance().
    * Id + class beats the Tailwind `transition-transform` utility in both the
@@ -479,7 +553,7 @@ const i18n = {
     }
 
     /* Autoplay never starts under reduced motion, so there is nothing to pause. */
-    .lt-pause {
+    #carousel-pause {
       display: none;
     }
   }
@@ -507,6 +581,11 @@ const i18n = {
     const container = track.parentElement;
     const root = track.closest<HTMLElement>("[data-carousel-root]");
     const controls = document.querySelector<HTMLElement>("[data-carousel-controls]");
+    const dialog = document.querySelector<HTMLDialogElement>("[data-shot-dialog]");
+    const preview = dialog?.querySelector<HTMLImageElement>("[data-shot-preview]");
+    const zoomButton = dialog?.querySelector<HTMLButtonElement>("[data-shot-zoom]");
+    const previewBody = dialog?.querySelector<HTMLElement>(".lt-shot-dialog-body");
+    const previewStage = dialog?.querySelector<HTMLElement>("[data-shot-stage]");
     /*
      * Slide names read back out of the rendered figcaptions rather than passed
      * down from the frontmatter: a `<script>` is its own module, and getting the
@@ -556,6 +635,7 @@ const i18n = {
       if (label) label.textContent = copy.themes[theme as keyof typeof copy.themes] ?? theme;
       button.setAttribute("aria-pressed", "false");
       button.addEventListener("click", () => {
+        setPaused(true);
         selectedTheme = theme;
         applyTheme();
       }, { signal });
@@ -584,11 +664,9 @@ const i18n = {
          const name = image.dataset.shotName;
          if (!name) return;
          const source = `${origin}/screenshots/${locale}/${theme}/${selectedForm}/${name}.webp`;
-        image.parentElement?.querySelectorAll("source").forEach((candidate) => {
-          candidate.removeAttribute("srcset");
-        });
-        image.src = source;
-        image.removeAttribute("srcset");
+         image.src = source;
+         const link = image.closest<HTMLAnchorElement>("[data-shot-open]");
+         if (link) link.href = source;
       });
     }
     applyTheme();
@@ -606,9 +684,11 @@ const i18n = {
       if (label) label.textContent = copy.forms[form as keyof typeof copy.forms] ?? form;
       button.setAttribute("aria-pressed", "false");
       button.addEventListener("click", () => {
+        setPaused(true);
         selectedForm = form;
         formLocked = true;
         applyForm();
+        update();
       }, { signal });
     });
 
@@ -621,23 +701,9 @@ const i18n = {
     function applyForm() {
       const form = selectedForm;
       root?.setAttribute("data-form", form);
-      track.querySelectorAll<HTMLImageElement>("img[data-phone-src]").forEach((image) => {
-        const source = image.dataset[`${form}Src`] ?? image.dataset.phoneSrc;
-        if (!source || image.src.endsWith(source)) return;
-        // Astro's <Picture> emits <source> siblings for its initial srcset.
-        // Once the user chooses a form factor, let the explicit image URL own
-        // the selection; leaving those siblings active would make the browser
-        // immediately pick the old phone candidate again on the next layout.
-        image.parentElement?.querySelectorAll("source").forEach((candidate) => {
-          candidate.removeAttribute("srcset");
-        });
-        image.src = source;
-        image.removeAttribute("srcset");
-        // The server-rendered phone Picture carries width/height attributes.
-        // Leaving those dimensions on the swapped tablet/desktop source makes
-        // the first desktop layout reserve a portrait-sized image box.
-        image.removeAttribute("width");
-        image.removeAttribute("height");
+      track.querySelectorAll<HTMLImageElement>("img[data-shot-name]").forEach((image) => {
+        image.width = form === "phone" ? 1170 : form === "tablet" ? 1668 : 2880;
+        image.height = form === "phone" ? 2532 : form === "tablet" ? 2388 : 1800;
         image.loading = form === "phone" ? "lazy" : "eager";
       });
       applyThemeImages();
@@ -654,7 +720,9 @@ const i18n = {
     const trackResizeObserver = typeof ResizeObserver === "function"
       ? new ResizeObserver(() => update())
       : null;
-    trackResizeObserver?.observe(track);
+    if (root) trackResizeObserver?.observe(root);
+    const navbar = document.getElementById("lt-navbar");
+    if (navbar) trackResizeObserver?.observe(navbar);
     signal.addEventListener("abort", () => trackResizeObserver?.disconnect());
 
     /**
@@ -701,6 +769,12 @@ const i18n = {
       if (container && root) {
         root.style.setProperty("--carousel-width", `${container.clientWidth}px`);
         root.style.setProperty("--phone-cols", String(cols));
+        const chromeHeight = root.clientHeight - container.clientHeight;
+        const captionHeight = Math.max(...Array.from(track.querySelectorAll("figcaption"))
+          .map((caption) => caption.getBoundingClientRect().height));
+        const navbarBottom = Math.max(0, navbar?.getBoundingClientRect().bottom ?? 0);
+        const height = Math.max(64, window.innerHeight - navbarBottom - chromeHeight - captionHeight - 36);
+        root.style.setProperty("--shot-height", `${height}px`);
       }
       const max = Math.max(0, total - cols);
       if (current > max) current = max;
@@ -737,6 +811,8 @@ const i18n = {
       // which used to slide in as a white frame. Promote it to eager.
       const visibleEnd = Math.min(current + cols + 1, total);
       track.querySelectorAll<HTMLImageElement>("img[data-phone-src]").forEach((image, index) => {
+        const link = image.closest<HTMLAnchorElement>("[data-shot-open]");
+        if (link) link.tabIndex = index >= current && index < current + cols ? 0 : -1;
         if (index >= current && index < visibleEnd && image.loading === "lazy") {
           image.loading = "eager";
         }
@@ -763,7 +839,7 @@ const i18n = {
     function startAutoplay() {
       stopAutoplay();
       if (motionQuery.matches || userPaused || hovered || focused || !inView || document.hidden) return;
-      autoplay = window.setInterval(advance, 5000);
+      autoplay = window.setInterval(advance, 10000);
     }
 
     function stopAutoplay() {
@@ -778,17 +854,21 @@ const i18n = {
       if (pauseBtn) {
         pauseBtn.setAttribute("aria-label", paused ? copy.play : copy.pause);
         pauseBtn.setAttribute("aria-pressed", String(paused));
-        pauseBtn.dataset.paused = String(paused);
         const play = pauseBtn.querySelector<SVGElement>('[data-glyph="play"]');
         const pause = pauseBtn.querySelector<SVGElement>('[data-glyph="pause"]');
-        if (play) play.hidden = !paused;
-        if (pause) pause.hidden = paused;
+        if (paused) {
+          play?.removeAttribute("hidden");
+          pause?.setAttribute("hidden", "");
+        } else {
+          play?.setAttribute("hidden", "");
+          pause?.removeAttribute("hidden");
+        }
       }
     }
 
     /*
      * Speak only what the user asked for. Autoplay deliberately does NOT call
-     * this: a polite live region updated every five seconds interrupts whatever
+     * this: a polite live region updated on every advance interrupts whatever
      * else a screen reader user is doing, indefinitely, which is the classic way
      * an "accessible" carousel becomes unusable. The autoplay is already
      * pauseable and stops on focus, so a user who wants to inspect a slide can.
@@ -815,12 +895,11 @@ const i18n = {
           : fill(copy.announceBare, { span, total });
     }
 
-    // A manual control should also restart the 5s clock, otherwise the next
-    // auto-advance can land a beat after the user's own click.
+    // Reading takes priority once the user chooses a scene. Only Play resumes.
     function manual(go: () => void) {
+      setPaused(true);
       go();
       announce();
-      startAutoplay();
     }
 
     /*
@@ -881,6 +960,125 @@ const i18n = {
     });
     pauseBtn?.addEventListener("click", () => setPaused(!userPaused), { signal });
 
+    // Use the existing page scroll owner, as the friend-links modal does.
+    const smoothScroll = (window as unknown as {
+      ltLenis?: { start(): void; stop(): void; isStopped: boolean };
+    }).ltLenis;
+    let scrollLocked = false;
+    let resumeSmoothScroll = false;
+    let previousOverflow = "";
+    // Null follows the viewport; numeric scales are relative to source pixels.
+    let previewScale: number | null = null;
+    let previewDrag: { pointerId: number; x: number; y: number; left: number; top: number } | null = null;
+
+    function endPreviewDrag() {
+      const drag = previewDrag;
+      previewDrag = null;
+      previewBody?.removeAttribute("data-dragging");
+      if (drag && previewBody?.hasPointerCapture(drag.pointerId)) {
+        previewBody.releasePointerCapture(drag.pointerId);
+      }
+    }
+
+    function scalePreview(requested: number | null, clientX?: number, clientY?: number) {
+      if (!dialog?.open || !preview?.naturalWidth || !previewBody || !previewStage) return;
+      const body = previewBody.getBoundingClientRect();
+      const before = preview.getBoundingClientRect();
+      const x = clientX ?? body.left + previewBody.clientWidth / 2;
+      const y = clientY ?? body.top + previewBody.clientHeight / 2;
+      const imageX = (x - before.left) / before.width;
+      const imageY = (y - before.top) / before.height;
+      const fit = Math.min(previewBody.clientWidth / preview.naturalWidth,
+        previewBody.clientHeight / preview.naturalHeight, 1);
+      const scale = Math.max(fit, Math.min(4, requested ?? fit));
+      previewScale = scale > fit + 0.0001 ? scale : null;
+      const width = preview.naturalWidth * scale;
+      const height = preview.naturalHeight * scale;
+      previewStage.style.width = `${Math.max(previewBody.clientWidth, width)}px`;
+      previewStage.style.height = `${Math.max(previewBody.clientHeight, height)}px`;
+      preview.style.width = `${width}px`;
+      preview.style.height = `${height}px`;
+      dialog.dataset.zoomed = String(previewScale !== null);
+      zoomButton?.setAttribute("aria-pressed", String(previewScale !== null));
+      if (previewScale === null) {
+        previewBody.scrollLeft = 0;
+        previewBody.scrollTop = 0;
+      } else {
+        // Preserve the source point beneath the cursor as layout changes size.
+        const after = preview.getBoundingClientRect();
+        previewBody.scrollLeft += after.left + imageX * width - x;
+        previewBody.scrollTop += after.top + imageY * height - y;
+      }
+    }
+
+    preview?.addEventListener("load", () => scalePreview(null), { signal });
+    previewBody?.addEventListener("wheel", (event) => {
+      event.preventDefault();
+      if (!preview?.naturalWidth || !event.deltaY) return;
+      endPreviewDrag();
+      const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? previewBody.clientHeight : 1);
+      const scale = preview.getBoundingClientRect().width / preview.naturalWidth;
+      scalePreview(scale * Math.exp(-delta * 0.002), event.clientX, event.clientY);
+    }, { passive: false, signal });
+    previewBody?.addEventListener("pointerdown", (event) => {
+      if (event.pointerType !== "mouse" || event.button !== 0 || previewScale === null) return;
+      event.preventDefault();
+      previewDrag = { pointerId: event.pointerId, x: event.clientX, y: event.clientY,
+        left: previewBody.scrollLeft, top: previewBody.scrollTop };
+      previewBody.setPointerCapture(event.pointerId);
+      previewBody.setAttribute("data-dragging", "");
+    }, { signal });
+    previewBody?.addEventListener("pointermove", (event) => {
+      if (!previewDrag || event.pointerId !== previewDrag.pointerId) return;
+      previewBody.scrollLeft = previewDrag.left - (event.clientX - previewDrag.x);
+      previewBody.scrollTop = previewDrag.top - (event.clientY - previewDrag.y);
+    }, { signal });
+    previewBody?.addEventListener("pointerup", endPreviewDrag, { signal });
+    previewBody?.addEventListener("pointercancel", endPreviewDrag, { signal });
+    previewBody?.addEventListener("lostpointercapture", endPreviewDrag, { signal });
+
+    function unlockPreviewScroll() {
+      endPreviewDrag();
+      if (!scrollLocked) return;
+      scrollLocked = false;
+      document.documentElement.style.overflow = previousOverflow;
+      if (resumeSmoothScroll) smoothScroll?.start();
+    }
+    track.querySelectorAll<HTMLAnchorElement>("[data-shot-open]").forEach((link, index) => {
+      link.addEventListener("click", (event) => {
+        if (!dialog || !preview || typeof dialog.showModal !== "function") return;
+        event.preventDefault();
+        setPaused(true);
+        previewStage?.removeAttribute("style");
+        preview.removeAttribute("style");
+        if (preview.src !== link.href) preview.src = link.href;
+        preview.alt = labels[index];
+        const title = dialog.querySelector("#shot-preview-title");
+        if (title) title.textContent = labels[index];
+        previewScale = null;
+        delete dialog.dataset.zoomed;
+        zoomButton?.setAttribute("aria-pressed", "false");
+        dialog.showModal();
+        scalePreview(null);
+        previousOverflow = document.documentElement.style.overflow;
+        document.documentElement.style.overflow = "hidden";
+        resumeSmoothScroll = !!smoothScroll && !smoothScroll.isStopped;
+        smoothScroll?.stop();
+        scrollLocked = true;
+      }, { signal });
+    });
+    dialog?.querySelector("[data-shot-close]")?.addEventListener("click", () => dialog.close(), { signal });
+    dialog?.addEventListener("close", unlockPreviewScroll, { signal });
+    let downOnBackdrop = false;
+    dialog?.addEventListener("pointerdown", (event) => { downOnBackdrop = event.target === dialog; }, { signal });
+    dialog?.addEventListener("click", (event) => {
+      if (downOnBackdrop && event.target === dialog) dialog.close();
+      downOnBackdrop = false;
+    }, { signal });
+    zoomButton?.addEventListener("click", () => {
+      scalePreview(previewScale === null ? 1 : null);
+    }, { signal });
+
     window.addEventListener("resize", () => {
       window.clearTimeout(resizeTimer);
       resizeTimer = window.setTimeout(() => {
@@ -889,6 +1087,7 @@ const i18n = {
           applyForm();
         }
         update();
+        scalePreview(previewScale);
       }, 100);
     }, { signal });
 
@@ -950,6 +1149,8 @@ const i18n = {
     signal.addEventListener("abort", () => {
       stopAutoplay();
       window.clearTimeout(resizeTimer);
+      if (dialog?.open) dialog.close();
+      unlockPreviewScroll();
     });
   });
 </script>

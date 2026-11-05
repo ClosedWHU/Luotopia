@@ -53,6 +53,9 @@
 
   "carousel.roleDescription": "carousel",
   "carousel.label": "App screenshots",
+  "carousel.enlarge": "Enlarge {name}",
+  "carousel.close": "Close preview",
+  "carousel.zoom": "View at full resolution",
   "carousel.prev": "Previous slide",
   "carousel.next": "Next slide",
   "carousel.pause": "Pause autoplay",
