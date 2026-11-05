@@ -507,6 +507,8 @@ const i18n = {
     min-height: 0;
     overflow: auto;
     margin: 0 1rem 1rem;
+    touch-action: none;
+    overscroll-behavior: contain;
   }
   .lt-shot-dialog-stage {
     display: flex;
@@ -961,31 +963,33 @@ const i18n = {
     pauseBtn?.addEventListener("click", () => setPaused(!userPaused), { signal });
 
     // Use the existing page scroll owner, as the friend-links modal does.
-    const smoothScroll = (window as unknown as {
-      ltLenis?: { start(): void; stop(): void; isStopped: boolean };
-    }).ltLenis;
+    type PageScroll = { start(): void; stop(): void; isStopped: boolean };
+    let lockedSmoothScroll: PageScroll | undefined;
     let scrollLocked = false;
     let resumeSmoothScroll = false;
     let previousOverflow = "";
     // Null follows the viewport; numeric scales are relative to source pixels.
     let previewScale: number | null = null;
-    let previewDrag: { pointerId: number; x: number; y: number; left: number; top: number } | null = null;
+    type PreviewPoint = { x: number; y: number };
+    const previewPointers = new Map<number, PreviewPoint>();
+    let previewGestureStart: { distance: number; scale: number; anchor: PreviewPoint } | null = null;
 
-    function endPreviewDrag() {
-      const drag = previewDrag;
-      previewDrag = null;
+    function resetPreviewPointers() {
+      const ids = Array.from(previewPointers.keys());
+      previewPointers.clear();
+      previewGestureStart = null;
       previewBody?.removeAttribute("data-dragging");
-      if (drag && previewBody?.hasPointerCapture(drag.pointerId)) {
-        previewBody.releasePointerCapture(drag.pointerId);
+      for (const id of ids) {
+        if (previewBody?.hasPointerCapture(id)) previewBody.releasePointerCapture(id);
       }
     }
 
-    function scalePreview(requested: number | null, clientX?: number, clientY?: number) {
+    function scalePreview(requested: number | null, anchor?: PreviewPoint, destination = anchor) {
       if (!dialog?.open || !preview?.naturalWidth || !previewBody || !previewStage) return;
       const body = previewBody.getBoundingClientRect();
       const before = preview.getBoundingClientRect();
-      const x = clientX ?? body.left + previewBody.clientWidth / 2;
-      const y = clientY ?? body.top + previewBody.clientHeight / 2;
+      const x = anchor?.x ?? body.left + previewBody.clientWidth / 2;
+      const y = anchor?.y ?? body.top + previewBody.clientHeight / 2;
       const imageX = (x - before.left) / before.width;
       const imageY = (y - before.top) / before.height;
       const fit = Math.min(previewBody.clientWidth / preview.naturalWidth,
@@ -1000,49 +1004,95 @@ const i18n = {
       preview.style.height = `${height}px`;
       dialog.dataset.zoomed = String(previewScale !== null);
       zoomButton?.setAttribute("aria-pressed", String(previewScale !== null));
+      if (previewScale !== null && previewPointers.size) previewBody.setAttribute("data-dragging", "");
+      else previewBody.removeAttribute("data-dragging");
       if (previewScale === null) {
         previewBody.scrollLeft = 0;
         previewBody.scrollTop = 0;
       } else {
-        // Preserve the source point beneath the cursor as layout changes size.
+        // Keep the source point under the cursor or moving pinch midpoint.
         const after = preview.getBoundingClientRect();
-        previewBody.scrollLeft += after.left + imageX * width - x;
-        previewBody.scrollTop += after.top + imageY * height - y;
+        previewBody.scrollLeft += after.left + imageX * width - (destination?.x ?? x);
+        previewBody.scrollTop += after.top + imageY * height - (destination?.y ?? y);
       }
     }
 
-    preview?.addEventListener("load", () => scalePreview(null), { signal });
+    preview?.addEventListener("load", () => {
+      scalePreview(null);
+      capturePreviewGesture();
+    }, { signal });
     previewBody?.addEventListener("wheel", (event) => {
       event.preventDefault();
       if (!preview?.naturalWidth || !event.deltaY) return;
-      endPreviewDrag();
+      resetPreviewPointers();
       const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? previewBody.clientHeight : 1);
       const scale = preview.getBoundingClientRect().width / preview.naturalWidth;
-      scalePreview(scale * Math.exp(-delta * 0.002), event.clientX, event.clientY);
+      scalePreview(scale * Math.exp(-delta * 0.002), { x: event.clientX, y: event.clientY });
     }, { passive: false, signal });
     previewBody?.addEventListener("pointerdown", (event) => {
-      if (event.pointerType !== "mouse" || event.button !== 0 || previewScale === null) return;
+      if (event.button !== 0 || (event.pointerType === "mouse" && previewScale === null)) return;
       event.preventDefault();
-      previewDrag = { pointerId: event.pointerId, x: event.clientX, y: event.clientY,
-        left: previewBody.scrollLeft, top: previewBody.scrollTop };
+      previewPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
       previewBody.setPointerCapture(event.pointerId);
-      previewBody.setAttribute("data-dragging", "");
+      capturePreviewGesture();
+      if (previewScale !== null) previewBody.setAttribute("data-dragging", "");
     }, { signal });
+
+    // The first two active pointers determine the pinch midpoint and distance.
+    function previewGesture() {
+      const points = Array.from(previewPointers.values());
+      const a = points[0];
+      const b = points[1] ?? a;
+      return {
+        center: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 },
+        distance: Math.hypot(a.x - b.x, a.y - b.y),
+      };
+    }
+
+    // Keep one source-image anchor per pointer set, avoiding accumulated scroll rounding.
+    function capturePreviewGesture() {
+      previewGestureStart = null;
+      if (!previewPointers.size || !preview?.naturalWidth) return;
+      const gesture = previewGesture();
+      const box = preview.getBoundingClientRect();
+      previewGestureStart = {
+        distance: gesture.distance,
+        scale: box.width / preview.naturalWidth,
+        anchor: { x: (gesture.center.x - box.left) / box.width, y: (gesture.center.y - box.top) / box.height },
+      };
+    }
+
     previewBody?.addEventListener("pointermove", (event) => {
-      if (!previewDrag || event.pointerId !== previewDrag.pointerId) return;
-      previewBody.scrollLeft = previewDrag.left - (event.clientX - previewDrag.x);
-      previewBody.scrollTop = previewDrag.top - (event.clientY - previewDrag.y);
+      if (!previewPointers.has(event.pointerId)) return;
+      previewPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (!previewGestureStart || !preview) return;
+      const gesture = previewGesture();
+      const box = preview.getBoundingClientRect();
+      const start = previewGestureStart;
+      const ratio = start.distance > 0 && gesture.distance > 0 ? gesture.distance / start.distance : 1;
+      scalePreview(start.scale * ratio, {
+        x: box.left + start.anchor.x * box.width,
+        y: box.top + start.anchor.y * box.height,
+      }, gesture.center);
     }, { signal });
-    previewBody?.addEventListener("pointerup", endPreviewDrag, { signal });
-    previewBody?.addEventListener("pointercancel", endPreviewDrag, { signal });
-    previewBody?.addEventListener("lostpointercapture", endPreviewDrag, { signal });
+
+    function releasePreviewPointer(event: PointerEvent) {
+      if (!previewPointers.delete(event.pointerId)) return;
+      if (!previewPointers.size) previewBody?.removeAttribute("data-dragging");
+      if (previewBody?.hasPointerCapture(event.pointerId)) previewBody.releasePointerCapture(event.pointerId);
+      capturePreviewGesture();
+    }
+    previewBody?.addEventListener("pointerup", releasePreviewPointer, { signal });
+    previewBody?.addEventListener("pointercancel", releasePreviewPointer, { signal });
+    previewBody?.addEventListener("lostpointercapture", releasePreviewPointer, { signal });
 
     function unlockPreviewScroll() {
-      endPreviewDrag();
+      resetPreviewPointers();
       if (!scrollLocked) return;
       scrollLocked = false;
       document.documentElement.style.overflow = previousOverflow;
-      if (resumeSmoothScroll) smoothScroll?.start();
+      if (resumeSmoothScroll) lockedSmoothScroll?.start();
+      lockedSmoothScroll = undefined;
     }
     track.querySelectorAll<HTMLAnchorElement>("[data-shot-open]").forEach((link, index) => {
       link.addEventListener("click", (event) => {
@@ -1062,8 +1112,9 @@ const i18n = {
         scalePreview(null);
         previousOverflow = document.documentElement.style.overflow;
         document.documentElement.style.overflow = "hidden";
-        resumeSmoothScroll = !!smoothScroll && !smoothScroll.isStopped;
-        smoothScroll?.stop();
+        lockedSmoothScroll = (window as unknown as { ltLenis?: PageScroll }).ltLenis;
+        resumeSmoothScroll = !!lockedSmoothScroll && !lockedSmoothScroll.isStopped;
+        lockedSmoothScroll?.stop();
         scrollLocked = true;
       }, { signal });
     });
@@ -1076,6 +1127,7 @@ const i18n = {
       downOnBackdrop = false;
     }, { signal });
     zoomButton?.addEventListener("click", () => {
+      resetPreviewPointers();
       scalePreview(previewScale === null ? 1 : null);
     }, { signal });
 
@@ -1087,6 +1139,7 @@ const i18n = {
           applyForm();
         }
         update();
+        resetPreviewPointers();
         scalePreview(previewScale);
       }, 100);
     }, { signal });

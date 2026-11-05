@@ -231,7 +231,7 @@ function mirrorStubHtml(urlPath) {
   const origin = `https://${MIRROR_MAIN_DOMAIN}`;
   return (
     `<!doctype html><html lang="zh-Hans"><head><meta charset="utf-8">` +
-    `<meta name="viewport" content="width=device-width, initial-scale=1">` +
+    `<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">` +
     `<title>Luotopia</title>` +
     `<link rel="canonical" href="${origin}${urlPath}">` +
     `<meta http-equiv="refresh" content="0;url=${origin}${urlPath}">` +
