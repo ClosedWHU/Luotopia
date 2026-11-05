@@ -1,8 +1,292 @@
 {
   "package": "@luotopia/toolkit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "AGPL-3.0-or-later",
   "parsers": {
+    "course-parser": {
+      "apiVersion": 1,
+      "checksum": "sha256:1fdfbd6cf28fbf2fd899706ab1a9caf76884e9d60373a686658c197805df0e91",
+      "source": "// Parses the academic system timetable (kbList) into a normalized course list.\nfunction parse(rawJson) {\n  var data = JSON.parse(rawJson);\n  // kbList = 课表列表 (timetable list); courses from the academic system.\n  var kbList = data.kbList || [];\n  var result = [];\n\n  for (var i = 0; i < kbList.length; i++) {\n    var item = kbList[i];\n    // kcmc = 课程名称 (course name).\n    var title = sanitizeDisplay(item.kcmc || '');\n    if (!title) continue;\n\n    var weekday = parseWeekday(item.xqj, item.xqjmc);\n    if (weekday < 1 || weekday > 7) continue;\n\n    var classPeriod = parseClassPeriod(pickFirst(item, ['jcs', 'jc', 'jcsm']));\n    if (!classPeriod) continue;\n\n    var weeks = parseWeeks(pickFirst(item, ['zcd', 'zcmc', 'zc']));\n    if (weeks.length === 0) continue;\n\n    result.push({\n      title: title,\n      titleRaw: '' + (item.kcmc || ''),\n      weekday: weekday,\n      classFrom: classPeriod.from,\n      classTo: classPeriod.to,\n      weeks: weeks,\n      // jxbmc = 教学班名称 code; teaching class id used as course id.\n      courseId: (item.jxbmc || '').trim(),\n      courseNature: sanitizeDisplay(pickFirst(item, ['kcxz', 'kcxzmc', 'kclbmc', 'kclb'])),\n      // xm = 姓名 (teacher name).\n      instructor: sanitizeDisplay(item.xm || ''),\n      instructorRaw: '' + (item.xm || ''),\n      // cdmc = 场地名称 (venue/room name).\n      location: sanitizeDisplay(item.cdmc || ''),\n      // zcd = 周次段 code; raw week-range string (e.g. \"1-16周\").\n      weekMeta: (item.zcd || '').trim(),\n      // kssj / jssj = 开始时间 / 结束时间 (start/end time).\n      // sksj_kssj / sksj_jssj / kssj_hhmm are alternative field names.\n      startText: pickFirst(item, ['kssj', 'sksj_kssj', 'kssj_hhmm']),\n      endText: pickFirst(item, ['jssj', 'sksj_jssj', 'jssj_hhmm'])\n    });\n  }\n  return JSON.stringify({ courses: result });\n}\n\n// Returns the first non-empty trimmed value among the given keys.\nfunction pickFirst(obj, keys) {\n  for (var i = 0; i < keys.length; i++) {\n    var v = obj[keys[i]];\n    if (v !== undefined && v !== null) {\n      var s = ('' + v).trim();\n      if (s.length > 0) return s;\n    }\n  }\n  return '';\n}\n\n// Removes control/format/whitespace Unicode characters and collapses spaces.\nfunction sanitizeDisplay(value) {\n  return ('' + value)\n    .replace(/[\\u0000-\\u0008\\u000b\\u000c\\u000e-\\u001f\\u007f\\u00ad\\u200b-\\u200f\\u202a-\\u202e\\u2060\\u2066-\\u2069\\ufeff]/g, '')\n    .replace(/[\\u00a0\\u2000-\\u200a\\u202f\\u205f]/g, ' ')\n    .replace(/[ \\t\\f\\v]+/g, ' ')\n    .trim();\n}\n\n// Converts a weekday value to 1-7; falls back to matching Chinese day labels.\n// xqj = 星期几 (weekday number), xqjmc = 星期几名称 code (weekday label).\nfunction parseWeekday(raw, label) {\n  if (raw !== undefined && raw !== null) {\n    var n = parseInt(raw, 10);\n    if (n >= 1 && n <= 7) return n;\n  }\n  var text = '' + (label || raw || '');\n  if (text.indexOf('\\u4e00') !== -1) return 1; // 一 (Mon)\n  if (text.indexOf('\\u4e8c') !== -1) return 2; // 二 (Tue)\n  if (text.indexOf('\\u4e09') !== -1) return 3; // 三 (Wed)\n  if (text.indexOf('\\u56db') !== -1) return 4; // 四 (Thu)\n  if (text.indexOf('\\u4e94') !== -1) return 5; // 五 (Fri)\n  if (text.indexOf('\\u516d') !== -1) return 6; // 六 (Sat)\n  if (text.indexOf('\\u65e5') !== -1 || text.indexOf('\\u5929') !== -1 || text.indexOf('\\u4e03') !== -1) return 7; // 日/天/七 (Sun)\n  return -1;\n}\n\n// Parses a class period range like \"1-2\" into {from,to}; normalizes dashes.\n// jc / jcs / jcsm = 节次 / 节次段 / 节次说明 (class period range).\nfunction parseClassPeriod(text) {\n  if (!text) return null;\n  var raw = text.trim().replace(/\\s+/g, '')\n    .replace(/～/g, '-').replace(/~/g, '-').replace(/—/g, '-').replace(/－/g, '-');\n  var nums = raw.match(/\\d+/g);\n  if (!nums || nums.length === 0) return null;\n  var from = parseInt(nums[0], 10);\n  var to = nums.length >= 2 ? parseInt(nums[1], 10) : from;\n  if (from <= 0 || to < from) return null;\n  return { from: from, to: to };\n}\n\n// Parses a week string like \"1-16周,18周,单周\" into a sorted unique week list.\n// zcd / zcmc / zc = 周次段 code / 周次名称 code / 周次 (week range).\nfunction parseWeeks(weekStr) {\n  if (!weekStr) return [];\n  var result = [];\n  var parts = weekStr.split(/[,，;；、]/);\n  for (var p = 0; p < parts.length; p++) {\n    var seg = parts[p].trim();\n    if (!seg) continue;\n    var odd = seg.indexOf('\\u5355') !== -1; // 单 (odd-week only)\n    var even = seg.indexOf('\\u53cc') !== -1; // 双 (even-week only)\n    var nums = seg.match(/\\d+/g);\n    if (!nums) continue;\n    var start = parseInt(nums[0], 10);\n    var end = nums.length > 1 ? parseInt(nums[1], 10) : start;\n    for (var w = start; w <= end; w++) {\n      if (odd && w % 2 === 0) continue;\n      if (even && w % 2 === 1) continue;\n      if (result.indexOf(w) === -1) result.push(w);\n    }\n  }\n  result.sort(function(a, b) { return a - b; });\n  return result;\n}\n",
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "course-parser API v1 output",
+        "type": "object",
+        "required": [
+          "courses"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "courses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "title",
+                "titleRaw",
+                "weekday",
+                "classFrom",
+                "classTo",
+                "weeks",
+                "courseId",
+                "courseNature",
+                "instructor",
+                "instructorRaw",
+                "location",
+                "weekMeta",
+                "startText",
+                "endText"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "titleRaw": {
+                  "type": "string"
+                },
+                "weekday": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 7
+                },
+                "classFrom": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "classTo": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "weeks": {
+                  "type": "array",
+                  "minItems": 1,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "integer"
+                  }
+                },
+                "courseId": {
+                  "type": "string"
+                },
+                "courseNature": {
+                  "type": "string"
+                },
+                "instructor": {
+                  "type": "string"
+                },
+                "instructorRaw": {
+                  "type": "string"
+                },
+                "location": {
+                  "type": "string"
+                },
+                "weekMeta": {
+                  "type": "string"
+                },
+                "startText": {
+                  "type": "string"
+                },
+                "endText": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "smoke": {
+        "input": {
+          "kbList": [
+            {
+              "kcmc": "高等数学",
+              "xqj": "1",
+              "jcs": "1-2",
+              "zcd": "1-2周",
+              "jxbmc": "001",
+              "cdmc": "教室A",
+              "xm": "张三",
+              "kcxz": "必修",
+              "xf": "4.0",
+              "kssj": "08:00",
+              "jssj": "09:35"
+            }
+          ]
+        },
+        "expect": {
+          "courses": [
+            {
+              "title": "高等数学",
+              "weekday": 1,
+              "classFrom": 1,
+              "classTo": 2
+            }
+          ]
+        }
+      },
+      "cases": [
+        {
+          "name": "odd and even ranges are filtered independently and sorted uniquely",
+          "input": {
+            "kbList": [
+              {
+                "kcmc": "周次课程",
+                "xqj": "2",
+                "jcs": "3-4",
+                "zcd": "1-6单周，2-6双周;3周、8周",
+                "jxbmc": " class-001 "
+              }
+            ]
+          },
+          "expect": {
+            "courses": [
+              {
+                "title": "周次课程",
+                "weekday": 2,
+                "classFrom": 3,
+                "classTo": 4,
+                "weeks": [
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  8
+                ],
+                "courseId": "class-001"
+              }
+            ]
+          }
+        },
+        {
+          "name": "field aliases, Sunday label, unicode period dash and raw local times",
+          "input": {
+            "kbList": [
+              {
+                "kcmc": "别名课程",
+                "xqj": "invalid",
+                "xqjmc": "星期日",
+                "jc": "5～6节",
+                "zcmc": "2-6双周",
+                "kclbmc": " 通识选修 ",
+                "sksj_kssj": " 14:05 ",
+                "jssj_hhmm": "15:40"
+              }
+            ]
+          },
+          "expect": {
+            "courses": [
+              {
+                "title": "别名课程",
+                "weekday": 7,
+                "classFrom": 5,
+                "classTo": 6,
+                "weeks": [
+                  2,
+                  4,
+                  6
+                ],
+                "courseNature": "通识选修",
+                "weekMeta": "",
+                "startText": "14:05",
+                "endText": "15:40"
+              }
+            ]
+          }
+        },
+        {
+          "name": "display sanitization preserves raw title and instructor",
+          "input": {
+            "kbList": [
+              {
+                "kcmc": "  高​等 数学  ",
+                "xm": " 张​三 ",
+                "cdmc": "教室  A",
+                "xqj": "3",
+                "jcs": "7",
+                "zcd": "1周"
+              }
+            ]
+          },
+          "expect": {
+            "courses": [
+              {
+                "title": "高等 数学",
+                "titleRaw": "  高​等 数学  ",
+                "instructor": "张三",
+                "instructorRaw": " 张​三 ",
+                "location": "教室 A",
+                "classFrom": 7,
+                "classTo": 7,
+                "weeks": [
+                  1
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "invalid title, weekday, reversed period and missing weeks do not hide a later valid course",
+          "input": {
+            "kbList": [
+              {
+                "kcmc": "",
+                "xqj": "1",
+                "jcs": "1-2",
+                "zcd": "1周"
+              },
+              {
+                "kcmc": "无星期",
+                "xqj": "8",
+                "jcs": "1-2",
+                "zcd": "1周"
+              },
+              {
+                "kcmc": "倒序节次",
+                "xqj": "1",
+                "jcs": "4-3",
+                "zcd": "1周"
+              },
+              {
+                "kcmc": "无周次",
+                "xqj": "1",
+                "jcs": "1-2",
+                "zcd": ""
+              },
+              {
+                "kcmc": "有效课程",
+                "xqj": "5",
+                "jcsm": "9—10",
+                "zc": "3周"
+              }
+            ]
+          },
+          "expect": {
+            "courses": [
+              {
+                "title": "有效课程",
+                "weekday": 5,
+                "classFrom": 9,
+                "classTo": 10,
+                "weeks": [
+                  3
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty timetable",
+          "input": {
+            "kbList": []
+          },
+          "expect": {
+            "courses": []
+          }
+        }
+      ]
+    },
     "score-parser": {
       "apiVersion": 1,
       "checksum": "sha256:c9a62b08513599df86ffc0845f7f15dd5d3b82d4fe2ea40fb7ec1f93e8afc294",

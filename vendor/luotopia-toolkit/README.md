@@ -4,7 +4,7 @@
 包含 parser 源码、契约和测试向量，源码沿用 AGPL-3.0-or-later（本仓库 LICENSE）。
 
 唯一编辑源：Toolkit 仓库。不要手改此文件或生成的
-`public/hot-update/scripts/score-parser.js`。
+`public/hot-update/scripts/score-parser.js` 和 `course-parser.js`。
 
 更新：checkout Toolkit 固定 commit，`npm ci && npm test && npm run bundle`，然后：
 

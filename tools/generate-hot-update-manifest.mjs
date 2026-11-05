@@ -51,7 +51,7 @@ if (allowUnsigned && isPagesProduction) {
 
 const toolkit = await verifyToolkitSnapshot();
 const tests = {
-  'course-parser': { input: { kbList: [{ kcmc: '高等数学', xqj: '1', jcs: '1-2', zcd: '1-2周', jxbmc: '001', cdmc: '教室A', xm: '张三', kcxz: '必修', xf: '4.0', kssj: '08:00', jssj: '09:35' }] }, expect: { courses: [{ title: '高等数学', weekday: 1, classFrom: 1, classTo: 2 }] } },
+  'course-parser': toolkit.parsers['course-parser'].smoke,
   'score-parser': toolkit.parsers['score-parser'].smoke,
   'study-status-course-parser': { input: { items: [{ KCMC: '高等数学', KCXZMC: '必修', XF: '4.0', CJ: '92', JD: '4.0', MAXCJ: '92', XDZT: '4', KCLBMC: '基础课' }] }, expect: { courses: [{ name: '高等数学', credit: 4, score: 92, status: 'passed' }] } },
   'study-status-index-parser': { input: { html: "<p class='title1' id='pABC123DEF456ABC123DEF456ABC123DE'>必修课程&nbsp;</p>" }, expect: { names: { ABC123DEF456ABC123DEF456ABC123DE: '必修课程' } } },
