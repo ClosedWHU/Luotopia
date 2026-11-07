@@ -10,6 +10,7 @@ import { remarkAlert } from 'remark-github-blockquote-alert';
 import rehypePreMermaid from './src/plugins/rehype-pre-mermaid.mjs';
 import { redirects as docsRedirects } from './src/config/docs/redirects.mjs';
 import { misansWeights, pruneFontSubsets } from './tools/vite/font-plugins.mjs';
+import { devFixtures } from './tools/vite/dev-fixtures.mjs';
 
 /*
  * The documentation site (merged from ClosedWHU/Luotopia-Docs, see
@@ -425,7 +426,7 @@ export default defineConfig({
     },
   },
   vite: {
-    plugins: [misansWeights(), pruneFontSubsets(), flattenCssLayers(), statusDevApi(), tailwindcss()],
+    plugins: [misansWeights(), pruneFontSubsets(), flattenCssLayers(), statusDevApi(), devFixtures(), tailwindcss()],
     build: {
       /*
        * Legacy WebView floor. Vite's default (baseline-widely-available,
