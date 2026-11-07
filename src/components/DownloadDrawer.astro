@@ -1,0 +1,32 @@
+---
+/**
+ * One disclosure row on the download page.
+ *
+ * The page used to repeat this twelve-line `<details>` block ten times. The
+ * open/close animation and the one-open-at-a-time handoff live in
+ * DownloadPage's script and key off `.lt-dl-drawer*` and the surrounding
+ * `[data-drawer-group]`, so this only owns the markup.
+ */
+import Icon from "./Icon.astro";
+
+export interface Props {
+  title: string;
+  icon: string;
+  open?: boolean;
+}
+
+const { title, icon, open = false } = Astro.props;
+---
+
+<details class="lt-dl-drawer" open={open}>
+  <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
+    <Icon name={icon} class="text-lg text-primary" />
+    <h4 class="flex-1 text-title-small text-on-surface">{title}</h4>
+    <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
+  </summary>
+  <div class="lt-dl-drawer-body">
+    <div class="space-y-2 px-3.5 py-3">
+      <slot />
+    </div>
+  </div>
+</details>
