@@ -1,6 +1,6 @@
 ---
 import AppIcon from "./AppIcon.astro";
-import { resolveLocale, routeUrl, useTranslations, type RouteKey } from "../i18n/ui";
+import { resolveLocale, routeUrl, useTranslations } from "../i18n/ui";
 import { getBuildInfo } from "../lib/buildInfo";
 
 const year = new Date().getFullYear();
@@ -10,7 +10,7 @@ const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
 
 interface NavItem {
-  route: RouteKey;
+  href: string;
   label: string;
 }
 
@@ -20,23 +20,16 @@ interface ResourceItem {
   external?: boolean;
 }
 
-/*
- * Route keys, not literal paths — see the same note in `Navbar.astro`. On a page
- * whose locale does not translate a given destination, `routeUrl()` returns the
- * default-locale URL, so a footer link never points at a redirect stub.
- */
+/* Navigation is the site's content; download already has the header CTA. */
 const nav: NavItem[] = [
-  { route: "features", label: t("footer.nav.features") },
-  { route: "download", label: t("footer.nav.download") },
-  { route: "community", label: t("footer.nav.community") },
-  { route: "status", label: t("nav.status") },
-  { route: "brand", label: t("footer.nav.brand") },
-  { route: "legal", label: t("footer.nav.legal") },
+  { href: routeUrl(locale, "home"), label: t("nav.home") },
+  { href: routeUrl(locale, "features"), label: t("footer.nav.features") },
+  { href: routeUrl(locale, "community"), label: t("footer.nav.community") },
+  { href: "/docs/", label: t("footer.nav.docs") },
 ];
 
 /*
- * Absolute URLs, identical in every locale: the destination is the same whatever
- * language you are reading, and translating the label is all that is owed.
+ * Reference pages stay reachable here; the site source opens externally.
  *
  * The copyright line below stays English in every locale on purpose:
  * `store-listings/README.md` requires the attribution to be identical in all of
@@ -46,8 +39,8 @@ const nav: NavItem[] = [
  */
 const resources: ResourceItem[] = [
   { href: routeUrl(locale, "status"), label: t("footer.resources.status") },
-    { href: "/docs/", label: t("footer.resources.docs") },
-  { href: "https://github.com/ClosedWHU", label: t("footer.resources.github"), external: true },
+  { href: routeUrl(locale, "brand"), label: t("footer.resources.brand") },
+  { href: routeUrl(locale, "legal"), label: t("footer.resources.legal") },
   {
     href: "https://github.com/ClosedWHU/Luotopia",
     label: t("footer.resources.repo"),
@@ -82,7 +75,7 @@ const resources: ResourceItem[] = [
             nav.map((item) => (
               <li>
                 <a
-                  href={routeUrl(locale, item.route)}
+                  href={item.href}
                   class="text-on-surface-variant hover:text-primary no-underline transition-colors"
                 >
                   {item.label}
