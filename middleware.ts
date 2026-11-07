@@ -39,7 +39,7 @@ const HOT_UPDATE_PATHS = new Set([
 ]);
 
 /** Path prefixes proxied from the origin (extension-bearing, no static copy). */
-const PROXIED_PREFIXES = ["/fonts/gstatic/", "/api/releases/download/"];
+const PROXIED_PREFIXES = ["/fonts/gstatic/", "/api/releases/download/", "/api/cli/releases/download/"];
 
 function classify(pathname) {
   if (HOT_UPDATE_PATHS.has(pathname)) return "hot-update";
@@ -134,5 +134,6 @@ export const config = {
     "/hot-update/assets/model-metadata-catalog.json.gz",
     "/fonts/gstatic/:path*",
     "/api/releases/download/:path*",
+    "/api/cli/releases/download/:path*",
   ],
 };

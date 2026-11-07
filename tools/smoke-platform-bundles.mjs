@@ -109,6 +109,16 @@ const GH_RELEASE_WITH_ASSET = {
   }],
 };
 
+const GH_CLI_RELEASE = {
+  ...GH_RELEASE,
+  id: 2,
+  tag_name: 'v0.1.0-alpha.2',
+  name: 'Luotopia CLI v0.1.0-alpha.2',
+  body: 'CLI release notes',
+  prerelease: true,
+  assets: [{ id: 77, name: 'luotopia-cli-windows-amd64.exe', size: 4 }],
+};
+
 const FONT_HEX = 'a'.repeat(64);
 let fetchCalls = [];
 
@@ -118,6 +128,13 @@ globalThis.fetch = async (input) => {
   if (url.startsWith('https://itunes.apple.com/lookup')) {
     return Response.json(ITUNES_LOOKUP);
   }
+  if (url.includes('/Luotopia-CLI/releases/tags/')) return Response.json(GH_CLI_RELEASE);
+  if (url.includes('/Luotopia-CLI/releases/assets/77')) {
+    return new Response(new Uint8Array([4, 3, 2, 1]), {
+      headers: { 'Content-Type': 'application/octet-stream' },
+    });
+  }
+  if (url.includes('/Luotopia-CLI/releases?')) return Response.json([GH_CLI_RELEASE]);
   if (url.includes('api.github.com') && url.includes('/releases/latest')) {
     return Response.json(GH_RELEASE);
   }
@@ -196,10 +213,16 @@ async function runSuite(label, drive) {
       throw new Error('expected 200 + one item');
     }
   });
+  await expectRoute(drive, label, '/api/cli/releases', undefined, (res, body) => {
+    if (res.status !== 503 || body.error !== 'not_configured') throw new Error('CLI requires token');
+  });
 
   // Guard rails that must answer without any upstream call.
   await expectRoute(drive, label, '/api/releases/download/only-one-segment', undefined, (res, body) => {
     if (res.status !== 400 || body.error !== 'bad_request') throw new Error('expected 400 bad_request');
+  });
+  await expectRoute(drive, label, '/api/cli/releases/download/v0.1.0-alpha.2/notes.txt', undefined, (res) => {
+    if (res.status !== 503) throw new Error('CLI download requires token');
   });
   await expectRoute(drive, label, '/fonts/gstatic/not-a-font', undefined, (res) => {
     if (res.status !== 404) throw new Error('expected 404 from the path guard');
@@ -230,6 +253,21 @@ globalThis.__LUOTOPIA_HOMEPAGE_ENV__ = {};
 const esa = await import(pathToFileURL(join(ROOT, 'platform-dist/esa/edge-routine.js')).href);
 check('esa: default.fetch exported', typeof esa.default?.fetch === 'function');
 await runSuite('esa', (request) => esa.default.fetch(request));
+globalThis.__LUOTOPIA_HOMEPAGE_ENV__ = { GITHUB_TOKEN: 'smoke-private-token' };
+esa.resetResolvedEnv();
+{
+  const result = await esa.default.fetch(new Request(`${ORIGIN}/api/cli/releases`));
+  const body = await result.json();
+  check('esa: CLI versions come from their own repo', result.status === 200 &&
+    body.latest.tag === 'v0.1.0-alpha.2' && body.items[0].assets[0].url.startsWith('/api/cli/releases/download/'));
+  const denied = await esa.default.fetch(new Request(`${ORIGIN}/api/cli/releases/download/v0.1.0-alpha.2/notes.txt`));
+  check('esa: private CLI proxy refuses non-binary assets', denied.status === 404);
+  const binary = await esa.default.fetch(new Request(`${ORIGIN}/api/cli/releases/download/v0.1.0-alpha.2/luotopia-cli-windows-amd64.exe`));
+  check('esa: CLI binary streams through authenticated proxy', binary.status === 200 &&
+    (await binary.arrayBuffer()).byteLength === 4);
+}
+globalThis.__LUOTOPIA_HOMEPAGE_ENV__ = {};
+esa.resetResolvedEnv();
 
 // On ESA every miss reaches the routine; it must answer plainly, not hang.
 {
@@ -254,6 +292,7 @@ console.log('EdgeOne Makers entries (platform-dist/edgeone/edge-functions/**)');
 const EDGEONE_ENTRIES = [
   { file: 'api/status.js', path: '/api/status' },
   { file: 'api/appstore/latest.js', path: '/api/appstore/latest' },
+  { file: 'api/cli/releases.js', path: '/api/cli/releases' },
   { file: 'api/releases/index.js', path: '/api/releases' },
   { file: 'api/releases/latest.js', path: '/api/releases/latest' },
 ];
@@ -303,6 +342,7 @@ for (const { file, path } of EDGEONE_ENTRIES) {
     '/hot-update/assets/model-metadata-catalog.json.gz',
     '/fonts/gstatic/:path*',
     '/api/releases/download/:path*',
+    '/api/cli/releases/download/:path*',
   ]) {
     check(`middleware: matcher claims ${route}`, claimed.includes(`"${route}"`));
   }
@@ -311,6 +351,7 @@ for (const { file, path } of EDGEONE_ENTRIES) {
     Boolean(prefixes) &&
     prefixes[1].includes('"/fonts/gstatic/"') &&
     prefixes[1].includes('"/api/releases/download/"'));
+  check('middleware: proxies CLI binaries', prefixes[1].includes('"/api/cli/releases/download/"'));
 }
 
 /* -------------------------------------------------------------------------- */

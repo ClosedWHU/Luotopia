@@ -1,0 +1,45 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHeader from "../components/PageHeader.astro";
+---
+
+<BaseLayout title="Luotopia CLI">
+  <PageHeader title="Luotopia CLI" subtitle="独立的命令行客户端，版本与图形 App 分别发布" />
+  <main class="max-w-content mx-auto px-4 pb-20 text-on-surface">
+    <div class="glass rounded-card p-6 mb-6">
+      <p class="text-body-medium text-on-surface-variant mb-3">正式发布版本与开发中的版本分别编号。安装包和更新日志来自 Luotopia-CLI 的 Release，不会跟随 App 的版本变化。</p>
+      <p class="text-body-small text-outline">CLI 仓库为私有仓库；以下下载由官网代理公开发布的 CLI 安装包。直接查看源码和 GitHub Release 仍需仓库权限。</p>
+      <a href="https://github.com/ClosedWHU/Luotopia-CLI/releases" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">在 GitHub 查看 CLI Releases</a>
+    </div>
+    <div id="cli-releases" class="space-y-4" aria-live="polite">正在加载 CLI 版本…</div>
+  </main>
+</BaseLayout>
+
+<script>
+  import { onPageSetup } from "../scripts/page-lifecycle";
+
+  type CliAsset = { name: string; size: number; url: string };
+  type CliRelease = { tag: string; version: string; name: string; htmlUrl: string; body: string; publishedAt: string; prerelease: boolean; assets: CliAsset[] };
+
+  onPageSetup((signal) => {
+    const root = document.getElementById("cli-releases");
+    if (!root) return;
+    const safe = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    fetch("/api/cli/releases", { signal }).then(async (response) => {
+      if (!response.ok) throw new Error("unavailable");
+      const data = await response.json() as { items: CliRelease[] };
+      if (signal.aborted) return;
+      root.innerHTML = data.items.length ? data.items.map((release) => `
+        <section class="glass rounded-card p-6">
+          <h2 class="text-title-medium">${safe(release.name)}</h2>
+          <p class="text-body-small text-outline mt-1">${safe(release.publishedAt.slice(0, 10))}${release.prerelease ? " · 预发布" : ""}</p>
+          ${release.assets.length ? `<ul class="mt-4 space-y-2">${release.assets.map((asset) => `<li><a class="text-primary hover:underline" href="${safe(asset.url)}" download>${safe(asset.name)} · ${(asset.size / 1048576).toFixed(1)} MB</a></li>`).join("")}</ul>` : "<p class='mt-4 text-outline'>此版本没有可下载的安装包。</p>"}
+          <h3 class="text-title-small mt-5">更新日志</h3>
+          <pre class="whitespace-pre-wrap break-words text-body-medium text-on-surface-variant mt-2">${safe(release.body || "该版本未提供更新说明。")}</pre>
+          <a class="inline-block text-primary hover:underline mt-3" href="${safe(release.htmlUrl)}" target="_blank" rel="noopener noreferrer">在 GitHub 查看完整更新日志</a>
+        </section>`).join("") : "目前没有已发布的 CLI 版本。";
+    }).catch(() => {
+      if (!signal.aborted) root.textContent = "暂时无法读取 CLI 版本，请稍后重试或通过上方 GitHub 链接查看。";
+    });
+  });
+</script>

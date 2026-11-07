@@ -25,6 +25,8 @@
  */
 
 import { onRequestGet as appstoreLatestGet } from "../api/appstore/latest";
+import { onRequestGet as cliReleasesGet } from "../api/cli/releases";
+import { onRequestGet as cliDownloadGet } from "../api/cli/releases/download/[[path]]";
 import { onRequestGet as msstoreLatestGet } from "../api/msstore/latest";
 import { onRequestGet as releaseDownloadGet } from "../api/releases/download/[[path]]";
 import { onRequestGet as releasesIndexGet } from "../api/releases/index";
@@ -84,6 +86,13 @@ export async function routeApiRequest(
   }
   if (pathname === "/api/msstore/latest") {
     return msstoreLatestGet({ request, env });
+  }
+  if (pathname === "/api/cli/releases") {
+    return cliReleasesGet({ env });
+  }
+  if (pathname === "/api/cli/releases/download" || pathname.startsWith("/api/cli/releases/download/")) {
+    const rest = pathname.slice("/api/cli/releases/download".length).replace(/^\//, "");
+    return cliDownloadGet({ request, env, params: { path: rest } });
   }
   if (pathname === "/api/releases") {
     return releasesIndexGet({ request, env });

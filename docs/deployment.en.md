@@ -97,7 +97,7 @@ them in `.dev.vars` (see `.dev.vars.example`); `.env.example` is the full list.
 |----------|----------|-------|
 | ~~`HOT_UPDATE_*`~~ | — | No longer Pages variables. The signing key `HOT_UPDATE_ED25519_PRIVATE_KEY` and the R2 credentials `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` are **GitHub Actions secrets** used by the sync/publish workflows; `HOT_UPDATE_ALLOW_UNSIGNED` / `HOT_UPDATE_PRODUCTION_BRANCH` are retired (the build no longer signs). See [Hot-update R2](#hot-update-r2-manifest-and-model-catalog). |
 | `UPTIMEROBOT_API_KEY` | For `/status` | A Read-Only key is enough |
-| `GITHUB_TOKEN` | No | Raises the GitHub API limit for `/api/releases*` |
+| `GITHUB_TOKEN` | Optional for App releases; required for CLI downloads | Raises the GitHub API limit for `/api/releases*` and lets `/api/cli/releases` and its binary proxy read the private `ClosedWHU/Luotopia-CLI` repository. Without access the CLI page retains its GitHub sign-in link. |
 | `REPO` | No | Defaults to `ClosedWHU/Luotopia` |
 | `APPSTORE_CONNECT` | No | `1` enables App Store Connect (TestFlight build numbers) |
 | `APPSTORE_CONNECT_KEY_ID` / `_ISSUER_ID` / `_PRIVATE_KEY` | When enabled | PEM with literal `\n` newlines |

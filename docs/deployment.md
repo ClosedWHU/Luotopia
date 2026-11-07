@@ -80,7 +80,7 @@ Preview 环境没有运行时 secret，所以：
 | `MIRROR_ASSETS_ONLY` | 否 | `1` 时把构建产物中的全部 HTML 页面替换为跳转到主域名的存根（保留根 `404.html`），把部署变成纯静态文件镜像。**只配镜像项目**，Cloudflare 主站不配。见[其他部署方式](#其他部署方式) |
 | `MIRROR_MAIN_DOMAIN` | 否 | 镜像跳转存根的目标域名，默认 `www.whu.sb`（应与 `functions/_middleware.ts` 的 `MAIN_DOMAIN` 一致）。仅 `MIRROR_ASSETS_ONLY` 启用时使用 |
 | `UPTIMEROBOT_API_KEY` | `/status` 需要 | Read-Only key 即可 |
-| `GITHUB_TOKEN` | 否 | 提高 `/api/releases*` 的 GitHub API 限额 |
+| `GITHUB_TOKEN` | App Release 可选、CLI 下载必需 | 提高 `/api/releases*` 的 GitHub API 限额；`/api/cli/releases` 和 CLI 二进制下载代理使用同一 token 读取私有 `ClosedWHU/Luotopia-CLI` 仓库。无权限或未配置时 CLI 接口不返回版本，下载页保留 GitHub 登录入口。 |
 | `GITHUB_ASSET_MIRROR` | 否 | release 资产下载的镜像前缀列表（逗号/空格分隔，按序尝试，如 `https://gh-proxy.com,https://ghfast.top`），全部失败回退 GitHub 直连。**国内边缘部署（EdgeOne/ESA）建议配**，Cloudflare 不配。见[其他部署方式](#其他部署方式) |
 | `REPO` | 否 | 默认 `ClosedWHU/Luotopia` |
 | `APPSTORE_CONNECT` | 否 | `1` 时启用 App Store Connect（TestFlight 构建号） |

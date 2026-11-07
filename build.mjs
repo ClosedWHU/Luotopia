@@ -51,6 +51,7 @@ const COMMON = {
 const EDGEONE_ENTRIES = [
   { entry: 'platform/edgeone/api/status.ts', out: 'edge-functions/api/status.js' },
   { entry: 'platform/edgeone/api/appstore/latest.ts', out: 'edge-functions/api/appstore/latest.js' },
+  { entry: 'platform/edgeone/api/cli/releases.ts', out: 'edge-functions/api/cli/releases.js' },
   { entry: 'platform/edgeone/api/releases/index.ts', out: 'edge-functions/api/releases/index.js' },
   { entry: 'platform/edgeone/api/releases/latest.ts', out: 'edge-functions/api/releases/latest.js' },
   // No extension-bearing entries, deliberately. EdgeOne routes paths with an
