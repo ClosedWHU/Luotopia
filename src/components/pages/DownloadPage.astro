@@ -247,8 +247,6 @@ const i18n = {
     <div class="max-w-content mx-auto">
       <p id="latest-meta" class="lt-reveal text-body-medium text-outline mb-6">{t("download.latest.loading")}</p>
 
-      <a href="/cli/" class="inline-flex items-center gap-2 text-primary hover:underline no-underline mb-8">Luotopia CLI →</a>
-
       <!--
         One platform at a time. The page used to lay out four equal cards, then
         a "how to install" card and a "package managers" card that repeated the
@@ -310,6 +308,8 @@ const i18n = {
                 data-external-label={external ?? ""}
                 data-invite-code={p.id === "apple" ? testFlightCode : ""}
               >
+                <div class="lg:grid lg:grid-cols-2 lg:gap-10">
+                <div class="min-w-0">
                 <div class="flex items-start gap-3.5">
                   <span class="lt-icon-chip text-primary text-[22px] shrink-0"><Icon name={p.icon} /></span>
                   <div class="min-w-0 flex-1">
@@ -328,7 +328,7 @@ const i18n = {
                   script replaces this with the real asset list; the store
                   button it renders is the same markup as the one here.
                 -->
-                <div class="platform-assets mt-4 space-y-1.5 max-w-md">
+                <div class="platform-assets mt-4 space-y-1.5">
                   {p.externalUrl ? (
                     <a
                       href={p.externalUrl}
@@ -355,9 +355,11 @@ const i18n = {
                     </a>
                   )}
                 </div>
+                </div>
 
-                <div class="mt-6 space-y-2 text-body-medium text-on-surface-variant" data-drawer-group>
-                  <DownloadDrawer title={t("download.install.title")} icon="info">
+                <div class="min-w-0 mt-6 lg:mt-0">
+                <div class="space-y-2 text-body-medium text-on-surface-variant" data-drawer-group>
+                  <DownloadDrawer title={t("download.install.title")} icon="info" open>
                     {p.id === "android" && (
                       <p
                         set:html={rich("download.install.android.body", {
@@ -466,6 +468,8 @@ const i18n = {
                     </div>
                   </div>
                 )}
+                </div>
+                </div>
               </div>
             );
           })
@@ -474,7 +478,7 @@ const i18n = {
         <!-- HarmonyOS has no card of its own in `platforms` (it ships no
              regular assets), so its panel is only the sideload note. -->
         <div
-          class="glass rounded-card p-5 sm:p-7"
+          class="glass rounded-card p-5 sm:p-7 lg:max-w-3xl lg:mx-auto"
           role="tabpanel"
           id="panel-harmony"
           aria-labelledby="tab-harmony"
@@ -498,6 +502,10 @@ const i18n = {
             <p class="text-body-small text-outline">{t("download.install.harmony.note")}</p>
           </div>
         </div>
+      </div>
+
+      <div class="mt-6 flex justify-end">
+        <a href="/cli/" class="inline-flex items-center gap-2 text-body-medium text-primary hover:underline no-underline">Luotopia CLI →</a>
       </div>
 
       <noscript>
