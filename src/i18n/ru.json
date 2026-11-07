@@ -34,6 +34,7 @@
   "footer.resources.repo": "Исходный код этого сайта",
 
   "cta.download": "Скачать приложение",
+  "cta.downloadFor": "Скачать для {platform}",
   "cta.features": "Посмотреть функции",
 
   "home.title": "Главная",
@@ -421,6 +422,7 @@
   "download.title": "Скачать",
   "download.header": "Скачать Luotopia",
   "download.subtitle": "Выберите платформу и получите свежий выпуск",
+  "download.tabs.label": "Выберите платформу",
   "download.latest.loading": "Загрузка из GitHub Releases…",
   "download.latest.current": "Текущая версия: {version}",
   "download.latest.unavailable": "Сейчас не удалось получить свежий выпуск. Загляните в GitHub Releases.",

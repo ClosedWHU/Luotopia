@@ -34,6 +34,7 @@
   "footer.resources.repo": "Código fuente de este sitio",
 
   "cta.download": "Descargar la app",
+  "cta.downloadFor": "Descargar para {platform}",
   "cta.features": "Ver las funciones",
 
   "home.title": "Inicio",
@@ -421,6 +422,7 @@
   "download.title": "Descargar",
   "download.header": "Descargar Luotopia",
   "download.subtitle": "Elige tu plataforma y descarga la última versión",
+  "download.tabs.label": "Elige una plataforma",
   "download.latest.loading": "Cargando desde GitHub Releases…",
   "download.latest.current": "Última versión: {version}",
   "download.latest.unavailable": "No se ha podido cargar la última versión por ahora. Consulta GitHub Releases.",

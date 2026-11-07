@@ -34,6 +34,7 @@
   "footer.resources.repo": "本站開源倉庫",
 
   "cta.download": "下載 App",
+  "cta.downloadFor": "下載 {platform} 版",
   "cta.features": "了解功能",
 
   "home.title": "首頁",
@@ -421,6 +422,7 @@
   "download.title": "下載",
   "download.header": "下載 Luotopia",
   "download.subtitle": "選擇你的平台，取得最新版本",
+  "download.tabs.label": "選擇平台",
   "download.latest.loading": "正在從 GitHub Releases 載入…",
   "download.latest.current": "目前最新：{version}",
   "download.latest.unavailable": "暫時無法取得最新版本，請前往 GitHub Releases。",

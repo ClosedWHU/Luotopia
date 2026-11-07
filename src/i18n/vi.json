@@ -34,6 +34,7 @@
   "footer.resources.repo": "Kho mã nguồn mở của trang này",
 
   "cta.download": "Tải ứng dụng",
+  "cta.downloadFor": "Tải cho {platform}",
   "cta.features": "Tìm hiểu tính năng",
 
   "home.title": "Trang chủ",
@@ -421,6 +422,7 @@
   "download.title": "Tải về",
   "download.header": "Tải Luotopia",
   "download.subtitle": "Chọn nền tảng của bạn và tải phiên bản mới nhất",
+  "download.tabs.label": "Chọn nền tảng",
   "download.latest.loading": "Đang tải từ GitHub Releases…",
   "download.latest.current": "Bản mới nhất: {version}",
   "download.latest.unavailable": "Hiện chưa thể lấy phiên bản mới nhất, vui lòng truy cập GitHub Releases.",

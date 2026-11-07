@@ -19,19 +19,22 @@ const t = useTranslations(locale);
  * translated-route table, so on `/en/` the links to pages English does not have
  * point at the Chinese original *directly* rather than at a redirect stub.
  */
+/*
+ * Five entries, down from eight. Status, brand and legal are reference pages a
+ * visitor reaches once, if ever, and the footer carries them; keeping them here
+ * crowded the one thing the site is for. Download is in the list (the mobile
+ * sheet shows it in order, highlighted) but the desktop bar pulls it out and
+ * renders it as a button at the end of the row — see `DOWNLOAD_ROUTE`.
+ */
+const DOWNLOAD_ROUTE = "download";
 const links = [
   { route: "home", label: t("nav.home") },
   { route: "features", label: t("nav.features") },
   { route: "download", label: t("nav.download") },
-  { route: "community", label: t("nav.community") },
-  { route: "status", label: t("nav.status") },
   // The docs site (merged from Luotopia-Docs, served under /docs) is zh-Hans only,
   // so unlike every other entry it has no per-locale URL — one href for all.
-  // Label is the short nav.docs ("文档"), not the footer's "文档中心": eight
-  // items leave no room for the longer form at the breakpoint floor.
   { href: "/docs/", label: t("nav.docs") },
-  { route: "brand", label: t("nav.brand") },
-  { route: "legal", label: t("nav.legal") },
+  { route: "community", label: t("nav.community") },
 ] as const;
 
 const linkHref = (link: (typeof links)[number]) =>
@@ -113,16 +116,28 @@ const persistName = `lt-navbar-${locale}`;
 
     <div class="hidden lg:flex items-center gap-0.5">
       {
-        links.map((link) => (
-          <a
-            href={linkHref(link)}
-            aria-current={isActive(linkHref(link)) ? "page" : undefined}
-            class="lt-navlink state-layer rounded-control px-3.5 py-2 text-body-large text-on-surface-variant no-underline transition-colors"
-          >
-            {link.label}
-          </a>
-        ))
+        links
+          .filter((link) => !("route" in link && link.route === DOWNLOAD_ROUTE))
+          .map((link) => (
+            <a
+              href={linkHref(link)}
+              aria-current={isActive(linkHref(link)) ? "page" : undefined}
+              class="lt-navlink state-layer rounded-control px-3.5 py-2 text-body-large text-on-surface-variant no-underline transition-colors"
+            >
+              {link.label}
+            </a>
+          ))
       }
+      <!-- No `aria-current` here: the bar is persisted across client
+           navigations and the copy-over in the script below only knows
+           `.lt-navlink`, so a stale value would outlive the page. -->
+      <a
+        href={routeUrl(locale, DOWNLOAD_ROUTE)}
+        class="filled-glass state-layer ml-2 inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-label-large font-medium no-underline"
+      >
+        <Icon name="download" class="text-lg" />
+        {t("nav.download")}
+      </a>
 
       <!--
         `<details>`, not a JS popover: the disclosure is native, so the switcher
@@ -230,7 +245,12 @@ const persistName = `lt-navbar-${locale}`;
           <a
             href={linkHref(link)}
             aria-current={isActive(linkHref(link)) ? "page" : undefined}
-              class="lt-navlink state-layer rounded-control px-3 py-2.5 text-body-large text-on-surface-variant no-underline"
+              class:list={[
+                "lt-navlink state-layer rounded-control px-3 py-2.5 text-body-large no-underline",
+                "route" in link && link.route === DOWNLOAD_ROUTE
+                  ? "text-primary font-medium"
+                  : "text-on-surface-variant",
+              ]}
           >
             {link.label}
           </a>

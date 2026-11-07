@@ -34,6 +34,7 @@
   "footer.resources.repo": "This site's source",
 
   "cta.download": "Download",
+  "cta.downloadFor": "Download for {platform}",
   "cta.features": "Explore features",
 
   "home.title": "Home",
@@ -440,6 +441,7 @@
   "download.title": "Download",
   "download.header": "Download Luotopia",
   "download.subtitle": "Pick your platform and get the latest release",
+  "download.tabs.label": "Choose a platform",
 
   "download.latest.loading": "Loading from GitHub Releases…",
   "download.latest.current": "Latest release: {version}",
