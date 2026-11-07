@@ -867,6 +867,25 @@ jobs:
           restore-keys: |
             Android-gradle-
 
+      # The app's Tencent Gradle wrapper mirror times out after ten seconds on
+      # hosted runners. Fetch the same version from Gradle's official CDN and
+      # check its published digest before building either APKs or the Play AAB.
+      - name: Fetch and verify the official Gradle distribution
+        shell: bash
+        run: |
+          set -euo pipefail
+          properties=android/gradle/wrapper/gradle-wrapper.properties
+          version=$(sed -n 's/.*gradle-\([0-9.]*\)-all.zip.*/\1/p' "$properties")
+          test -n "$version"
+          archive="$RUNNER_TEMP/gradle-${version}-all.zip"
+          base="https://services.gradle.org/distributions/gradle-${version}-all.zip"
+          curl -fL --retry 3 --connect-timeout 30 --max-time 900 "$base" -o "$archive"
+          expected=$(curl -fsSL --retry 3 --connect-timeout 30 --max-time 120 "$base.sha256")
+          [[ "$expected" =~ ^[0-9a-f]{64}$ ]]
+          printf '%s  %s\n' "$expected" "$archive" | sha256sum -c -
+          sed -i "s|^distributionUrl=.*|distributionUrl=file\\:$archive|" "$properties"
+          printf '\ndistributionSha256Sum=%s\nnetworkTimeout=120000\n' "$expected" >> "$properties"
+
       - name: Free disk space for Android build
         run: bash scripts/free_android_runner_space.sh
 
