@@ -53,12 +53,12 @@ const toolkit = await verifyToolkitSnapshot();
 const tests = {
   'course-parser': toolkit.parsers['course-parser'].smoke,
   'score-parser': toolkit.parsers['score-parser'].smoke,
-  'study-status-course-parser': { input: { items: [{ KCMC: '高等数学', KCXZMC: '必修', XF: '4.0', CJ: '92', JD: '4.0', MAXCJ: '92', XDZT: '4', KCLBMC: '基础课' }] }, expect: { courses: [{ name: '高等数学', credit: 4, score: 92, status: 'passed' }] } },
-  'study-status-index-parser': { input: { html: "<p class='title1' id='pABC123DEF456ABC123DEF456ABC123DE'>必修课程&nbsp;</p>" }, expect: { names: { ABC123DEF456ABC123DEF456ABC123DE: '必修课程' } } },
+  'study-status-course-parser': toolkit.parsers['study-status-course-parser'].smoke,
+  'study-status-index-parser': toolkit.parsers['study-status-index-parser'].smoke,
   'school-net-parser': { input: { operation: 'landing', html: '<button id="suspend">暂停</button>' }, expect: { operation: 'landing', status: 'active' } },
   'datarepo-parser': { input: { body: '<p>学号：</p><p>2021001234</p><p>学生姓名：</p><p>张三</p>' }, expect: { studentId: '2021001234', name: '张三' } },
-  'empty-room-parser': { input: { data: [{ cdmc: '教室101', jxl: '理科楼', zws: '60', kszws: '45', jc: '1,2', lh: '1' }] }, expect: { rooms: [{ name: '教室101', totalSeats: 60 }] } },
-  'messages-parser': { input: { resultData: { total: 1, rows: [{ msgId: 'test123', msgtitle: 'Test', senderName: 'Admin', sendTime: '2026-01-01', receiptStatus: '0' }] } }, expect: { messages: [{ msgId: 'test123', title: 'Test', isRead: false }], totalCount: 1 } },
+  'empty-room-parser': toolkit.parsers['empty-room-parser'].smoke,
+  'messages-parser': toolkit.parsers['messages-parser'].smoke,
   // The 免修 row is followed by a normal one on purpose: an unrecognised grade
   // makes the cross-line join swallow the next course into its name. The 缓考
   // row locks that guard in — it is dropped, and the row after it survives.
@@ -66,7 +66,7 @@ const tests = {
   'wakeup-parser': { input: { format: 'csv', content: '课程名称,星期,开始节数,结束节数,教师,地点,周次\n高等数学,1,1,2,张三,教室A,1-16', fileName: 'test.csv' }, expect: { name: 'test', items: [{ name: '高等数学', day: 1, startNode: 1, endNode: 2 }] } },
   'third-party-timetable-parser': { input: { source: 'shiguang', data: { name: '测试课表', courses: [{ name: '高等数学', day: 1, startSection: 1, endSection: 2, startTime: '08:00', endTime: '09:35' }] } }, expect: { normalized: true, name: '测试课表', courses: [{ name: '高等数学', day: 1 }] } },
   'sports-reservation-parser': { input: { decoded: { Success: true, Code: 0, Data: { Items: [] } } }, expect: { normalized: { success: true, status: 0 } } },
-  'campus-bus-parser': { input: { kind: 'vehicles', vehicles: ['1|x|2|1|114.3|30.5'] }, expect: { schemaVersion: 1, kind: 'vehicles', vehicles: [{ num: '1', stationIndex: 2, arrive: true }] } },
+  'campus-bus-parser': toolkit.parsers['campus-bus-parser'].smoke,
   'ai-structured-output-parser': { input: { content: '```json\n{"intent":"create"}\n```' }, expect: { schemaVersion: 1, payload: { intent: 'create_item' } } },
   'whu-email-envelope-parser': { input: { body: { code: 200, data: { unreadCount: 3 } } }, expect: { schemaVersion: 1, success: true, unreadCount: 3 } },
   'medical-report-list-parser': { input: { kind: 'page', html: '<div id="lisId"><div class="f14 mt10 font333 bgw"><div class="p10"><p>血常规</p><p>门诊</p></div><div><a onclick="lisReportDetail(\'adm-token&amp;sign=signed-token\', \'item-token\', \'lab-token\')"><p>2026-07-20 10:00:00</p><span class="weui-cell__ft">报告已出</span></a></div></div></div><div id="risId"></div><script>var lisLoadEnd=!!(\'\');var risLoadEnd=!!(\'1\');</script>' }, expect: { schemaVersion: 1, laboratoryReports: [{ title: '血常规', status: '报告已出', detail: { path: 'lisreportdetail' } }], examinationIsLast: true } },

@@ -1,8 +1,220 @@
 {
   "package": "@luotopia/toolkit",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "license": "AGPL-3.0-or-later",
   "parsers": {
+    "campus-bus-parser": {
+      "apiVersion": 1,
+      "checksum": "sha256:07ff97aef793cdc1ba41f458e908b4b79c93be996e0e5223023e0e62f2697525",
+      "source": "// Parses campus bus data, supporting \"line\" (route) and \"vehicles\" payloads.\nfunction parse(rawJson) {\n  var input = JSON.parse(rawJson);\n  if (input.kind === 'line') return parseLine(input);\n  if (input.kind === 'vehicles') return parseVehicles(input);\n  throw new Error('Unsupported campus bus payload');\n}\n\n// Parses a bus route: stops with coordinates and basic line metadata.\nfunction parseLine(input) {\n  var data = input.data || {};\n  var rawStops = Array.isArray(data.stops) ? data.stops : [];\n  var stops = [];\n  for (var i = 0; i < rawStops.length; i++) {\n    var stop = rawStops[i] || {};\n    var id = text(stop.stopId);\n    var name = text(stop.stopName);\n    // stopOrder = the stop's sequence index along the route.\n    var index = integer(stop.stopOrder);\n    // lng / lat = longitude / latitude of the stop.\n    var lng = number(stop.lng);\n    var lat = number(stop.lat);\n    if (!id || !name || index === null || lng === null || lat === null) continue;\n    stops.push({ id: id, name: name, index: index, lng: lng, lat: lat });\n  }\n  return JSON.stringify({\n    schemaVersion: 1,\n    kind: 'line',\n    line: {\n      lineId: text(data.lineId),\n      // line2Id = the reverse-direction line id of the same route.\n      oppositeLineId: text(data.line2Id),\n      // lineNo = the human-readable line number (e.g. \"校车1号线\").\n      lineNo: text(data.lineNo),\n      // direction \"0\" means the default/forward direction.\n      direction: text(data.direction) === '0',\n      firstTime: text(data.firstTime),\n      lastTime: text(data.lastTime),\n      priceRange: text(data.price),\n      stops: stops\n    }\n  });\n}\n\n// Parses a pipe-delimited vehicle list (\"num|x|stationIndex|arrive|lon|lat\").\nfunction parseVehicles(input) {\n  var raw = Array.isArray(input.vehicles) ? input.vehicles : [];\n  var vehicles = [];\n  for (var i = 0; i < raw.length; i++) {\n    var parts = text(raw[i]).split('|');\n    if (parts.length !== 6) continue;\n    // parts[1] is unused (a placeholder \"x\" in the source payload).\n    var stationIndex = integer(parts[2]);\n    // arrive = \"1\" if the bus has arrived at the station, otherwise \"0\".\n    var arrive = integer(parts[3]);\n    var lon = number(parts[4]);\n    var lat = number(parts[5]);\n    if (stationIndex === null || arrive === null || lon === null || lat === null) continue;\n    vehicles.push({\n      // num = the vehicle identifier (e.g. bus plate number or code).\n      num: text(parts[0]), stationIndex: stationIndex, arrive: arrive === 1,\n      lon: lon, lat: lat\n    });\n  }\n  vehicles.sort(function(a, b) { return a.stationIndex - b.stationIndex; });\n  return JSON.stringify({ schemaVersion: 1, kind: 'vehicles', vehicles: vehicles });\n}\n\nfunction text(value) {\n  return value === undefined || value === null ? '' : String(value).trim();\n}\nfunction integer(value) {\n  var valueText = text(value);\n  if (!/^-?\\d+$/.test(valueText)) return null;\n  var parsed = Number(valueText);\n  return isFinite(parsed) ? parsed : null;\n}\nfunction number(value) {\n  var valueText = text(value);\n  if (!valueText) return null;\n  var parsed = Number(valueText);\n  return isFinite(parsed) ? parsed : null;\n}\n",
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "kind"
+        ],
+        "properties": {
+          "schemaVersion": {
+            "const": 1
+          },
+          "kind": {
+            "enum": [
+              "line",
+              "vehicles"
+            ]
+          },
+          "line": {
+            "type": "object",
+            "required": [
+              "lineId",
+              "oppositeLineId",
+              "lineNo",
+              "direction",
+              "firstTime",
+              "lastTime",
+              "priceRange",
+              "stops"
+            ],
+            "properties": {
+              "lineId": {
+                "type": "string"
+              },
+              "oppositeLineId": {
+                "type": "string"
+              },
+              "lineNo": {
+                "type": "string"
+              },
+              "direction": {
+                "type": "boolean"
+              },
+              "firstTime": {
+                "type": "string"
+              },
+              "lastTime": {
+                "type": "string"
+              },
+              "priceRange": {
+                "type": "string"
+              },
+              "stops": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "name",
+                    "index",
+                    "lng",
+                    "lat"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "index": {
+                      "type": "integer"
+                    },
+                    "lng": {
+                      "type": "number"
+                    },
+                    "lat": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "vehicles": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "num",
+                "stationIndex",
+                "arrive",
+                "lon",
+                "lat"
+              ],
+              "properties": {
+                "num": {
+                  "type": "string"
+                },
+                "stationIndex": {
+                  "type": "integer"
+                },
+                "arrive": {
+                  "type": "boolean"
+                },
+                "lon": {
+                  "type": "number"
+                },
+                "lat": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "line"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "line"
+              ],
+              "properties": {
+                "line": true
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "vehicles"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "vehicles"
+              ],
+              "properties": {
+                "vehicles": true
+              }
+            }
+          }
+        ]
+      },
+      "smoke": {
+        "input": {
+          "kind": "vehicles",
+          "vehicles": [
+            "1|x|2|1|114.3|30.5"
+          ]
+        },
+        "expect": {
+          "schemaVersion": 1,
+          "kind": "vehicles",
+          "vehicles": [
+            {
+              "num": "1",
+              "stationIndex": 2,
+              "arrive": true
+            }
+          ]
+        }
+      },
+      "cases": [
+        {
+          "name": "invalid rows do not hide valid vehicles",
+          "input": {
+            "kind": "vehicles",
+            "vehicles": [
+              "bad",
+              "01|x|1|0|114.3|30.5",
+              "02|x|2|1|114.4|30.6"
+            ]
+          },
+          "expect": {
+            "vehicles": [
+              {
+                "num": "01",
+                "stationIndex": 1,
+                "arrive": false
+              },
+              {
+                "num": "02",
+                "stationIndex": 2,
+                "arrive": true
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty live fleet",
+          "input": {
+            "kind": "vehicles",
+            "vehicles": []
+          },
+          "expect": {
+            "vehicles": []
+          }
+        }
+      ]
+    },
     "course-parser": {
       "apiVersion": 1,
       "checksum": "sha256:1fdfbd6cf28fbf2fd899706ab1a9caf76884e9d60373a686658c197805df0e91",
@@ -287,6 +499,502 @@
         }
       ]
     },
+    "empty-room-parser": {
+      "apiVersion": 1,
+      "checksum": "sha256:be97426f424842f52524f1971299ad37f2207c7b64562672274b41e7ae8c200e",
+      "source": "// Parses empty-classroom availability data into a normalized room list.\nfunction parse(rawJson) {\n  var data = JSON.parse(rawJson);\n  var result = data.data || [];\n  if (!Array.isArray(result)) result = [];\n  var rooms = [];\n  for (var i = 0; i < result.length; i++) {\n    var item = result[i];\n    // jc = 节次 (class period), comma-separated section numbers like \"1,2\".\n    var rawSections = (item.jc || '').toString();\n    var sections = [];\n    if (rawSections) {\n      var parts = rawSections.split(',');\n      for (var j = 0; j < parts.length; j++) {\n        var n = parseInt(parts[j].trim(), 10);\n        if (n > 0) sections.push(n);\n      }\n      sections.sort(function(a, b) { return a - b; });\n    }\n    rooms.push({\n      // cdmc = 场地名称 (venue/room name).\n      name: (item.cdmc || '').toString(),\n      // jxl = 教学楼 (building).\n      building: (item.jxl || '').toString(),\n      // cdlb = 场地类别 (room type).\n      type: (item.cdlb || '').toString(),\n      // zws = 座位数 (total seat count).\n      totalSeats: parseInt((item.zws || '').toString(), 10) || 0,\n      // kszws = 可用座位数 (available seat count).\n      availableSeats: parseInt((item.kszws || '').toString(), 10) || 0,\n      availableSections: sections,\n      // lh = 楼层 (floor).\n      floor: (item.lh || '').toString()\n    });\n  }\n  return JSON.stringify({ rooms: rooms });\n}\n",
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+          "rooms"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "rooms": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "building",
+                "type",
+                "totalSeats",
+                "availableSeats",
+                "availableSections",
+                "floor"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "building": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "floor": {
+                  "type": "string"
+                },
+                "totalSeats": {
+                  "type": "integer"
+                },
+                "availableSeats": {
+                  "type": "integer"
+                },
+                "availableSections": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "smoke": {
+        "input": {
+          "data": [
+            {
+              "cdmc": "教室101",
+              "jxl": "理科楼",
+              "zws": "60",
+              "kszws": "45",
+              "jc": "1,2",
+              "lh": "1"
+            }
+          ]
+        },
+        "expect": {
+          "rooms": [
+            {
+              "name": "教室101",
+              "totalSeats": 60
+            }
+          ]
+        }
+      },
+      "cases": [
+        {
+          "name": "sections are positive and numerically sorted",
+          "input": {
+            "data": [
+              {
+                "cdmc": "教室202",
+                "jc": "10,2,0,bad,1",
+                "zws": "80",
+                "kszws": "70",
+                "lh": "2"
+              }
+            ]
+          },
+          "expect": {
+            "rooms": [
+              {
+                "name": "教室202",
+                "availableSections": [
+                  1,
+                  2,
+                  10
+                ],
+                "totalSeats": 80,
+                "availableSeats": 70,
+                "floor": "2"
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty availability",
+          "input": {
+            "data": []
+          },
+          "expect": {
+            "rooms": []
+          }
+        }
+      ]
+    },
+    "graduate-course-parser": {
+      "apiVersion": 1,
+      "checksum": "sha256:8d31cf7c9ef581b6345fa79599c61147e6ecfc07bb903a27fac97261688563b2",
+      "source": "// Normalizes newyjs xspkjgcx rows using the App graduate importer contract.\n// Dates belong to the authenticated calendar, not to this pure parser.\nfunction parse(rawJson) {\n  var input = JSON.parse(rawJson);\n  var rows = Array.isArray(input.rows) ? input.rows : [];\n  var courses = [];\n  for (var i = 0; i < rows.length; i++) {\n    var row = rows[i] || {};\n    var titleRaw = text(row.KCMC), title = display(titleRaw);\n    var weekday = positive(row.XQ);\n    if (text(row.XQ) === '0') weekday = 7;\n    if (!title || weekday === null || weekday > 7) continue;\n    var primary = text(row.ZCBH), secondary = text(row.ZCMC);\n    var weeks = expandWeeks(primary || secondary);\n    if (!weeks.length && primary && secondary && primary !== secondary) weeks = expandWeeks(secondary);\n    if (!weeks.length) continue;\n    var from = positive(row.KSJCDM), to = positive(row.JSJCDM);\n    if (to === null) to = from;\n    var start = clock(row.KSSJ), end = clock(row.JSSJ);\n    if (!(from !== null && to >= from) && !(start && end)) continue;\n    var cancelled = text(row.SFQZAP);\n    if (cancelled === '1' || cancelled === 'true' || cancelled === '是') continue;\n    var instructorRaw = text(row.JSXM);\n    courses.push({\n      title: title, titleRaw: titleRaw, courseId: text(row.KCDM), classId: text(row.BJDM),\n      courseNature: display(text(row.KCLBDM_DISPLAY) || text(row.KCLBDM)),\n      instructor: display(instructorRaw), instructorRaw: instructorRaw,\n      location: display(text(row.JASMC)), weekday: weekday, weeks: weeks,\n      weekMeta: secondary, classFrom: from === null ? -1 : from,\n      classTo: to === null ? -1 : to, startText: start, endText: end\n    });\n  }\n  return JSON.stringify({courses: courses});\n}\nfunction text(v) { return v === null || v === undefined ? '' : String(v).trim(); }\nfunction positive(v) { var m = text(v).match(/\\d+/); return m && Number(m[0]) > 0 ? Number(m[0]) : null; }\nfunction display(v) {\n  return v.replace(/[\\u0000-\\u0008\\u000b\\u000c\\u000e-\\u001f\\u007f\\u00ad\\u200b-\\u200f\\u202a-\\u202e\\u2060\\u2066-\\u2069\\ufeff]/g, '')\n    .replace(/[\\u00a0\\u2000-\\u200a\\u202f\\u205f]/g, ' ').replace(/[ \\t\\f\\v]+/g, ' ').trim();\n}\nfunction clock(v) {\n  if (typeof v !== 'number' && !/^\\d+$/.test(text(v))) return '';\n  var n = Math.floor(Number(v));\n  if (!isFinite(n) || n <= 0) return '';\n  var hour = Math.floor(n / 100), minute = n % 100;\n  if (!(hour <= 23 && minute <= 59)) {\n    if (n >= 1440) return '';\n    hour = Math.floor(n / 60); minute = n % 60;\n  }\n  return ('0' + hour).slice(-2) + ':' + ('0' + minute).slice(-2);\n}\nfunction expandWeeks(raw) {\n  if (/^[01]{8,}$/.test(raw)) {\n    var mask = []; for (var i = 0; i < raw.length; i++) if (raw.charAt(i) === '1') mask.push(i + 1);\n    return mask;\n  }\n  var result = {}, pieces = raw.split(/[,，;；、\\s]+/);\n  for (var j = 0; j < pieces.length; j++) {\n    var part = pieces[j], nums = part.match(/\\d+/g);\n    if (!nums || !nums.length) continue;\n    var start = Number(nums[0]), end = Number(nums.length > 1 ? nums[1] : nums[0]);\n    if (start <= 0 || end < start) continue;\n    for (var w = start; w <= end; w++) {\n      if (part.indexOf('单') >= 0 && w % 2 === 0) continue;\n      if (part.indexOf('双') >= 0 && w % 2 === 1) continue;\n      result[w] = true;\n    }\n  }\n  return Object.keys(result).map(Number).sort(function(a, b) { return a - b; });\n}\n",
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+          "courses"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "courses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "title",
+                "titleRaw",
+                "courseId",
+                "classId",
+                "courseNature",
+                "instructor",
+                "instructorRaw",
+                "location",
+                "weekday",
+                "weeks",
+                "weekMeta",
+                "classFrom",
+                "classTo",
+                "startText",
+                "endText"
+              ],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "titleRaw": {
+                  "type": "string"
+                },
+                "courseId": {
+                  "type": "string"
+                },
+                "classId": {
+                  "type": "string"
+                },
+                "courseNature": {
+                  "type": "string"
+                },
+                "instructor": {
+                  "type": "string"
+                },
+                "instructorRaw": {
+                  "type": "string"
+                },
+                "location": {
+                  "type": "string"
+                },
+                "weekday": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 7
+                },
+                "weeks": {
+                  "type": "array",
+                  "minItems": 1,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "weekMeta": {
+                  "type": "string"
+                },
+                "classFrom": {
+                  "type": "integer"
+                },
+                "classTo": {
+                  "type": "integer"
+                },
+                "startText": {
+                  "type": "string"
+                },
+                "endText": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "smoke": {
+        "input": {
+          "rows": [
+            {
+              "KCMC": "研究方法",
+              "KCDM": "C1",
+              "BJDM": "B1",
+              "JSXM": "教师",
+              "JASMC": "A101",
+              "XQ": "2",
+              "ZCBH": "1-3",
+              "KSJCDM": "1",
+              "JSJCDM": "2",
+              "KSSJ": 800,
+              "JSSJ": 935
+            }
+          ]
+        },
+        "expect": {
+          "courses": [
+            {
+              "title": "研究方法",
+              "courseId": "C1",
+              "classId": "B1",
+              "weekday": 2,
+              "weeks": [
+                1,
+                2,
+                3
+              ],
+              "classFrom": 1,
+              "classTo": 2,
+              "startText": "08:00",
+              "endText": "09:35"
+            }
+          ]
+        }
+      },
+      "cases": [
+        {
+          "name": "binary teaching weeks and Sunday encoding",
+          "input": {
+            "rows": [
+              {
+                "KCMC": "专题",
+                "XQ": 0,
+                "ZCBH": "10101000",
+                "KSJCDM": 3,
+                "JSJCDM": 4
+              }
+            ]
+          },
+          "expect": {
+            "courses": [
+              {
+                "title": "专题",
+                "weekday": 7,
+                "weeks": [
+                  1,
+                  3,
+                  5
+                ],
+                "classFrom": 3,
+                "classTo": 4
+              }
+            ]
+          }
+        },
+        {
+          "name": "cancelled and unplaceable arrangements are excluded",
+          "input": {
+            "rows": [
+              {
+                "KCMC": "取消",
+                "XQ": 1,
+                "ZCBH": "1-2",
+                "KSJCDM": 1,
+                "SFQZAP": "1"
+              },
+              {
+                "KCMC": "无时间",
+                "XQ": 1,
+                "ZCBH": "1"
+              },
+              {
+                "KCMC": "有效",
+                "XQ": 3,
+                "ZCBH": "1-6单周;8-10双周",
+                "KSJCDM": 6,
+                "JSJCDM": 7
+              }
+            ]
+          },
+          "expect": {
+            "courses": [
+              {
+                "title": "有效",
+                "weeks": [
+                  1,
+                  3,
+                  5,
+                  8,
+                  10
+                ],
+                "classFrom": 6,
+                "classTo": 7
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty graduate timetable",
+          "input": {
+            "rows": []
+          },
+          "expect": {
+            "courses": []
+          }
+        }
+      ]
+    },
+    "messages-parser": {
+      "apiVersion": 1,
+      "checksum": "sha256:ca1e652050b0f2a3a626e55c67ba85eee63734a266bb9c23526581d6704f2de6",
+      "source": "// Parses campus notification/messages list data into a normalized message list.\nfunction parse(rawJson) {\n  var data = JSON.parse(rawJson);\n  var resultData = data.resultData;\n  if (!resultData) return JSON.stringify({ messages: [], totalCount: 0 });\n\n  var rows = resultData.rows || [];\n  var total = resultData.total || rows.length;\n  var messages = [];\n  for (var i = 0; i < rows.length; i++) {\n    var item = rows[i];\n    var msgId = (item.msgId || '').toString().trim();\n    if (!msgId) continue;\n    messages.push({\n      msgId: msgId,\n      // msgtitle = 消息标题 (message title).\n      title: (item.msgtitle || '').toString(),\n      summary: (item.summary || '').toString() || null,\n      photoUrl: (item.photoUrl || '').toString() || null,\n      senderName: (item.senderName || '').toString(),\n      sendTime: (item.sendTime || '').toString(),\n      sendMsgType: ((item.sendMsgType || '').toString() || '1'),\n      // receiptStatus \"1\" or \"2\" means the message has been read.\n      isRead: (item.receiptStatus || '').toString() === '1' || (item.receiptStatus || '').toString() === '2',\n      appId: (item.appId || '').toString() || null\n    });\n  }\n  return JSON.stringify({ messages: messages, totalCount: total });\n}\n",
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+          "messages",
+          "totalCount"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "totalCount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "msgId",
+                "title",
+                "summary",
+                "photoUrl",
+                "senderName",
+                "sendTime",
+                "sendMsgType",
+                "isRead",
+                "appId"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "msgId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "title": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "photoUrl": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "senderName": {
+                  "type": "string"
+                },
+                "sendTime": {
+                  "type": "string"
+                },
+                "sendMsgType": {
+                  "type": "string"
+                },
+                "isRead": {
+                  "type": "boolean"
+                },
+                "appId": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "smoke": {
+        "input": {
+          "resultData": {
+            "total": 1,
+            "rows": [
+              {
+                "msgId": "test123",
+                "msgtitle": "Test",
+                "senderName": "Admin",
+                "sendTime": "2026-01-01",
+                "receiptStatus": "0"
+              }
+            ]
+          }
+        },
+        "expect": {
+          "messages": [
+            {
+              "msgId": "test123",
+              "title": "Test",
+              "isRead": false
+            }
+          ],
+          "totalCount": 1
+        }
+      },
+      "cases": [
+        {
+          "name": "read status aliases and missing ID filtering",
+          "input": {
+            "resultData": {
+              "total": 3,
+              "rows": [
+                {
+                  "msgId": "one",
+                  "msgtitle": "通知",
+                  "receiptStatus": "1"
+                },
+                {
+                  "msgtitle": "缺少编号"
+                },
+                {
+                  "msgId": "two",
+                  "receiptStatus": "2",
+                  "appId": "app"
+                }
+              ]
+            }
+          },
+          "expect": {
+            "messages": [
+              {
+                "msgId": "one",
+                "isRead": true
+              },
+              {
+                "msgId": "two",
+                "isRead": true,
+                "appId": "app"
+              }
+            ],
+            "totalCount": 3
+          }
+        },
+        {
+          "name": "empty inbox",
+          "input": {
+            "resultData": {
+              "total": 0,
+              "rows": []
+            }
+          },
+          "expect": {
+            "messages": [],
+            "totalCount": 0
+          }
+        }
+      ]
+    },
     "score-parser": {
       "apiVersion": 1,
       "checksum": "sha256:c9a62b08513599df86ffc0845f7f15dd5d3b82d4fe2ea40fb7ec1f93e8afc294",
@@ -513,6 +1221,384 @@
           }
         }
       ]
+    },
+    "study-status-course-parser": {
+      "apiVersion": 1,
+      "checksum": "sha256:7796f275e7e6cc1bb17c2c61616070eb932d5e0fb0d475ed941075f01b3f0a0a",
+      "source": "// Parses study-status course data (credit/score/status) into a course list.\n// Handles retake scores (CXCJ1) and makeup exams (CXCJ) by choosing the max.\nfunction parse(rawJson) {\n  var data = JSON.parse(rawJson);\n  var items = data.items || data;\n  if (!Array.isArray(items)) items = [];\n  var result = [];\n  for (var i = 0; i < items.length; i++) {\n    var item = items[i];\n    // The study-status API uses UPPERCASE Pinyin abbreviations for fields.\n    // XDZT = 学位状态 (status code, see parseStatus).\n    var xdzt = (item.XDZT || '').toString();\n    var status = parseStatus(xdzt);\n    // CJ = 成绩 (grade raw value).\n    var score = (item.CJ || '').toString();\n    // CXCJ1 = 重修成绩 (retake grade, if any).\n    var retakeScoreStr = (item.CXCJ1 || '').toString();\n    var maxScoreStr = (item.MAXCJ || '').toString();\n    // JD = 绩点 (grade point).\n    var jd = (item.JD || '').toString();\n    // XF = 学分 (credit).\n    var xf = (item.XF || '').toString();\n\n    var hasRetake = item.hasOwnProperty('CXCJ1');\n    var originalScore = parseInt(score, 10);\n    var retakeScore = parseInt(retakeScoreStr, 10);\n    var maxScore = parseInt(maxScoreStr, 10);\n    // Prefer the max score if available; otherwise retake, otherwise original.\n    var effectiveScore = !isNaN(maxScore) ? maxScore : (hasRetake ? retakeScore : originalScore);\n\n    result.push({\n      // KCMC = 课程名称 (course name).\n      name: (item.KCMC || '').toString(),\n      // KCXZMC = 课程性质名称 code (course nature, e.g. 必修/选修).\n      category: (item.KCXZMC || '').toString(),\n      credit: parseFloat(xf) || 0,\n      score: isNaN(effectiveScore) ? null : effectiveScore,\n      gradePoint: parseFloat(jd) || null,\n      maxScore: isNaN(maxScore) ? null : maxScore,\n      status: status,\n      // XSXXXX = 学时信息 (class hours).\n      hours: (item.XSXXXX || '').toString() || null,\n      // KCLBMC = 课程类别名称 code (course category).\n      courseNature: (item.KCLBMC || '').toString() || null,\n      // JYXDXNMC = 培养方案学年名称 code (suggested academic year).\n      suggestedYear: (item.JYXDXNMC || '').toString() || null,\n      // JYXDXQMC = 培养方案学期名称 code (suggested semester).\n      suggestedSemester: (item.JYXDXQMC || '').toString() || null,\n      // KCZYXXS = 课程专业信息数 (importance, a numeric weight).\n      importance: parseFloat((item.KCZYXXS || '').toString()) || null,\n      // KCYWMC = 课程英文名称 code (course English name).\n      englishName: (item.KCYWMC || '').toString() || null,\n      // KCH = 课程号 (course code).\n      courseCode: (item.KCH || '').toString() || null,\n      // XNMC = 学年名称 code (academic year of the row).\n      academicYear: (item.XNMC || '').toString() || null,\n      // XQMMC = 学期名称 code (semester of the row).\n      semester: (item.XQMMC || '').toString() || null,\n      // CXCJ = 重修成绩 (makeup/retake exam presence flag).\n      hasMakeupExam: item.hasOwnProperty('CXCJ'),\n      hasRetake: hasRetake,\n      originalScore: isNaN(originalScore) ? null : originalScore,\n      retakeScore: isNaN(retakeScore) ? null : retakeScore\n    });\n  }\n  return JSON.stringify({ courses: result });\n}\n\n// Maps the academic system status code to a readable status.\nfunction parseStatus(xdzt) {\n  if (xdzt === '4') return 'passed';\n  if (xdzt === '2') return 'failed';\n  if (xdzt === '1') return 'studying';\n  return 'notTaken';\n}\n",
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+          "courses"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "courses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "category",
+                "credit",
+                "score",
+                "gradePoint",
+                "maxScore",
+                "status",
+                "hasMakeupExam",
+                "hasRetake",
+                "originalScore",
+                "retakeScore"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string"
+                },
+                "credit": {
+                  "type": "number"
+                },
+                "score": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "gradePoint": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "maxScore": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "passed",
+                    "failed",
+                    "studying",
+                    "notTaken"
+                  ]
+                },
+                "hasMakeupExam": {
+                  "type": "boolean"
+                },
+                "hasRetake": {
+                  "type": "boolean"
+                },
+                "originalScore": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "retakeScore": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "smoke": {
+        "input": {
+          "items": [
+            {
+              "KCMC": "高等数学",
+              "KCXZMC": "必修",
+              "XF": "4.0",
+              "CJ": "92",
+              "JD": "4.0",
+              "MAXCJ": "92",
+              "XDZT": "4",
+              "KCLBMC": "基础课"
+            }
+          ]
+        },
+        "expect": {
+          "courses": [
+            {
+              "name": "高等数学",
+              "credit": 4,
+              "score": 92,
+              "status": "passed"
+            }
+          ]
+        }
+      },
+      "cases": [
+        {
+          "name": "retake uses published maximum and keeps original attempt",
+          "input": {
+            "items": [
+              {
+                "KCMC": "数学",
+                "XF": "4",
+                "XDZT": "4",
+                "CJ": "45",
+                "CXCJ1": "78",
+                "MAXCJ": "82",
+                "JD": "3.3",
+                "CXCJ": "60"
+              }
+            ]
+          },
+          "expect": {
+            "courses": [
+              {
+                "name": "数学",
+                "score": 82,
+                "originalScore": 45,
+                "retakeScore": 78,
+                "maxScore": 82,
+                "hasRetake": true,
+                "hasMakeupExam": true
+              }
+            ]
+          }
+        },
+        {
+          "name": "in progress without a grade",
+          "input": {
+            "items": [
+              {
+                "KCMC": "在读课程",
+                "XF": "1.5",
+                "XDZT": "1"
+              }
+            ]
+          },
+          "expect": {
+            "courses": [
+              {
+                "name": "在读课程",
+                "credit": 1.5,
+                "status": "studying",
+                "score": null
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty requirement",
+          "input": {
+            "items": []
+          },
+          "expect": {
+            "courses": []
+          }
+        }
+      ]
+    },
+    "study-status-index-parser": {
+      "apiVersion": 1,
+      "checksum": "sha256:7fb012665833c00e40d90bf7e0692be6dc2daca24472fe5d936f5c21336c5566",
+      "source": "// Parses the study-status index page HTML into ids, names, modes, credits,\n// and a credit-requirement tree.\n//\n// The page embeds credit requirements via HTML attributes using Pinyin\n// abbreviations: xfyqjd_id = 学分要求节点_id (requirement node id),\n// fxfyqjd_id = 父学分要求节点_id (parent node id),\n// jdkcsx = 节点课程属性 (requirement type),\n// yxxf = 已修学分 (earned credits), yqzdxf = 要求最低学分 (min required credits).\nfunction parse(rawJson) {\n  var input = JSON.parse(rawJson);\n  var html = typeof input.html === 'string' ? input.html : '';\n\n  var ids = discoverIds(html);\n  var names = input.names || discoverNames(html);\n  var modes = discoverModes(html);\n  var credits = input.credits || discoverCredits(html);\n  var tree = buildTree(html, names, credits);\n\n  return JSON.stringify({\n    ids: ids,\n    names: names,\n    modes: modes,\n    credits: credits,\n    tree: tree\n  });\n}\n\n// Collects all requirement ids (plus two synthetic fixed ids) from the page.\nfunction discoverIds(html) {\n  var pattern = /xfyqjd_id='([A-F0-9]{32})'/g;\n  var ids = {};\n  var m;\n  while ((m = pattern.exec(html)) !== null) {\n    ids[m[1]] = true;\n  }\n  var result = Object.keys(ids);\n  // qtkcxfyq = 其他课程学分要求 / cxcyqkxfyq = 创新创业区学分要求 (scope ids).\n  result.push('qtkcxfyq', 'cxcyqkxfyq');\n  return result;\n}\n\n// Maps requirement ids to their display names by reading <p class='title1'>.\nfunction discoverNames(html) {\n  var result = {};\n  var pattern = /<p class='title1' id='p([A-F0-9]{32})'/g;\n  var m;\n  while ((m = pattern.exec(html)) !== null) {\n    var id = m[1];\n    var closeIdx = html.indexOf('>', m.index + m[0].length);\n    if (closeIdx === -1) continue;\n    var nbspIdx = html.indexOf('&nbsp;', closeIdx);\n    if (nbspIdx === -1) continue;\n    var raw = html.substring(closeIdx + 1, nbspIdx);\n    var lastQuote = raw.lastIndexOf('\"');\n    if (lastQuote !== -1) raw = raw.substring(lastQuote + 1);\n    var name = raw.trim();\n    if (name.length > 0 && name.indexOf('get(') === -1) {\n      result[id] = name;\n    }\n  }\n  return result;\n}\n\n// Maps requirement ids to their requirement type code (jdkcsx = 节点课程属性).\nfunction discoverModes(html) {\n  var result = {};\n  var pattern = /xfyqjd_id='([A-F0-9]{32})' jdkcsx='([0-9]+)'/g;\n  var m;\n  while ((m = pattern.exec(html)) !== null) {\n    if (!result[m[1]]) result[m[1]] = m[2];\n  }\n  return result;\n}\n\n// Maps requirement ids to earned/required credit pairs (yxxf / yqzdxf).\n// yxxf = 已修学分, yqzdxf = 要求最低学分.\nfunction discoverCredits(html) {\n  var result = {};\n  var pattern = /id='p([A-F0-9]{32})' yxxf='([0-9.]+)' yqzdxf='([0-9.]+)'/g;\n  var m;\n  while ((m = pattern.exec(html)) !== null) {\n    if (!result[m[1]]) {\n      result[m[1]] = {\n        earnedCredits: parseFloat(m[2]) || 0,\n        requiredCredits: parseFloat(m[3]) || 0\n      };\n    }\n  }\n  return result;\n}\n\n// Reconstructs the parent/child relationships between credit requirements.\n// Relationships can be encoded either as li attributes or .appendTo calls.\n// fxfyqjd_id = 父学分要求节点_id (parent node id).\nfunction buildTree(html, idToName, idToCredits) {\n  var childToParent = {};\n  var discoveredIds = {};\n\n  var liPattern = /<li\\b[^>]*>/g;\n  // liIdPattern = id='li...' form; childAttrPattern = xfyqjd_id form.\n  var liIdPattern = /\\bid='li([A-F0-9]{32})'/;\n  var childAttrPattern = /\\bxfyqjd_id='([A-F0-9]{32})'/;\n  var parentAttrPattern = /\\bfxfyqjd_id='([A-F0-9]{32})'/;\n\n  var m;\n  // Strategy 1: derive parent-child from li attributes on the same element.\n  while ((m = liPattern.exec(html)) !== null) {\n    var li = m[0];\n    var childIdMatch = liIdPattern.exec(li) || childAttrPattern.exec(li);\n    if (!childIdMatch) continue;\n    var childId = childIdMatch[1];\n    discoveredIds[childId] = true;\n\n    var parentMatch = parentAttrPattern.exec(li);\n    if (parentMatch && parentMatch[1] !== childId) {\n      if (!childToParent[childId]) childToParent[childId] = parentMatch[1];\n      discoveredIds[parentMatch[1]] = true;\n    }\n  }\n\n  var appendToPattern = /\\.appendTo\\(\\$\\((['\\\"])#ul([A-F0-9]{32})\\1\\)\\)/g;\n  var pIdPattern = /<p class='title1' id='p([A-F0-9]{32})'/g;\n\n  // Strategy 2: derive parent-child from .appendTo(#ul...) calls; the child\n  // name is the last title preceding the appendTo call.\n  while ((m = appendToPattern.exec(html)) !== null) {\n    var parentId = m[2];\n    var previousHtml = html.substring(0, m.index);\n    var pMatches = [];\n    var pm;\n    pIdPattern.lastIndex = 0;\n    while ((pm = pIdPattern.exec(previousHtml)) !== null) {\n      pMatches.push(pm);\n    }\n    if (pMatches.length === 0) continue;\n    var childId2 = pMatches[pMatches.length - 1][1];\n    discoveredIds[childId2] = true;\n    discoveredIds[parentId] = true;\n    if (childId2 !== parentId && !childToParent[childId2]) {\n      childToParent[childId2] = parentId;\n    }\n  }\n\n  // Build a parent -> children mapping for every known id.\n  var parentToChildren = {};\n  var allIds = {};\n  var k;\n  for (k in idToName) allIds[k] = true;\n  for (k in discoveredIds) allIds[k] = true;\n  for (k in allIds) parentToChildren[k] = [];\n\n  for (var child in childToParent) {\n    var parent = childToParent[child];\n    if (!parentToChildren[parent]) parentToChildren[parent] = [];\n    if (parentToChildren[parent].indexOf(child) === -1) {\n      parentToChildren[parent].push(child);\n    }\n    if (!parentToChildren[child]) parentToChildren[child] = [];\n  }\n\n  // Roots are named nodes that are never a child.\n  var childSet = {};\n  for (var c in childToParent) childSet[c] = true;\n\n  var rootIds = [];\n  for (var id in parentToChildren) {\n    if (idToName[id] && !childSet[id]) rootIds.push(id);\n  }\n\n  // Depth-first build with cycle detection via the visiting set.\n  var visiting = {};\n  function buildNode(id) {\n    if (visiting[id]) {\n      return { name: idToName[id] || id, requiredCredits: 0, earnedCredits: 0, children: [] };\n    }\n    visiting[id] = true;\n    var children = (parentToChildren[id] || [])\n      .filter(function(cid) { return idToName[cid]; })\n      .map(buildNode);\n    delete visiting[id];\n    var credits = idToCredits[id] || {};\n    return {\n      name: idToName[id] || id,\n      requiredCredits: credits.requiredCredits || 0,\n      earnedCredits: credits.earnedCredits || 0,\n      children: children\n    };\n  }\n\n  return rootIds.map(buildNode);\n}\n",
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "required": [
+          "ids",
+          "names",
+          "modes",
+          "credits",
+          "tree"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "names": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "modes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "credits": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "required": [
+                "earnedCredits",
+                "requiredCredits"
+              ],
+              "properties": {
+                "earnedCredits": {
+                  "type": "number"
+                },
+                "requiredCredits": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "tree": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/node"
+            }
+          }
+        },
+        "definitions": {
+          "node": {
+            "type": "object",
+            "required": [
+              "name",
+              "requiredCredits",
+              "earnedCredits",
+              "children"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "requiredCredits": {
+                "type": "number"
+              },
+              "earnedCredits": {
+                "type": "number"
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/node"
+                }
+              }
+            }
+          }
+        }
+      },
+      "smoke": {
+        "input": {
+          "html": "<p class='title1' id='pABC123DEF456ABC123DEF456ABC123DE'>必修课程&nbsp;</p>"
+        },
+        "expect": {
+          "names": {
+            "ABC123DEF456ABC123DEF456ABC123DE": "必修课程"
+          }
+        }
+      },
+      "cases": [
+        {
+          "name": "embedded course modes and fractional credit requirements",
+          "input": {
+            "html": "<li xfyqjd_id='ABCDEF0123456789ABCDEF0123456789' jdkcsx='3'><p class='title1' id='pABCDEF0123456789ABCDEF0123456789' yxxf='12.5' yqzdxf='20'>选修课程&nbsp;</p></li>"
+          },
+          "expect": {
+            "ids": [
+              "ABCDEF0123456789ABCDEF0123456789",
+              "qtkcxfyq",
+              "cxcyqkxfyq"
+            ],
+            "modes": {
+              "ABCDEF0123456789ABCDEF0123456789": "3"
+            },
+            "credits": {
+              "ABCDEF0123456789ABCDEF0123456789": {
+                "earnedCredits": 12.5,
+                "requiredCredits": 20
+              }
+            },
+            "tree": [
+              {
+                "name": "选修课程",
+                "earnedCredits": 12.5,
+                "requiredCredits": 20,
+                "children": []
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty page retains special scopes",
+          "input": {
+            "html": ""
+          },
+          "expect": {
+            "names": {},
+            "tree": [],
+            "ids": [
+              "qtkcxfyq",
+              "cxcyqkxfyq"
+            ]
+          }
+        }
+      ]
     }
-  }
+  },
+  "whuPeriods": [
+    [
+      480,
+      525
+    ],
+    [
+      530,
+      575
+    ],
+    [
+      590,
+      635
+    ],
+    [
+      640,
+      685
+    ],
+    [
+      690,
+      735
+    ],
+    [
+      845,
+      890
+    ],
+    [
+      895,
+      940
+    ],
+    [
+      945,
+      990
+    ],
+    [
+      1000,
+      1045
+    ],
+    [
+      1050,
+      1095
+    ],
+    [
+      1110,
+      1155
+    ],
+    [
+      1160,
+      1205
+    ],
+    [
+      1210,
+      1255
+    ]
+  ]
 }
