@@ -463,6 +463,11 @@
 
   "download.external.fallback": "External install",
   "download.asset.recommended": "Recommended",
+  "download.asset.others": "Other builds",
+  "download.hint.android": "Not sure which to pick? Phones from the last few years want the arm64-v8a build marked “Recommended”. Very old 32-bit devices need armeabi-v7a; x86_64 is only for Android emulators on a PC.",
+  "download.hint.linux": "Not sure which to pick? Most PCs want x64 (Raspberry Pi and ARM servers want arm64). For the format, AppImage is the easiest: make it executable and run it, on most distributions. Debian / Ubuntu can use the deb, Flatpak users the flatpak, and the tar.gz is a plain archive for people who manage files themselves.",
+  "download.hint.windows": "Installing from the Microsoft Store is easiest: it updates itself and needs no unzipping. The zip is a portable build: most PCs want x64, Snapdragon and other ARM devices want arm64.",
+  "download.hint.apple": "On iPhone, iPad and Mac, TestFlight is the way to go: officially signed and self-updating. The macOS DMG is an unsigned fallback that needs a manual OK the first time you open it.",
   "download.asset.archFilter": "Filter by architecture",
   "download.apple.storeSubtitle": "Auto-updates · Officially signed · No manual trust",
   "download.apple.inviteCode": "Invite code",

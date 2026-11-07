@@ -188,6 +188,7 @@ const i18n = {
   appleBadge: t("download.platform.apple.badge"),
   externalFallback: t("download.external.fallback"),
   recommended: t("download.asset.recommended"),
+  otherBuilds: t("download.asset.others"),
   archFilter: t("download.asset.archFilter"),
   appleStoreSubtitle: t("download.apple.storeSubtitle"),
   appleInviteCode: t("download.apple.inviteCode"),
@@ -225,6 +226,7 @@ const i18n = {
     data-i18n-apple-badge={i18n.appleBadge}
     data-i18n-external-fallback={i18n.externalFallback}
     data-i18n-recommended={i18n.recommended}
+    data-i18n-other-builds={i18n.otherBuilds}
     data-i18n-arch-filter={i18n.archFilter}
     data-i18n-apple-store-subtitle={i18n.appleStoreSubtitle}
     data-i18n-apple-invite-code={i18n.appleInviteCode}
@@ -353,6 +355,10 @@ const i18n = {
                     </a>
                   )}
                 </div>
+
+                <p class="mt-4 max-w-prose text-body-small text-on-surface-variant">
+                  {t(`download.hint.${p.id}` as TranslationKey)}
+                </p>
 
                 <div class="mt-6 space-y-2 text-body-medium text-on-surface-variant" data-drawer-group>
                   <DownloadDrawer title={t("download.install.title")} icon="info">
@@ -751,13 +757,13 @@ const i18n = {
   import caretIconRaw from "@material-symbols/svg-400/outlined/keyboard_arrow_down.svg?raw";
   import msStoreIconRaw from "../../assets/icons/store-microsoft-24-filled.svg?raw";
 
-  const assetDownloadIcon = normalizeIconSvg(downloadIconRaw, "text-base shrink-0 mt-0.5");
   /* The de-emphasized direct-download rows (the Apple DMG / Windows zip that sit
    * below the store CTA): a smaller, muted glyph, so the store button above is
-   * the one that reads as "click me". Android / Linux keep assetDownloadIcon —
+   * the one that reads as "click me". Android / Linux lead with the big primary button instead —
    * there the direct download *is* the primary path. */
   const directDownloadIcon = normalizeIconSvg(downloadIconRaw, "text-sm shrink-0 opacity-60");
   const openInNewSmallIcon = normalizeIconSvg(openInNewIconRaw, "text-base");
+  const primaryDownloadIcon = normalizeIconSvg(downloadIconRaw, "text-[24px] shrink-0 text-primary");
   const changelogDownloadIcon = normalizeIconSvg(downloadIconRaw, "text-sm");
   /* The changelog's expand/collapse caret. It borrows `.lt-dl-caret` from the
    * drawer groups for the transition only — duration and curve — while its
@@ -817,6 +823,7 @@ const i18n = {
       appleBadge: dataset.i18nAppleBadge ?? "",
       externalFallback: dataset.i18nExternalFallback ?? "",
       recommended: dataset.i18nRecommended ?? "",
+      otherBuilds: dataset.i18nOtherBuilds ?? "",
       archFilter: dataset.i18nArchFilter ?? "",
       appleStoreSubtitle: dataset.i18nAppleStoreSubtitle ?? "",
       appleInviteCode: dataset.i18nAppleInviteCode ?? "",
@@ -1201,46 +1208,73 @@ const i18n = {
       return null;
     }
 
-    function assetLinkHtml(a) {
-      const title =
-        a.label ||
+    /*
+     * "arm64-v8a · APK", not the API's `label` ("android · arm64-v8a · APK"):
+     * the platform is already the heading of the panel the row sits in.
+     */
+    function assetTitle(a) {
+      return (
         [a.archLabel || a.arch, a.formatLabel].filter(Boolean).join(" · ") ||
-        a.name;
+        a.label ||
+        a.name
+      );
+    }
+
+    /**
+     * The one big download button of a panel that has no store (Android, Linux):
+     * the recommended build, or the first one when none is flagged. The panel
+     * used to list every build as an equal text link, so a visitor had to read
+     * three near-identical filenames to find out which to tap. The rest drop
+     * under "other builds" as muted rows, exactly as the DMG / zip do on the
+     * store platforms.
+     */
+    function primaryAssetHtml(a) {
       const rec = a.recommended
-        ? `<span class="shrink-0 px-1.5 py-0.5 rounded-sm bg-primary-container text-on-primary-container text-label-small leading-none">${copy.recommended}</span>`
+        ? `<span class="self-start px-2 py-0.5 rounded-sm bg-primary-container text-on-primary-container text-label-small leading-none">${escapeHtml(copy.recommended)}</span>`
         : "";
-      const { base, ext } = splitFilename(a.name);
-      return `<a href="${escapeHtml(a.url)}" title="${escapeHtml(a.name)}" class="flex items-start gap-1.5 text-body-small text-primary hover:underline no-underline" download>
-          ${assetDownloadIcon}
-          <span class="min-w-0 flex-1">
-            <span class="flex flex-wrap items-center gap-1.5">
-              <span class="font-medium text-on-surface">${escapeHtml(title)}</span>
-              ${rec}
-            </span>
-            <span class="flex min-w-0 items-baseline text-outline text-[11px] mt-0.5">
-              <span class="truncate min-w-0">${escapeHtml(base)}</span>
-              <span class="shrink-0">${escapeHtml(ext)}</span>
-              <span class="shrink-0"> · ${formatSize(a.size)}</span>
-            </span>
+      return `<a href="${escapeHtml(a.url)}" title="${escapeHtml(a.name)}" class="lt-dl-store state-layer no-underline" download>
+          ${primaryDownloadIcon}
+          <span class="min-w-0 flex-1 flex flex-col gap-1">
+            ${rec}
+            <span class="text-title-small text-on-surface">${escapeHtml(assetTitle(a))}</span>
+            <span class="truncate text-body-small text-on-surface-variant">${escapeHtml(splitFilename(a.name).base + splitFilename(a.name).ext)} · ${formatSize(a.size)}</span>
           </span>
         </a>`;
+    }
+
+    function directAssetsHtml(list) {
+      if (list.length === 0) return "";
+      let main = list[0];
+      for (const a of list) {
+        if (a.recommended) {
+          main = a;
+          break;
+        }
+      }
+      const rest = list.filter((a) => a !== main);
+      return (
+        primaryAssetHtml(main) +
+        (rest.length > 0
+          ? `<div class="space-y-1.5 pt-1.5">
+          <p class="text-label-medium text-outline">${escapeHtml(copy.otherBuilds)}</p>
+          ${rest.map(mutedAssetLinkHtml).join("")}
+        </div>`
+          : "")
+      );
     }
 
     /**
      * The de-emphasized direct-download row, for the Apple DMG and Windows zip
      * that sit *below* the store CTA. Same link and same target as the prominent
-     * assetLinkHtml, but muted: on-surface-variant rather than primary, a smaller
+     * primaryAssetHtml, but muted: on-surface-variant rather than primary, a smaller
      * dimmed glyph, one line instead of two, and no 推荐 badge — that signal now
      * belongs to the store button above, and repeating it on the unsigned /
      * needs-extracting fallback is exactly what sent visitors the wrong way
-     * before. The full filename stays on the tooltip. Android / Linux keep
-     * assetLinkHtml, because there the direct download *is* the primary path.
+     * before. The full filename stays on the tooltip. Android / Linux lead with
+     * primaryAssetHtml, because there the direct download *is* the primary path.
      */
     function mutedAssetLinkHtml(a) {
-      const title =
-        a.label ||
-        [a.archLabel || a.arch, a.formatLabel].filter(Boolean).join(" · ") ||
-        a.name;
+      const title = assetTitle(a);
       return `<a href="${escapeHtml(a.url)}" title="${escapeHtml(a.name)}" class="flex items-center gap-1.5 text-body-small text-on-surface-variant hover:text-primary hover:underline no-underline" download>
           ${directDownloadIcon}
           <span class="truncate min-w-0">${escapeHtml(title)}</span>
@@ -1337,7 +1371,7 @@ const i18n = {
       if (id === "apple") return appleCardHtml(installers, storeCta);
       if (id === "windows") return windowsCardHtml(installers, storeCta);
       const { switcher, list } = applyArchFilter(id, installers);
-      return storeCta + switcher + list.map(assetLinkHtml).join("");
+      return storeCta + switcher + directAssetsHtml(list);
     }
 
     /**

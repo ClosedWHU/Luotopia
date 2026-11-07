@@ -54,7 +54,9 @@ const RECOMMENDED_ARCH: Partial<Record<PlatformId, ArchId>> = {
 const RECOMMENDED_FORMAT: Partial<Record<PlatformId, FormatId>> = {
   android: "apk",
   windows: "zip",
-  linux: "tar",
+  // AppImage: no root, no package manager, runs on most distros once it is
+  // executable — the format a visitor who "just wants to try it" can use.
+  linux: "appimage",
   macos: "dmg",
 };
 
@@ -342,7 +344,7 @@ function formatSortKey(platform: PlatformId, format: FormatId): number {
   if (pref && format === pref) return 0;
   const order: FormatId[] =
     platform === "linux"
-      ? ["tar", "appimage", "deb", "flatpak", "rpm", "other"]
+      ? ["appimage", "tar", "deb", "flatpak", "rpm", "other"]
       : platform === "windows"
         ? ["zip", "msix", "msi", "exe", "other"]
         : platform === "android"

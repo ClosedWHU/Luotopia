@@ -463,6 +463,11 @@
 
   "download.external.fallback": "外部安装",
   "download.asset.recommended": "推荐",
+  "download.asset.others": "其他版本",
+  "download.hint.android": "不确定选哪个？近几年的手机选标有「推荐」的 arm64-v8a 即可；很老的 32 位设备选 armeabi-v7a；x86_64 只用于电脑上的安卓模拟器。",
+  "download.hint.linux": "不确定选哪个？大多数电脑选 x64（树莓派、ARM 服务器选 arm64）。格式上 AppImage 最省事：下载后赋予执行权限就能运行，适用于大多数发行版；Debian / Ubuntu 也可用 deb；习惯 Flatpak 的选 flatpak；tar.gz 是普通压缩包，适合想自己管理文件的人。",
+  "download.hint.windows": "推荐从 Microsoft Store 安装，自动更新、免解压。直接下载的 zip 是便携版：大多数电脑选 x64，骁龙等 ARM 设备选 arm64。",
+  "download.hint.apple": "iPhone、iPad 和 Mac 都推荐通过 TestFlight 安装：官方签名、自动更新。macOS 上的 DMG 是未签名的备选，首次打开需要手动放行。",
   "download.asset.archFilter": "架构筛选",
   "download.apple.storeSubtitle": "自动更新 · 官方签名 · 无需手动信任",
   "download.apple.inviteCode": "邀请码",
