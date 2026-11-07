@@ -30,6 +30,7 @@ import { Code } from "astro:components";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHeader from "../PageHeader.astro";
 import Icon from "../Icon.astro";
+import DownloadDrawer from "../DownloadDrawer.astro";
 import {
   descKey,
   externalLabelKey,
@@ -90,6 +91,13 @@ const codeHtml = (text: string) =>
   `<code class="text-on-surface">${escapeHtml(text)}</code>`;
 const linkHtml = (href: string, text: string) =>
   `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${escapeHtml(text)}</a>`;
+
+/* The tab row: the four release platforms plus HarmonyOS, which has a panel but no card in `platforms`. */
+const tabs = [
+  ...platforms.map((p) => ({ id: p.id as string, name: p.name as string, icon: p.icon as string })),
+  { id: "harmony", name: "HarmonyOS", icon: "harmonyos" },
+];
+const releasesLatestUrl = "https://github.com/ClosedWHU/Luotopia/releases/latest";
 
 const testFlightLink = linkHtml(testFlightUrl, t("download.install.apple.joinLink"));
 /* Proper nouns: the repository's own name and GitHub's own product name. */
@@ -237,269 +245,268 @@ const i18n = {
     data-i18n-notes-collapse={i18n.notesCollapse}
   >
     <div class="max-w-content mx-auto">
-      <p id="latest-meta" class="lt-reveal text-body-medium text-outline mb-10">{t("download.latest.loading")}</p>
+      <p id="latest-meta" class="lt-reveal text-body-medium text-outline mb-6">{t("download.latest.loading")}</p>
 
-      <div id="platform-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!--
+        One platform at a time. The page used to lay out four equal cards, then
+        a "how to install" card and a "package managers" card that repeated the
+        same platforms again. Each platform is now a single panel that holds its
+        download, its install notes and its package managers together; the tab
+        row picks the panel, and the script preselects the visitor's own system.
+
+        Without JS the tab row stays hidden and every panel is shown (see the
+        <noscript> rule), so nothing is unreachable.
+      -->
+      <div
+        id="platform-tabs"
+        role="tablist"
+        aria-label={t("download.tabs.label")}
+        class="lt-reveal mb-5 inline-flex max-w-full flex-wrap items-center gap-1 rounded-[28px] lt-inset p-1"
+      >
+        {
+          tabs.map((p, i) => (
+            <button
+              type="button"
+              role="tab"
+              id={`tab-${p.id}`}
+              aria-controls={`panel-${p.id}`}
+              aria-selected={i === 0 ? "true" : "false"}
+              tabindex={i === 0 ? 0 : -1}
+              data-tab={p.id}
+              class:list={[
+                "lt-dl-tab state-layer inline-flex cursor-pointer items-center gap-1.5 rounded-full px-4 py-2 text-label-large",
+                i === 0 ? "lt-inset-raised text-primary" : "bg-transparent text-on-surface-variant",
+              ]}
+            >
+              <Icon name={p.icon} class="text-lg" />
+              <span>{p.name}</span>
+              <span class="lt-dl-tabrec hidden rounded-sm bg-primary-container px-1.5 py-0.5 text-label-small leading-none text-on-primary-container">{t("download.asset.recommended")}</span>
+            </button>
+          ))
+        }
+      </div>
+
+      <div id="platform-grid">
         {
           platforms.map((p, i) => {
-            /*
-             * The external-install link's copy, or `undefined` where the card
-             * has no such link — the same presence test `p.externalLabel` was
-             * when the label still lived in `config/downloads.ts`.
-             */
             const external = p.externalUrl ? t(externalLabelKey(p.id)) : undefined;
+            const storeSubtitle =
+              p.id === "apple"
+                ? t("download.apple.storeSubtitle")
+                : p.id === "windows"
+                  ? t("download.windows.storeSubtitle")
+                  : "";
             return (
               <div
-                class="platform-card lt-reveal-lift lt-lift glass rounded-card p-5 flex flex-col"
-                style={`--lt-reveal-delay: ${(i % 4) * 70}ms`}
+                class="platform-card glass rounded-card p-5 sm:p-7"
+                role="tabpanel"
+                id={`panel-${p.id}`}
+                aria-labelledby={`tab-${p.id}`}
+                hidden={i > 0}
                 data-platform={p.id}
                 data-external-url={p.externalUrl ?? ""}
                 data-external-label={external ?? ""}
                 data-invite-code={p.id === "apple" ? testFlightCode : ""}
               >
-                <span class="lt-icon-chip text-primary text-[22px] mb-3.5"><Icon name={p.icon} /></span>
-                <h2 class="text-title-medium text-on-surface">{p.name}</h2>
-                <p class="text-body-medium text-on-surface-variant mt-1">{t(descKey(p.id))}</p>
+                <div class="flex items-start gap-3.5">
+                  <span class="lt-icon-chip text-primary text-[22px] shrink-0"><Icon name={p.icon} /></span>
+                  <div class="min-w-0 flex-1">
+                    <h2 class="text-title-medium text-on-surface">{p.name}</h2>
+                    <p class="text-body-medium text-on-surface-variant mt-1">{t(descKey(p.id))}</p>
+                  </div>
+                </div>
                 <div class="mt-4 flex flex-wrap gap-1.5 items-center platform-badges">
                   <span class="inline-block px-2.5 py-0.5 rounded-sm lt-inset text-on-surface-variant text-label-medium">
                     {p.id === "apple" ? t("download.platform.apple.badge") : t("download.badge.loading")}
                   </span>
                 </div>
-                <div class:list={["platform-assets", "mt-3", "space-y-1.5", !p.externalUrl && "hidden"]}>
-                  {p.externalUrl && (
+                <!--
+                  Static first paint of the primary action, so the page has a
+                  clickable download before (or without) the releases API. The
+                  script replaces this with the real asset list; the store
+                  button it renders is the same markup as the one here.
+                -->
+                <div class="platform-assets mt-4 space-y-1.5 max-w-md">
+                  {p.externalUrl ? (
                     <a
                       href={p.externalUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      class="flex items-center gap-1 py-1.5 text-body-small text-primary hover:underline no-underline"
+                      class="lt-dl-store state-layer no-underline"
+                    >
+                      <Icon name="open_in_new" class="text-[22px] shrink-0" />
+                      <span class="min-w-0 flex-1 flex flex-col gap-1">
+                        <span class="self-start px-2 py-0.5 rounded-sm bg-primary-container text-on-primary-container text-label-small leading-none">{t("download.asset.recommended")}</span>
+                        <span class="text-title-small text-on-surface">{external}</span>
+                        {storeSubtitle && <span class="text-body-small text-on-surface-variant">{storeSubtitle}</span>}
+                      </span>
+                    </a>
+                  ) : (
+                    <a
+                      href={releasesLatestUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="flex items-center gap-1.5 text-body-small text-primary hover:underline no-underline"
                     >
                       <Icon name="open_in_new" class="text-base" />
-                      <span>{external ?? t("download.external.fallback")}</span>
+                      <span>{t("download.changelog.viewOnGithub")}</span>
                     </a>
                   )}
                 </div>
+
+                <div class="mt-6 space-y-2 text-body-medium text-on-surface-variant" data-drawer-group>
+                  <DownloadDrawer title={t("download.install.title")} icon="info">
+                    {p.id === "android" && (
+                      <p
+                        set:html={rich("download.install.android.body", {
+                          arm64: strongHtml("arm64-v8a"),
+                          armv7: strongHtml("armeabi-v7a"),
+                          x86: strongHtml("x86_64"),
+                        })}
+                      />
+                    )}
+                    {p.id === "apple" && (
+                      <>
+                        <p
+                          set:html={rich("download.install.apple.ios.body", {
+                            lead: strongHtml(t("download.install.apple.ios.lead")),
+                            joinLink: testFlightLink,
+                          })}
+                        />
+                        <p
+                          set:html={rich("download.install.apple.inviteCode", {
+                            code: codeHtml(testFlightCode),
+                          })}
+                        />
+                        <p
+                          set:html={rich("download.install.apple.macos.body", {
+                            dmg: strongHtml("DMG"),
+                            openWith: strongHtml(t("download.install.apple.openWith")),
+                            xattr: codeHtml("xattr -cr /Applications/Luotopia.app"),
+                          })}
+                        />
+                      </>
+                    )}
+                    {p.id === "windows" && (
+                      <>
+                        <p
+                          set:html={rich("download.install.windows.body", {
+                            extractAll: strongHtml(t("download.install.windows.extractAll")),
+                            exe: strongHtml("luotopia.exe"),
+                          })}
+                        />
+                        <Code code={snippets.windows} lang="powershell" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
+                        <p class="text-body-small text-outline">{t("download.install.windows.note")}</p>
+                      </>
+                    )}
+                    {p.id === "linux" && (
+                      <>
+                        <p
+                          set:html={rich("download.install.linux.body", {
+                            arch: strongHtml(t("download.install.linux.arch")),
+                            format: strongHtml(t("download.install.linux.format")),
+                          })}
+                        />
+                        <Code code={snippets.linux} lang="bash" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
+                        <p class="text-body-small text-outline">{t("download.install.linux.note")}</p>
+                      </>
+                    )}
+                  </DownloadDrawer>
+                </div>
+
+                {p.id !== "android" && (
+                  <div class="mt-5">
+                    <p class="text-label-medium text-outline mb-2">{t("download.pkg.title")}</p>
+                    <div class="space-y-2 text-body-medium text-on-surface-variant" data-drawer-group>
+                      {p.id === "windows" && (
+                        <>
+                          <DownloadDrawer title="Scoop" icon="terminal">
+                            <p>{t("download.pkg.scoop.body")}</p>
+                            <Code code={snippets.scoop} lang="powershell" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
+                            <p class="text-body-small text-outline">{t("download.pkg.scoop.note")}</p>
+                          </DownloadDrawer>
+                          <DownloadDrawer title="winget" icon="terminal">
+                            <p>{t("download.pkg.winget.body")}</p>
+                            <Code code={snippets.wingetDraft} lang="powershell" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
+                            <p set:html={rich("download.pkg.winget.merged", { repo: wingetRepoLink })} />
+                            <Code code={snippets.winget} lang="powershell" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
+                            <p class="text-body-small text-outline">{t("download.pkg.winget.note")}</p>
+                          </DownloadDrawer>
+                        </>
+                      )}
+                      {(p.id === "apple" || p.id === "linux") && (
+                        <DownloadDrawer title="Homebrew" icon="homebrew">
+                          <p>{t("download.pkg.brew.body")}</p>
+                          <Code code={snippets.brew} lang="bash" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
+                          <p
+                            class="text-body-small text-outline"
+                            set:html={rich("download.pkg.brew.note", {
+                              install: codeHtml("brew install luotopia"),
+                              cask: codeHtml("--cask"),
+                              upgrade: codeHtml("brew upgrade luotopia"),
+                            })}
+                          />
+                        </DownloadDrawer>
+                      )}
+                      {p.id === "linux" && (
+                        <>
+                          <DownloadDrawer title="Nix" icon="nixos">
+                            <p>{t("download.pkg.nix.body")}</p>
+                            <Code code={snippets.nix} lang="bash" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
+                          </DownloadDrawer>
+                          <DownloadDrawer title={t("download.pkg.aur.title")} icon="archlinux">
+                            <p>{t("download.pkg.aur.body")}</p>
+                            <Code code={snippets.aur} lang="bash" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
+                            <p class="text-body-small text-outline">{t("download.pkg.aur.note")}</p>
+                          </DownloadDrawer>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })
         }
-      </div>
 
-      <div class="lt-reveal-lift mt-16 rounded-card glass p-6 sm:p-8">
-        <h2 class="text-title-medium text-on-surface mb-4">{t("download.install.title")}</h2>
-        <!--
-          One drawer per platform, the first one open.
-
-          These five sections used to render flat, which put every platform's
-          install prose, both shell snippets and all three caveats on screen at
-          once — most of it about a platform the visitor is not on. `<details>`
-          keeps the disclosure native, so the copy is reachable with JS off, and
-          matches the convention the Navbar's language panel and the docs sidebar
-          already set. The script below adds only what `<details>` cannot do
-          itself on this site's Chrome 66 floor: the exclusivity, which the
-          `name` attribute would need 120+ for.
-        -->
-        <div class="space-y-2 text-body-medium text-on-surface-variant" data-drawer-group>
-          <details class="lt-dl-drawer" open>
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
-              <Icon name="android" class="text-lg text-primary" />
-              <h3 class="flex-1 text-title-small text-on-surface">Android</h3>
-              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
-            </summary>
-            <div class="lt-dl-drawer-body">
-              <div class="space-y-2 px-3.5 py-3">
-                <p
-                  set:html={rich("download.install.android.body", {
-                    arm64: strongHtml("arm64-v8a"),
-                    armv7: strongHtml("armeabi-v7a"),
-                    x86: strongHtml("x86_64"),
-                  })}
-                />
-              </div>
+        <!-- HarmonyOS has no card of its own in `platforms` (it ships no
+             regular assets), so its panel is only the sideload note. -->
+        <div
+          class="glass rounded-card p-5 sm:p-7"
+          role="tabpanel"
+          id="panel-harmony"
+          aria-labelledby="tab-harmony"
+          data-harmony-panel
+          hidden
+        >
+          <div class="flex items-start gap-3.5">
+            <span class="lt-icon-chip text-primary text-[22px] shrink-0"><Icon name="harmonyos" /></span>
+            <div class="min-w-0 flex-1">
+              <h2 class="text-title-medium text-on-surface">HarmonyOS</h2>
             </div>
-          </details>
-          <details class="lt-dl-drawer">
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
-              <Icon name="apple" class="text-lg text-primary" />
-              <h3 class="flex-1 text-title-small text-on-surface">Apple</h3>
-              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
-            </summary>
-            <div class="lt-dl-drawer-body">
-              <div class="space-y-2 px-3.5 py-3">
-                <p
-                  set:html={rich("download.install.apple.ios.body", {
-                    lead: strongHtml(t("download.install.apple.ios.lead")),
-                    joinLink: testFlightLink,
-                  })}
-                />
-                <p
-                  set:html={rich("download.install.apple.inviteCode", {
-                    code: codeHtml(testFlightCode),
-                  })}
-                />
-                <p
-                  set:html={rich("download.install.apple.macos.body", {
-                    dmg: strongHtml("DMG"),
-                    openWith: strongHtml(t("download.install.apple.openWith")),
-                    xattr: codeHtml("xattr -cr /Applications/Luotopia.app"),
-                  })}
-                />
-              </div>
-            </div>
-          </details>
-          <details class="lt-dl-drawer">
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
-              <Icon name="windows" class="text-lg text-primary" />
-              <h3 class="flex-1 text-title-small text-on-surface">Windows</h3>
-              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
-            </summary>
-            <div class="lt-dl-drawer-body">
-              <div class="space-y-2 px-3.5 py-3">
-                <p
-                  set:html={rich("download.install.windows.body", {
-                    extractAll: strongHtml(t("download.install.windows.extractAll")),
-                    exe: strongHtml("luotopia.exe"),
-                  })}
-                />
-                <Code code={snippets.windows} lang="powershell" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
-                <p class="text-body-small text-outline">{t("download.install.windows.note")}</p>
-              </div>
-            </div>
-          </details>
-          <details class="lt-dl-drawer">
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
-              <Icon name="linux" class="text-lg text-primary" />
-              <h3 class="flex-1 text-title-small text-on-surface">Linux</h3>
-              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
-            </summary>
-            <div class="lt-dl-drawer-body">
-              <div class="space-y-2 px-3.5 py-3">
-                <p
-                  set:html={rich("download.install.linux.body", {
-                    arch: strongHtml(t("download.install.linux.arch")),
-                    format: strongHtml(t("download.install.linux.format")),
-                  })}
-                />
-                <Code code={snippets.linux} lang="bash" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
-                <p class="text-body-small text-outline">{t("download.install.linux.note")}</p>
-              </div>
-            </div>
-          </details>
-          <details class="lt-dl-drawer">
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
-              <Icon name="harmonyos" class="text-lg text-primary" />
-              <h3 class="flex-1 text-title-small text-on-surface">HarmonyOS</h3>
-              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
-            </summary>
-            <div class="lt-dl-drawer-body">
-              <div class="space-y-2 px-3.5 py-3">
-                <p
-                  set:html={rich("download.install.harmony.body", {
-                    hap: codeHtml(".hap"),
-                    signedHap: codeHtml("luotopia-*-harmonyos-arm64-signed.hap"),
-                    sideload: codeHtml("HARMONYOS-SIDELOAD.txt"),
-                  })}
-                />
-                <p class="text-body-small text-outline">{t("download.install.harmony.note")}</p>
-              </div>
-            </div>
-          </details>
+          </div>
+          <div class="mt-4 space-y-2 text-body-medium text-on-surface-variant">
+            <p
+              set:html={rich("download.install.harmony.body", {
+                hap: codeHtml(".hap"),
+                signedHap: codeHtml("luotopia-*-harmonyos-arm64-signed.hap"),
+                sideload: codeHtml("HARMONYOS-SIDELOAD.txt"),
+              })}
+            />
+            <p class="text-body-small text-outline">{t("download.install.harmony.note")}</p>
+          </div>
         </div>
       </div>
 
-      <div class="lt-reveal-lift mt-8 rounded-card glass p-6 sm:p-8">
-        <h2 class="text-title-medium text-on-surface mb-2">{t("download.pkg.title")}</h2>
-        <p class="text-body-medium text-on-surface-variant mb-4">{t("download.pkg.subtitle")}</p>
-        <!--
-          Marks follow one rule: the brand's own where simple-icons (CC0, the
-          source `icon-source.server.ts` already vendors the platform marks
-          from) carries one, `terminal` where it does not. Scoop and winget have
-          no entry there, and hand-tracing a trademark for two rows of a
-          five-row list is not what this card needs — the generic glyph says
-          "CLI", which is the card's own subtitle.
-        -->
-        <div class="space-y-2 text-body-medium text-on-surface-variant" data-drawer-group>
-          <details class="lt-dl-drawer" open>
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
-              <Icon name="terminal" class="text-lg text-primary" />
-              <h3 class="flex-1 text-title-small text-on-surface">Scoop</h3>
-              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
-            </summary>
-            <div class="lt-dl-drawer-body">
-              <div class="space-y-2 px-3.5 py-3">
-                <p>{t("download.pkg.scoop.body")}</p>
-                <Code code={snippets.scoop} lang="powershell" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
-                <p class="text-body-small text-outline">{t("download.pkg.scoop.note")}</p>
-              </div>
-            </div>
-          </details>
-          <details class="lt-dl-drawer">
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
-              <Icon name="homebrew" class="text-lg text-primary" />
-              <h3 class="flex-1 text-title-small text-on-surface">Homebrew</h3>
-              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
-            </summary>
-            <div class="lt-dl-drawer-body">
-              <div class="space-y-2 px-3.5 py-3">
-                <p>{t("download.pkg.brew.body")}</p>
-                <Code code={snippets.brew} lang="bash" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
-                <p
-                  class="text-body-small text-outline"
-                  set:html={rich("download.pkg.brew.note", {
-                    install: codeHtml("brew install luotopia"),
-                    cask: codeHtml("--cask"),
-                    upgrade: codeHtml("brew upgrade luotopia"),
-                  })}
-                />
-              </div>
-            </div>
-          </details>
-          <details class="lt-dl-drawer">
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
-              <Icon name="nixos" class="text-lg text-primary" />
-              <h3 class="flex-1 text-title-small text-on-surface">Nix</h3>
-              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
-            </summary>
-            <div class="lt-dl-drawer-body">
-              <div class="space-y-2 px-3.5 py-3">
-                <p>{t("download.pkg.nix.body")}</p>
-                <Code code={snippets.nix} lang="bash" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
-              </div>
-            </div>
-          </details>
-          <details class="lt-dl-drawer">
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
-              <Icon name="archlinux" class="text-lg text-primary" />
-              <h3 class="flex-1 text-title-small text-on-surface">{t("download.pkg.aur.title")}</h3>
-              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
-            </summary>
-            <div class="lt-dl-drawer-body">
-              <div class="space-y-2 px-3.5 py-3">
-                <p>{t("download.pkg.aur.body")}</p>
-                <Code code={snippets.aur} lang="bash" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
-                <p class="text-body-small text-outline">{t("download.pkg.aur.note")}</p>
-              </div>
-            </div>
-          </details>
-          <details class="lt-dl-drawer">
-            <summary class="lt-dl-drawer-head state-layer flex items-center gap-2 px-3.5 py-3 cursor-pointer select-none list-none">
-              <Icon name="terminal" class="text-lg text-primary" />
-              <h3 class="flex-1 text-title-small text-on-surface">winget</h3>
-              <Icon name="keyboard_arrow_down" class="lt-dl-caret text-base text-outline" />
-            </summary>
-            <div class="lt-dl-drawer-body">
-              <div class="space-y-2 px-3.5 py-3">
-                <p>{t("download.pkg.winget.body")}</p>
-                <Code code={snippets.wingetDraft} lang="powershell" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
-                <p set:html={rich("download.pkg.winget.merged", { repo: wingetRepoLink })} />
-                <Code code={snippets.winget} lang="powershell" themes={SNIPPET_THEMES} defaultColor={false} class={SNIPPET_CLASS} data-lenis-prevent-horizontal />
-                <p class="text-body-small text-outline">{t("download.pkg.winget.note")}</p>
-              </div>
-            </div>
-          </details>
-        </div>
-      </div>
+      <noscript>
+        <style>
+          #platform-tabs { display: none !important; }
+          #platform-grid [role="tabpanel"][hidden] { display: block !important; }
+          #platform-grid [role="tabpanel"] + [role="tabpanel"] { margin-top: 1rem; }
+        </style>
+      </noscript>
 
-      <div class="mt-8 text-center mb-20">
+      <div class="mt-10 text-center mb-16">
         <p class="text-body-small text-outline" set:html={rich("download.releases.more", { link: releasesLink })} />
       </div>
 
@@ -557,6 +564,11 @@ const i18n = {
    * `overflow` on the shell while it animates and clears both when it settles,
    * so an open drawer keeps its natural height and nothing in it stays clipped.
    */
+  .platform-card[hidden],
+  #platform-grid [role="tabpanel"][hidden] {
+    display: none;
+  }
+
   .lt-dl-drawer {
     border: 1px solid var(--lt-glass-divider);
     border-radius: var(--lt-radius-control);
@@ -745,6 +757,7 @@ const i18n = {
    * the one that reads as "click me". Android / Linux keep assetDownloadIcon —
    * there the direct download *is* the primary path. */
   const directDownloadIcon = normalizeIconSvg(downloadIconRaw, "text-sm shrink-0 opacity-60");
+  const openInNewSmallIcon = normalizeIconSvg(openInNewIconRaw, "text-base");
   const changelogDownloadIcon = normalizeIconSvg(downloadIconRaw, "text-sm");
   /* The changelog's expand/collapse caret. It borrows `.lt-dl-caret` from the
    * drawer groups for the transition only — duration and curve — while its
@@ -762,7 +775,7 @@ const i18n = {
   const releasesLinkHtml = `<a href="https://github.com/ClosedWHU/Luotopia/releases" class="text-primary hover:underline" target="_blank" rel="noopener noreferrer">GitHub Releases</a>`;
 
   onPageSetup((signal) => {
-    const PER_PAGE = 5;
+    const PER_PAGE = 2;
     let page = 1;
     let hasNext = false;
     let hasPrev = false;
@@ -1028,27 +1041,25 @@ const i18n = {
         : statusBadge(statusText || copy.noData);
     }
 
+    /*
+     * One version per card. The store platforms used to show the GitHub release
+     * and the store build side by side whenever they differed, which asked a
+     * visitor to understand two release channels before downloading anything.
+     * The card now names the build its primary button installs (the store's);
+     * the GitHub version stays in the line at the top of the page.
+     */
     function paintStoreBadges(id) {
       const badges = document.querySelector(`.platform-card[data-platform="${id}"] .platform-badges`);
       if (!badges) return;
       const store = id === "apple" ? appleStoreVersion : msStoreVersion;
-      const releaseName = releaseVersion.replace(/^v/, "").split("+")[0];
-      const storeName = store?.version.replace(/^v/, "").replace(/\.0$/, "");
-      const sameVersion = store && (id === "apple"
-        ? store.version.replace(/^v/, "") === releaseVersion.replace(/^v/, "")
-        : storeName === releaseName);
-      const different = !!(store && releaseVersion && !sameVersion);
-      badges.classList.toggle("flex-col", different);
-      badges.classList.toggle("items-start", different);
-      badges.classList.toggle("items-center", !different);
-      const releaseBadge = releaseVersion
-        ? statusBadge(fill(copy.latestCurrent, { version: releaseVersion }))
-        : "";
       const storeBadge = store
         ? stableBadge(`${id === "apple" ? copy.appleBadge : "Microsoft Store"} · ${store.version}`)
         : "";
+      const releaseBadge = releaseVersion
+        ? statusBadge(fill(copy.latestCurrent, { version: releaseVersion }))
+        : "";
       badges.innerHTML = (latestPrerelease ? prereleaseBadge() : "") +
-        (different ? releaseBadge + storeBadge : storeBadge || releaseBadge || statusBadge(copy.noData));
+        (storeBadge || releaseBadge || statusBadge(copy.noData));
     }
 
     /**
@@ -1154,6 +1165,11 @@ const i18n = {
         return normalizeIconSvg(msStoreIconRaw, `${size} shrink-0 text-[#0078D4] dark:text-[#4CC2FF]`);
       }
       return "";
+    }
+
+    /* What a card without a store button shows when the releases API is down. */
+    function githubFallbackHtml() {
+      return `<a href="https://github.com/ClosedWHU/Luotopia/releases/latest" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 text-body-small text-primary hover:underline no-underline">${openInNewSmallIcon}<span>${escapeHtml(copy.viewOnGithub)}</span></a>`;
     }
 
     function paintAssets(assetsEl, html) {
@@ -1396,7 +1412,7 @@ const i18n = {
           } else {
             paintBadges(badges, "", false, copy.noData);
           }
-          paintAssets(assetsEl, storeCtaHtml(card));
+          paintAssets(assetsEl, storeCtaHtml(card) || githubFallbackHtml());
         });
         void loadTestFlightVersion();
         void loadMsStoreVersion();
@@ -1925,6 +1941,83 @@ const i18n = {
     nextBtn?.addEventListener("click", () => {
       if (hasNext) loadChangelog(page + 1);
     }, { signal });
+
+    /*
+     * ── Platform tabs ──
+     *
+     * The panels are server-rendered with only the first visible; this picks the
+     * one that matches the visitor. Order of precedence: a `#windows`-style hash
+     * (the home page's button links to it), then the detected system, then the
+     * first tab. The detected tab also gets a "recommended" tag, so a visitor
+     * who switches away can see which one was theirs.
+     *
+     * Detection is deliberately coarse and Chrome-66-safe (`userAgentData` is
+     * only a bonus). Android is tested before HarmonyOS because HarmonyOS 2–4
+     * phones run the APK; only NEXT/OpenHarmony, which has no Android layer,
+     * gets the sideload panel.
+     */
+    const tabsEl = document.getElementById("platform-tabs");
+    const tabBtns = tabsEl ? Array.prototype.slice.call(tabsEl.querySelectorAll("[data-tab]")) : [];
+
+    function detectPlatform() {
+      const ua = navigator.userAgent || "";
+      const uad = navigator.userAgentData;
+      const plat = (uad && uad.platform) || navigator.platform || "";
+      if (/Android/i.test(ua)) return "android";
+      if (/OpenHarmony|HarmonyOS/i.test(ua)) return "harmony";
+      if (/iPhone|iPad|iPod/i.test(ua)) return "apple";
+      if (/Mac/i.test(plat) || /Macintosh/i.test(ua)) return "apple";
+      if (/Win/i.test(plat) || /Windows/i.test(ua)) return "windows";
+      if (/Linux|X11|CrOS/i.test(ua) || /Linux/i.test(plat)) return "linux";
+      return null;
+    }
+
+    function selectTab(id, focus) {
+      let found = false;
+      tabBtns.forEach((btn) => {
+        const on = btn.getAttribute("data-tab") === id;
+        if (on) found = true;
+        btn.setAttribute("aria-selected", on ? "true" : "false");
+        btn.setAttribute("tabindex", on ? "0" : "-1");
+        btn.classList.toggle("lt-inset-raised", on);
+        btn.classList.toggle("text-primary", on);
+        btn.classList.toggle("bg-transparent", !on);
+        btn.classList.toggle("text-on-surface-variant", !on);
+        if (on && focus) btn.focus({ preventScroll: true });
+      });
+      if (!found) return;
+      document.querySelectorAll("#platform-grid [role='tabpanel']").forEach((panel) => {
+        panel.hidden = panel.id !== "panel-" + id;
+      });
+    }
+
+    if (tabBtns.length > 0) {
+      const detected = detectPlatform();
+      const fromHash = (location.hash || "").replace(/^#/, "");
+      const known = (id) => tabBtns.some((b) => b.getAttribute("data-tab") === id);
+      if (detected && known(detected)) {
+        const tag = tabsEl.querySelector(`[data-tab="${detected}"] .lt-dl-tabrec`);
+        if (tag) tag.classList.remove("hidden");
+      }
+      selectTab(known(fromHash) ? fromHash : detected && known(detected) ? detected : tabBtns[0].getAttribute("data-tab"), false);
+
+      tabsEl.addEventListener("click", (ev) => {
+        const btn = ev.target && ev.target.closest ? ev.target.closest("[data-tab]") : null;
+        if (btn && tabsEl.contains(btn)) selectTab(btn.getAttribute("data-tab"), false);
+      }, { signal });
+      tabsEl.addEventListener("keydown", (ev) => {
+        const i = tabBtns.indexOf(document.activeElement);
+        if (i < 0) return;
+        let n = -1;
+        if (ev.key === "ArrowRight") n = (i + 1) % tabBtns.length;
+        else if (ev.key === "ArrowLeft") n = (i - 1 + tabBtns.length) % tabBtns.length;
+        else if (ev.key === "Home") n = 0;
+        else if (ev.key === "End") n = tabBtns.length - 1;
+        if (n < 0) return;
+        ev.preventDefault();
+        selectTab(tabBtns[n].getAttribute("data-tab"), true);
+      }, { signal });
+    }
 
     loadLatest();
     loadChangelog(1);

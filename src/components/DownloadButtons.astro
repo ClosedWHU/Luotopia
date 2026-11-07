@@ -48,9 +48,14 @@ const secondaryClass = `lt-btn ${surface === "panel" ? "lt-inset-raised" : "glas
 ---
 
 <div class="flex flex-wrap justify-center gap-3">
-  <a href={downloadHref} class={primaryClass}>
+  <!--
+    The label and hash are upgraded in place by the script below when the
+    visitor's system is recognised ("Download for macOS", landing on the macOS
+    tab). Without JS this is the generic button, which is still correct.
+  -->
+  <a href={downloadHref} class={primaryClass} data-download-cta data-label-template={t("cta.downloadFor")}>
     <Icon name="download" class={iconSize} />
-    {t("cta.download")}
+    <span data-download-cta-label>{t("cta.download")}</span>
   </a>
   <a href={featuresHref} class={secondaryClass}>
     {t("cta.features")}
@@ -100,3 +105,37 @@ const secondaryClass = `lt-btn ${surface === "panel" ? "lt-inset-raised" : "glas
     }
   }
 </style>
+
+<script>
+  import { onPageSetup } from "../scripts/page-lifecycle";
+
+  /*
+   * Same coarse detection as the download page's tabs (kept in step by hand: the
+   * two are in different bundles and the page's one needs the tab ids too).
+   * Returns the tab to land on and the name to print on the button.
+   */
+  function detect(): { tab: string; name: string } | null {
+    const ua = navigator.userAgent || "";
+    const uad = (navigator as any).userAgentData;
+    const plat: string = (uad && uad.platform) || navigator.platform || "";
+    if (/Android/i.test(ua)) return { tab: "android", name: "Android" };
+    if (/OpenHarmony|HarmonyOS/i.test(ua)) return { tab: "harmony", name: "HarmonyOS" };
+    if (/iPhone|iPad|iPod/i.test(ua)) return { tab: "apple", name: "iOS" };
+    if (/Mac/i.test(plat) || /Macintosh/i.test(ua)) return { tab: "apple", name: "macOS" };
+    if (/Win/i.test(plat) || /Windows/i.test(ua)) return { tab: "windows", name: "Windows" };
+    if (/Linux|X11|CrOS/i.test(ua) || /Linux/i.test(plat)) return { tab: "linux", name: "Linux" };
+    return null;
+  }
+
+  onPageSetup(() => {
+    const found = detect();
+    if (!found) return;
+    document.querySelectorAll<HTMLAnchorElement>("a[data-download-cta]").forEach((a) => {
+      const template = a.dataset.labelTemplate;
+      const label = a.querySelector("[data-download-cta-label]");
+      if (!template || !label) return;
+      label.textContent = template.replace(/\{platform\}/g, found.name);
+      a.setAttribute("href", a.getAttribute("href")!.replace(/#.*$/, "") + "#" + found.tab);
+    });
+  });
+</script>

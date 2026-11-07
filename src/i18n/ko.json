@@ -34,6 +34,7 @@
   "footer.resources.repo": "이 사이트의 오픈소스 저장소",
 
   "cta.download": "앱 다운로드",
+  "cta.downloadFor": "{platform}용 다운로드",
   "cta.features": "기능 살펴보기",
 
   "home.title": "홈",
@@ -421,6 +422,7 @@
   "download.title": "다운로드",
   "download.header": "Luotopia 다운로드",
   "download.subtitle": "플랫폼을 골라 최신 버전을 받으세요",
+  "download.tabs.label": "플랫폼 선택",
   "download.latest.loading": "GitHub Releases에서 불러오는 중…",
   "download.latest.current": "최신 버전: {version}",
   "download.latest.unavailable": "지금 최신 버전을 가져올 수 없습니다. GitHub Releases에서 확인해 주세요.",

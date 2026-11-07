@@ -34,6 +34,7 @@
   "footer.resources.repo": "本サイトのオープンソースリポジトリ",
 
   "cta.download": "アプリをダウンロード",
+  "cta.downloadFor": "{platform} 版をダウンロード",
   "cta.features": "機能を見る",
 
   "home.title": "ホーム",
@@ -421,6 +422,7 @@
   "download.title": "ダウンロード",
   "download.header": "Luotopia をダウンロード",
   "download.subtitle": "プラットフォームを選んで、最新バージョンを入手",
+  "download.tabs.label": "プラットフォームを選択",
   "download.latest.loading": "GitHub Releases から読み込み中…",
   "download.latest.current": "現在の最新：{version}",
   "download.latest.unavailable": "現在、最新バージョンを取得できません。GitHub Releases をご覧ください。",
