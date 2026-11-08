@@ -460,6 +460,7 @@
   "download.platform.linux.desc": "x64 / arm64 · glibc + GTK3",
 
   "download.external.fallback": "外部安装",
+  "download.platform.currentDevice": "当前设备",
   "download.asset.recommended": "推荐",
   "download.asset.others": "其他版本",
   "download.hint.android": "不确定选哪个？近几年的手机选标有「推荐」的 arm64-v8a 即可；很老的 32 位设备选 armeabi-v7a；x86_64 只用于电脑上的安卓模拟器。",

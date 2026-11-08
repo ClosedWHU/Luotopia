@@ -460,6 +460,7 @@
   "download.platform.linux.desc": "x64 / arm64 · glibc + GTK3",
 
   "download.external.fallback": "External install",
+  "download.platform.currentDevice": "Your device",
   "download.asset.recommended": "Recommended",
   "download.asset.others": "Other builds",
   "download.hint.android": "Not sure which to pick? Phones from the last few years want the arm64-v8a build marked “Recommended”. Very old 32-bit devices need armeabi-v7a; x86_64 is only for Android emulators on a PC.",

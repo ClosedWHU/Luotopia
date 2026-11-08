@@ -436,6 +436,7 @@
   "download.platform.windows.externalLabel": "從 Microsoft Store 下載",
   "download.platform.linux.desc": "x64 / arm64 · glibc + GTK3",
   "download.external.fallback": "外部安裝",
+  "download.platform.currentDevice": "目前裝置",
   "download.asset.recommended": "推薦",
   "download.asset.others": "其他版本",
   "download.hint.android": "不確定選哪個？近幾年的手機選標有「推薦」的 arm64-v8a 即可；很舊的 32 位元裝置選 armeabi-v7a；x86_64 僅用於電腦上的安卓模擬器。",

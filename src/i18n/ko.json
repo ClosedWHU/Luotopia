@@ -436,6 +436,7 @@
   "download.platform.windows.externalLabel": "Microsoft Store에서 다운로드",
   "download.platform.linux.desc": "x64 / arm64 · glibc + GTK3",
   "download.external.fallback": "외부 설치",
+  "download.platform.currentDevice": "현재 기기",
   "download.asset.recommended": "추천",
   "download.asset.others": "다른 빌드",
   "download.hint.android": "어떤 것을 받아야 할지 모르겠다면? 최근 몇 년 사이의 스마트폰은 '추천' 표시가 있는 arm64-v8a를 받으면 됩니다. 아주 오래된 32비트 기기는 armeabi-v7a, x86_64는 PC의 안드로이드 에뮬레이터 전용입니다.",

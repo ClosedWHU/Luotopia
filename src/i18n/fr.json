@@ -436,6 +436,7 @@
   "download.platform.windows.externalLabel": "Télécharger depuis le Microsoft Store",
   "download.platform.linux.desc": "x64 / arm64 · glibc + GTK3",
   "download.external.fallback": "Installation externe",
+  "download.platform.currentDevice": "Votre appareil",
   "download.asset.recommended": "Recommandé",
   "download.asset.others": "Autres versions",
   "download.hint.android": "Vous hésitez ? Les téléphones des dernières années prennent la version arm64-v8a marquée « Recommandé ». Les très anciens appareils 32 bits ont besoin d'armeabi-v7a ; x86_64 ne sert qu'aux émulateurs Android sur PC.",

@@ -282,7 +282,7 @@ const i18n = {
             >
               <Icon name={p.icon} class="text-lg" />
               <span>{p.name}</span>
-              <span class="lt-dl-tabrec hidden rounded-sm bg-primary-container px-1.5 py-0.5 text-label-small leading-none text-on-primary-container">{t("download.asset.recommended")}</span>
+              <span class="lt-dl-tabrec hidden rounded-sm bg-primary-container px-1.5 py-0.5 text-label-small leading-none text-on-primary-container">{t("download.platform.currentDevice")}</span>
             </button>
           ))
         }
@@ -760,6 +760,7 @@ const i18n = {
 
 <script>
   import { onPageSetup } from "../../scripts/page-lifecycle";
+  import { formatReleaseNotes } from "../../scripts/release-notes";
   import { normalizeIconSvg } from "../../scripts/icon-svg";
   import downloadIconRaw from "@material-symbols/svg-400/outlined/download.svg?raw";
   import openInNewIconRaw from "@material-symbols/svg-400/outlined/open_in_new.svg?raw";
@@ -911,126 +912,8 @@ const i18n = {
         .replace(/"/g, "&quot;");
     }
 
-    /** Inline markdown after HTML escape: **bold**, `code`, [text](url) */
-    function formatInline(s) {
-      return s
-        .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, (_, t, u) => {
-          return `<a href="${u}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${t}</a>`;
-        })
-        .replace(/`([^`]+)`/g, '<code class="px-1 rounded-[4px] lt-inset text-on-surface text-[0.9em]">$1</code>')
-        .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-medium text-on-surface">$1</strong>');
-    }
-
-    /** Release notes markdown: headings, lists, quotes, hr, paragraphs */
     function formatBody(body) {
-      if (!body) return `<p class="text-outline">${copy.noNotes}</p>`;
-      const lines = escapeHtml(body).split(/\r?\n/);
-      const html = [];
-      let inList = false;
-      const closeList = () => {
-        if (inList) {
-          html.push("</ul>");
-          inList = false;
-        }
-      };
-      let inQuote = false;
-      let quoteLines = [];
-      const closeQuote = () => {
-        if (!inQuote) return;
-        const paras = [];
-        let cur = [];
-        for (const l of quoteLines) {
-          if (l.trim() === "") {
-            if (cur.length) {
-              paras.push(cur);
-              cur = [];
-            }
-          } else {
-            cur.push(l);
-          }
-        }
-        if (cur.length) paras.push(cur);
-        const inner = paras.length
-          ? paras
-              .map(
-                (p) =>
-                  `<p class="my-1 text-body-medium text-on-surface-variant">${p
-                    .map(formatInline)
-                    .join("<br>")}</p>`,
-              )
-              .join("")
-          : '<p class="my-1">&nbsp;</p>';
-        html.push(
-          `<blockquote class="my-2 border-l-2 border-outline-variant pl-3">${inner}</blockquote>`,
-        );
-        inQuote = false;
-        quoteLines = [];
-      };
-      for (const raw of lines) {
-        const line = raw.replace(/\s+$/, "");
-        // `>` is HTML-escaped to `&gt;` before parsing, so match the entity.
-        const quote = line.match(/^\s*&gt;\s?(.*)$/);
-        if (quote) {
-          if (!inQuote) {
-            closeList();
-            inQuote = true;
-            quoteLines = [];
-          }
-          quoteLines.push(quote[1].replace(/\s+$/, ""));
-          continue;
-        }
-        closeQuote();
-        if (line.trim() === "") {
-          closeList();
-          html.push('<div class="h-2"></div>');
-          continue;
-        }
-        if (/^---+$/.test(line.trim()) || /^\*\*\*+$/.test(line.trim())) {
-          closeList();
-          html.push('<hr class="my-3 border-outline-variant" />');
-          continue;
-        }
-        const h = line.match(/^(#{1,4})\s+(.+)$/);
-        if (h) {
-          closeList();
-          const level = h[1].length;
-          const text = formatInline(h[2]);
-          // The release article already spends h3 on the version title, so
-          // note headings start at h4 to keep the outline hierarchical.
-          if (level === 1) {
-            html.push(
-              `<h4 class="mt-4 mb-2 text-title-large text-on-surface">${text}</h4>`,
-            );
-          } else if (level === 2) {
-            html.push(
-              `<h4 class="mt-4 mb-2 text-title-medium text-on-surface">${text}</h4>`,
-            );
-          } else {
-            html.push(
-              `<h5 class="mt-3 mb-1.5 text-title-small text-on-surface">${text}</h5>`,
-            );
-          }
-          continue;
-        }
-        const item = line.match(/^\s*[-*•]\s+(.+)/);
-        if (item) {
-          if (!inList) {
-            html.push('<ul class="space-y-1.5 my-2 pl-0 list-none">');
-            inList = true;
-          }
-          html.push(
-            `<li class="flex gap-2 text-body-medium text-on-surface-variant"><span class="text-primary shrink-0 select-none">•</span><span class="min-w-0">${formatInline(item[1])}</span></li>`,
-          );
-          continue;
-        }
-        closeList();
-        html.push(
-          `<p class="text-body-medium text-on-surface-variant">${formatInline(line)}</p>`,
-        );
-      }
-      closeList();
-      closeQuote();
-      return html.join("");
+      return formatReleaseNotes(body, copy.noNotes);
     }
 
     function prereleaseBadge() {
@@ -1991,7 +1874,7 @@ const i18n = {
      * The panels are server-rendered with only the first visible; this picks the
      * one that matches the visitor. Order of precedence: a `#windows`-style hash
      * (the home page's button links to it), then the detected system, then the
-     * first tab. The detected tab also gets a "recommended" tag, so a visitor
+     * first tab. The detected tab also gets a "Your device" tag, so a visitor
      * who switches away can see which one was theirs.
      *
      * Detection is deliberately coarse and Chrome-66-safe (`userAgentData` is

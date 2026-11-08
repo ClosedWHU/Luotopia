@@ -436,6 +436,7 @@
   "download.platform.windows.externalLabel": "Tải từ Microsoft Store",
   "download.platform.linux.desc": "x64 / arm64 · glibc + GTK3",
   "download.external.fallback": "Cài đặt bên ngoài",
+  "download.platform.currentDevice": "Thiết bị của bạn",
   "download.asset.recommended": "Khuyên dùng",
   "download.asset.others": "Bản dựng khác",
   "download.hint.android": "Không biết chọn bản nào? Điện thoại đời gần đây chọn bản arm64-v8a có nhãn “Khuyên dùng”. Thiết bị 32-bit rất cũ dùng armeabi-v7a; x86_64 chỉ dành cho trình giả lập Android trên máy tính.",

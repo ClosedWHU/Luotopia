@@ -436,6 +436,7 @@
   "download.platform.windows.externalLabel": "Microsoft Store からダウンロード",
   "download.platform.linux.desc": "x64 / arm64 · glibc + GTK3",
   "download.external.fallback": "外部インストール",
+  "download.platform.currentDevice": "お使いの端末",
   "download.asset.recommended": "推奨",
   "download.asset.others": "その他のビルド",
   "download.hint.android": "どれを選べばよいかわからない場合：ここ数年のスマートフォンは「推奨」と表示された arm64-v8a で問題ありません。非常に古い 32 ビット端末は armeabi-v7a、x86_64 は PC 上の Android エミュレーター専用です。",

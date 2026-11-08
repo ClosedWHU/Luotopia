@@ -436,6 +436,7 @@
   "download.platform.windows.externalLabel": "Скачать из Microsoft Store",
   "download.platform.linux.desc": "x64 / arm64 · glibc + GTK3",
   "download.external.fallback": "Внешняя установка",
+  "download.platform.currentDevice": "Ваше устройство",
   "download.asset.recommended": "Рекомендуется",
   "download.asset.others": "Другие сборки",
   "download.hint.android": "Не знаете, что выбрать? Для телефонов последних лет подойдёт сборка arm64-v8a с пометкой «Рекомендуется». Очень старым 32-битным устройствам нужна armeabi-v7a; x86_64 — только для эмуляторов Android на ПК.",
