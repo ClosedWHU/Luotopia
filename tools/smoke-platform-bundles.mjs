@@ -116,7 +116,11 @@ const GH_CLI_RELEASE = {
   name: 'Luotopia CLI v0.1.0-alpha.2',
   body: 'CLI release notes',
   prerelease: true,
-  assets: [{ id: 77, name: 'luotopia-cli-windows-amd64.exe', size: 4 }],
+  assets: [
+    { id: 77, name: 'luotopia-cli-windows-amd64.exe', size: 4 },
+    { id: 78, name: 'luotopia-darwin-arm64', size: 4 },
+    { id: 79, name: 'SHA256SUMS-darwin-arm64.txt', size: 87 },
+  ],
 };
 
 const FONT_HEX = 'a'.repeat(64);
@@ -260,6 +264,14 @@ esa.resetResolvedEnv();
   const body = await result.json();
   check('esa: CLI versions come from their own repo', result.status === 200 &&
     body.latest.tag === 'v0.1.0-alpha.2' && body.items[0].assets[0].url.startsWith('/api/cli/releases/download/'));
+  const windowsAsset = body.latest.assets.find((asset) => asset.platform === 'windows');
+  const macAsset = body.latest.assets.find((asset) => asset.platform === 'macos' && !asset.meta);
+  const checksum = body.latest.assets.find((asset) => asset.format === 'checksum');
+  check('esa: CLI installers expose the shared platform, architecture and format fields',
+    windowsAsset?.arch === 'amd64' && windowsAsset.archLabel === 'x64' && windowsAsset.format === 'exe' &&
+    macAsset?.arch === 'arm64' && macAsset.format === 'binary' && macAsset.recommended === true);
+  check('esa: CLI checksums are metadata, not installers',
+    checksum?.platform === 'macos' && checksum.arch === 'arm64' && checksum.meta === true && checksum.recommended === false);
   const denied = await esa.default.fetch(new Request(`${ORIGIN}/api/cli/releases/download/v0.1.0-alpha.2/notes.txt`));
   check('esa: private CLI proxy refuses non-binary assets', denied.status === 404);
   const binary = await esa.default.fetch(new Request(`${ORIGIN}/api/cli/releases/download/v0.1.0-alpha.2/luotopia-cli-windows-amd64.exe`));

@@ -1,5 +1,5 @@
 /** Published CLI builds and their own changelog; independent of App releases. */
-import { apiCacheHeaders, ghFetch, json, type GhRelease } from "../../lib/github-releases";
+import { apiCacheHeaders, ghFetch, json, mapReleaseAsset, type GhRelease } from "../../lib/github-releases";
 
 const repo = "ClosedWHU/Luotopia-CLI";
 
@@ -22,11 +22,10 @@ export async function onRequestGet(context: {
       body: release.body || "",
       publishedAt: release.published_at || release.created_at,
       prerelease: release.prerelease,
-      assets: release.assets.filter((asset) => /^(?:luotopia(-cli)?-|SHA256SUMS-)(windows|linux|darwin)-/.test(asset.name)).map((asset) => ({
-        name: asset.name,
-        size: asset.size,
-        url: `/api/cli/releases/download/${encodeURIComponent(release.tag_name)}/${encodeURIComponent(asset.name)}`,
-      })),
+      assets: release.assets.filter((asset) => /^(?:luotopia(-cli)?-|SHA256SUMS-)(windows|linux|darwin)-/.test(asset.name)).map((asset) => mapReleaseAsset(
+        asset,
+        `/api/cli/releases/download/${encodeURIComponent(release.tag_name)}/${encodeURIComponent(asset.name)}`,
+      )),
     }));
     items.sort((a, b) => (Date.parse(b.publishedAt) || 0) - (Date.parse(a.publishedAt) || 0));
     return json({ latest: items[0] || null, items }, 200, apiCacheHeaders());

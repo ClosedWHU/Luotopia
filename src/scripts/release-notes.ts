@@ -1,7 +1,5 @@
 /** Small, HTML-escaped Markdown renderer shared by the App and CLI releases. */
-export function escapeHtml(value: string): string {
-  return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
+import { escapeHtml } from "./download-ui";
 
 function formatInline(value: string): string {
   return value

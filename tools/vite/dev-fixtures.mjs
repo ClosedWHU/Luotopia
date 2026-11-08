@@ -16,6 +16,7 @@ import path from 'node:path';
  *   releases-page-N.json   /api/releases?page=N&per_page=2
  *   appstore-latest.json   /api/appstore/latest?connect=1
  *   msstore-latest.json    /api/msstore/latest
+ *   cli-releases.json     /api/cli/releases
  * Set LT_DEV_FIXTURES=0 to turn it off (e.g. to see the failure state).
  */
 export function devFixtures() {
@@ -37,6 +38,7 @@ export function devFixtures() {
           file = `releases-page-${Number(url.searchParams.get('page')) || 1}.json`;
         } else if (url.pathname === '/api/appstore/latest') file = 'appstore-latest.json';
         else if (url.pathname === '/api/msstore/latest') file = 'msstore-latest.json';
+        else if (url.pathname === '/api/cli/releases') file = 'cli-releases.json';
         if (!file) return next();
 
         const full = path.join(dir, file);

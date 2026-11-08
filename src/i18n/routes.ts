@@ -66,15 +66,15 @@ export const ALL_ROUTES = Object.keys(ROUTES) as RouteKey[];
  */
 export const TRANSLATED_ROUTES: Record<string, readonly RouteKey[]> = {
   "zh-Hans": ALL_ROUTES,
-  "zh-Hant": ALL_ROUTES.filter((route) => route !== "cli"),
-  "en": ALL_ROUTES.filter((route) => route !== "cli"),
-  "ja": ALL_ROUTES.filter((route) => route !== "cli"),
-  "ko": ALL_ROUTES.filter((route) => route !== "cli"),
-  "es": ALL_ROUTES.filter((route) => route !== "cli"),
-  "fr": ALL_ROUTES.filter((route) => route !== "cli"),
-  "pt": ALL_ROUTES.filter((route) => route !== "cli"),
-  "ru": ALL_ROUTES.filter((route) => route !== "cli"),
-  "vi": ALL_ROUTES.filter((route) => route !== "cli"),
+  "zh-Hant": ALL_ROUTES,
+  "en": ALL_ROUTES,
+  "ja": ALL_ROUTES,
+  "ko": ALL_ROUTES,
+  "es": ALL_ROUTES,
+  "fr": ALL_ROUTES,
+  "pt": ALL_ROUTES,
+  "ru": ALL_ROUTES,
+  "vi": ALL_ROUTES,
 };
 
 /** Strip a trailing slash, mapping the empty result back to `/`. */

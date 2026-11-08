@@ -1,0 +1,256 @@
+---
+import { Code } from "astro:components";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageHeader from "../PageHeader.astro";
+import Icon from "../Icon.astro";
+import PlatformTabs from "../PlatformTabs.astro";
+import { resolveLocale, useTranslations } from "../../i18n/ui";
+import "../../styles/download.css";
+
+const locale = resolveLocale(Astro.currentLocale);
+const t = useTranslations(locale);
+const copy = {
+  loading: t("download.latest.loading"),
+  latest: t("download.latest.current"),
+  prerelease: t("download.badge.prerelease"),
+  stable: t("cli.stable"),
+  published: t("cli.published"),
+  archFilter: t("download.asset.archFilter"),
+  noNotes: t("download.changelog.noNotes"),
+  assetsEmpty: t("cli.assets.empty"),
+  commandUnavailable: t("cli.command.unavailable"),
+  downloadAction: t("cli.download.action"),
+  binary: t("cli.binary"),
+  checksums: t("cli.checksums"),
+  empty: t("cli.empty"),
+  waiting: t("cli.waiting"),
+  changelogEmpty: t("cli.changelog.empty"),
+  downloadVersion: t("cli.changelog.download"),
+  github: t("cli.changelog.github"),
+  error: t("cli.error"),
+  errorBody: t("cli.error.body"),
+  retry: t("cli.retry"),
+  errorDownloads: t("cli.error.downloads"),
+  copyCommand: t("cli.copyCommand"),
+  copied: t("cli.copied"),
+  copyFailed: t("cli.copyFailed"),
+};
+const platforms = [
+  { id: "windows", name: "Windows", icon: "desktop_windows", devices: ["windows"] as const },
+  { id: "macos", name: "macOS", icon: "laptop_mac", devices: ["macos"] as const },
+  { id: "linux", name: "Linux", icon: "computer", devices: ["linux"] as const },
+];
+---
+
+<BaseLayout title="Luotopia CLI">
+  <PageHeader title="Luotopia CLI" subtitle={t("cli.subtitle")} />
+  <main id="cli-page" data-copy={JSON.stringify(copy)} class="px-4 pb-20 text-on-surface">
+    <div class="max-w-content mx-auto">
+    <p id="cli-meta" class="text-body-medium text-outline mb-6" role="status">{copy.loading}</p>
+    <PlatformTabs id="cli-tabs" label={t("download.tabs.label")} deviceLabel={t("download.platform.currentDevice")} tabs={platforms} />
+    <div id="cli-panels">
+      {platforms.map((platform, index) => (
+        <section id={`cli-tabs-panel-${platform.id}`} role="tabpanel" aria-labelledby={`cli-tabs-tab-${platform.id}`} tabindex="0" hidden={index > 0} class="glass rounded-card p-5 sm:p-7">
+          <div class="grid gap-7 lg:grid-cols-2 lg:gap-10">
+            <div class="min-w-0">
+              <div class="flex items-start gap-3.5">
+                <span class="lt-icon-chip text-primary text-[22px] shrink-0"><Icon name={platform.icon} /></span>
+                <div><h2 class="text-title-medium">{platform.name}</h2><p class="text-body-medium text-on-surface-variant mt-1">{t("cli.platform.description")}</p></div>
+              </div>
+              <div data-downloads={platform.id} class="mt-5" aria-live="polite"><p class="text-body-medium text-outline">{t("cli.download.loading")}</p></div>
+            </div>
+            <div class="min-w-0">
+              <h3 class="flex items-center gap-2 text-title-small mb-3"><Icon name="terminal" class="text-lg text-primary" />{t("cli.install.title")}</h3>
+              <p class="text-body-medium text-on-surface-variant mb-3">{t("cli.install.body")}</p>
+              <div class="lt-inset rounded-control overflow-hidden">
+                <div class="flex justify-end px-2 pt-1">
+                  <button type="button" data-copy-command={platform.id} disabled class="state-layer inline-flex cursor-pointer items-center gap-1 rounded-full px-2.5 py-1.5 text-label-medium text-primary disabled:opacity-50" aria-label={t("cli.copyCommand")}><Icon name="content_copy" class="text-base" /><span data-copy-label role="status">{t("cli.copyCommand")}</span></button>
+                </div>
+                <div data-command={platform.id} class="px-3 pb-3 text-body-small">{t("cli.command.loading")}</div>
+                <template data-command-template={platform.id}>
+                  <Code code={platform.id === "windows" ? String.raw`.\LUOTOPIA_BINARY --help` : "chmod +x ./LUOTOPIA_BINARY\n./LUOTOPIA_BINARY --help"} lang={platform.id === "windows" ? "powershell" : "bash"} themes={{ light: "github-light", dark: "github-dark" }} defaultColor={false} class="lt-download-code overflow-x-auto text-body-small text-on-surface" data-lenis-prevent-horizontal />
+                </template>
+              </div>
+              <p class="mt-3 text-body-small text-outline">{t(platform.id === "windows" ? "cli.install.windowsNote" : "cli.install.unixNote")}</p>
+              {platform.id === "macos" && <p class="mt-2 text-body-small text-outline">{t("cli.install.macosNote")}</p>}
+              {platform.id === "macos" && <p class="mt-2 text-body-small text-outline">{t("cli.install.macosGatekeeper")}</p>}
+            </div>
+          </div>
+        </section>
+      ))}
+    </div>
+    <p class="mt-5 text-body-small text-outline leading-relaxed">{t("cli.accessNote")} <a href="https://github.com/ClosedWHU/Luotopia-CLI/releases" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">{t("cli.github")}</a></p>
+    <section class="mt-12" aria-labelledby="cli-changelog-title">
+      <h2 id="cli-changelog-title" class="text-headline-small mb-5">{t("download.changelog.title")}</h2>
+      <div id="cli-releases" class="space-y-4" aria-live="polite"><p class="text-body-medium text-outline">{t("download.changelog.loading")}</p></div>
+    </section>
+    <noscript><p class="mt-5 text-body-medium">{t("cli.noscript")}</p></noscript>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  :global(.lt-cli-notes) { overflow-wrap: anywhere; }
+  :global(.lt-cli-history summary::-webkit-details-marker) { display: none; }
+</style>
+
+<script>
+  import { onPageSetup } from "../../scripts/page-lifecycle";
+  import { architecturePickerHtml, bindArchitecturePicker } from "../../scripts/architecture-picker";
+  import { formatReleaseNotes } from "../../scripts/release-notes";
+  import { escapeHtml as safe, formatSize, formatDate, releaseBadgeHtml, fillTemplate } from "../../scripts/download-ui";
+  import { normalizeIconSvg } from "../../scripts/icon-svg";
+  import downloadSvg from "@material-symbols/svg-400/outlined/download.svg?raw";
+  import chevronSvg from "@material-symbols/svg-400/outlined/keyboard_arrow_down.svg?raw";
+
+  import type { ReleaseAsset as CliAsset } from "../../../functions/lib/github-releases";
+  type CliRelease = { tag: string; version: string; name: string; htmlUrl: string; body: string; publishedAt: string; prerelease: boolean; assets: CliAsset[] };
+
+  onPageSetup((signal) => {
+    const root = document.getElementById("cli-releases");
+    if (!root) return;
+    const copy = JSON.parse(document.getElementById("cli-page")!.dataset.copy!) as Record<string, string>;
+    const meta = document.getElementById("cli-meta")!;
+    const ids = ["windows", "macos", "linux"];
+    const downloadIcon = normalizeIconSvg(downloadSvg, "text-2xl text-primary shrink-0");
+    const chevron = normalizeIconSvg(chevronSvg, "text-lg text-outline shrink-0");
+    const arch = (asset: CliAsset) => asset.archLabel;
+    const size = (asset: CliAsset) => formatSize(asset.size);
+    const badge = (release: CliRelease) => releaseBadgeHtml(release.prerelease ? copy.prerelease : copy.stable, release.prerelease);
+    const date = (release: CliRelease) => safe(formatDate(release.publishedAt, document.documentElement.lang));
+    let latest: CliRelease | undefined;
+    const choices: Record<string, string> = {};
+    const copyTimers = new Map<HTMLButtonElement, number>();
+    const paintDownloads = (platform: string) => {
+      const container = document.querySelector<HTMLElement>(`[data-downloads="${platform}"]`)!;
+      const command = document.querySelector<HTMLElement>(`[data-command="${platform}"]`)!;
+      const copyButton = document.querySelector<HTMLButtonElement>(`[data-copy-command="${platform}"]`)!;
+      copyButton.disabled = true;
+      const files = latest!.assets.filter((asset) => asset.platform === platform && !asset.meta);
+      const checksums = latest!.assets.filter((asset) => asset.platform === platform && asset.format === "checksum");
+      if (!files.length) {
+        container.innerHTML = `<p class="text-body-medium text-outline">${safe(copy.assetsEmpty)}</p>`;
+        command.textContent = copy.commandUnavailable;
+        return;
+      }
+      const selected = files.find((file) => arch(file) === choices[platform]) || files.find((file) => file.recommended) || files[0];
+      choices[platform] = arch(selected);
+      const arches = files.map(arch).filter((value, index, values) => values.indexOf(value) === index);
+      const picker = architecturePickerHtml(platform, arches, arch(selected), copy.archFilter);
+      const switcher = picker ? `<div class="mb-4">${picker}</div>` : "";
+      const title = fillTemplate(copy.downloadAction, { arch: arch(selected), format: selected.formatLabel || copy.binary });
+      container.innerHTML = `${switcher}
+        <a href="${safe(selected.url)}" title="${safe(selected.name)}" class="lt-download-action state-layer no-underline" download>
+          ${downloadIcon}<span class="min-w-0 flex-1">
+            <span class="block text-title-small">${safe(title)}</span>
+            <span class="block truncate text-body-small text-on-surface-variant mt-1">${safe(selected.name)} · ${size(selected)}</span>
+          </span>
+        </a>
+        ${checksums.length ? `<details class="mt-4">
+          <summary class="cursor-pointer text-body-small text-on-surface-variant hover:text-primary">${safe(copy.checksums)}</summary>
+          <ul class="mt-2 space-y-2">${checksums.map((file) => `<li><a href="${safe(file.url)}" download class="text-body-small text-primary hover:underline break-all">${safe(file.name)}</a></li>`).join("")}</ul>
+        </details>` : ""}`;
+      const template = document.querySelector<HTMLTemplateElement>(`[data-command-template="${platform}"]`)!;
+      const fragment = template.content.cloneNode(true);
+      const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_TEXT);
+      let node = walker.nextNode();
+      while (node) {
+        node.textContent = node.textContent!.replace(/LUOTOPIA_BINARY/g, () => selected.name);
+        node = walker.nextNode();
+      }
+      command.textContent = "";
+      command.appendChild(fragment);
+      copyButton.disabled = false;
+    };
+    const copyCommand = async (platform: string, button: HTMLButtonElement) => {
+      const command = document.querySelector<HTMLElement>(`[data-command="${platform}"]`);
+      const label = button.querySelector<HTMLElement>("[data-copy-label]");
+      if (!command || !label) return;
+      const text = command.textContent || "";
+      let copied = false;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+          copied = true;
+        } else {
+          const area = document.createElement("textarea");
+          area.value = text;
+          area.setAttribute("readonly", "");
+          area.style.position = "fixed";
+          area.style.top = "-1000px";
+          document.body.appendChild(area);
+          area.select();
+          copied = document.execCommand("copy");
+          area.remove();
+        }
+      } catch {
+        copied = false;
+      }
+      if (signal.aborted) return;
+      label.textContent = copied ? copy.copied : copy.copyFailed;
+      window.clearTimeout(copyTimers.get(button));
+      copyTimers.set(button, window.setTimeout(() => {
+        label.textContent = copy.copyCommand;
+        copyTimers.delete(button);
+      }, 1800));
+    };
+    document.getElementById("cli-panels")!.addEventListener("click", (event) => {
+      const button = (event.target as Element).closest<HTMLButtonElement>("[data-copy-command]");
+      if (button) void copyCommand(button.dataset.copyCommand!, button);
+    }, { signal });
+    bindArchitecturePicker(document.getElementById("cli-panels")!, signal, (platform, arch) => {
+      choices[platform] = arch;
+      paintDownloads(platform);
+    });
+    const load = async () => {
+      meta.textContent = copy.loading;
+      root.setAttribute("aria-busy", "true");
+      try {
+        const response = await fetch("/api/cli/releases", { signal });
+        if (!response.ok) throw new Error("unavailable");
+        const data = await response.json() as { items: CliRelease[] };
+        if (signal.aborted) return;
+        latest = data.items[0];
+        if (!latest) {
+          meta.textContent = copy.empty;
+          document.querySelectorAll("[data-downloads], [data-command]").forEach((element) => { element.textContent = copy.waiting; });
+          document.querySelectorAll<HTMLButtonElement>("[data-copy-command]").forEach((button) => { button.disabled = true; });
+          root.textContent = copy.changelogEmpty;
+          return;
+        }
+        meta.innerHTML = `<span class="inline-flex flex-wrap items-center gap-2"><span>${safe(fillTemplate(copy.latest, { version: latest.tag }))}</span>${badge(latest)}<span>${safe(fillTemplate(copy.published, { date: formatDate(latest.publishedAt, document.documentElement.lang) }))}</span></span>`;
+        ids.forEach(paintDownloads);
+        root.innerHTML = data.items.map((release, index) => `
+          <details class="lt-cli-history glass rounded-card" ${index === 0 ? "open" : ""}>
+            <summary class="state-layer flex cursor-pointer list-none items-center gap-3 rounded-card p-5 sm:p-6">
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2"><h3 class="text-title-medium">${safe(release.name)}</h3>${badge(release)}</div>
+                <span class="block text-body-small text-outline mt-1">${date(release)}</span>
+              </div>${chevron}
+            </summary>
+            <div class="px-5 pb-5 sm:px-6 sm:pb-6">
+              <div class="lt-cli-notes text-body-medium space-y-2">${formatReleaseNotes(release.body, copy.noNotes)}</div>
+              ${index > 0 ? `<details class="lt-inset rounded-control p-3 mt-4">
+                <summary class="cursor-pointer text-label-large">${safe(copy.downloadVersion)}</summary>
+                <ul class="mt-3 space-y-2">${release.assets.map((asset) => `<li><a href="${safe(asset.url)}" download class="text-body-small text-primary hover:underline break-all">${safe(asset.name)}</a></li>`).join("")}</ul>
+              </details>` : ""}
+              <a class="inline-block text-body-small text-primary hover:underline mt-4" href="${safe(release.htmlUrl)}" target="_blank" rel="noopener noreferrer">${safe(copy.github)}</a>
+            </div>
+          </details>`).join("");
+      } catch {
+        if (signal.aborted) return;
+        meta.textContent = copy.error;
+        root.innerHTML = `<div class="lt-inset rounded-control p-5 text-body-medium"><p>${safe(copy.errorBody)}</p><button type="button" data-retry class="state-layer lt-inset-raised rounded-full px-4 py-2 text-label-large text-primary mt-3 cursor-pointer">${safe(copy.retry)}</button></div>`;
+        document.querySelectorAll("[data-downloads], [data-command]").forEach((element) => { element.textContent = copy.errorDownloads; });
+        document.querySelectorAll<HTMLButtonElement>("[data-copy-command]").forEach((button) => { button.disabled = true; });
+      } finally {
+        if (!signal.aborted) root.removeAttribute("aria-busy");
+      }
+    };
+    root.addEventListener("click", (event) => {
+      if ((event.target as Element).closest("[data-retry]")) void load();
+    }, { signal });
+    void load();
+    return () => copyTimers.forEach((timer) => window.clearTimeout(timer));
+  });
+</script>

@@ -1,0 +1,10 @@
+---
+import { PREFIXED_LOCALES } from "../../i18n/locales";
+import CliPage from "../../components/pages/CliPage.astro";
+
+export function getStaticPaths() {
+  return PREFIXED_LOCALES.map((locale) => ({ params: { lang: locale.path } }));
+}
+---
+
+<CliPage />

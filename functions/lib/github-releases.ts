@@ -15,6 +15,8 @@ export type ArchId =
 
 /** Package format (extension / kind) for display. */
 export type FormatId =
+  | "binary"
+  | "checksum"
   | "apk"
   | "aab"
   | "ipa"
@@ -72,6 +74,8 @@ const ARCH_LABELS: Record<ArchId, string> = {
 };
 
 const FORMAT_LABELS: Record<FormatId, string> = {
+  binary: "",
+  checksum: "SHA-256",
   apk: "APK",
   aab: "AAB",
   ipa: "IPA",
@@ -93,7 +97,7 @@ const FORMAT_LABELS: Record<FormatId, string> = {
 
 /** Manifests / non-installer assets — keep out of platform cards & default changelog chips. */
 export function isMetaAsset(platform: PlatformId, format: FormatId): boolean {
-  return platform === "other" || format === "scoop" || format === "winget";
+  return platform === "other" || format === "scoop" || format === "winget" || format === "checksum";
 }
 
 export interface GhRelease {
@@ -179,6 +183,7 @@ export function compareReleasesNewestFirst(a: GhRelease, b: GhRelease): number {
 
 export function detectFormat(filename: string): FormatId {
   const n = filename.toLowerCase();
+  if (/^sha256sums-/.test(n)) return "checksum";
   if (/scoop-.*\.json$/i.test(n)) return "scoop";
   if (/^winget-/i.test(n) || n.includes("winget-")) return "winget";
   if (/\.apk$/i.test(n)) return "apk";
@@ -195,6 +200,7 @@ export function detectFormat(filename: string): FormatId {
   if (/\.flatpak$/i.test(n)) return "flatpak";
   if (/\.(tar\.gz|tgz)$/i.test(n)) return "tar";
   if (/\.zip$/i.test(n)) return "zip";
+  if (/^luotopia(?:-cli)?-(?:windows|linux|darwin)-[^.]+$/.test(n)) return "binary";
   return "other";
 }
 
@@ -298,6 +304,7 @@ export function isRecommendedAsset(
 ): boolean {
   if (isMetaAsset(platform, format)) return false;
   if (!isRecommendedArch(platform, arch)) return false;
+  if (format === "binary") return true;
   const prefFmt = RECOMMENDED_FORMAT[platform];
   if (!prefFmt) return true;
   return format === prefFmt;
@@ -354,6 +361,31 @@ function formatSortKey(platform: PlatformId, format: FormatId): number {
   return i === -1 ? 50 : i + 1;
 }
 
+export function mapReleaseAsset(asset: GhAsset, url: string) {
+  const platform = detectPlatform(asset.name);
+  const arch = detectArch(asset.name, platform);
+  const format = detectFormat(asset.name);
+  return {
+    id: asset.id,
+    name: asset.name,
+    size: asset.size,
+    downloadCount: asset.download_count,
+    url,
+    githubUrl: asset.browser_download_url,
+    contentType: asset.content_type,
+    platform,
+    arch,
+    archLabel: archLabel(arch),
+    format,
+    formatLabel: formatLabel(format),
+    label: assetDisplayLabel(platform, arch, format, asset.name),
+    meta: isMetaAsset(platform, format),
+    recommended: isRecommendedAsset(platform, arch, format),
+  };
+}
+
+export type ReleaseAsset = ReturnType<typeof mapReleaseAsset>;
+
 export function mapRelease(r: GhRelease) {
   const parsed = parseFlutterVersion(r.tag_name || r.name || "");
   const titleParsed = r.name ? parseFlutterVersion(r.name) : null;
@@ -361,30 +393,7 @@ export function mapRelease(r: GhRelease) {
     titleParsed && titleParsed.buildNumber && !parsed.buildNumber ? titleParsed : parsed;
 
   const tag = r.tag_name;
-  const assets = (r.assets || []).map((a) => {
-    const platform = detectPlatform(a.name);
-    const arch = detectArch(a.name, platform);
-    const format = detectFormat(a.name);
-    const fl = formatLabel(format);
-    return {
-      id: a.id,
-      name: a.name,
-      size: a.size,
-      downloadCount: a.download_count,
-      // Prefer same-origin proxy (CDN-cached); keep GitHub URL as fallback field
-      url: proxyAssetUrl(tag, a.name),
-      githubUrl: a.browser_download_url,
-      contentType: a.content_type,
-      platform,
-      arch,
-      archLabel: archLabel(arch),
-      format,
-      formatLabel: fl,
-      label: assetDisplayLabel(platform, arch, format, a.name),
-      meta: isMetaAsset(platform, format),
-      recommended: isRecommendedAsset(platform, arch, format),
-    };
-  });
+  const assets = (r.assets || []).map((asset) => mapReleaseAsset(asset, proxyAssetUrl(tag, asset.name)));
 
   assets.sort((a, b) => {
     // Installers first, then scoop/winget manifests

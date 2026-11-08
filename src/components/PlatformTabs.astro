@@ -1,0 +1,68 @@
+---
+import Icon from "./Icon.astro";
+import type { DevicePlatform } from "../scripts/device-platform";
+
+interface Props {
+  id: string;
+  label: string;
+  deviceLabel: string;
+  tabs: { id: string; name: string; icon: string; devices: readonly DevicePlatform[] }[];
+}
+
+const { id, label, deviceLabel, tabs } = Astro.props;
+---
+
+<div id={id} data-platform-tabs role="tablist" aria-label={label} class="mb-5 inline-flex max-w-full flex-wrap items-center gap-1 rounded-[28px] lt-inset p-1">
+  {tabs.map((tab, index) => (
+    <button type="button" role="tab" id={`${id}-tab-${tab.id}`} aria-controls={`${id}-panel-${tab.id}`} aria-selected={index === 0 ? "true" : "false"} tabindex={index === 0 ? 0 : -1} data-tab={tab.id} data-devices={tab.devices.join(" ")} class:list={[
+      "state-layer inline-flex cursor-pointer items-center gap-1.5 rounded-full px-4 py-2 text-label-large",
+      index === 0 ? "lt-inset-raised text-primary" : "bg-transparent text-on-surface-variant",
+    ]}>
+      <Icon name={tab.icon} class="text-lg" />
+      <span>{tab.name}</span>
+      <span data-device class="hidden rounded-sm bg-primary-container px-1.5 py-0.5 text-label-small leading-none text-on-primary-container">{deviceLabel}</span>
+    </button>
+  ))}
+</div>
+
+<script>
+  import { onPageSetup } from "../scripts/page-lifecycle";
+  import { detectDevicePlatform } from "../scripts/device-platform";
+
+  onPageSetup((signal) => {
+    const device = detectDevicePlatform();
+    document.querySelectorAll<HTMLElement>("[data-platform-tabs]").forEach((root) => {
+      const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>("[role=tab]"));
+      const detected = tabs.find((tab) => device && tab.dataset.devices!.split(" ").includes(device));
+      const fromHash = tabs.find((tab) => tab.dataset.tab === location.hash.slice(1));
+      const select = (selected: HTMLButtonElement, focus: boolean) => {
+        tabs.forEach((tab) => {
+          const active = tab === selected;
+          tab.setAttribute("aria-selected", String(active));
+          tab.tabIndex = active ? 0 : -1;
+          tab.classList.toggle("lt-inset-raised", active);
+          tab.classList.toggle("text-primary", active);
+          tab.classList.toggle("bg-transparent", !active);
+          tab.classList.toggle("text-on-surface-variant", !active);
+          document.getElementById(tab.getAttribute("aria-controls")!)!.hidden = !active;
+        });
+        if (focus) selected.focus({ preventScroll: true });
+      };
+      detected?.querySelector("[data-device]")?.classList.remove("hidden");
+      select(fromHash || detected || tabs[0], false);
+      tabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => select(tab, false), { signal });
+        tab.addEventListener("keydown", (event) => {
+          let next: number;
+          if (event.key === "ArrowRight") next = (index + 1) % tabs.length;
+          else if (event.key === "ArrowLeft") next = (index + tabs.length - 1) % tabs.length;
+          else if (event.key === "Home") next = 0;
+          else if (event.key === "End") next = tabs.length - 1;
+          else return;
+          event.preventDefault();
+          select(tabs[next], true);
+        }, { signal });
+      });
+    });
+  });
+</script>

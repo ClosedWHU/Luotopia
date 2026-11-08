@@ -1,0 +1,40 @@
+{
+  "latest": {
+    "tag": "v0.1.0-alpha.2",
+    "version": "0.1.0-alpha.2",
+    "name": "Luotopia CLI v0.1.0-alpha.2",
+    "htmlUrl": "https://github.com/ClosedWHU/Luotopia-CLI/releases/tag/v0.1.0-alpha.2",
+    "body": "**Full Changelog**: https://github.com/ClosedWHU/Luotopia-CLI/commits/v0.1.0-alpha.2",
+    "publishedAt": "2026-11-05T16:15:48Z",
+    "prerelease": true,
+    "assets": [
+      { "id": 713988284, "name": "luotopia-darwin-amd64", "size": 22195936, "downloadCount": 0, "url": "/api/cli/releases/download/v0.1.0-alpha.2/luotopia-darwin-amd64", "githubUrl": "https://github.com/ClosedWHU/Luotopia-CLI/releases/download/v0.1.0-alpha.2/luotopia-darwin-amd64", "contentType": "application/octet-stream", "platform": "macos", "arch": "amd64", "archLabel": "x64", "format": "binary", "formatLabel": "", "label": "macos · x64", "meta": false, "recommended": false },
+      { "id": 713988274, "name": "luotopia-darwin-arm64", "size": 21033490, "downloadCount": 0, "url": "/api/cli/releases/download/v0.1.0-alpha.2/luotopia-darwin-arm64", "githubUrl": "https://github.com/ClosedWHU/Luotopia-CLI/releases/download/v0.1.0-alpha.2/luotopia-darwin-arm64", "contentType": "application/octet-stream", "platform": "macos", "arch": "arm64", "archLabel": "arm64", "format": "binary", "formatLabel": "", "label": "macos · arm64", "meta": false, "recommended": true },
+      { "id": 713988347, "name": "luotopia-linux-amd64", "size": 22361901, "downloadCount": 0, "url": "/api/cli/releases/download/v0.1.0-alpha.2/luotopia-linux-amd64", "githubUrl": "https://github.com/ClosedWHU/Luotopia-CLI/releases/download/v0.1.0-alpha.2/luotopia-linux-amd64", "contentType": "application/octet-stream", "platform": "linux", "arch": "amd64", "archLabel": "x64", "format": "binary", "formatLabel": "", "label": "linux · x64", "meta": false, "recommended": true },
+      { "id": 713988405, "name": "luotopia-windows-amd64.exe", "size": 22012928, "downloadCount": 0, "url": "/api/cli/releases/download/v0.1.0-alpha.2/luotopia-windows-amd64.exe", "githubUrl": "https://github.com/ClosedWHU/Luotopia-CLI/releases/download/v0.1.0-alpha.2/luotopia-windows-amd64.exe", "contentType": "application/octet-stream", "platform": "windows", "arch": "amd64", "archLabel": "x64", "format": "exe", "formatLabel": "EXE", "label": "windows · x64 · EXE", "meta": false, "recommended": false },
+      { "id": 713988285, "name": "SHA256SUMS-darwin-amd64.txt", "size": 176, "downloadCount": 0, "url": "/api/cli/releases/download/v0.1.0-alpha.2/SHA256SUMS-darwin-amd64.txt", "githubUrl": "https://github.com/ClosedWHU/Luotopia-CLI/releases/download/v0.1.0-alpha.2/SHA256SUMS-darwin-amd64.txt", "contentType": "text/plain; charset=utf-8", "platform": "macos", "arch": "amd64", "archLabel": "x64", "format": "checksum", "formatLabel": "SHA-256", "label": "macos · x64 · SHA-256", "meta": true, "recommended": false },
+      { "id": 713988289, "name": "SHA256SUMS-linux-amd64.txt", "size": 87, "downloadCount": 0, "url": "/api/cli/releases/download/v0.1.0-alpha.2/SHA256SUMS-linux-amd64.txt", "githubUrl": "https://github.com/ClosedWHU/Luotopia-CLI/releases/download/v0.1.0-alpha.2/SHA256SUMS-linux-amd64.txt", "contentType": "text/plain; charset=utf-8", "platform": "linux", "arch": "amd64", "archLabel": "x64", "format": "checksum", "formatLabel": "SHA-256", "label": "linux · x64 · SHA-256", "meta": true, "recommended": false },
+      { "id": 713988286, "name": "SHA256SUMS-windows-amd64.txt", "size": 93, "downloadCount": 0, "url": "/api/cli/releases/download/v0.1.0-alpha.2/SHA256SUMS-windows-amd64.txt", "githubUrl": "https://github.com/ClosedWHU/Luotopia-CLI/releases/download/v0.1.0-alpha.2/SHA256SUMS-windows-amd64.txt", "contentType": "text/plain; charset=utf-8", "platform": "windows", "arch": "amd64", "archLabel": "x64", "format": "checksum", "formatLabel": "SHA-256", "label": "windows · x64 · SHA-256", "meta": true, "recommended": false }
+    ]
+  },
+  "items": [
+    {
+      "tag": "v0.1.0-alpha.2",
+      "version": "0.1.0-alpha.2",
+      "name": "Luotopia CLI v0.1.0-alpha.2",
+      "htmlUrl": "https://github.com/ClosedWHU/Luotopia-CLI/releases/tag/v0.1.0-alpha.2",
+      "body": "**Full Changelog**: https://github.com/ClosedWHU/Luotopia-CLI/commits/v0.1.0-alpha.2",
+      "publishedAt": "2026-11-05T16:15:48Z",
+      "prerelease": true,
+      "assets": [
+        { "id": 713988284, "name": "luotopia-darwin-amd64", "size": 22195936, "downloadCount": 0, "url": "/api/cli/releases/download/v0.1.0-alpha.2/luotopia-darwin-amd64", "githubUrl": "https://github.com/ClosedWHU/Luotopia-CLI/releases/download/v0.1.0-alpha.2/luotopia-darwin-amd64", "contentType": "application/octet-stream", "platform": "macos", "arch": "amd64", "archLabel": "x64", "format": "binary", "formatLabel": "", "label": "macos · x64", "meta": false, "recommended": false },
+        { "id": 713988274, "name": "luotopia-darwin-arm64", "size": 21033490, "downloadCount": 0, "url": "/api/cli/releases/download/v0.1.0-alpha.2/luotopia-darwin-arm64", "githubUrl": "https://github.com/ClosedWHU/Luotopia-CLI/releases/download/v0.1.0-alpha.2/luotopia-darwin-arm64", "contentType": "application/octet-stream", "platform": "macos", "arch": "arm64", "archLabel": "arm64", "format": "binary", "formatLabel": "", "label": "macos · arm64", "meta": false, "recommended": true },
+        { "id": 713988347, "name": "luotopia-linux-amd64", "size": 22361901, "downloadCount": 0, "url": "/api/cli/releases/download/v0.1.0-alpha.2/luotopia-linux-amd64", "githubUrl": "https://github.com/ClosedWHU/Luotopia-CLI/releases/download/v0.1.0-alpha.2/luotopia-linux-amd64", "contentType": "application/octet-stream", "platform": "linux", "arch": "amd64", "archLabel": "x64", "format": "binary", "formatLabel": "", "label": "linux · x64", "meta": false, "recommended": true },
+        { "id": 713988405, "name": "luotopia-windows-amd64.exe", "size": 22012928, "downloadCount": 0, "url": "/api/cli/releases/download/v0.1.0-alpha.2/luotopia-windows-amd64.exe", "githubUrl": "https://github.com/ClosedWHU/Luotopia-CLI/releases/download/v0.1.0-alpha.2/luotopia-windows-amd64.exe", "contentType": "application/octet-stream", "platform": "windows", "arch": "amd64", "archLabel": "x64", "format": "exe", "formatLabel": "EXE", "label": "windows · x64 · EXE", "meta": false, "recommended": false },
+        { "id": 713988285, "name": "SHA256SUMS-darwin-amd64.txt", "size": 176, "downloadCount": 0, "url": "/api/cli/releases/download/v0.1.0-alpha.2/SHA256SUMS-darwin-amd64.txt", "githubUrl": "https://github.com/ClosedWHU/Luotopia-CLI/releases/download/v0.1.0-alpha.2/SHA256SUMS-darwin-amd64.txt", "contentType": "text/plain; charset=utf-8", "platform": "macos", "arch": "amd64", "archLabel": "x64", "format": "checksum", "formatLabel": "SHA-256", "label": "macos · x64 · SHA-256", "meta": true, "recommended": false },
+        { "id": 713988289, "name": "SHA256SUMS-linux-amd64.txt", "size": 87, "downloadCount": 0, "url": "/api/cli/releases/download/v0.1.0-alpha.2/SHA256SUMS-linux-amd64.txt", "githubUrl": "https://github.com/ClosedWHU/Luotopia-CLI/releases/download/v0.1.0-alpha.2/SHA256SUMS-linux-amd64.txt", "contentType": "text/plain; charset=utf-8", "platform": "linux", "arch": "amd64", "archLabel": "x64", "format": "checksum", "formatLabel": "SHA-256", "label": "linux · x64 · SHA-256", "meta": true, "recommended": false },
+        { "id": 713988286, "name": "SHA256SUMS-windows-amd64.txt", "size": 93, "downloadCount": 0, "url": "/api/cli/releases/download/v0.1.0-alpha.2/SHA256SUMS-windows-amd64.txt", "githubUrl": "https://github.com/ClosedWHU/Luotopia-CLI/releases/download/v0.1.0-alpha.2/SHA256SUMS-windows-amd64.txt", "contentType": "text/plain; charset=utf-8", "platform": "windows", "arch": "amd64", "archLabel": "x64", "format": "checksum", "formatLabel": "SHA-256", "label": "windows · x64 · SHA-256", "meta": true, "recommended": false }
+      ]
+    }
+  ]
+}

@@ -31,6 +31,9 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHeader from "../PageHeader.astro";
 import Icon from "../Icon.astro";
 import DownloadDrawer from "../DownloadDrawer.astro";
+import PlatformTabs from "../PlatformTabs.astro";
+import type { DevicePlatform } from "../../scripts/device-platform";
+import "../../styles/download.css";
 import {
   descKey,
   externalLabelKey,
@@ -38,24 +41,12 @@ import {
   testFlightCode,
   testFlightUrl,
 } from "../../config/downloads";
-import { resolveLocale, useTranslations, type TranslationKey } from "../../i18n/ui";
+import { resolveLocale, useTranslations, routeUrl, type TranslationKey } from "../../i18n/ui";
 import { DEFAULT_LOCALE } from "../../i18n/locales";
+import { escapeHtml } from "../../scripts/download-ui";
 
 const locale = resolveLocale(Astro.currentLocale);
 const t = useTranslations(locale);
-
-/*
- * Same escaping as `legal/[slug].astro` does before its own `set:html`. Build
- * time only, so the Chrome 66 floor does not apply, but `replace(/g)` keeps it
- * identical to the copy the script below carries.
- */
-function escapeHtml(text: string): string {
-  return String(text)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 /**
  * A dictionary value with inline markup woven through it.
@@ -94,8 +85,8 @@ const linkHtml = (href: string, text: string) =>
 
 /* The tab row: the four release platforms plus HarmonyOS, which has a panel but no card in `platforms`. */
 const tabs = [
-  ...platforms.map((p) => ({ id: p.id as string, name: p.name as string, icon: p.icon as string })),
-  { id: "harmony", name: "HarmonyOS", icon: "harmonyos" },
+  ...platforms.map((p) => ({ id: p.id as string, name: p.name as string, icon: p.icon as string, devices: (p.id === "apple" ? ["ios", "macos"] : [p.id]) as DevicePlatform[] })),
+  { id: "harmony", name: "HarmonyOS", icon: "harmonyos", devices: ["harmony"] as const },
 ];
 const releasesLatestUrl = "https://github.com/ClosedWHU/Luotopia/releases/latest";
 
@@ -161,7 +152,7 @@ winget install --manifest .\path\to\manifests\folder`,
  */
 const SNIPPET_THEMES = { light: "github-light", dark: "github-dark" };
 const SNIPPET_CLASS =
-  "lt-dl-code overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface";
+  "lt-download-code overflow-x-auto rounded-sm lt-inset px-3 py-2 text-body-small text-on-surface";
 
 /*
  * The strings the *script* needs, carried on data attributes.
@@ -259,34 +250,7 @@ const i18n = {
         Without JS the tab row stays hidden and every panel is shown (see the
         <noscript> rule), so nothing is unreachable.
       -->
-      <div
-        id="platform-tabs"
-        role="tablist"
-        aria-label={t("download.tabs.label")}
-        class="lt-reveal mb-5 inline-flex max-w-full flex-wrap items-center gap-1 rounded-[28px] lt-inset p-1"
-      >
-        {
-          tabs.map((p, i) => (
-            <button
-              type="button"
-              role="tab"
-              id={`tab-${p.id}`}
-              aria-controls={`panel-${p.id}`}
-              aria-selected={i === 0 ? "true" : "false"}
-              tabindex={i === 0 ? 0 : -1}
-              data-tab={p.id}
-              class:list={[
-                "lt-dl-tab state-layer inline-flex cursor-pointer items-center gap-1.5 rounded-full px-4 py-2 text-label-large",
-                i === 0 ? "lt-inset-raised text-primary" : "bg-transparent text-on-surface-variant",
-              ]}
-            >
-              <Icon name={p.icon} class="text-lg" />
-              <span>{p.name}</span>
-              <span class="lt-dl-tabrec hidden rounded-sm bg-primary-container px-1.5 py-0.5 text-label-small leading-none text-on-primary-container">{t("download.platform.currentDevice")}</span>
-            </button>
-          ))
-        }
-      </div>
+      <PlatformTabs id="platform-tabs" label={t("download.tabs.label")} deviceLabel={t("download.platform.currentDevice")} tabs={tabs} />
 
       <div id="platform-grid">
         {
@@ -302,8 +266,8 @@ const i18n = {
               <div
                 class="platform-card glass rounded-card p-5 sm:p-7"
                 role="tabpanel"
-                id={`panel-${p.id}`}
-                aria-labelledby={`tab-${p.id}`}
+                id={`platform-tabs-panel-${p.id}`}
+                aria-labelledby={`platform-tabs-tab-${p.id}`}
                 hidden={i > 0}
                 data-platform={p.id}
                 data-external-url={p.externalUrl ?? ""}
@@ -336,7 +300,7 @@ const i18n = {
                       href={p.externalUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      class="lt-dl-store state-layer no-underline"
+                      class="lt-download-action state-layer no-underline"
                     >
                       <Icon name="open_in_new" class="text-[22px] shrink-0" />
                       <span class="min-w-0 flex-1 flex flex-col gap-1">
@@ -485,8 +449,8 @@ const i18n = {
         <div
           class="glass rounded-card p-5 sm:p-7 lg:max-w-3xl lg:mx-auto"
           role="tabpanel"
-          id="panel-harmony"
-          aria-labelledby="tab-harmony"
+          id="platform-tabs-panel-harmony"
+          aria-labelledby="platform-tabs-tab-harmony"
           data-harmony-panel
           hidden
         >
@@ -510,7 +474,7 @@ const i18n = {
       </div>
 
       <div class="mt-6 flex justify-end">
-        <a href="/cli/" class="inline-flex items-center gap-2 text-body-medium text-primary hover:underline no-underline">Luotopia CLI →</a>
+        <a href={routeUrl(locale, "cli")} class="inline-flex items-center gap-2 text-body-medium text-primary hover:underline no-underline">Luotopia CLI →</a>
       </div>
 
       <noscript>
@@ -615,66 +579,6 @@ const i18n = {
   }
 
   /*
-   * ── The store CTA ──
-   *
-    * The Apple / Windows cards' primary action, rendered by storeCtaHtml: a
-    * full-width raised button so TestFlight / Microsoft Store finally outweigh the
-    * direct DMG / zip rows that used to out-shine them. It is the raised-glass
-    * rung (glass-control fill + sheen), NOT `filled-glass`: the button sits inside
-    * a `.glass` card, where the design rules forbid a nested backdrop-filter, and
-    * the brand marks are coloured (TestFlight's blue squircle, the Store bag's
-    * Fluent blue), so a primary fill would fight them. The 1px primary ring is
-    * what lifts it from an ordinary inset row to "the button" — a plain var(), not
-    * a color-mix, so it survives the Chrome 66 / Safari 12 build target.
-    *
-    * The ring is the *whole* edge treatment: no `--lt-glass-rim` hairline on top
-    * of it. Box shadows stack first-painted-on-top, so the rim the glass rungs
-    * carry landed on the ring's top edge only and overwrote it there — in light
-    * mode a white 85% line over #005BAC, which read as one pale edge against
-    * three blue ones. Dark mode hid it (its rim is white at 16%), so the seam
-    * only ever showed on the light theme. The sheen still supplies the lit-from-
-    * above read the rim was standing in for.
-   *
-   * `color` is set for the `state-layer` press/hover tint, which paints
-   * `currentColor`; the label / subtitle spans override it with their own roles.
-   */
-  .lt-dl-store {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    width: 100%;
-    padding: 0.7rem 0.8rem;
-    text-align: left;
-    color: var(--lt-color-on-surface);
-    border-radius: var(--lt-radius-control);
-    background-color: var(--lt-glass-control);
-    background-image: var(--lt-glass-sheen);
-    box-shadow:
-      inset 0 0 0 1px var(--lt-color-primary),
-      0 8px 20px -14px hsl(215 45% 18% / 0.5);
-    transition:
-      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  @media (hover: hover) {
-    .lt-dl-store:hover {
-      transform: translateY(-2px);
-      box-shadow:
-        inset 0 0 0 1px var(--lt-color-primary),
-        0 14px 30px -16px hsl(215 45% 18% / 0.55);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .lt-dl-store,
-    .lt-dl-store:hover {
-      transition: none;
-      transform: none;
-    }
-  }
-
-  /*
    * ── The changelog clamp ──
    *
    * One release note is a page of its own, and five of them per page made
@@ -739,13 +643,6 @@ const i18n = {
    * class rather than `prefers-color-scheme` because that is how this site
    * switches theme (`docs.css` does the same for the docs' fenced blocks).
    */
-  .lt-dl-code span {
-    color: var(--shiki-light);
-  }
-
-  html.dark .lt-dl-code span {
-    color: var(--shiki-dark);
-  }
 
   .lt-dl-more[aria-expanded="true"] .lt-dl-caret {
     transform: rotate(180deg);
@@ -760,6 +657,8 @@ const i18n = {
 
 <script>
   import { onPageSetup } from "../../scripts/page-lifecycle";
+  import { architecturePickerHtml, bindArchitecturePicker } from "../../scripts/architecture-picker";
+  import { escapeHtml, formatSize, formatDate as formatReleaseDate, releaseBadgeHtml, fillTemplate as fill } from "../../scripts/download-ui";
   import { formatReleaseNotes } from "../../scripts/release-notes";
   import { normalizeIconSvg } from "../../scripts/icon-svg";
   import downloadIconRaw from "@material-symbols/svg-400/outlined/download.svg?raw";
@@ -854,27 +753,6 @@ const i18n = {
       notesCollapse: dataset.i18nNotesCollapse ?? "",
     };
 
-    /**
-     * `{name}` substitution.
-     *
-     * `String.prototype.replaceAll` is Chrome 85 and the bundle's floor is 66, so
-     * this is a global regex instead. Unknown placeholders are left alone rather
-     * than blanked, so a typo in a dictionary shows up on the page instead of
-     * silently deleting part of the sentence.
-     */
-    function fill(template: string, vars: Record<string, string | number>): string {
-      return template.replace(/\{([a-zA-Z][a-zA-Z0-9]*)\}/g, (match, name: string) =>
-        Object.prototype.hasOwnProperty.call(vars, name) ? String(vars[name]) : match,
-      );
-    }
-
-    function formatSize(bytes) {
-      if (!bytes && bytes !== 0) return "";
-      if (bytes < 1024) return bytes + " B";
-      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-      return (bytes / (1024 * 1024)).toFixed(1) + " MB";
-    }
-
     /** Split name so UI can truncate base while keeping suffix (e.g. .tar.gz) visible. */
     function splitFilename(name) {
       const n = String(name || "");
@@ -894,22 +772,7 @@ const i18n = {
      * which is what passing `undefined` means.
      */
     function formatDate(iso) {
-      if (!iso) return "";
-      try {
-        return new Date(iso).toLocaleDateString(copy.locale || undefined, { year: "numeric", month: "short", day: "numeric" });
-      } catch {
-        return iso.slice(0, 10);
-      }
-    }
-
-    function escapeHtml(s) {
-      // `replace(/g)`, not `replaceAll` (Chrome 85+): this bundle must parse
-      // and run on WebView kernels back to ~66.
-      return String(s)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
+      return formatReleaseDate(iso, copy.locale);
     }
 
     function formatBody(body) {
@@ -917,11 +780,11 @@ const i18n = {
     }
 
     function prereleaseBadge() {
-      return `<span class="inline-block px-2 py-0.5 rounded-sm bg-error-container text-on-error-container text-label-medium">${copy.prerelease}</span>`;
+      return releaseBadgeHtml(copy.prerelease, true);
     }
 
     function stableBadge(text) {
-      return `<span class="inline-block px-2.5 py-0.5 rounded-sm bg-primary-container text-on-primary-container text-label-medium">${escapeHtml(text)}</span>`;
+      return releaseBadgeHtml(text, false);
     }
 
     function statusBadge(text) {
@@ -998,7 +861,7 @@ const i18n = {
       const icon =
         brandIconHtml(externalUrl, "text-[26px]") ||
         normalizeIconSvg(openInNewIconRaw, "text-[22px] shrink-0");
-      const cta = `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="lt-dl-store state-layer no-underline">
+      const cta = `<a href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer" class="lt-download-action state-layer no-underline">
           ${icon}
           <span class="min-w-0 flex-1 flex flex-col gap-1">
             <span class="self-start px-2 py-0.5 rounded-sm bg-primary-container text-on-primary-container text-label-small leading-none">${escapeHtml(copy.recommended)}</span>
@@ -1092,7 +955,6 @@ const i18n = {
      */
     const ARCH_FILTER_DEFAULT = { windows: "x64", linux: "x64" };
     const archChoice = {};
-    const cardAssetState = {};
 
     function archBucketOf(a) {
       if (a.arch === "amd64") return "x64";
@@ -1124,7 +986,7 @@ const i18n = {
       const rec = a.recommended
         ? `<span class="self-start px-2 py-0.5 rounded-sm bg-primary-container text-on-primary-container text-label-small leading-none">${escapeHtml(copy.recommended)}</span>`
         : "";
-      return `<a href="${escapeHtml(a.url)}" title="${escapeHtml(a.name)}" class="lt-dl-store state-layer no-underline" download>
+      return `<a href="${escapeHtml(a.url)}" title="${escapeHtml(a.name)}" class="lt-download-action state-layer no-underline" download>
           ${primaryDownloadIcon}
           <span class="min-w-0 flex-1 flex flex-col gap-1">
             ${rec}
@@ -1172,16 +1034,6 @@ const i18n = {
           <span class="truncate min-w-0">${escapeHtml(title)}</span>
           <span class="shrink-0 text-outline">· ${formatSize(a.size)}</span>
         </a>`;
-    }
-
-    function archSwitcherHtml(id) {
-      const seg = (key) => {
-        const active = archChoice[id] === key;
-        return `<button type="button" data-arch="${key}" aria-pressed="${active ? "true" : "false"}" class="state-layer rounded-full px-2.5 py-0.5 text-label-medium cursor-pointer ${active ? "lt-inset-raised text-primary" : "bg-transparent text-on-surface-variant"}">${key}</button>`;
-      };
-      /* Escaped because it lands in an attribute: Astro escaped the literal this
-       * replaced, and a translated value must not be able to close the quote. */
-      return `<div class="inline-flex items-center gap-0.5 rounded-full lt-inset p-0.5" role="group" aria-label="${escapeHtml(copy.archFilter)}">${seg("x64")}${seg("arm64")}</div>`;
     }
 
     /**
@@ -1251,7 +1103,7 @@ const i18n = {
       if (!archChoice[id]) archChoice[id] = ARCH_FILTER_DEFAULT[id];
       const choice = archChoice[id];
       return {
-        switcher: archSwitcherHtml(id),
+        switcher: architecturePickerHtml(id, ["x64", "arm64"], choice, copy.archFilter),
         list: installers.filter((a) => {
           const bucket = archBucketOf(a);
           return bucket === null || bucket === choice;
@@ -1386,41 +1238,13 @@ const i18n = {
         }
         const installers = platformAssets.filter((a) => !a.meta);
         const storeCta = storeCtaHtml(card);
-        cardAssetState[id] = { installers, storeCta, assetsEl };
         paintAssets(assetsEl, cardAssetsHtml(id, installers, storeCta));
 
         if (Object.prototype.hasOwnProperty.call(ARCH_FILTER_DEFAULT, id)) {
-          // Delegated: the switcher buttons live in innerHTML that is replaced
-          // on every toggle, while assetsEl itself is static Astro markup.
-          assetsEl.addEventListener(
-            "click",
-            (ev) => {
-              const btn =
-                ev.target && ev.target.closest
-                  ? ev.target.closest("button[data-arch]")
-                  : null;
-              if (!btn || !assetsEl.contains(btn)) return;
-              const state = cardAssetState[id];
-              if (!state) return;
-              const nextArch = btn.getAttribute("data-arch");
-              // Replacing innerHTML detaches the focused segment and drops
-              // focus to <body>; park it back on the same segment (the
-              // changelog pager does the same with its list).
-              const hadFocus = assetsEl.contains(document.activeElement);
-              archChoice[id] = nextArch;
-              paintAssets(
-                state.assetsEl,
-                cardAssetsHtml(id, state.installers, state.storeCta),
-              );
-              if (hadFocus) {
-                const restored = state.assetsEl.querySelector(
-                  `button[data-arch="${nextArch}"]`,
-                );
-                if (restored) restored.focus({ preventScroll: true });
-              }
-            },
-            { signal },
-          );
+          bindArchitecturePicker(assetsEl, signal, (_, nextArch) => {
+            archChoice[id] = nextArch;
+            paintAssets(assetsEl, cardAssetsHtml(id, installers, storeCta));
+          });
         }
       });
 
@@ -1867,83 +1691,6 @@ const i18n = {
     nextBtn?.addEventListener("click", () => {
       if (hasNext) loadChangelog(page + 1);
     }, { signal });
-
-    /*
-     * ── Platform tabs ──
-     *
-     * The panels are server-rendered with only the first visible; this picks the
-     * one that matches the visitor. Order of precedence: a `#windows`-style hash
-     * (the home page's button links to it), then the detected system, then the
-     * first tab. The detected tab also gets a "Your device" tag, so a visitor
-     * who switches away can see which one was theirs.
-     *
-     * Detection is deliberately coarse and Chrome-66-safe (`userAgentData` is
-     * only a bonus). Android is tested before HarmonyOS because HarmonyOS 2–4
-     * phones run the APK; only NEXT/OpenHarmony, which has no Android layer,
-     * gets the sideload panel.
-     */
-    const tabsEl = document.getElementById("platform-tabs");
-    const tabBtns = tabsEl ? Array.prototype.slice.call(tabsEl.querySelectorAll("[data-tab]")) : [];
-
-    function detectPlatform() {
-      const ua = navigator.userAgent || "";
-      const uad = navigator.userAgentData;
-      const plat = (uad && uad.platform) || navigator.platform || "";
-      if (/Android/i.test(ua)) return "android";
-      if (/OpenHarmony|HarmonyOS/i.test(ua)) return "harmony";
-      if (/iPhone|iPad|iPod/i.test(ua)) return "apple";
-      if (/Mac/i.test(plat) || /Macintosh/i.test(ua)) return "apple";
-      if (/Win/i.test(plat) || /Windows/i.test(ua)) return "windows";
-      if (/Linux|X11|CrOS/i.test(ua) || /Linux/i.test(plat)) return "linux";
-      return null;
-    }
-
-    function selectTab(id, focus) {
-      let found = false;
-      tabBtns.forEach((btn) => {
-        const on = btn.getAttribute("data-tab") === id;
-        if (on) found = true;
-        btn.setAttribute("aria-selected", on ? "true" : "false");
-        btn.setAttribute("tabindex", on ? "0" : "-1");
-        btn.classList.toggle("lt-inset-raised", on);
-        btn.classList.toggle("text-primary", on);
-        btn.classList.toggle("bg-transparent", !on);
-        btn.classList.toggle("text-on-surface-variant", !on);
-        if (on && focus) btn.focus({ preventScroll: true });
-      });
-      if (!found) return;
-      document.querySelectorAll("#platform-grid [role='tabpanel']").forEach((panel) => {
-        panel.hidden = panel.id !== "panel-" + id;
-      });
-    }
-
-    if (tabBtns.length > 0) {
-      const detected = detectPlatform();
-      const fromHash = (location.hash || "").replace(/^#/, "");
-      const known = (id) => tabBtns.some((b) => b.getAttribute("data-tab") === id);
-      if (detected && known(detected)) {
-        const tag = tabsEl.querySelector(`[data-tab="${detected}"] .lt-dl-tabrec`);
-        if (tag) tag.classList.remove("hidden");
-      }
-      selectTab(known(fromHash) ? fromHash : detected && known(detected) ? detected : tabBtns[0].getAttribute("data-tab"), false);
-
-      tabsEl.addEventListener("click", (ev) => {
-        const btn = ev.target && ev.target.closest ? ev.target.closest("[data-tab]") : null;
-        if (btn && tabsEl.contains(btn)) selectTab(btn.getAttribute("data-tab"), false);
-      }, { signal });
-      tabsEl.addEventListener("keydown", (ev) => {
-        const i = tabBtns.indexOf(document.activeElement);
-        if (i < 0) return;
-        let n = -1;
-        if (ev.key === "ArrowRight") n = (i + 1) % tabBtns.length;
-        else if (ev.key === "ArrowLeft") n = (i - 1 + tabBtns.length) % tabBtns.length;
-        else if (ev.key === "Home") n = 0;
-        else if (ev.key === "End") n = tabBtns.length - 1;
-        if (n < 0) return;
-        ev.preventDefault();
-        selectTab(tabBtns[n].getAttribute("data-tab"), true);
-      }, { signal });
-    }
 
     loadLatest();
     loadChangelog(1);

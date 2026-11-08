@@ -45,6 +45,23 @@ astro dev stop
 页面上的交互一律是原生 TypeScript，通过 `onPageSetup()` 挂载 —— 没有 React/Vue。
 新增交互前请先读 [页面约定](#页面约定)。
 
+App 与 CLI 下载页共用 `src/components/PlatformTabs.astro`：传入系统列表、每项对应的
+设备类型与本地化文案；面板的 `id` 为 `<组件 id>-panel-<系统 id>`，
+`aria-labelledby` 为 `<组件 id>-tab-<系统 id>`。组件统一处理系统识别、URL hash
+优先选择、键盘导航与页面切换清理。设备识别在 `src/scripts/device-platform.ts`，
+主下载链接共用 `src/styles/download.css` 的 `.lt-download-action` 样式。
+
+架构选择器由 `src/scripts/architecture-picker.ts` 统一渲染与绑定，替换下载列表后会
+恢复键盘焦点。两页的转义、文件大小、日期、版本徽章和模板替换共用
+`src/scripts/download-ui.ts`，更新日志排版共用 `src/scripts/release-notes.ts`。
+`functions/lib/github-releases.ts` 的 `mapReleaseAsset()` 为 App 与 CLI 提供同一套
+资产字段；CLI 的二进制文件为 `format: "binary"`，校验文件为
+`format: "checksum"`、`meta: true`。CLI 页面正文在 `CliPage.astro`，各语言路由只负责挂载。
+两页的命令块使用 Shiki 的 github-light / github-dark 双主题及 `.lt-download-code`。
+CLI 按实际下载文件名更新高亮模板，复制按钮始终复制当前架构的完整命令，并提供本地化反馈。
+macOS v0.1.0-alpha.2 的 arm64 文件为 ad-hoc 签名，amd64 无签名；页面提供 Gatekeeper
+首次运行指引。此结论来自发布文件的 Mach-O 签名信息及 SHA-256 校验，未在本机执行 macOS 文件。
+
 ## 目录结构
 
 ```
@@ -111,8 +128,12 @@ Cloudflare 运行时的东西），本地访问 `/api/status` 会 404。这个�
 内存 Map。凭据按 wrangler 的顺序读：`.dev.vars` → `.env.local` → `.env` →
 真实环境变量；没有 key 时返回 503 `not_configured`，和生产一致。
 
-其他 `/api/*`（releases、appstore）本地没有对应中间件，`/download` 会退回静态占位
-文案 —— 要验证它们得用 `npm run build && npx wrangler pages dev dist`。
+下载相关 API 在 `astro dev` 下由 `tools/vite/dev-fixtures.mjs` 提供数据快照，
+包括 App Releases、App Store、Microsoft Store 和 `/api/cli/releases`；
+CLI 快照为 `tools/dev-fixtures/cli-releases.json`。不配置 Token 也能预览两页的下载列表、
+架构切换与更新日志。设置 `LT_DEV_FIXTURES=0` 可关闭快照。
+快照只提供展示数据；验证真实 API 和安装包下载仍需
+`npm run build && npx wrangler pages dev dist` 及具有 CLI 私有仓库读取权限的 `GITHUB_TOKEN`。
 
 ## 构建目标：Chrome 66
 
@@ -307,7 +328,7 @@ GPLv3，需要单独评估），见 [public/scales/README.md](../public/scales/R
 页面组件里**不传 locale**，一律读 `Astro.currentLocale`（Astro 按路由填：`/en/features`
 → `en`，`/features` → 默认语种）。这样路由文件只是壳，两份实现不可能对不上。
 
-十个语种当前都翻了全部 12 条路由。`TRANSLATED_ROUTES` 因此对每个语种都是
+十个语种当前都翻了全部 13 条路由（含 CLI 下载页）。`TRANSLATED_ROUTES` 因此对每个语种都是
 `ALL_ROUTES`——但**保留这张表**，因为「某语种只翻一部分」是随时可能再出现的状态，而
 链接生成、`hreflang`、中间件的重定向闸门三处都靠它。
 
