@@ -259,8 +259,13 @@ Universal Links（applinks），链接与 App 内路由一一对应（GoRouter �
 维护要点：
 
 - `public/.well-known/assetlinks.json` 里的 `sha256_cert_fingerprints` 必须与
-  **实际分发的签名证书**一致（当前包含 release 证书与仓库共享 debug 证书）。更换
-  签名密钥后要同步更新，否则 Android 侧验证失效。指纹用
+  **实际分发的签名证书**一致。当前包含 CI release / Play upload 证书、两张
+  Google Play App Signing 证书，以及仓库共享 debug 证书。两张 Play 证书分别以
+  `4E:EA:2D:AC`、`13:36:77:98` 开头；需同时覆盖新旧系统可能收到的 Play 签名版本，
+  不能用 upload 证书代替。App 端可交叉核对
+  `lib/core/security/app_security_controller.dart` 的 `signingCertHashes` 和
+  `native/key_obfuscator/src/caller_gate.rs` 的 `PINNED_SIGNER_SHA256`。
+  更换签名密钥后要同步更新，否则 Android 侧验证失效。指纹用
   `apksigner verify --print-certs app.apk` 查看。
 - `public/.well-known/apple-app-site-association` 对应 Team ID `ZW372988NV`，经
   `public/_headers` 以 `application/json` 提供；该文件必须**无重定向**直达。
@@ -272,6 +277,28 @@ Universal Links（applinks），链接与 App 内路由一一对应（GoRouter �
   提示「App 里可能没有这个页面，仍会尝试打开」，但**唤起照常进行** —— 列表过期不
   应该拦住一个本来能成功的跳转。只校验首段是有意的：App 有数百个嵌套路由且随版本
   变动，更深的匹配交给客户端自己的错误页。
+
+#### Play Console 的 custom scheme 升级提示
+
+Manifest 同时声明 `luotopia://app/*` 与已启用 `autoVerify` 的
+`https://luotopia.whu.sb/*`。对外分享使用后者，例如
+`https://luotopia.whu.sb/campus/bus`；旧 scheme 仍用于通知、小组件和网页手动唤起。
+“将 1 个 custom scheme link 升级为 app link”是针对旧 scheme 的改进建议，
+不能仅凭这条提示判断 HTTPS 域名验证失败，也不需要为消除计数删掉仍在使用的入口。
+
+在 Console 的“深层链接”页选择实际发布版本，检查 `luotopia.whu.sb` 的域名状态，
+并与“应用完整性”里的**应用签名密钥证书**核对，勿误用上传密钥证书。
+本地文件修改须部署官网才会生效；域名状态更新和设备重新验证可能需要等待缓存过期。
+Android 12+ 可用实际 Play 安装包检查：
+
+```sh
+adb shell pm verify-app-links --re-verify sb.whu.luotopia
+adb shell pm get-app-links sb.whu.luotopia
+adb shell am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "https://luotopia.whu.sb/campus/bus"
+```
+
+域名应显示 `verified`。最后一条故意不指定包名，以检验系统的实际链接分发结果。
+参考：[Play Console 深层链接说明](https://support.google.com/googleplay/android-developer/answer/12463044)。
 
 校验：
 

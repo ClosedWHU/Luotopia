@@ -270,9 +270,14 @@ link.
 Maintenance notes:
 
 - `sha256_cert_fingerprints` in `public/.well-known/assetlinks.json` must match the
-  **actually distributed signing certificate** (currently the release certificate
-  and the repository's shared debug certificate). Update it whenever the signing key
-  changes or Android verification breaks. Read the fingerprints with
+  **actually distributed signing certificates**: the CI release / Play upload
+  certificate, both Google Play App Signing certificates, and the repository's
+  shared debug certificate. The Play fingerprints start with `4E:EA:2D:AC` and
+  `13:36:77:98`; cover both signing versions served by Play rather than substituting
+  the upload certificate. Cross-check the app's `signingCertHashes` in
+  `lib/core/security/app_security_controller.dart` and `PINNED_SIGNER_SHA256` in
+  `native/key_obfuscator/src/caller_gate.rs`. Update the association whenever a
+  signing key changes or Android verification breaks. Read the fingerprints with
   `apksigner verify --print-certs app.apk`.
 - `public/.well-known/apple-app-site-association` is for Team ID `ZW372988NV`,
   served as `application/json` via `public/_headers`; it must be reachable **with no
@@ -289,6 +294,30 @@ Maintenance notes:
   have worked. Only the first segment is checked on purpose: the app has hundreds of
   nested routes that change per release, so deeper matching is left to the client's
   own error page.
+
+#### Play Console custom-scheme upgrade suggestion
+
+The manifest declares both `luotopia://app/*` and the auto-verified
+`https://luotopia.whu.sb/*`. Use HTTPS for public links, such as
+`https://luotopia.whu.sb/campus/bus`. Notifications, widgets and the browser's
+manual launch action still use the custom scheme. The suggestion to upgrade one
+custom-scheme link does not by itself mean HTTPS domain verification has failed.
+
+In Play Console's Deep links page, select the actual released version and inspect
+the status of `luotopia.whu.sb`. Compare the association with the **app signing key
+certificates** under App integrity, rather than the upload key certificate. Deploy
+the website change before checking again; caches and device re-verification may
+take time. With a Play-installed app on Android 12+, run:
+
+```sh
+adb shell pm verify-app-links --re-verify sb.whu.luotopia
+adb shell pm get-app-links sb.whu.luotopia
+adb shell am start -W -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d "https://luotopia.whu.sb/campus/bus"
+```
+
+The domain should be `verified`. The last command intentionally omits a package
+name so it tests actual system link resolution. See
+[Play Console Deep links help](https://support.google.com/googleplay/android-developer/answer/12463044).
 
 Validate:
 
