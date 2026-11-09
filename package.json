@@ -37,7 +37,7 @@
     "@fontsource/noto-sans-tc": "^5.3.1",
     "@material-symbols/svg-400": "^0.48.3",
     "@paper-design/shaders": "^0.0.82",
-    "@tailwindcss/vite": "^4.3.3",
+    "@tailwindcss/vite": "^4.3.4",
     "astro": "^7.4.4",
     "lenis": "^1.3.27",
     "mermaid": "^12.3.0",
