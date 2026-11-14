@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Exercise the real release-context shell without contacting GitHub."""
 
+import configparser
 import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import tempfile
 import textwrap
@@ -14,15 +16,9 @@ WORKFLOW = Path(__file__).resolve().parents[1] / "workflows/app-release.yml"
 
 
 def resolve_script():
-    lines = WORKFLOW.read_text().splitlines()
-    start = lines.index("      - name: Resolve")
-    start = lines.index("        run: |", start) + 1
-    code = []
-    for line in lines[start:]:
-        if line and not line.startswith("          "):
-            break
-        code.append(line)
-    return textwrap.dedent("\n".join(code))
+    step = WORKFLOW.read_text(encoding="utf-8").split("      - name: Resolve\n", 1)[1]
+    code = re.search(r"^        run: \|\n((?:          .*\n|\n)+)", step, re.MULTILINE)
+    return textwrap.dedent(code[1])
 
 
 class ReleaseContextTest(unittest.TestCase):
@@ -37,6 +33,7 @@ class ReleaseContextTest(unittest.TestCase):
             "inputs.apple_action": "build", "inputs.distribute_apple_external": "true",
             "inputs.build_windows": "true", "inputs.build_macos": "false",
             "inputs.windows_arch": "both",
+            "inputs.submit_store": "false", "inputs.rebuild": "false",
             "inputs.build_ios_testflight": "false", "inputs.build_macos_testflight": "false",
             "inputs.upload_apple_testflight": "true", "inputs.build_linux": "true",
             "inputs.build_ohos": "false", "inputs.linux_arch": "both",
@@ -46,14 +43,24 @@ class ReleaseContextTest(unittest.TestCase):
         code = re.sub(r"\$\{\{\s*([^}]+?)\s*\}\}", lambda match: values[match[1]], resolve_script())
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "outputs"
-            result = subprocess.run(["bash", "-c", code], env=dict(os.environ, GITHUB_OUTPUT=str(output)),
-                                    capture_output=True, text=True, timeout=10)
+            gh = Path(directory) / "gh"
+            gh.write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+            gh.chmod(0o700)
+            result = subprocess.run([shutil.which("bash"), "-s"], input=code,
+                                    env=dict(os.environ, GITHUB_OUTPUT=output.as_posix(),
+                                             PATH=directory + os.pathsep + os.environ["PATH"]),
+                                    capture_output=True, text=True, encoding="utf-8", timeout=10)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-            return dict(line.split("=", 1) for line in output.read_text().splitlines())
+            outputs = configparser.ConfigParser(interpolation=None)
+            outputs.read_string("[outputs]\n" + output.read_text(encoding="utf-8"))
+            return dict(outputs["outputs"])
 
     def assert_no_public_platforms(self, outputs):
-        for name in ("build_android", "build_windows", "build_linux", "build_ohos", "build_macos"):
-            self.assertEqual(outputs[name], "false", name)
+        self.assertEqual(outputs["build_android"], "false")
+        self.assertEqual(outputs["build_windows"], "false")
+        self.assertEqual(outputs["build_linux"], "false")
+        self.assertEqual(outputs["build_ohos"], "false")
+        self.assertEqual(outputs["build_macos"], "false")
 
     def test_plus14_is_apple_only_even_with_other_platform_defaults_enabled(self):
         outputs = self.resolve(**{"inputs.tag": "v1.0.1+14"})
