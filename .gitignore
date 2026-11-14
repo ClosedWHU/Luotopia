@@ -53,6 +53,4 @@ public/hot-update/manifest.json
 public/hot-update/assets/model-metadata-catalog.json.gz
 public/screenshots/
 
-# claude agent config
-AGENTS.md
-CLAUDE.md
+# Project AGENTS.md / CLAUDE.md are shared development entry points.
