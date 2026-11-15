@@ -699,11 +699,6 @@ jobs:
           bash tool/fetch_fjs_xcframework.sh
           bash tool/sync_model_metadata.sh --strict
 
-      - name: Patch liquid_glass_easy shaders (remove main() early return)
-        if: needs.context.outputs.apple_action == 'build'
-        shell: pwsh
-        run: ./scripts/patch_liquid_glass_shaders.ps1
-
       - name: Test release orchestration
         if: needs.context.outputs.apple_action == 'build'
         run: |
@@ -968,15 +963,8 @@ jobs:
           fi
 
       - name: Patch freerasp for AGP 9 built-in Kotlin
-        shell: pwsh
-        # freerasp 8.2.2's android/build.gradle still applies the legacy
-        # kotlin-android plugin, which AGP 9 rejects outright. Fresh CI caches
-        # always carry the pristine sources, so this must run on every build.
-        run: ./scripts/patch_freerasp_kotlin.ps1
-
-      - name: Patch liquid_glass_easy shaders (remove main() early return)
-        shell: pwsh
-        run: ./scripts/patch_liquid_glass_shaders.ps1
+        shell: bash
+        run: bash tool/patch_freerasp_agp9.sh
 
       - name: Build release split APKs (signed, obfuscated)
         if: matrix.package == 'apk'
@@ -1353,10 +1341,6 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Patch liquid_glass_easy shaders (remove main() early return)
-        shell: pwsh
-        run: ./scripts/patch_liquid_glass_shaders.ps1
-
       - name: Fetch native prebuilts
         env:
           GITHUB_TOKEN: ${{ env.APP_TOKEN }}
@@ -1610,10 +1594,6 @@ jobs:
         run: |
           dart run tool/strip_windows_firebase.dart
           flutter pub get
-
-      - name: Patch liquid_glass_easy shaders (remove main() early return)
-        shell: pwsh
-        run: ./scripts/patch_liquid_glass_shaders.ps1
 
       - name: Fetch native prebuilts
         env:
@@ -2529,11 +2509,6 @@ jobs:
         run: |
           export PATH="$HOME/flutter/bin:$PATH"
           flutter pub get
-
-      - name: Patch liquid_glass_easy shaders (remove main() early return)
-        if: steps.sel.outputs.run == 'true'
-        shell: pwsh
-        run: ./scripts/patch_liquid_glass_shaders.ps1
 
       - name: Fetch native prebuilts
         if: steps.sel.outputs.run == 'true'
