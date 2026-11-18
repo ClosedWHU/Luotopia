@@ -1727,7 +1727,7 @@ jobs:
           # run the exe" is not obvious to everyone: ship the instructions
           # inside the archive (BOM+CRLF so Notepad renders the Chinese).
           cp packaging/windows/portable-readme.txt "$STAGE/luotopia/README.txt"
-          find "$STAGE" -type f \( -iname '*.pdb' -o -iname '*debug*' \) -delete || true
+          find "$STAGE" -type f -iname '*.pdb' -delete
           (
             cd "$STAGE"
             powershell.exe -NoProfile -Command \
@@ -2404,8 +2404,8 @@ jobs:
             clang cmake ninja-build pkg-config \
             libgtk-3-dev liblzma-dev libstdc++-12-dev \
             libsecret-1-dev libjsoncpp-dev \
-            libwebkit2gtk-4.1-dev \
-            dpkg-dev fakeroot desktop-file-utils elfutils
+            libsoup-3.0-dev libepoxy-dev libwayland-dev \
+            dpkg-dev fakeroot desktop-file-utils elfutils file patchelf pax-utils libpulse0
           # Flatpak packaging deps (optional — the packaging script skips what is
           # missing). imagemagick downscales the 1024px app icon for the
           # hicolor/256x256 slot; without a resizer flatpak-builder's export step
@@ -2440,6 +2440,21 @@ jobs:
           )
           command -v appimagetool
           appimagetool --version || true
+
+      - name: Cache Linux WPE SDK
+        if: steps.sel.outputs.run == 'true'
+        uses: actions/cache@v6
+        with:
+          path: build/native/wpe/sdk
+          key: Linux-${{ matrix.arch }}-wpe-${{ hashFiles('scripts/linux_wpe/Dockerfile', 'scripts/linux_wpe/build-sdk.sh', 'scripts/linux_wpe/relocate.py') }}
+
+      - name: Prepare bundled Linux WPE
+        if: steps.sel.outputs.run == 'true'
+        run: |
+          set -euo pipefail
+          bash scripts/prepare_linux_wpe.sh
+          echo "PKG_CONFIG_PATH=$GITHUB_WORKSPACE/build/native/wpe/sdk/lib/pkgconfig" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/build/native/wpe/runtime/lib" >> "$GITHUB_ENV"
 
       # The pinned fjs generation (a73359fe / precompiled_dd0cf313...) ships
       # signed aarch64-unknown-linux-gnu artifacts, so arm64 resolves from the

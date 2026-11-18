@@ -11,7 +11,11 @@ sidebar:
 
 ## 框架边界
 
-底层栈为 `zikzak_inappwebview`，页面层通过平台中立抽象 `AppWebViewController`（`shared/presentation/widgets/webview/app_web_view_types.dart`）访问：Linux 走 `webview_all`（WebKitGTK）后端，其余原生平台走 Zikzak 后端。业务代码只面向抽象，不直接依赖插件类型。
+页面层通过平台中立抽象 `AppWebViewController`（`shared/presentation/widgets/webview/app_web_view_types.dart`）访问 WebView。标准 Flutter 平台统一使用 `zikzak_inappwebview`：Windows 底层为 WebView2，Linux 随包交付 WPE 引擎。业务代码只面向抽象，不直接依赖插件类型。OpenHarmony 使用独立的兼容依赖清单。
+
+`zikzak_inappwebview` 6.4.1 提供 Windows Cookie/profile、导航拦截、文档起始脚本及 `loadData(baseUrl)` 的 HTTP origin 支持。App 的 Windows 页面与 Cookie 操作共同等待 `AppWindowsWebViewEnvironment`，按主机清理 Cookie 时覆盖所有路径并保留其他主机的会话。VPN 代理参数由既有 VPN 状态在首次创建 environment 时提供；WebView2 的进程级环境创建后不能动态切换代理，需要重启 App 才能使用新的参数。
+
+Windows 实现目前另外固定到已合并的 [导航拦截修复（#450）](https://github.com/arrrrny/zikzak_inappwebview/pull/450)，解决 6.4.1 首次拦截导航挂起及后续导航丢失策略的问题；该修复发布后可移除临时 Git override。
 
 `AppWebViewPage` 负责通用生命周期：
 
