@@ -1,0 +1,216 @@
+---
+import { resolveLocale, useTranslations } from "../i18n/ui";
+
+const t = useTranslations(resolveLocale(Astro.currentLocale));
+---
+
+<section
+  class="relative pb-24 px-4"
+  aria-labelledby="community-contributors-title"
+  data-contributors-page
+  data-contributors-commits={t("community.contributors.commits")}
+  data-contributors-added={t("community.contributors.added")}
+  data-contributors-deleted={t("community.contributors.deleted")}
+  data-contributors-canceled-added={t("community.contributors.canceledAdded")}
+  data-contributors-canceled-deleted={t("community.contributors.canceledDeleted")}
+  data-contributors-net-added={t("community.contributors.netAdded")}
+  data-contributors-net-deleted={t("community.contributors.netDeleted")}
+  data-contributors-error={t("community.contributors.error")}
+  data-contributors-empty={t("community.contributors.empty")}
+>
+  <div class="max-w-content mx-auto">
+    <div class="mb-6 max-w-2xl">
+      <h2 id="community-contributors-title" class="text-title-large text-on-surface mb-2">
+        {t("community.contributors.title")}
+      </h2>
+      <p class="text-body-large text-on-surface-variant">
+        {t("community.contributors.subtitle")}
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <section class="lt-contributors-panel glass rounded-group p-5 sm:p-6" aria-labelledby="community-contributors-human-title">
+        <h3 id="community-contributors-human-title" class="text-title-medium text-on-surface mb-4">
+          {t("community.contributors.humans")}
+        </h3>
+        <p class="text-body-medium text-on-surface-variant" data-contributors-state="human">
+          {t("community.contributors.loading")}
+        </p>
+        <div class="lt-contributors-list" data-contributors-group="human"></div>
+      </section>
+
+      <section class="lt-contributors-panel glass rounded-group p-5 sm:p-6" aria-labelledby="community-contributors-bot-title">
+        <h3 id="community-contributors-bot-title" class="text-title-medium text-on-surface mb-4">
+          {t("community.contributors.bots")}
+        </h3>
+        <p class="text-body-medium text-on-surface-variant" data-contributors-state="bot">
+          {t("community.contributors.loading")}
+        </p>
+        <div class="lt-contributors-list" data-contributors-group="bot"></div>
+      </section>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { onPageSetup } from "../scripts/page-lifecycle";
+
+  type Contributor = {
+    name: string;
+    type: "human" | "bot";
+    commits: number;
+    addedLines: number;
+    deletedLines: number;
+    canceledAddedLines: number;
+    canceledDeletedLines: number;
+    netLines: number;
+    rankScoreKsloc: number;
+    avatarUrl: string | null;
+  };
+
+  type ContributorsResponse = {
+    humanContributors: Contributor[];
+    botContributors: Contributor[];
+  };
+
+  function escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function initials(name: string): string {
+    return name.trim().slice(0, 1).toUpperCase() || "?";
+  }
+
+  function formatLines(value: number): string {
+    const absolute = Math.abs(Math.round(value));
+    if (absolute < 1000) return `<1k ${absolute} 行`;
+    if (absolute < 1000000) {
+      return `${(absolute / 1000).toFixed(absolute < 10000 ? 1 : 0).replace(/\.0$/, "")}k 行`;
+    }
+    return `${(absolute / 1000000).toFixed(absolute < 10000000 ? 1 : 0).replace(/\.0$/, "")}m 行`;
+  }
+
+  function renderGroup(
+    group: HTMLElement,
+    state: HTMLElement,
+    items: Contributor[],
+    commitsTemplate: string,
+    labels: Record<string, string>,
+    emptyText: string,
+  ): void {
+    if (!items.length) {
+      state.textContent = emptyText;
+      return;
+    }
+    state.textContent = "";
+    group.innerHTML = items.map((item, index) => {
+      const avatar = item.avatarUrl
+        ? `<img class="lt-contributor-avatar" src="${escapeHtml(item.avatarUrl)}" alt="" loading="lazy" width="40" height="40">`
+        : `<span class="lt-contributor-avatar lt-contributor-avatar-fallback" aria-hidden="true">${escapeHtml(initials(item.name))}</span>`;
+      const netLabel = item.netLines < 0 ? labels.netDeleted : labels.netAdded;
+      const netColor = item.netLines < 0 ? "text-error" : "text-primary";
+      return `<div class="lt-contributor-row" style="--lt-contributor-delay: ${Math.min(index, 8) * 35}ms">
+        ${avatar}
+        <div class="min-w-0 flex-1">
+          <div class="text-title-small text-on-surface truncate">${escapeHtml(item.name)}</div>
+          <div class="lt-contributor-primary text-body-small">
+            <span class="text-primary">${escapeHtml(labels.added)} <strong>${escapeHtml(formatLines(item.addedLines))}</strong></span>
+            <span class="text-error">${escapeHtml(labels.deleted)} <strong>${escapeHtml(formatLines(item.deletedLines))}</strong></span>
+            <span class="text-on-surface-variant">${escapeHtml(commitsTemplate.replace("{count}", String(item.commits)))}</span>
+          </div>
+          <div class="lt-contributor-secondary text-label-small text-on-surface-variant">
+            <span>${escapeHtml(labels.canceledAdded)} ${escapeHtml(formatLines(item.canceledAddedLines))}</span>
+            <span>${escapeHtml(labels.canceledDeleted)} ${escapeHtml(formatLines(item.canceledDeletedLines))}</span>
+            <span class="${netColor}">${escapeHtml(netLabel)} ${escapeHtml(formatLines(item.netLines))}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  onPageSetup((signal) => {
+    const humanGroup = document.querySelector<HTMLElement>('[data-contributors-group="human"]');
+    const botGroup = document.querySelector<HTMLElement>('[data-contributors-group="bot"]');
+    const humanState = document.querySelector<HTMLElement>('[data-contributors-state="human"]');
+    const botState = document.querySelector<HTMLElement>('[data-contributors-state="bot"]');
+    const page = document.querySelector<HTMLElement>("[data-contributors-page]");
+    if (!humanGroup || !botGroup || !humanState || !botState || !page) return;
+    const commitsTemplate = page.dataset.contributorsCommits || "{count}";
+    const labels = {
+      added: page.dataset.contributorsAdded || "Added",
+      deleted: page.dataset.contributorsDeleted || "Deleted",
+      canceledAdded: page.dataset.contributorsCanceledAdded || "Added then removed",
+      canceledDeleted: page.dataset.contributorsCanceledDeleted || "Cleaned",
+      netAdded: page.dataset.contributorsNetAdded || "Net additions",
+      netDeleted: page.dataset.contributorsNetDeleted || "Net deletions",
+    };
+    const errorText = page.dataset.contributorsError || "Error";
+    const emptyText = page.dataset.contributorsEmpty || "";
+
+    fetch("/api/contributors", { signal })
+      .then((response) => {
+        if (!response.ok) throw new Error(`contributors_${response.status}`);
+        return response.json() as Promise<ContributorsResponse>;
+      })
+      .then((data) => {
+        renderGroup(humanGroup, humanState, data.humanContributors || [], commitsTemplate, labels, emptyText);
+        renderGroup(botGroup, botState, data.botContributors || [], commitsTemplate, labels, emptyText);
+      })
+      .catch(() => {
+        if (signal.aborted) return;
+        humanState.textContent = errorText;
+        botState.textContent = errorText;
+      });
+  });
+</script>
+
+<style is:global>
+  .lt-contributors-list { display: grid; gap: 4px; }
+  .lt-contributor-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    padding: 8px 10px;
+    border-radius: 16px;
+    background: var(--lt-surface-container-low);
+    animation: lt-contributor-rise 420ms ease-out backwards;
+    animation-delay: var(--lt-contributor-delay);
+  }
+  .lt-contributor-avatar {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--lt-primary-container);
+  }
+  .lt-contributor-avatar-fallback {
+    display: grid;
+    place-items: center;
+    color: var(--lt-on-primary-container);
+    font-weight: 600;
+  }
+  .lt-contributor-primary,
+  .lt-contributor-secondary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+  }
+  .lt-contributor-primary { margin-top: 2px; }
+  .lt-contributor-primary > span:first-child { color: #16803c; }
+  .dark .lt-contributor-primary > span:first-child { color: #78d99a; }
+  .lt-contributor-secondary { margin-top: 3px; }
+  @keyframes lt-contributor-rise {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lt-contributor-row { animation: none; }
+  }
+</style>

@@ -17,6 +17,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PageHeader from "../PageHeader.astro";
 import FriendLinks from "../FriendLinks.astro";
+import ContributorsSection from "../ContributorsSection.astro";
 import Icon from "../Icon.astro";
 import { resolveLocale, useTranslations, type TranslationKey } from "../../i18n/ui";
 
@@ -112,4 +113,6 @@ const groupNumberHtml = rich("community.qqGroup.number", {
       </div>
     </div>
   </section>
+
+  <ContributorsSection />
 </BaseLayout>
