@@ -27,6 +27,7 @@ type Contributor = {
 };
 
 type ContributorsReport = {
+  metric_version: number;
   contributors?: Contributor[];
   human_contributors?: Contributor[];
   bot_contributors?: Contributor[];
@@ -174,6 +175,11 @@ export async function onRequestGet(context: {
     }
 
     const report = (await assetResponse.json()) as ContributorsReport;
+    if (report.metric_version !== 2) {
+      return json({ error: "unsupported_contributor_metric" }, 502, {
+        "Cache-Control": "no-store",
+      });
+    }
     return new Response(
       JSON.stringify({
         generatedAt: release.published_at || release.created_at,
