@@ -74,6 +74,7 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
 
   type Contributor = {
     name: string;
+    username: string | null;
     type: "human" | "bot";
     commits: number;
     addedLines: number;
@@ -138,6 +139,7 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
           ${avatar}
           <div class="lt-contributor-identity">
             <h4 id="contributor-${item.type}-${index}" class="text-title-small text-on-surface">${escapeHtml(item.name)}</h4>
+            ${item.username ? `<p class="lt-contributor-username">@${escapeHtml(item.username)}</p>` : ""}
             <p class="lt-contributor-commits text-body-small text-on-surface-variant">${icons.commits}${escapeHtml(commitsTemplate.replace("{count}", String(item.commits)))}</p>
           </div>
         </header>
@@ -218,6 +220,7 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
   }
   .lt-contributor-identity { min-width: 0; }
   .lt-contributor-identity h4 { overflow-wrap: break-word; }
+  .lt-contributor-username { font-size: 12px; line-height: 1.5; color: var(--lt-color-outline); overflow-wrap: anywhere; }
   .lt-contributor-commits { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
   .lt-contributor-icon { width: 18px; height: 18px; flex: 0 0 18px; }
   .lt-contributor-avatar {

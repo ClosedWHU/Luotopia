@@ -58,6 +58,33 @@ const AVATAR_IDS: Record<string, number> = {
   "misa.subanxia@icloud.com": 45150398,
   "badges@fossa.io": 29791463,
   "noreply@anthropic.com": 81847,
+  "3066474607@qq.com": 47223358,
+  "yangqk12@whu.edu.cn": 219803883,
+};
+
+// Profile names verified by numeric account ID; Git author names remain in the report.
+const PROFILES: Record<number, { username: string; nickname: string }> = {
+  264958572: { username: "0x535a", nickname: "0x535A" },
+  67186192: { username: "Enchograph", nickname: "陈广隰 / Chen Guangxi" },
+  44727214: { username: "GuGuMur", nickname: "HevCateon" },
+  79034142: { username: "HsukqiLee", nickname: "Hsukqi Lee" },
+  69208179: { username: "fQwQf", nickname: "fQwQf" },
+  106751350: { username: "Johnson-Tang2019", nickname: "Johnson-Tang2019" },
+  30401338: { username: "Crescentm", nickname: "Crescentm" },
+  95037758: { username: "jingyan-x", nickname: "Jingyan" },
+  248266228: { username: "mornhussakuyo-hub", nickname: "MornHus" },
+  184511944: { username: "Yinary", nickname: "Yinary" },
+  190065939: { username: "QinXi-ai", nickname: "QinXi" },
+  166027578: { username: "SuiYueMengHen", nickname: "SuiYueMengHen" },
+  243921773: { username: "hao2530", nickname: "hao2530" },
+  172453170: { username: "wofiporia", nickname: "wofiporia" },
+  219803883: { username: "LaplaceYoung", nickname: "laplaceyoung" },
+  6327311: { username: "ExerciseBook", nickname: "Eric_Lian" },
+  233723091: { username: "LeixinSun", nickname: "Leixin Sun" },
+  83490374: { username: "little-weakduck", nickname: "Little Weakduck" },
+  45150398: { username: "misakayuuki", nickname: "小天使misa！" },
+  29791463: { username: "fossabot", nickname: "fossabot" },
+  47223358: { username: "answerend42", nickname: "answerend42" },
 };
 
 // GitHub App bot avatars use installation artwork (/in/), not user IDs (/u/).
@@ -78,9 +105,11 @@ async function avatarUrl(identity: string): Promise<string> {
 
 async function decorate(items: Contributor[] | undefined) {
   return Promise.all((items || []).map(async (item) => {
+    const profile = PROFILES[AVATAR_IDS[item.id]];
     return {
       id: item.id,
-      name: item.name,
+      name: profile?.nickname || item.name,
+      username: profile?.username || (BOT_APP_AVATARS[item.id] ? item.id : null),
       type: item.type,
       repositories: item.repositories,
       commits: item.commits,
