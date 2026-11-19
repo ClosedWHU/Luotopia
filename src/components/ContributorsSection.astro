@@ -11,11 +11,8 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
   data-contributors-locale={t.locale}
   data-contributors-commits={t("community.contributors.commits")}
   data-contributors-added={t("community.contributors.added")}
-  data-contributors-deleted={t("community.contributors.deleted")}
   data-contributors-canceled-added={t("community.contributors.canceledAdded")}
   data-contributors-canceled-deleted={t("community.contributors.canceledDeleted")}
-  data-contributors-net-added={t("community.contributors.netAdded")}
-  data-contributors-net-deleted={t("community.contributors.netDeleted")}
   data-contributors-error={t("community.contributors.error")}
   data-contributors-empty={t("community.contributors.empty")}
 >
@@ -60,16 +57,12 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
   import removeRaw from "@material-symbols/svg-400/outlined/remove.svg?raw";
   import commitRaw from "@material-symbols/svg-400/outlined/commit.svg?raw";
   import historyRaw from "@material-symbols/svg-400/outlined/history.svg?raw";
-  import cleanupRaw from "@material-symbols/svg-400/outlined/cleaning_services.svg?raw";
-  import balanceRaw from "@material-symbols/svg-400/outlined/swap_vert.svg?raw";
 
   const icons = {
     added: normalizeIconSvg(addRaw, "lt-contributor-icon"),
-    deleted: normalizeIconSvg(removeRaw, "lt-contributor-icon"),
     commits: normalizeIconSvg(commitRaw, "lt-contributor-icon"),
     history: normalizeIconSvg(historyRaw, "lt-contributor-icon"),
-    cleanup: normalizeIconSvg(cleanupRaw, "lt-contributor-icon"),
-    net: normalizeIconSvg(balanceRaw, "lt-contributor-icon"),
+    removed: normalizeIconSvg(removeRaw, "lt-contributor-icon"),
   };
 
   type Contributor = {
@@ -78,11 +71,8 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
     type: "human" | "bot";
     commits: number;
     addedLines: number;
-    deletedLines: number;
     canceledAddedLines: number;
     canceledDeletedLines: number;
-    netLines: number;
-    rankScoreKsloc: number;
     avatarUrl: string | null;
   };
 
@@ -133,7 +123,6 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
       const avatar = item.avatarUrl
         ? `<img class="lt-contributor-avatar" src="${escapeHtml(item.avatarUrl)}" alt="" loading="lazy" decoding="async" width="40" height="40">`
         : `<span class="lt-contributor-avatar lt-contributor-avatar-fallback" aria-hidden="true">${escapeHtml(initials(item.name))}</span>`;
-      const netLabel = item.netLines < 0 ? labels.netDeleted : labels.netAdded;
       return `<article class="lt-contributor-card" aria-labelledby="contributor-${item.type}-${index}">
         <header class="lt-contributor-heading">
           ${avatar}
@@ -148,15 +137,10 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
             <dt>${icons.added}${escapeHtml(labels.added)}</dt>
             <dd>${escapeHtml(format(item.addedLines))}</dd>
           </div>
-          <div class="lt-contributor-deleted">
-            <dt>${icons.deleted}${escapeHtml(labels.deleted)}</dt>
-            <dd>${escapeHtml(format(item.deletedLines))}</dd>
-          </div>
         </dl>
         <dl class="lt-contributor-secondary text-body-small text-on-surface-variant">
           <div><dt>${icons.history}${escapeHtml(labels.canceledAdded)}</dt><dd>${escapeHtml(format(item.canceledAddedLines))}</dd></div>
-          <div><dt>${icons.cleanup}${escapeHtml(labels.canceledDeleted)}</dt><dd>${escapeHtml(format(item.canceledDeletedLines))}</dd></div>
-          <div><dt>${icons.net}${escapeHtml(netLabel)}</dt><dd>${escapeHtml(format(item.netLines))}</dd></div>
+          <div><dt>${icons.removed}${escapeHtml(labels.canceledDeleted)}</dt><dd>${escapeHtml(format(item.canceledDeletedLines))}</dd></div>
         </dl>
       </article>`;
     }).join("");
@@ -173,11 +157,8 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
     const labels = {
       locale: page.dataset.contributorsLocale || "zh-Hans",
       added: page.dataset.contributorsAdded || "Added",
-      deleted: page.dataset.contributorsDeleted || "Deleted",
       canceledAdded: page.dataset.contributorsCanceledAdded || "Added then removed",
-      canceledDeleted: page.dataset.contributorsCanceledDeleted || "Cleaned",
-      netAdded: page.dataset.contributorsNetAdded || "Net additions",
-      netDeleted: page.dataset.contributorsNetDeleted || "Net deletions",
+      canceledDeleted: page.dataset.contributorsCanceledDeleted || "Removed code",
     };
     const errorText = page.dataset.contributorsError || "Error";
     const emptyText = page.dataset.contributorsEmpty || "";
@@ -238,17 +219,13 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
     font-weight: 600;
   }
   .lt-contributor-primary {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 12px;
     margin: 20px 0 16px;
   }
   .lt-contributor-primary dt,
   .lt-contributor-secondary dt { display: flex; align-items: center; gap: 6px; }
   .lt-contributor-primary dt { font-size: 12px; line-height: 1.5; }
-  .lt-contributor-primary dd { margin: 4px 0 0; font-size: 20px; line-height: 1.4; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .lt-contributor-primary dd { margin: 4px 0 0; font-size: 28px; line-height: 1.3; font-weight: 600; font-variant-numeric: tabular-nums; }
   .lt-contributor-added { color: var(--lt-color-success); }
-  .lt-contributor-deleted { color: var(--lt-color-error); }
   .lt-contributor-secondary { display: grid; gap: 8px; margin: 0; padding-top: 14px; border-top: 1px solid var(--lt-color-outline-variant); }
   .lt-contributor-secondary > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
   .lt-contributor-secondary dd { margin: 0; flex-shrink: 0; font-variant-numeric: tabular-nums; }

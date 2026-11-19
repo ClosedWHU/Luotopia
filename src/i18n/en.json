@@ -404,11 +404,8 @@
   "community.contributors.error": "The contributor list is temporarily unavailable.",
   "community.contributors.empty": "No records yet.",
   "community.contributors.added": "Retained code",
-  "community.contributors.deleted": "Unattributed deletions",
   "community.contributors.canceledAdded": "Added then removed",
-  "community.contributors.canceledDeleted": "Matched removals",
-  "community.contributors.netAdded": "Net additions",
-  "community.contributors.netDeleted": "Net deletions",
+  "community.contributors.canceledDeleted": "Removed code",
   "community.friend.title": "Friend links",
 
   "community.friend.category.feedback": "Feedback",

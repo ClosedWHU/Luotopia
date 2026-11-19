@@ -404,11 +404,8 @@
   "community.contributors.error": "贡献者列表暂时无法加载。",
   "community.contributors.empty": "暂无记录。",
   "community.contributors.added": "保留代码",
-  "community.contributors.deleted": "未归属删除",
   "community.contributors.canceledAdded": "新增后被删除",
-  "community.contributors.canceledDeleted": "删除后被抵消",
-  "community.contributors.netAdded": "净增加",
-  "community.contributors.netDeleted": "净删除",
+  "community.contributors.canceledDeleted": "删除的代码",
   "community.friend.title": "友情链接",
 
   "community.friend.category.feedback": "使用反馈",
