@@ -378,8 +378,6 @@
           let frameValue = 0;
           let lastDraw = 0;
           let rafId = 0;
-          let scrolling = false;
-          let scrollTimer = 0;
 
           const tick = (now) => {
             rafId = requestAnimationFrame(tick);
@@ -397,7 +395,7 @@
           };
 
           const start = () => {
-            if (rafId || scrolling || document.hidden) return;
+            if (rafId || document.hidden) return;
             lastDraw = performance.now();
             rafId = requestAnimationFrame(tick);
           };
@@ -417,19 +415,6 @@
             if (document.hidden) stop();
             else start();
           });
-
-          // This persisted scene shares the document lifetime of the visibility
-          // listener above. Freeze its last frame during scrolling so glass only
-          // samples a stationary backdrop; resume decorative motion once idle.
-          window.addEventListener("scroll", () => {
-            scrolling = true;
-            stop();
-            window.clearTimeout(scrollTimer);
-            scrollTimer = window.setTimeout(() => {
-              scrolling = false;
-              start();
-            }, 120);
-          }, { passive: true });
 
           start();
         }

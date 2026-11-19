@@ -173,9 +173,13 @@ chunk）、`import.meta`（64）都在，其余由 esbuild 降级。
 `AppDesignLayout.glass()`（control 14 / nested 18 / card 28 / group 32），模糊取自
 `kAppGlassBlurSigma`（10）与 `appGlassStyle(blur:)`（8）。
 
-滚动期间共享极光背景保持最后一帧，玻璃指针光照暂停更新，连续 120ms 没有滚动事件后恢复。
-玻璃的透明度和背景模糊始终保留。光照仅在精细指针活动且未启用减少动画时更新可见面板，
-渐变参数没有变化时不写入样式。这两项由 `AuroraBackground.astro` 与 `BaseLayout.astro` 统一管理。
+共享极光背景在滚动时持续流动，玻璃的透明度和背景模糊始终保留。指针光照仅响应鼠标移动
+和窗口大小变化，每帧合并一次输入，只读取 `IntersectionObserver` 标记为可见的面板；
+滚动事件不更新高光坐标，渐变参数没有变化时不写入样式。`--lt-light-*` 不做 CSS 过渡，
+避免把渐变插值变成每帧重绘整块玻璃。相同坐标的 `pointermove` 不触发高光更新，防止滚动时
+浏览器为光标下的新元素合成指针事件。`.lt-lift` 保留位置过渡，但悬停阴影直接切换，不对
+`box-shadow` 插值：卡片经过静止光标时也会触发 hover，阴影动画会重复重绘玻璃。
+背景与光照由 `AuroraBackground.astro` 与 `BaseLayout.astro` 统一管理。
 
 ### 玻璃的三条硬规则
 

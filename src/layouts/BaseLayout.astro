@@ -370,11 +370,9 @@
    *   the geometry. Clamping to the box would pin the glint to the near edge and
    *   light every card on the page at full strength, and modulating the colour
    *   instead would need `color-mix()` (111+) to keep the theme tokens.
-   * - Values are percentages and degrees, never px. All three properties are
-   *   registered in global.css (`<length-percentage>` / `<angle>`) so they
-   *   interpolate, and a length cannot tween into a percentage — mixing units
-   *   silently downgrades the transition to the discrete snap @property was
-   *   added to remove.
+   * - Light responds to pointer input only. Scrolling does not animate gradient
+   *   coordinates; CSS interpolation of these paint properties is deliberately
+   *   absent. The blur, sheen and animated backdrop remain independent.
    */
   onPageSetup((signal) => {
     const fine = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -396,12 +394,26 @@
     let pointerX = 0;
     let pointerY = 0;
     let pointerActive = false;
-    let scrolling = false;
-    let scrollTimer = 0;
     const lit = new Map<HTMLElement, string>();
+    const visible = new Set<HTMLElement>();
+    let visibility: IntersectionObserver | undefined;
 
     const scan = () => {
-      surfaces = Array.from(document.querySelectorAll<HTMLElement>(".glass"));
+      const next = Array.from(document.querySelectorAll<HTMLElement>(".glass"));
+      const membership = new Set(next);
+      for (const surface of surfaces) {
+        if (membership.has(surface)) continue;
+        visibility?.unobserve(surface);
+        visible.delete(surface);
+        unlight(surface);
+      }
+      const previous = new Set(surfaces);
+      for (const surface of next) {
+        if (previous.has(surface)) continue;
+        if (visibility) visibility.observe(surface);
+        else visible.add(surface);
+      }
+      surfaces = next;
     };
 
     const unlight = (surface: HTMLElement) => {
@@ -420,15 +432,16 @@
 
     const paint = () => {
       frame = 0;
-      if (!surfaces.length || scrolling || !pointerActive || !fine.matches || motion.matches) return;
+      if (!visible.size || !pointerActive || !fine.matches || motion.matches) return;
       const clamp = (value: number) => Math.max(-CLAMP, Math.min(CLAMP, value));
       /* Every rect first, then every write. Interleaving them would invalidate
        * style on the first write and force a reflow on the second read — twenty
        * cards is twenty reflows a frame instead of one. */
-      const rects = surfaces.map((surface) => surface.getBoundingClientRect());
-      for (let i = 0; i < surfaces.length; i++) {
+      const targets = Array.from(visible);
+      const rects = targets.map((surface) => surface.getBoundingClientRect());
+      for (let i = 0; i < targets.length; i++) {
         const rect = rects[i];
-        const surface = surfaces[i];
+        const surface = targets[i];
         if (!rect.width || !rect.height) continue;
         if (rect.bottom < 0 || rect.top > window.innerHeight || rect.right < 0 || rect.left > window.innerWidth) {
           unlight(surface);
@@ -465,12 +478,15 @@
     };
 
     const schedule = () => {
-      if (frame || scrolling || !pointerActive || !fine.matches || motion.matches) return;
+      if (frame || !pointerActive || !fine.matches || motion.matches) return;
       frame = requestAnimationFrame(paint);
     };
 
     const onMove = (event: PointerEvent) => {
       if (!fine.matches || motion.matches || event.pointerType === "touch") return;
+      // Scrolling can dispatch a synthetic pointermove as content changes under
+      // a stationary cursor. It is not new lighting input.
+      if (event.clientX === pointerX && event.clientY === pointerY) return;
       pointerActive = true;
       pointerX = event.clientX;
       pointerY = event.clientY;
@@ -486,22 +502,18 @@
       rest();
     };
 
+    if ("IntersectionObserver" in window) {
+      visibility = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          const surface = entry.target as HTMLElement;
+          if (entry.isIntersecting) visible.add(surface);
+          else visible.delete(surface);
+        }
+      });
+    }
     scan();
     document.addEventListener("pointermove", onMove, { signal, passive: true });
     document.addEventListener("pointerout", onOut, { signal, passive: true });
-    // Keep the last lighting while scrolling. Recomputing gradients for every
-    // scroll frame repaints large blurred panels; re-anchor once scrolling rests.
-    window.addEventListener("scroll", () => {
-      if (!pointerActive || !fine.matches || motion.matches) return;
-      scrolling = true;
-      cancelAnimationFrame(frame);
-      frame = 0;
-      window.clearTimeout(scrollTimer);
-      scrollTimer = window.setTimeout(() => {
-        scrolling = false;
-        schedule();
-      }, 120);
-    }, { signal, passive: true });
     window.addEventListener("resize", schedule, { signal, passive: true });
     window.addEventListener("blur", rest, { signal });
     motion.addEventListener("change", rest, { signal });
@@ -526,11 +538,12 @@
     return () => {
       cancelAnimationFrame(frame);
       cancelAnimationFrame(scanFrame);
-      window.clearTimeout(scrollTimer);
       frame = 0;
       scanFrame = 0;
       observer?.disconnect();
       observer = undefined;
+      visibility?.disconnect();
+      visible.clear();
       surfaces.forEach(unlight);
       lit.clear();
       surfaces = [];

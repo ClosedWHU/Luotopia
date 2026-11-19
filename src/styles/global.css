@@ -205,16 +205,11 @@ html[lang="ko"] {
 }
 
 /*
- * Registered so the pointer-tracking glint (BaseLayout writes these on
- * `.glass.lt-lift` surfaces) can interpolate: unregistered custom properties
- * flip discretely, so the highlight used to jump from the cursor's last
- * position to the resting corner in a single frame on pointerleave.
- *
- * Chrome 85+ / Safari 16.4+; engines that ignore @property keep the old snap —
- * acceptable degradation, the transition entries below are simply inert there.
- * BaseLayout writes *percentage* values so the pair always interpolates:
- * <length> and <percentage> cannot tween into each other, and mixing units
- * would silently downgrade the transition to a discrete flip.
+ * Per-surface light coordinates. Registration prevents a nested surface from
+ * inheriting its parent's pointer position. Older engines use the var fallbacks.
+ * These properties must not be transitioned: interpolating gradient inputs
+ * repaints the entire blurred surface on every animation frame. The pointer
+ * tracker already coalesces actual input to one update per frame.
  */
 @property --lt-light-x {
   syntax: "<length-percentage>";
@@ -279,12 +274,6 @@ html[lang="ko"] {
   backdrop-filter: blur(var(--lt-glass-blur)) saturate(var(--lt-glass-saturate));
   -webkit-backdrop-filter: blur(var(--lt-glass-blur)) saturate(var(--lt-glass-saturate));
   box-shadow: var(--lt-shadow-glass);
-  /* The glint trail. Overridden (and restated) wherever a hand-written rule
-   * also sets `transition` on the same element — see `.lt-lift` below. */
-  transition:
-    --lt-light-x 0.35s ease-out,
-    --lt-light-y 0.35s ease-out,
-    --lt-light-angle 0.35s ease-out;
 }
 
 @utility glass-control {
@@ -523,30 +512,23 @@ pre::-webkit-scrollbar-corner,
  * `:hover` but comes later in source order, so it silently cancelled the hover
  * lift for good. `translate` composes with `transform` instead of competing,
  * and the merged transition list below keeps both animations smooth.
+ * The two shadow states switch directly: scrolling cards pass under a stationary
+ * cursor too, and interpolating box-shadow repaints each whole blurred card.
  */
 .lt-lift {
-  transition:
-    box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    translate 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    --lt-light-x 0.35s ease-out,
-    --lt-light-y 0.35s ease-out,
-    --lt-light-angle 0.35s ease-out;
+  transition: translate 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /*
  * Stacked case. Neither base rule's `transition` shorthand can win outright —
- * the reveal's would drop the hover properties (shadow snaps), the hover's
+ * the reveal's would drop the hover motion, the hover's
  * would drop the reveal's transform and delay (entrance snaps and loses its
  * stagger). Higher specificity than both, so the merged list takes over.
  */
 .lt-reveal-lift.lt-lift {
   transition:
     transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms),
-    translate 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    --lt-light-x 0.35s ease-out,
-    --lt-light-y 0.35s ease-out,
-    --lt-light-angle 0.35s ease-out;
+    translate 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Hover effects are gated on real pointers site-wide: on touch, `:hover`
@@ -692,15 +674,7 @@ body {
 
 .lt-reveal-lift {
   transform: translateY(28px);
-  /* The delay rides the transform entry rather than a bare `transition-delay`:
-   * that property applies to every listed transition, so the reveal's stagger
-   * would also hold the pointer light back by up to a few hundred ms. Same
-   * shape as the merged `.lt-reveal-lift.lt-lift` rule below. */
-  transition:
-    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms),
-    --lt-light-x 0.35s ease-out,
-    --lt-light-y 0.35s ease-out,
-    --lt-light-angle 0.35s ease-out;
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--lt-reveal-delay, 0ms);
 }
 
 .lt-reveal[data-revealed="true"] {
