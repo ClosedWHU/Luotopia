@@ -395,15 +395,21 @@
     let scanFrame = 0;
     let pointerX = 0;
     let pointerY = 0;
+    let pointerActive = false;
+    let scrolling = false;
+    let scrollTimer = 0;
+    const lit = new Map<HTMLElement, string>();
 
     const scan = () => {
       surfaces = Array.from(document.querySelectorAll<HTMLElement>(".glass"));
     };
 
     const unlight = (surface: HTMLElement) => {
+      if (!lit.has(surface)) return;
       surface.style.removeProperty("--lt-light-x");
       surface.style.removeProperty("--lt-light-y");
       surface.style.removeProperty("--lt-light-angle");
+      lit.delete(surface);
     };
 
     const rest = () => {
@@ -414,7 +420,7 @@
 
     const paint = () => {
       frame = 0;
-      if (!surfaces.length) return;
+      if (!surfaces.length || scrolling || !pointerActive || !fine.matches || motion.matches) return;
       const clamp = (value: number) => Math.max(-CLAMP, Math.min(CLAMP, value));
       /* Every rect first, then every write. Interleaving them would invalidate
        * style on the first write and force a reflow on the second read — twenty
@@ -424,6 +430,10 @@
         const rect = rects[i];
         const surface = surfaces[i];
         if (!rect.width || !rect.height) continue;
+        if (rect.bottom < 0 || rect.top > window.innerHeight || rect.right < 0 || rect.left > window.innerWidth) {
+          unlight(surface);
+          continue;
+        }
         const dx = pointerX - (rect.left + rect.width / 2);
         const dy = pointerY - (rect.top + rect.height / 2);
         const nearest = Math.max(
@@ -442,19 +452,26 @@
          * edge facing it. `atan2(dx, -dy)` is the CSS convention (y down on
          * screen, y up in the angle space); the half turn is the flip. */
         const angle = ((Math.atan2(dx, -dy) * 180) / Math.PI + 540) % 360;
-        surface.style.setProperty("--lt-light-x", `${x.toFixed(2)}%`);
-        surface.style.setProperty("--lt-light-y", `${y.toFixed(2)}%`);
-        surface.style.setProperty("--lt-light-angle", `${angle.toFixed(1)}deg`);
+        const lightX = `${x.toFixed(2)}%`;
+        const lightY = `${y.toFixed(2)}%`;
+        const lightAngle = `${angle.toFixed(1)}deg`;
+        const value = `${lightX},${lightY},${lightAngle}`;
+        if (lit.get(surface) === value) continue;
+        lit.set(surface, value);
+        surface.style.setProperty("--lt-light-x", lightX);
+        surface.style.setProperty("--lt-light-y", lightY);
+        surface.style.setProperty("--lt-light-angle", lightAngle);
       }
     };
 
     const schedule = () => {
-      if (frame) return;
+      if (frame || scrolling || !pointerActive || !fine.matches || motion.matches) return;
       frame = requestAnimationFrame(paint);
     };
 
     const onMove = (event: PointerEvent) => {
       if (!fine.matches || motion.matches || event.pointerType === "touch") return;
+      pointerActive = true;
       pointerX = event.clientX;
       pointerY = event.clientY;
       schedule();
@@ -465,16 +482,26 @@
      * is whatever element the cursor happened to be over. */
     const onOut = (event: PointerEvent) => {
       if (event.relatedTarget || event.pointerType === "touch") return;
+      pointerActive = false;
       rest();
     };
 
     scan();
     document.addEventListener("pointermove", onMove, { signal, passive: true });
     document.addEventListener("pointerout", onOut, { signal, passive: true });
-    /* Repaint while the page scrolls: the light is anchored to a point on the
-     * page, so a card sliding under a stationary cursor has to have its local
-     * coordinates recomputed or the glint rides along with the card. */
-    window.addEventListener("scroll", schedule, { signal, passive: true });
+    // Keep the last lighting while scrolling. Recomputing gradients for every
+    // scroll frame repaints large blurred panels; re-anchor once scrolling rests.
+    window.addEventListener("scroll", () => {
+      if (!pointerActive || !fine.matches || motion.matches) return;
+      scrolling = true;
+      cancelAnimationFrame(frame);
+      frame = 0;
+      window.clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(() => {
+        scrolling = false;
+        schedule();
+      }, 120);
+    }, { signal, passive: true });
     window.addEventListener("resize", schedule, { signal, passive: true });
     window.addEventListener("blur", rest, { signal });
     motion.addEventListener("change", rest, { signal });
@@ -499,11 +526,13 @@
     return () => {
       cancelAnimationFrame(frame);
       cancelAnimationFrame(scanFrame);
+      window.clearTimeout(scrollTimer);
       frame = 0;
       scanFrame = 0;
       observer?.disconnect();
       observer = undefined;
       surfaces.forEach(unlight);
+      lit.clear();
       surfaces = [];
     };
   });

@@ -160,9 +160,8 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"] as const;
 
 <style>
   /*
-   * List rows use inset fills without backdrop filtering. The community list
-   * sits on a solid surface so scrolling never resamples the animated aurora
-   * through a panel as tall as the entire friend-link catalog.
+   * List rows use inset fills without backdrop filtering: the parent glass
+   * panel already blurs the scene, so rows need no additional blur pass.
    */
   .lt-flink {
     background-color: var(--lt-glass-subtle);

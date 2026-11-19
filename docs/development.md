@@ -173,6 +173,10 @@ chunk）、`import.meta`（64）都在，其余由 esbuild 降级。
 `AppDesignLayout.glass()`（control 14 / nested 18 / card 28 / group 32），模糊取自
 `kAppGlassBlurSigma`（10）与 `appGlassStyle(blur:)`（8）。
 
+滚动期间共享极光背景保持最后一帧，玻璃指针光照暂停更新，连续 120ms 没有滚动事件后恢复。
+玻璃的透明度和背景模糊始终保留。光照仅在精细指针活动且未启用减少动画时更新可见面板，
+渐变参数没有变化时不写入样式。这两项由 `AuroraBackground.astro` 与 `BaseLayout.astro` 统一管理。
+
 ### 玻璃的三条硬规则
 
 改样式之前先读完 `global.css` 里的注释，这里只列会咬人的部分：
