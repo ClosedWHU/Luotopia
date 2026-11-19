@@ -193,8 +193,17 @@ const i18n = {
 
 <style>
   .lt-carousel {
-    --shot-height: calc(100vh - 16rem);
+    --shot-height: calc(100vh - var(--shot-chrome-height, 16rem));
     --shot-ratio: 0.4621;
+  }
+
+  /* Browser toolbars change innerHeight while scrolling. The small viewport
+   * stays stable through those changes, but still adapts to rotation/resizing.
+   * Older browsers keep their stable, large-viewport 100vh fallback. */
+  @supports (height: 100svh) {
+    .lt-carousel {
+      --shot-height: max(64px, calc(100svh - var(--shot-chrome-height, 16rem)));
+    }
   }
 
   [data-carousel-root][data-form="tablet"] { --shot-ratio: 0.6985; }
@@ -775,8 +784,9 @@ const i18n = {
         const captionHeight = Math.max(...Array.from(track.querySelectorAll("figcaption"))
           .map((caption) => caption.getBoundingClientRect().height));
         const navbarBottom = Math.max(0, navbar?.getBoundingClientRect().bottom ?? 0);
-        const height = Math.max(64, window.innerHeight - navbarBottom - chromeHeight - captionHeight - 36);
-        root.style.setProperty("--shot-height", `${height}px`);
+        // CSS owns the stable viewport size; JS measures only the gallery chrome.
+        const reservedHeight = navbarBottom + chromeHeight + captionHeight + 36;
+        root.style.setProperty("--shot-chrome-height", `${reservedHeight}px`);
       }
       const max = Math.max(0, total - cols);
       if (current > max) current = max;
