@@ -60,7 +60,7 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"] as const;
                   class="lt-flink state-layer flex items-center gap-3 p-3 rounded-nested cursor-pointer border-none w-full text-left"
                 >
                   {link.image && (
-                    <img src={link.image.url} alt="" class="w-10 h-10 rounded-full object-cover shrink-0" loading="lazy" width="40" height="40" />
+                    <img src={link.image.url} alt="" class="w-10 h-10 rounded-full object-cover shrink-0" loading="lazy" decoding="async" width="40" height="40" />
                   )}
                   <div class="min-w-0 flex-1">
                     <span class="block text-title-small text-on-surface truncate">{link.title}</span>
@@ -79,7 +79,7 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"] as const;
                   class="lt-flink state-layer flex items-center gap-3 p-3 rounded-nested no-underline"
                 >
                   {link.image && (
-                    <img src={link.image.url} alt="" class="w-10 h-10 rounded-full object-cover shrink-0" loading="lazy" width="40" height="40" />
+                    <img src={link.image.url} alt="" class="w-10 h-10 rounded-full object-cover shrink-0" loading="lazy" decoding="async" width="40" height="40" />
                   )}
                   <div class="min-w-0 flex-1">
                     <span class="block text-title-small text-on-surface truncate">{link.title}</span>
@@ -92,7 +92,7 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"] as const;
             return (
               <div class="lt-flink lt-flink-off flex items-center gap-3 p-3 rounded-nested">
                 {link.image && (
-                  <img src={link.image.url} alt="" class="w-10 h-10 rounded-full object-cover shrink-0" loading="lazy" width="40" height="40" />
+                  <img src={link.image.url} alt="" class="w-10 h-10 rounded-full object-cover shrink-0" loading="lazy" decoding="async" width="40" height="40" />
                 )}
                 <div class="min-w-0 flex-1">
                   <span class="block text-title-small text-on-surface truncate">{link.title}</span>
@@ -160,10 +160,9 @@ const catOrder = ["feedback", "clubOrg", "partnerApp", "other"] as const;
 
 <style>
   /*
-   * Nested glass. These rows already sit on a `glass` panel, so they take a
-   * translucent fill with no `backdrop-filter` of their own — the parent
-   * blurred the aurora once, and blurring an already-blurred backdrop again
-   * only buys a compositor layer.
+   * List rows use inset fills without backdrop filtering. The community list
+   * sits on a solid surface so scrolling never resamples the animated aurora
+   * through a panel as tall as the entire friend-link catalog.
    */
   .lt-flink {
     background-color: var(--lt-glass-subtle);
