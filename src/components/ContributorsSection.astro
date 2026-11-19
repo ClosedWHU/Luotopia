@@ -29,8 +29,8 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
       </p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <section class="lt-contributors-panel glass rounded-group p-5 sm:p-6" aria-labelledby="community-contributors-human-title">
+    <div class="lt-contributors-groups">
+      <section class="lt-contributors-panel" aria-labelledby="community-contributors-human-title">
         <h3 id="community-contributors-human-title" class="text-title-medium text-on-surface mb-4">
           {t("community.contributors.humans")}
         </h3>
@@ -40,7 +40,7 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
         <div class="lt-contributors-list" data-contributors-group="human"></div>
       </section>
 
-      <section class="lt-contributors-panel glass rounded-group p-5 sm:p-6" aria-labelledby="community-contributors-bot-title">
+      <section class="lt-contributors-panel" aria-labelledby="community-contributors-bot-title">
         <h3 id="community-contributors-bot-title" class="text-title-medium text-on-surface mb-4">
           {t("community.contributors.bots")}
         </h3>
@@ -55,6 +55,22 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
 
 <script>
   import { onPageSetup } from "../scripts/page-lifecycle";
+  import { normalizeIconSvg } from "../scripts/icon-svg";
+  import addRaw from "@material-symbols/svg-400/outlined/add.svg?raw";
+  import removeRaw from "@material-symbols/svg-400/outlined/remove.svg?raw";
+  import commitRaw from "@material-symbols/svg-400/outlined/commit.svg?raw";
+  import historyRaw from "@material-symbols/svg-400/outlined/history.svg?raw";
+  import cleanupRaw from "@material-symbols/svg-400/outlined/cleaning_services.svg?raw";
+  import balanceRaw from "@material-symbols/svg-400/outlined/swap_vert.svg?raw";
+
+  const icons = {
+    added: normalizeIconSvg(addRaw, "lt-contributor-icon"),
+    deleted: normalizeIconSvg(removeRaw, "lt-contributor-icon"),
+    commits: normalizeIconSvg(commitRaw, "lt-contributor-icon"),
+    history: normalizeIconSvg(historyRaw, "lt-contributor-icon"),
+    cleanup: normalizeIconSvg(cleanupRaw, "lt-contributor-icon"),
+    net: normalizeIconSvg(balanceRaw, "lt-contributor-icon"),
+  };
 
   type Contributor = {
     name: string;
@@ -111,28 +127,36 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
       return;
     }
     state.textContent = "";
+    state.hidden = true;
     group.innerHTML = items.map((item, index) => {
       const avatar = item.avatarUrl
-        ? `<img class="lt-contributor-avatar" src="${escapeHtml(item.avatarUrl)}" alt="" loading="lazy" width="40" height="40">`
+        ? `<img class="lt-contributor-avatar" src="${escapeHtml(item.avatarUrl)}" alt="" loading="lazy" decoding="async" width="40" height="40">`
         : `<span class="lt-contributor-avatar lt-contributor-avatar-fallback" aria-hidden="true">${escapeHtml(initials(item.name))}</span>`;
       const netLabel = item.netLines < 0 ? labels.netDeleted : labels.netAdded;
-      const netColor = item.netLines < 0 ? "text-error" : "text-primary";
-      return `<div class="lt-contributor-row" style="--lt-contributor-delay: ${Math.min(index, 8) * 35}ms">
-        ${avatar}
-        <div class="min-w-0 flex-1">
-          <div class="text-title-small text-on-surface truncate">${escapeHtml(item.name)}</div>
-          <div class="lt-contributor-primary text-body-small">
-            <span class="text-primary">${escapeHtml(labels.added)} <strong>${escapeHtml(format(item.addedLines))}</strong></span>
-            <span class="text-error">${escapeHtml(labels.deleted)} <strong>${escapeHtml(format(item.deletedLines))}</strong></span>
-            <span class="text-on-surface-variant">${escapeHtml(commitsTemplate.replace("{count}", String(item.commits)))}</span>
+      return `<article class="lt-contributor-card" aria-labelledby="contributor-${item.type}-${index}">
+        <header class="lt-contributor-heading">
+          ${avatar}
+          <div class="lt-contributor-identity">
+            <h4 id="contributor-${item.type}-${index}" class="text-title-small text-on-surface">${escapeHtml(item.name)}</h4>
+            <p class="lt-contributor-commits text-body-small text-on-surface-variant">${icons.commits}${escapeHtml(commitsTemplate.replace("{count}", String(item.commits)))}</p>
           </div>
-          <div class="lt-contributor-secondary text-label-small text-on-surface-variant">
-            <span>${escapeHtml(labels.canceledAdded)} ${escapeHtml(format(item.canceledAddedLines))}</span>
-            <span>${escapeHtml(labels.canceledDeleted)} ${escapeHtml(format(item.canceledDeletedLines))}</span>
-            <span class="${netColor}">${escapeHtml(netLabel)} ${escapeHtml(format(item.netLines))}</span>
+        </header>
+        <dl class="lt-contributor-primary">
+          <div class="lt-contributor-added">
+            <dt>${icons.added}${escapeHtml(labels.added)}</dt>
+            <dd>${escapeHtml(format(item.addedLines))}</dd>
           </div>
-        </div>
-      </div>`;
+          <div class="lt-contributor-deleted">
+            <dt>${icons.deleted}${escapeHtml(labels.deleted)}</dt>
+            <dd>${escapeHtml(format(item.deletedLines))}</dd>
+          </div>
+        </dl>
+        <dl class="lt-contributor-secondary text-body-small text-on-surface-variant">
+          <div><dt>${icons.history}${escapeHtml(labels.canceledAdded)}</dt><dd>${escapeHtml(format(item.canceledAddedLines))}</dd></div>
+          <div><dt>${icons.cleanup}${escapeHtml(labels.canceledDeleted)}</dt><dd>${escapeHtml(format(item.canceledDeletedLines))}</dd></div>
+          <div><dt>${icons.net}${escapeHtml(netLabel)}</dt><dd>${escapeHtml(format(item.netLines))}</dd></div>
+        </dl>
+      </article>`;
     }).join("");
   }
 
@@ -174,47 +198,61 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
 </script>
 
 <style is:global>
-  .lt-contributors-list { display: grid; gap: 4px; }
-  .lt-contributor-row {
+  .lt-contributors-groups { display: grid; gap: 32px; }
+  .lt-contributors-list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .lt-contributor-card {
+    min-width: 0;
+    padding: 20px;
+    border-radius: var(--lt-radius-card, 28px);
+    background: var(--lt-color-surface);
+    border: 1px solid var(--lt-color-outline-variant);
+  }
+  .lt-contributor-heading {
     display: flex;
     align-items: center;
     gap: 12px;
-    min-height: 56px;
-    padding: 8px 10px;
-    border-radius: 16px;
-    background: var(--lt-surface-container-low);
-    animation: lt-contributor-rise 420ms ease-out backwards;
-    animation-delay: var(--lt-contributor-delay);
   }
+  .lt-contributor-identity { min-width: 0; }
+  .lt-contributor-identity h4 { overflow-wrap: break-word; }
+  .lt-contributor-commits { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+  .lt-contributor-icon { width: 18px; height: 18px; flex: 0 0 18px; }
   .lt-contributor-avatar {
     width: 40px;
     height: 40px;
     flex: 0 0 40px;
     border-radius: 50%;
     object-fit: cover;
-    background: var(--lt-primary-container);
+    background: var(--lt-color-primary-container);
   }
   .lt-contributor-avatar-fallback {
     display: grid;
     place-items: center;
-    color: var(--lt-on-primary-container);
+    color: var(--lt-color-on-primary-container);
     font-weight: 600;
   }
-  .lt-contributor-primary,
-  .lt-contributor-secondary {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 10px;
+  .lt-contributor-primary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+    margin: 20px 0 16px;
   }
-  .lt-contributor-primary { margin-top: 2px; }
-  .lt-contributor-primary > span:first-child { color: #16803c; }
-  .dark .lt-contributor-primary > span:first-child { color: #78d99a; }
-  .lt-contributor-secondary { margin-top: 3px; }
-  @keyframes lt-contributor-rise {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
+  .lt-contributor-primary dt,
+  .lt-contributor-secondary dt { display: flex; align-items: center; gap: 6px; }
+  .lt-contributor-primary dt { font-size: 12px; line-height: 1.5; }
+  .lt-contributor-primary dd { margin: 4px 0 0; font-size: 20px; line-height: 1.4; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .lt-contributor-added { color: var(--lt-color-success); }
+  .lt-contributor-deleted { color: var(--lt-color-error); }
+  .lt-contributor-secondary { display: grid; gap: 8px; margin: 0; padding-top: 14px; border-top: 1px solid var(--lt-color-outline-variant); }
+  .lt-contributor-secondary > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .lt-contributor-secondary dd { margin: 0; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+  @media (min-width: 640px) {
+    .lt-contributors-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
-  @media (prefers-reduced-motion: reduce) {
-    .lt-contributor-row { animation: none; }
+  @media (min-width: 1024px) {
+    .lt-contributors-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
 </style>
