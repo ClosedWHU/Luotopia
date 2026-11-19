@@ -1,4 +1,4 @@
-const LOGIN_PATTERN = /^(?:[1-9][0-9]{0,14}|identicon-[a-f0-9]{64})$/;
+const LOGIN_PATTERN = /^(?:(?:app-)?[1-9][0-9]{0,14}|identicon-[a-f0-9]{64})$/;
 
 export async function onRequestGet(context: {
   params: { login?: string };
@@ -14,7 +14,9 @@ export async function onRequestGet(context: {
   try {
     const source = login.startsWith("identicon-")
       ? `https://www.gravatar.com/avatar/${login.slice(10)}?d=identicon&s=96`
-      : `https://avatars.githubusercontent.com/u/${login}?s=96`;
+      : login.startsWith("app-")
+        ? `https://avatars.githubusercontent.com/in/${login.slice(4)}?s=96`
+        : `https://avatars.githubusercontent.com/u/${login}?s=96`;
     const upstream = await fetch(source, {
       headers: { "User-Agent": "Luotopia-Homepage-Pages" },
       redirect: "follow",

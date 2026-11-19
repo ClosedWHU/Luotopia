@@ -56,12 +56,19 @@ const AVATAR_IDS: Record<string, number> = {
   "gdnesso@gmail.com": 233723091,
   "yinjiab@gmail.com": 83490374,
   "misa.subanxia@icloud.com": 45150398,
-  "dependabot[bot]": 49699333,
-  "github-actions[bot]": 41898282,
   "badges@fossa.io": 29791463,
+  "noreply@anthropic.com": 81847,
+};
+
+// GitHub App bot avatars use installation artwork (/in/), not user IDs (/u/).
+const BOT_APP_AVATARS: Record<string, number> = {
+  "dependabot[bot]": 29110,
+  "github-actions[bot]": 15368,
 };
 
 async function avatarUrl(identity: string): Promise<string> {
+  const appId = BOT_APP_AVATARS[identity];
+  if (appId) return `/api/contributors/avatar/app-${appId}`;
   const id = AVATAR_IDS[identity];
   if (id) return `/api/contributors/avatar/${id}`;
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(identity));
