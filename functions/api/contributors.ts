@@ -35,21 +35,42 @@ type ContributorsReport = {
   repositories?: string[];
 };
 
-const AVATAR_LOGINS: Record<string, string> = {
-  "0x535A": "0x535a",
-  Enchograph: "Enchograph",
-  GuGuMur: "GuGuMur",
-  "Hsukqi Lee": "HsukqiLee",
+// Numeric accounts verified against repository commit/contributor metadata.
+const AVATAR_IDS: Record<string, number> = {
+  "i@0x535a.cn": 264958572,
+  "ender0213@outlook.com": 67186192,
+  "2221533105@qq.com": 44727214,
+  "team@tsinbei.com": 79034142,
+  "fqwqf@fqwqf.xyz": 69208179,
+  "johnson-tang2019@outlook.com": 106751350,
+  "guyues@outlook.com": 30401338,
+  "jingyan-x": 95037758,
+  "mornhussakuyo@gmail.com": 248266228,
+  "hoyou06@qq.com": 184511944,
+  "3624951962@qq.com": 190065939,
+  "shz20071026@163.com": 166027578,
+  "3621027213@qq.com": 243921773,
+  "1029687661@qq.com": 172453170,
+  "2024302072042@whu.edu.cn": 219803883,
+  "git@superexercisebook.com": 6327311,
+  "gdnesso@gmail.com": 233723091,
+  "yinjiab@gmail.com": 83490374,
+  "misa.subanxia@icloud.com": 45150398,
+  "dependabot[bot]": 49699333,
+  "github-actions[bot]": 41898282,
+  "badges@fossa.io": 29791463,
 };
 
-function avatarUrl(login: string | undefined): string | null {
-  if (!login) return null;
-  return `/api/contributors/avatar/${encodeURIComponent(login)}`;
+async function avatarUrl(identity: string): Promise<string> {
+  const id = AVATAR_IDS[identity];
+  if (id) return `/api/contributors/avatar/${id}`;
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(identity));
+  const hash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return `/api/contributors/avatar/identicon-${hash}`;
 }
 
-function decorate(items: Contributor[] | undefined) {
-  return (items || []).map((item) => {
-    const login = AVATAR_LOGINS[item.name];
+async function decorate(items: Contributor[] | undefined) {
+  return Promise.all((items || []).map(async (item) => {
     return {
       id: item.id,
       name: item.name,
@@ -68,9 +89,9 @@ function decorate(items: Contributor[] | undefined) {
       canceledDeletedLines: item.canceled_deleted_lines || 0,
       firstCommit: item.first_commit || null,
       lastCommit: item.last_commit || null,
-      avatarUrl: avatarUrl(login),
+      avatarUrl: await avatarUrl(item.id),
     };
-  });
+  }));
 }
 
 export async function onRequestGet(context: {
@@ -123,8 +144,8 @@ export async function onRequestGet(context: {
         releaseTag: release.tag_name,
         repositories: report.repositories || [],
         identityAliases: report.identity_aliases || [],
-        humanContributors: decorate(report.human_contributors),
-        botContributors: decorate(report.bot_contributors),
+        humanContributors: await decorate(report.human_contributors),
+        botContributors: await decorate(report.bot_contributors),
       }),
       {
         status: 200,

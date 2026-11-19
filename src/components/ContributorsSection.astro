@@ -8,6 +8,7 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
   class="relative pb-24 px-4"
   aria-labelledby="community-contributors-title"
   data-contributors-page
+  data-contributors-locale={t.locale}
   data-contributors-commits={t("community.contributors.commits")}
   data-contributors-added={t("community.contributors.added")}
   data-contributors-deleted={t("community.contributors.deleted")}
@@ -86,13 +87,14 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
     return name.trim().slice(0, 1).toUpperCase() || "?";
   }
 
-  function formatLines(value: number): string {
+  function formatLines(value: number, locale: string): string {
     const absolute = Math.abs(Math.round(value));
-    if (absolute < 1000) return `<1k ${absolute} 行`;
+    const chinese = locale.indexOf("zh") === 0;
+    if (absolute < 1000) return `${absolute} ${chinese ? "行" : "SLOC"}`;
     if (absolute < 1000000) {
-      return `${(absolute / 1000).toFixed(absolute < 10000 ? 1 : 0).replace(/\.0$/, "")}k 行`;
+      return `${(absolute / 1000).toFixed(absolute < 10000 ? 1 : 0).replace(/\.0$/, "")}${chinese ? "k 行" : " kSLOC"}`;
     }
-    return `${(absolute / 1000000).toFixed(absolute < 10000000 ? 1 : 0).replace(/\.0$/, "")}m 行`;
+    return `${(absolute / 1000000).toFixed(absolute < 10000000 ? 1 : 0).replace(/\.0$/, "")}${chinese ? "m 行" : " MSLOC"}`;
   }
 
   function renderGroup(
@@ -103,6 +105,7 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
     labels: Record<string, string>,
     emptyText: string,
   ): void {
+    const format = (value: number) => formatLines(value, labels.locale);
     if (!items.length) {
       state.textContent = emptyText;
       return;
@@ -119,14 +122,14 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
         <div class="min-w-0 flex-1">
           <div class="text-title-small text-on-surface truncate">${escapeHtml(item.name)}</div>
           <div class="lt-contributor-primary text-body-small">
-            <span class="text-primary">${escapeHtml(labels.added)} <strong>${escapeHtml(formatLines(item.addedLines))}</strong></span>
-            <span class="text-error">${escapeHtml(labels.deleted)} <strong>${escapeHtml(formatLines(item.deletedLines))}</strong></span>
+            <span class="text-primary">${escapeHtml(labels.added)} <strong>${escapeHtml(format(item.addedLines))}</strong></span>
+            <span class="text-error">${escapeHtml(labels.deleted)} <strong>${escapeHtml(format(item.deletedLines))}</strong></span>
             <span class="text-on-surface-variant">${escapeHtml(commitsTemplate.replace("{count}", String(item.commits)))}</span>
           </div>
           <div class="lt-contributor-secondary text-label-small text-on-surface-variant">
-            <span>${escapeHtml(labels.canceledAdded)} ${escapeHtml(formatLines(item.canceledAddedLines))}</span>
-            <span>${escapeHtml(labels.canceledDeleted)} ${escapeHtml(formatLines(item.canceledDeletedLines))}</span>
-            <span class="${netColor}">${escapeHtml(netLabel)} ${escapeHtml(formatLines(item.netLines))}</span>
+            <span>${escapeHtml(labels.canceledAdded)} ${escapeHtml(format(item.canceledAddedLines))}</span>
+            <span>${escapeHtml(labels.canceledDeleted)} ${escapeHtml(format(item.canceledDeletedLines))}</span>
+            <span class="${netColor}">${escapeHtml(netLabel)} ${escapeHtml(format(item.netLines))}</span>
           </div>
         </div>
       </div>`;
@@ -142,6 +145,7 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
     if (!humanGroup || !botGroup || !humanState || !botState || !page) return;
     const commitsTemplate = page.dataset.contributorsCommits || "{count}";
     const labels = {
+      locale: page.dataset.contributorsLocale || "zh-Hans",
       added: page.dataset.contributorsAdded || "Added",
       deleted: page.dataset.contributorsDeleted || "Deleted",
       canceledAdded: page.dataset.contributorsCanceledAdded || "Added then removed",
