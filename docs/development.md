@@ -180,6 +180,7 @@ chunk）、`import.meta`（64）都在，其余由 esbuild 降级。
 浏览器为光标下的新元素合成指针事件。`.lt-lift` 保留位置过渡，但悬停阴影直接切换，不对
 `box-shadow` 插值：卡片经过静止光标时也会触发 hover，阴影动画会重复重绘玻璃。
 背景与光照由 `AuroraBackground.astro` 与 `BaseLayout.astro` 统一管理。
+友链行 `.lt-flink` 同样只过渡位置，悬停填色和内阴影直接切换，避免长玻璃列表内逐行触发绘制动画。
 
 ### 玻璃的三条硬规则
 
