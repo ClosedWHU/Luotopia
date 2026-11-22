@@ -2988,11 +2988,10 @@ jobs:
       # Pin CLI tools release on ErBWs/ohos-sdk (change intentionally + clear cache).
       OHOS_CLI_VERSION: "6.1.1.280"
       # OpenHarmony Flutter (CPF / openharmony-sig). Override via repo variable if needed.
-      # Prefer CPF-Flutter 3.44 canary (matches the local OHOS Flutter toolchain; Dart 3.12).
-      # NOTE: canary — switch back to the latest stable tag once CPF publishes 3.44+ stable.
+      # Match the app's Flutter >=3.47 dependency baseline (Dart 3.13.5).
       OH_FLUTTER_REPO: https://gitcode.com/CPF-Flutter/flutter_flutter.git
       # Tag on CPF-Flutter (local branch name may differ).
-      OH_FLUTTER_REF: 3.44.9+ohos-0.0.1-canary1
+      OH_FLUTTER_REF: 3.47.7+ohos-0.0.1-pre
     steps:
       - name: Require app repo token
         shell: bash
