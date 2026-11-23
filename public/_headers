@@ -14,7 +14,8 @@
 # Markdown legal docs fetched and cached by the mobile client (versioned by
 # lastUpdated). Short max-age + Pages' automatic ETag let the client revalidate
 # cheaply while still opening instantly from its local cache.
-/legal/*.md
+/*.md
+  Content-Type: text/markdown; charset=utf-8
   Cache-Control: public, max-age=300
 
 /hot-update/*

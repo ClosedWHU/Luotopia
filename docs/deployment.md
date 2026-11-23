@@ -25,6 +25,41 @@
 truth，面板里配好的环境变量与绑定会被文件覆盖 —— 风险远大于收益（详见
 [404 处理](#404-处理)）。
 
+### 法律文档的字符编码
+
+`/legal/*.md` 是 UTF-8 Markdown，静态托管必须返回
+`Content-Type: text/markdown; charset=utf-8`。Astro 端点声明的响应头不会被所有
+静态托管平台保留，因此 Cloudflare 通过 `public/_headers`、EdgeOne 通过
+`edgeone.json` 的 `headers` 显式设置，并采用 `public, max-age=300` 缓存。
+两者的 `/*.md` URL 通配规则也覆盖 `/en/legal/*.md` 等翻译版本。
+
+ESA 的 [Pages 构建配置](https://help.aliyun.com/zh/edge-security-acceleration/esa/build-pages)
+没有声明静态响应头的字段；不能依赖 Cloudflare 的 `_headers` 在 ESA 上生效。
+ESA 自定义域名需要在站点响应头规则中匹配以下条件，将
+`Content-Type` **设置/覆盖**为 `text/markdown; charset=utf-8`，不要追加第二个
+Content-Type：
+
+```text
+(http.host in {"whu-homepage-esa.tsinbei.cn"}
+ and http.request.uri.path contains "/legal/"
+ and http.request.uri.path.file_name in {"terms.md" "privacy.md" "cross-border.md"})
+```
+
+`file_name` 是包含扩展名的完整文件名，不能写成 `{"md"}`。
+该规则属于站点配置，不由 `esa.jsonc` 部署。命中的静态文件不会
+进入 `platform/esa-routine.ts`，因此修改函数返回头无法修正静态 Markdown。
+
+部署或调整站点规则后，对三个域名分别检查实际 GET 响应：
+
+```sh
+curl -sS -D - -o /dev/null https://www.whu.sb/legal/terms.md
+curl -sS -D - -o /dev/null https://whu-homepage-esa.tsinbei.cn/legal/terms.md
+curl -sS -D - -o /dev/null https://whu-homepage-edgeone.tsinbei.cn/legal/terms.md
+```
+
+三个响应都应只有一个带 `charset=utf-8` 的 Markdown Content-Type。已经保存在
+App 本地的乱码正文仍需要客户端失效缓存并重新下载。
+
 ### 构建流程
 
 `npm run build` 之前会跑 `prebuild`：

@@ -21,6 +21,45 @@ of truth for the whole project configuration, and the environment variables and
 bindings configured in the dashboard get overridden by the file — the risk far
 outweighs the benefit (see [404 handling](#404-handling)).
 
+### Legal document encoding
+
+`/legal/*.md` contains UTF-8 Markdown and must be served with
+`Content-Type: text/markdown; charset=utf-8`. Static hosting does not always
+preserve the headers declared by the Astro endpoint. Cloudflare sets this in
+`public/_headers`; EdgeOne sets it in `edgeone.json`, alongside
+`Cache-Control: public, max-age=300`.
+Both use the `/*.md` URL wildcard to cover translated paths such as
+`/en/legal/*.md` as well.
+
+ESA's documented [Pages build configuration](https://help.aliyun.com/zh/edge-security-acceleration/esa/build-pages)
+has no static response-header field. Do not assume Cloudflare's `_headers` works
+on ESA. Configure a site response-header rule with the following condition,
+**setting/overwriting** `Content-Type` with `text/markdown; charset=utf-8`
+rather than appending a second value:
+
+```text
+(http.host in {"whu-homepage-esa.tsinbei.cn"}
+ and http.request.uri.path contains "/legal/"
+ and http.request.uri.path.file_name in {"terms.md" "privacy.md" "cross-border.md"})
+```
+
+`file_name` is the full filename including its extension, not `{"md"}`.
+This is a site setting, outside `esa.jsonc`. Matched static files bypass
+`platform/esa-routine.ts`, so changing the routine's response headers cannot fix
+these files.
+
+After deployment or a site-rule change, check actual GET responses:
+
+```sh
+curl -sS -D - -o /dev/null https://www.whu.sb/legal/terms.md
+curl -sS -D - -o /dev/null https://whu-homepage-esa.tsinbei.cn/legal/terms.md
+curl -sS -D - -o /dev/null https://whu-homepage-edgeone.tsinbei.cn/legal/terms.md
+```
+
+Each response should have a single Markdown Content-Type with `charset=utf-8`.
+Incorrectly decoded text already cached by the App still needs client-side
+invalidation and a fresh download.
+
 ### Build pipeline
 
 `npm run build` is preceded by `prebuild`:
