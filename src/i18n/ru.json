@@ -1,4 +1,7 @@
 {
+  "community.contributors.cumulativeAdded": "Добавлено",
+  "community.contributors.cumulativeModified": "Изменено",
+  "community.contributors.cumulativeRemoved": "Удалено",
   "meta.default.description": "Luotopia — сервисы кампуса в одном месте, открытая экосистема",
   "meta.default.ogDescription": "Универсальная платформа кампуса, которую развивает открытое сообщество",
 

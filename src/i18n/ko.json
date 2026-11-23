@@ -1,4 +1,7 @@
 {
+  "community.contributors.cumulativeAdded": "추가",
+  "community.contributors.cumulativeModified": "수정",
+  "community.contributors.cumulativeRemoved": "삭제",
   "meta.default.description": "Luotopia — 캠퍼스 서비스를 한곳에, 개방형 생태계를 구축",
   "meta.default.ogDescription": "원스톱 캠퍼스 플랫폼, 개방형 커뮤니티가 주도",
 

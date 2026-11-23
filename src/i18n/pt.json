@@ -1,4 +1,7 @@
 {
+  "community.contributors.cumulativeAdded": "Adicionadas",
+  "community.contributors.cumulativeModified": "Modificadas",
+  "community.contributors.cumulativeRemoved": "Eliminadas",
   "meta.default.description": "Luotopia — os serviços do campus em um só lugar, construído sobre um ecossistema aberto",
   "meta.default.ogDescription": "Plataforma completa de serviços do campus, movida por uma comunidade aberta",
 

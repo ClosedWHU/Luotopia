@@ -1,4 +1,7 @@
 {
+  "community.contributors.cumulativeAdded": "追加",
+  "community.contributors.cumulativeModified": "変更",
+  "community.contributors.cumulativeRemoved": "削除",
   "meta.default.description": "Luotopia —— キャンパスサービスを一つに、オープンなエコシステムを構築",
   "meta.default.ogDescription": "ワンストップのキャンパスプラットフォーム、オープンコミュニティが推進",
 

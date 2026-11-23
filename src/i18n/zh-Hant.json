@@ -1,4 +1,7 @@
 {
+  "community.contributors.cumulativeAdded": "新增",
+  "community.contributors.cumulativeModified": "修改",
+  "community.contributors.cumulativeRemoved": "刪除",
   "meta.default.description": "Luotopia —— 整合校園服務，建構開放生態",
   "meta.default.ogDescription": "校園服務一站式平台，開放社群驅動",
 

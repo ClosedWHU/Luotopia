@@ -11,8 +11,10 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
   data-contributors-locale={t.locale}
   data-contributors-commits={t("community.contributors.commits")}
   data-contributors-added={t("community.contributors.added")}
+  data-contributors-cumulative-added={t("community.contributors.cumulativeAdded")}
+  data-contributors-cumulative-modified={t("community.contributors.cumulativeModified")}
+  data-contributors-cumulative-removed={t("community.contributors.cumulativeRemoved")}
   data-contributors-canceled-added={t("community.contributors.canceledAdded")}
-  data-contributors-canceled-deleted={t("community.contributors.canceledDeleted")}
   data-contributors-error={t("community.contributors.error")}
   data-contributors-empty={t("community.contributors.empty")}
 >
@@ -54,7 +56,6 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
   import { onPageSetup } from "../scripts/page-lifecycle";
   import { normalizeIconSvg } from "../scripts/icon-svg";
   import addRaw from "@material-symbols/svg-400/outlined/add.svg?raw";
-  import removeRaw from "@material-symbols/svg-400/outlined/remove.svg?raw";
   import commitRaw from "@material-symbols/svg-400/outlined/commit.svg?raw";
   import historyRaw from "@material-symbols/svg-400/outlined/history.svg?raw";
 
@@ -62,7 +63,6 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
     added: normalizeIconSvg(addRaw, "lt-contributor-icon"),
     commits: normalizeIconSvg(commitRaw, "lt-contributor-icon"),
     history: normalizeIconSvg(historyRaw, "lt-contributor-icon"),
-    removed: normalizeIconSvg(removeRaw, "lt-contributor-icon"),
   };
 
   type Contributor = {
@@ -71,8 +71,10 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
     type: "human" | "bot";
     commits: number;
     addedLines: number;
+    cumulativeAddedLines: number | null;
+    cumulativeModifiedLines: number | null;
+    cumulativeRemovedLines: number | null;
     canceledAddedLines: number;
-    canceledDeletedLines: number;
     avatarUrl: string | null;
   };
 
@@ -113,6 +115,7 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
     emptyText: string,
   ): void {
     const format = (value: number) => formatLines(value, labels.locale);
+    const activity = (value: number | null | undefined, sign: string) => value == null ? "—" : `${sign}${format(value)}`;
     if (!items.length) {
       state.textContent = emptyText;
       return;
@@ -134,13 +137,21 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
         </header>
         <dl class="lt-contributor-primary">
           <div class="lt-contributor-added">
-            <dt>${icons.added}${escapeHtml(labels.added)}</dt>
-            <dd>${escapeHtml(format(item.addedLines))}</dd>
+            <dt>${escapeHtml(labels.cumulativeAdded)}</dt>
+            <dd>${escapeHtml(activity(item.cumulativeAddedLines, "+"))}</dd>
+          </div>
+          <div class="lt-contributor-modified">
+            <dt>${escapeHtml(labels.cumulativeModified)}</dt>
+            <dd>${escapeHtml(activity(item.cumulativeModifiedLines, "~"))}</dd>
+          </div>
+          <div class="lt-contributor-removed">
+            <dt>${escapeHtml(labels.cumulativeRemoved)}</dt>
+            <dd>${escapeHtml(activity(item.cumulativeRemovedLines, "-"))}</dd>
           </div>
         </dl>
         <dl class="lt-contributor-secondary text-body-small text-on-surface-variant">
+          <div><dt>${icons.added}${escapeHtml(labels.added)}</dt><dd>${escapeHtml(format(item.addedLines))}</dd></div>
           <div><dt>${icons.history}${escapeHtml(labels.canceledAdded)}</dt><dd>${escapeHtml(format(item.canceledAddedLines))}</dd></div>
-          <div><dt>${icons.removed}${escapeHtml(labels.canceledDeleted)}</dt><dd>${escapeHtml(format(item.canceledDeletedLines))}</dd></div>
         </dl>
       </article>`;
     }).join("");
@@ -157,8 +168,10 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
     const labels = {
       locale: page.dataset.contributorsLocale || "zh-Hans",
       added: page.dataset.contributorsAdded || "Added",
+      cumulativeAdded: page.dataset.contributorsCumulativeAdded || "Added",
+      cumulativeModified: page.dataset.contributorsCumulativeModified || "Modified",
+      cumulativeRemoved: page.dataset.contributorsCumulativeRemoved || "Removed",
       canceledAdded: page.dataset.contributorsCanceledAdded || "Added then removed",
-      canceledDeleted: page.dataset.contributorsCanceledDeleted || "Removed code",
     };
     const errorText = page.dataset.contributorsError || "Error";
     const emptyText = page.dataset.contributorsEmpty || "";
@@ -219,20 +232,27 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
     font-weight: 600;
   }
   .lt-contributor-primary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
     margin: 20px 0 16px;
   }
   .lt-contributor-primary dt,
   .lt-contributor-secondary dt { display: flex; align-items: center; gap: 6px; }
   .lt-contributor-primary dt { font-size: 12px; line-height: 1.5; }
-  .lt-contributor-primary dd { margin: 4px 0 0; font-size: 28px; line-height: 1.3; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .lt-contributor-primary dd { margin: 4px 0 0; font-size: 18px; line-height: 1.3; font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: break-word; }
   .lt-contributor-added { color: var(--lt-color-success); }
+  .lt-contributor-modified { color: var(--lt-color-warning); }
+  .lt-contributor-removed { color: var(--lt-color-error); }
   .lt-contributor-secondary { display: grid; gap: 8px; margin: 0; padding-top: 14px; border-top: 1px solid var(--lt-color-outline-variant); }
   .lt-contributor-secondary > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
   .lt-contributor-secondary dd { margin: 0; flex-shrink: 0; font-variant-numeric: tabular-nums; }
   @media (min-width: 640px) {
     .lt-contributors-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .lt-contributor-primary dd { font-size: 20px; }
   }
   @media (min-width: 1024px) {
     .lt-contributors-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .lt-contributor-primary dd { font-size: 20px; }
   }
 </style>

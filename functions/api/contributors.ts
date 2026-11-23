@@ -22,6 +22,9 @@ type Contributor = {
   matched_cancellations: number;
   canceled_added_lines?: number;
   canceled_deleted_lines?: number;
+  cumulative_added_lines?: number;
+  cumulative_modified_lines?: number;
+  cumulative_removed_lines?: number;
   first_commit?: string | null;
   last_commit?: string | null;
 };
@@ -104,7 +107,7 @@ async function avatarUrl(identity: string): Promise<string> {
   return `/api/contributors/avatar/identicon-${hash}`;
 }
 
-async function decorate(items: Contributor[] | undefined) {
+async function decorate(items: Contributor[] | undefined, version: number) {
   return Promise.all((items || []).map(async (item) => {
     const profile = PROFILES[AVATAR_IDS[item.id]];
     return {
@@ -124,6 +127,9 @@ async function decorate(items: Contributor[] | undefined) {
       matchedCancellations: item.matched_cancellations,
       canceledAddedLines: item.canceled_added_lines || 0,
       canceledDeletedLines: item.canceled_deleted_lines || 0,
+      cumulativeAddedLines: version >= 3 ? item.cumulative_added_lines ?? null : null,
+      cumulativeModifiedLines: version >= 3 ? item.cumulative_modified_lines ?? null : null,
+      cumulativeRemovedLines: version >= 3 ? item.cumulative_removed_lines ?? null : null,
       firstCommit: item.first_commit || null,
       lastCommit: item.last_commit || null,
       avatarUrl: await avatarUrl(item.id),
@@ -132,10 +138,26 @@ async function decorate(items: Contributor[] | undefined) {
 }
 
 export async function onRequestGet(context: {
+  request: Request;
   env: { CONTRIBUTORS_REPO?: string; GITHUB_TOKEN?: string };
+  waitUntil?(promise: Promise<unknown>): void;
 }): Promise<Response> {
   const repo = context.env.CONTRIBUTORS_REPO || "ClosedWHU/Luotopia-Contributors";
   const token = context.env.GITHUB_TOKEN || "";
+  // Cache the completed public projection, not just each GitHub subrequest.
+  // Query-free and repository-scoped: callers share one report per deployment.
+  type ReportCache = {
+    match(key: Request): Promise<Response | undefined>;
+    put(key: Request, response: Response): Promise<void>;
+  };
+  const cache = (globalThis as unknown as { caches?: { default?: ReportCache } }).caches?.default;
+  const cacheKey = new Request(`${new URL(context.request.url).origin}/__contributors/v3/${encodeURIComponent(repo)}`);
+  if (cache) {
+    try {
+      const cached = await cache.match(cacheKey);
+      if (cached) return cached;
+    } catch { /* Cache availability must not block the public report. */ }
+  }
 
   try {
     const releaseResponse = await ghFetch(
@@ -175,19 +197,20 @@ export async function onRequestGet(context: {
     }
 
     const report = (await assetResponse.json()) as ContributorsReport;
-    if (report.metric_version !== 2) {
+    if (report.metric_version !== 2 && report.metric_version !== 3) {
       return json({ error: "unsupported_contributor_metric" }, 502, {
         "Cache-Control": "no-store",
       });
     }
-    return new Response(
+    const response = new Response(
       JSON.stringify({
         generatedAt: release.published_at || release.created_at,
+        metricVersion: report.metric_version,
         releaseTag: release.tag_name,
         repositories: report.repositories || [],
         identityAliases: report.identity_aliases || [],
-        humanContributors: await decorate(report.human_contributors),
-        botContributors: await decorate(report.bot_contributors),
+        humanContributors: await decorate(report.human_contributors, report.metric_version),
+        botContributors: await decorate(report.bot_contributors, report.metric_version),
       }),
       {
         status: 200,
@@ -198,6 +221,14 @@ export async function onRequestGet(context: {
         },
       },
     );
+    if (cache) {
+      const stored = response.clone();
+      stored.headers.set("Cache-Control", `public, max-age=${GH_API_CACHE_TTL}`);
+      const saving = cache.put(cacheKey, stored).catch(() => undefined);
+      if (context.waitUntil) context.waitUntil(saving);
+      else await saving;
+    }
+    return response;
   } catch (error) {
     return json(
       {

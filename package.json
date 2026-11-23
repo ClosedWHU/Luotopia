@@ -27,7 +27,8 @@
     "scales:mmpi2:short": "node tools/build-mmpi2-scale.cjs --short 370",
     "notes:translate": "node tools/translate-release-notes.mjs",
     "notes:check": "node tools/translate-release-notes.mjs --self-test",
-    "prebuild": "npm run check:aasa && npm run i18n:check && npm run notes:check && npm run hot-update:verify-scripts && npm run scales:generate"
+    "contributors:check": "node --test tools/test-contributors-api.mjs",
+    "prebuild": "npm run check:aasa && npm run i18n:check && npm run notes:check && npm run contributors:check && npm run hot-update:verify-scripts && npm run scales:generate"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.6",

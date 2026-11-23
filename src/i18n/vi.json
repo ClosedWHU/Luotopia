@@ -1,4 +1,7 @@
 {
+  "community.contributors.cumulativeAdded": "Đã thêm",
+  "community.contributors.cumulativeModified": "Đã sửa",
+  "community.contributors.cumulativeRemoved": "Đã xóa",
   "meta.default.description": "Luotopia — tích hợp dịch vụ học đường, xây dựng hệ sinh thái mở",
   "meta.default.ogDescription": "Nền tảng dịch vụ học đường tất cả trong một, do cộng đồng mở dẫn dắt",
 
