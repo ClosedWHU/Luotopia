@@ -1,6 +1,6 @@
 /** Shared GitHub Releases helpers for Pages Functions */
 
-export type PlatformId = "android" | "ios" | "windows" | "macos" | "linux" | "other";
+export type PlatformId = "android" | "ios" | "windows" | "macos" | "linux" | "harmony" | "other";
 
 /** CPU / ABI key used for recommend + display. */
 export type ArchId =
@@ -20,6 +20,7 @@ export type FormatId =
   | "apk"
   | "aab"
   | "ipa"
+  | "hap"
   | "msix"
   | "msi"
   | "exe"
@@ -50,6 +51,7 @@ const RECOMMENDED_ARCH: Partial<Record<PlatformId, ArchId>> = {
   windows: "amd64",
   macos: "arm64",
   linux: "amd64",
+  harmony: "arm64",
 };
 
 /** Preferred install format when multiple exist for the same arch. */
@@ -60,6 +62,7 @@ const RECOMMENDED_FORMAT: Partial<Record<PlatformId, FormatId>> = {
   // executable — the format a visitor who "just wants to try it" can use.
   linux: "appimage",
   macos: "dmg",
+  harmony: "hap",
 };
 
 const ARCH_LABELS: Record<ArchId, string> = {
@@ -79,6 +82,7 @@ const FORMAT_LABELS: Record<FormatId, string> = {
   apk: "APK",
   aab: "AAB",
   ipa: "IPA",
+  hap: "HAP",
   msix: "MSIX",
   msi: "MSI",
   exe: "EXE",
@@ -189,6 +193,7 @@ export function detectFormat(filename: string): FormatId {
   if (/\.apk$/i.test(n)) return "apk";
   if (/\.aab$/i.test(n)) return "aab";
   if (/\.ipa$/i.test(n)) return "ipa";
+  if (/\.hap$/i.test(n)) return "hap";
   if (/\.msix$/i.test(n) || /\.appx$/i.test(n)) return "msix";
   if (/\.msi$/i.test(n)) return "msi";
   if (/\.exe$/i.test(n)) return "exe";
@@ -213,6 +218,7 @@ export function detectPlatform(filename: string): PlatformId {
   const format = detectFormat(filename);
   // Package-manager manifests (not installers)
   if (format === "scoop" || format === "winget") return "other";
+  if (format === "hap") return "harmony";
   if (format === "apk" || format === "aab" || n.includes("android")) return "android";
   if (format === "ipa" || n.includes("ios") || n.includes("iphone")) return "ios";
   if (

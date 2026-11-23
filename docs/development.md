@@ -54,6 +54,20 @@ App 与 CLI 下载页共用 `src/components/PlatformTabs.astro`：传入系统�
 架构选择器由 `src/scripts/architecture-picker.ts` 统一渲染与绑定，替换下载列表后会
 恢复键盘焦点。两页的转义、文件大小、日期、版本徽章和模板替换共用
 `src/scripts/download-ui.ts`，更新日志排版共用 `src/scripts/release-notes.ts`。
+
+HarmonyOS 下载面板复用 App Release 的徽章、附件列表及下载代理。共享资产映射按
+`.hap` 扩展名（不区分大小写）识别 `platform: "harmony"` / `format: "hap"`，架构仅从
+文件名中读取，不从平台推断。命名包含独立 `unsigned` 段时，下载标题显示本地化的
+未签名说明；这不是对包内签名的验证。当前 Release 没有 HAP 时显示无包状态，
+不沿用其他版本或拼接不存在的附件地址。侧载教程及第三方工具/视频链接在同一面板中。
+`npm run releases:check` 通过真实 Release API 与下载代理入口验证分类和文件流，
+并由 prebuild 执行。
+
+`app-release.yml` 的正常发布和手动运行默认开启 `build_ohos`，通过自托管 Linux
+runner 构建 HAP；手动运行可取消，Apple-only / Apple 状态查询等专用流程仍跳过。
+Release 同时上传 `HARMONYOS-SIDELOAD.txt`，其安装指引先区分 unsigned 和设备授权的
+signed 包，再说明签名、安装及续期。该说明上传失败会使发布步骤失败。
+
 `functions/lib/github-releases.ts` 的 `mapReleaseAsset()` 为 App 与 CLI 提供同一套
 资产字段；CLI 的二进制文件为 `format: "binary"`，校验文件为
 `format: "checksum"`、`meta: true`。CLI 页面正文在 `CliPage.astro`，各语言路由只负责挂载。

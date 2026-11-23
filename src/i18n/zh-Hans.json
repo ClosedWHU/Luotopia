@@ -1,4 +1,13 @@
 {
+  "download.install.harmony.unavailable": "此版本暂无 HAP",
+  "download.install.harmony.unsigned": "未签名，需自行签名",
+  "download.install.harmony.toolLink": "下载小白调试助手",
+  "download.install.harmony.videoLink": "观看安装视频",
+  "download.install.harmony.stepTool": "在电脑安装适合系统的 Auto-Installer（小白调试助手），先阅读所选版本的 Release 说明。",
+  "download.install.harmony.stepConnect": "在手机开启开发者选项及系统支持的 USB 或无线调试，在助手中连接设备并确认手机授权。无线连接时使用同一网络，地址和端口按设备提示填写。",
+  "download.install.harmony.stepSign": "导入下载的 unsigned HAP，按助手向导完成账号、证书和设备签名，再安装到手机。若要求开发者实名或设备注册，按系统与工具提示完成。",
+  "download.install.harmony.stepRenew": "保留签名账号、证书与助手配置。调试签名可能到期，按助手提示续期；更新尽量沿用相同签名，避免卸载造成本地数据丢失。",
+  "download.install.harmony.videoNote": "视频演示为助手 2.0 版；界面和签名要求以项目最新说明及设备系统为准。",
   "community.contributors.cumulativeAdded": "新增",
   "community.contributors.cumulativeModified": "修改",
   "community.contributors.cumulativeRemoved": "删除",
@@ -540,7 +549,7 @@
   "download.install.linux.arch": "架构",
   "download.install.linux.format": "文件格式",
   "download.install.linux.note": "依赖较新 glibc + GTK3。",
-  "download.install.harmony.body": "HarmonyOS NEXT 侧载困难，暂无积极维护，因此 {hap} 不随每个 Release 发布。若 Release 资产中包含 {signedHap}，可按照同版本的 {sideload} 侧载安装。",
+  "download.install.harmony.body": "HarmonyOS NEXT 使用 {hap} 安装包。Release 提供的 unsigned 包未签名，不能直接点击安装；需要先为自己的设备签名，再通过调试工具侧载。下载入口会在当前版本包含 HAP 附件时出现。",
   "download.install.harmony.note": "受平台能力限制，部分功能会在 HarmonyOS 上隐藏或降级。",
 
   "download.pkg.title": "高级用户 / 包管理器",

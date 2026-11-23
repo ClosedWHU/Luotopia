@@ -137,7 +137,7 @@ on:
         description: "Build HarmonyOS HAP on the self-hosted Linux runner (setup-ohos + OH Flutter)"
         required: false
         type: boolean
-        default: false
+        default: true
       linux_arch:
         description: Linux arch (x64, arm64, or both)
         required: false
@@ -253,8 +253,8 @@ jobs:
             UPLOAD_APPLE_TESTFLIGHT=true
             APPLE_ACTION=build
             DISTRIBUTE_APPLE_EXTERNAL=true
-            # HAP needs self-hosted DevEco/OH Flutter; opt-in via manual dispatch.
-            BUILD_OHOS=false
+            # Normal releases include HAP via the self-hosted DevEco/OH Flutter runner.
+            BUILD_OHOS=true
             LINUX_ARCH=both
             LINUX_FORMATS=all
           else
@@ -285,7 +285,7 @@ jobs:
           fi
           LINUX_ARCH="${LINUX_ARCH:-both}"
           LINUX_FORMATS="${LINUX_FORMATS:-all}"
-          BUILD_OHOS="${BUILD_OHOS:-false}"
+          BUILD_OHOS="${BUILD_OHOS:-true}"
           ANDROID_ABIS="${ANDROID_ABIS:-all}"
           ANDROID_PACKAGES="${ANDROID_PACKAGES:-both}"
           case "$ANDROID_PACKAGES" in
@@ -1186,7 +1186,6 @@ jobs:
           # Play consumes for native crash symbolication and never ships.
           flutter build appbundle --release \
             --flavor play \
-            --dart-define=PLAY_BUILD=true \
             --obfuscate \
             --split-debug-info=build/debug-info-aab \
             "${EXTRA[@]}"
@@ -1200,21 +1199,21 @@ jobs:
           cp -v "$AAB" "dist/luotopia-${SAFE_TAG}-android.aab"
           echo "aab_name=luotopia-${SAFE_TAG}-android.aab" >> "$GITHUB_OUTPUT"
 
-      # Google Play forbids self-update, so the play flavor's manifest overlay
-      # must have stripped REQUEST_INSTALL_PACKAGES. Fail loudly if not.
+      # Play must have neither APK self-update nor a system VPN declaration.
       # apkanalyzer `manifest permissions` shells out to `aapt dump badging`,
       # which cannot parse a bundle, so grep the merged protobuf manifest's
       # string pool directly (permission names live there as UTF-8).
-      - name: Verify the Play manifest drops REQUEST_INSTALL_PACKAGES
+      - name: Verify Play distribution restrictions in the AAB manifest
         if: matrix.package == 'aab'
         run: |
           set -euo pipefail
           AAB="$(find build/app/outputs/bundle -type f -name '*.aab' -print -quit)"
-          if unzip -p "$AAB" base/manifest/AndroidManifest.xml | grep -qi "REQUEST_INSTALL_PACKAGES"; then
-            echo "::error::REQUEST_INSTALL_PACKAGES still present in the Play AAB"
+          unzip -p "$AAB" base/manifest/AndroidManifest.xml > build/play-manifest.pb
+          if grep -aEi 'REQUEST_INSTALL_PACKAGES|BIND_VPN_SERVICE|android\.net\.VpnService|VpnTunnelService|FOREGROUND_SERVICE_SPECIAL_USE' build/play-manifest.pb; then
+            echo "::error::Installer or system VPN declaration still present in the Play AAB"
             exit 1
           fi
-          echo "REQUEST_INSTALL_PACKAGES absent from the Play AAB"
+          echo "Installer and system VPN declarations absent from the Play AAB"
 
       # The Flutter tool's release post-check (_isAabStrippedOfDebugSymbols)
       # only printTraces why it rejected the bundle, invisible without
@@ -2972,7 +2971,7 @@ jobs:
         if: always()
         run: rm -rf assets render dist-checkout brew-checkout
 
-  # HarmonyOS HAP for user sideload (hdc install).
+  # HarmonyOS HAP for device signing and sideloading.
   # Self-hosted Ubuntu + ErBWs/setup-ohos (CLI/SDK mirror) + OH Flutter clone.
   # Optional: set secrets OHOS_* for signing. Pin CLI via OHOS_CLI_VERSION if needed.
   ohos:
@@ -3230,17 +3229,47 @@ jobs:
           gh release upload "$TAG" "${HAPS[@]}" --repo "$TARGET_REPO" --clobber
           echo "Uploaded ${#HAPS[@]} HAP(s) to $TARGET_REPO@$TAG"
           cat > dist/HARMONYOS-SIDELOAD.txt <<'EOF'
-          HarmonyOS HAP (sideload)
-          ------------------------
-          1. Enable developer mode / USB debugging on the device.
-          2. Install with hdc (DevEco / command-line tools):
-               hdc install luotopia-*-harmonyos-arm64-*.hap
-          3. Unsigned HAPs only work on emulators / devices that trust debug certs.
-             Prefer AGC debug/release signing for real devices.
-          Built on GitHub-hosted Ubuntu with ErBWs/setup-ohos + OH Flutter.
+          HarmonyOS NEXT HAP / 侧载安装
+          =============================
+          官网教程 / Website guide:
+          https://www.whu.sb/download/#harmony
+
+          中文
+          ----
+          文件名带 -unsigned.hap 的包未签名，不能直接点击或用 hdc 安装到普通真机。
+          需要先为自己的设备签名，再通过调试工具侧载。
+
+          1. 在电脑安装适合系统的 Auto-Installer（小白调试助手）。先阅读所选版本的说明：
+             https://github.com/likuai2010/auto-installer/releases
+          2. 在手机开启开发者选项和系统支持的 USB 或无线调试，在助手中连接并确认授权。
+             无线连接时使用同一网络，按设备提示填写地址与端口。
+          3. 导入 unsigned HAP，按助手向导完成账号、证书和设备签名，再安装到手机。
+             若要求开发者实名或设备注册，按系统和工具提示完成。
+          4. 保留签名账号、证书与配置，按助手提示续期。更新尽量沿用相同签名，避免卸载丢失本地数据。
+
+          视频教程（助手 2.0 演示，界面与要求以项目当前说明和设备为准）：
+          https://www.bilibili.com/video/BV1hkZ7YnEMd/
+
+          English
+          -------
+          An -unsigned.hap package must be signed for your device before installation.
+          Opening it or running hdc install on the unsigned file is not sufficient.
+
+          1. Install Auto-Installer on a compatible computer; read its release notes first.
+          2. Enable developer options and supported USB/wireless debugging, connect and authorize the device.
+          3. Import the unsigned HAP and follow the account/certificate/device-signing steps, then install it.
+             Complete developer identity verification or device registration if requested.
+          4. Keep your signing identity, certificates and configuration. Renew debug signing when needed,
+             and reuse the signing identity for updates to avoid uninstalling and losing local data.
+
+          Advanced: hdc can install a HAP already signed and authorized for the target device:
+            hdc install /path/to/device-signed.hap
+          A pre-signed release HAP still needs a valid signature/profile for the target device.
+
+          Built on a self-hosted Linux runner using ErBWs/setup-ohos and OpenHarmony Flutter.
           EOF
           gh release upload "$TAG" dist/HARMONYOS-SIDELOAD.txt \
-            --repo "$TARGET_REPO" --clobber || true
+            --repo "$TARGET_REPO" --clobber
 
       - name: Scrub signing materials
         if: always()

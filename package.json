@@ -28,7 +28,8 @@
     "notes:translate": "node tools/translate-release-notes.mjs",
     "notes:check": "node tools/translate-release-notes.mjs --self-test",
     "contributors:check": "node --test tools/test-contributors-api.mjs",
-    "prebuild": "npm run check:aasa && npm run i18n:check && npm run notes:check && npm run contributors:check && npm run hot-update:verify-scripts && npm run scales:generate"
+    "releases:check": "node --test tools/test-harmony-releases.mjs",
+    "prebuild": "npm run check:aasa && npm run i18n:check && npm run notes:check && npm run contributors:check && npm run releases:check && npm run hot-update:verify-scripts && npm run scales:generate"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.8",

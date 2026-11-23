@@ -1,4 +1,13 @@
 {
+  "download.install.harmony.unavailable": "No HAP in this release",
+  "download.install.harmony.unsigned": "Unsigned — signing required",
+  "download.install.harmony.toolLink": "Get Auto-Installer",
+  "download.install.harmony.videoLink": "Watch the installation video",
+  "download.install.harmony.stepTool": "Install Auto-Installer on a compatible computer. Read the release notes for the tool version you choose first.",
+  "download.install.harmony.stepConnect": "Enable developer options and USB or wireless debugging supported by your phone. Connect in the tool and approve access on the phone. For wireless connections, use the same network and the address and port shown by the device.",
+  "download.install.harmony.stepSign": "Import the downloaded unsigned HAP. Follow the tool's account, certificate and device-signing steps, then install it. Complete developer identity verification or device registration if requested.",
+  "download.install.harmony.stepRenew": "Keep your signing account, certificates and tool configuration. Debug signatures may expire; renew them as instructed by the tool. Reuse the same signing identity for updates to avoid uninstalling and losing local data.",
+  "download.install.harmony.videoNote": "The video demonstrates version 2.0 of the tool. Follow the project's current instructions and your device's requirements where they differ.",
   "community.contributors.cumulativeAdded": "Added",
   "community.contributors.cumulativeModified": "Modified",
   "community.contributors.cumulativeRemoved": "Deleted",
@@ -540,7 +549,7 @@
   "download.install.linux.arch": "architecture",
   "download.install.linux.format": "package format",
   "download.install.linux.note": "Needs a reasonably recent glibc and GTK3.",
-  "download.install.harmony.body": "Sideloading on HarmonyOS NEXT is difficult and nothing here is actively maintained, so the {hap} does not ship with every release. When a release does include {signedHap}, sideload it by following the {sideload} file from the same version.",
+  "download.install.harmony.body": "HarmonyOS NEXT uses {hap} packages. An unsigned release package cannot be installed just by opening it: sign it for your own device before sideloading through a debugging tool. A download appears when the current release includes a HAP asset.",
   "download.install.harmony.note": "Platform limits mean some features are hidden or reduced on HarmonyOS.",
 
   "download.pkg.title": "Advanced users / package managers",

@@ -83,7 +83,7 @@ const codeHtml = (text: string) =>
 const linkHtml = (href: string, text: string) =>
   `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">${escapeHtml(text)}</a>`;
 
-/* The tab row: the four release platforms plus HarmonyOS, which has a panel but no card in `platforms`. */
+/* HarmonyOS uses the shared release-asset renderer with a dedicated signing guide. */
 const tabs = [
   ...platforms.map((p) => ({ id: p.id as string, name: p.name as string, icon: p.icon as string, devices: (p.id === "apple" ? ["ios", "macos"] : [p.id]) as DevicePlatform[] })),
   { id: "harmony", name: "HarmonyOS", icon: "harmonyos", devices: ["harmony"] as const },
@@ -190,6 +190,8 @@ const i18n = {
   windowsStoreSubtitle: t("download.windows.storeSubtitle"),
   windowsZip: t("download.windows.zipSection"),
   windowsZipCaveat: t("download.windows.zipCaveat"),
+  harmonyUnavailable: t("download.install.harmony.unavailable"),
+  harmonyUnsigned: t("download.install.harmony.unsigned"),
   noNotes: t("download.changelog.noNotes"),
   loading: t("download.changelog.loading"),
   empty: t("download.changelog.empty"),
@@ -228,6 +230,8 @@ const i18n = {
     data-i18n-windows-store-subtitle={i18n.windowsStoreSubtitle}
     data-i18n-windows-zip={i18n.windowsZip}
     data-i18n-windows-zip-caveat={i18n.windowsZipCaveat}
+    data-i18n-harmony-unavailable={i18n.harmonyUnavailable}
+    data-i18n-harmony-unsigned={i18n.harmonyUnsigned}
     data-i18n-no-notes={i18n.noNotes}
     data-i18n-loading={i18n.loading}
     data-i18n-empty={i18n.empty}
@@ -444,31 +448,54 @@ const i18n = {
           })
         }
 
-        <!-- HarmonyOS has no card of its own in `platforms` (it ships no
-             regular assets), so its panel is only the sideload note. -->
+        <!-- Uses the same platform badges/assets slots as the release cards. -->
         <div
-          class="glass rounded-card p-5 sm:p-7 lg:max-w-3xl lg:mx-auto"
+          class="platform-card glass rounded-card p-5 sm:p-7"
           role="tabpanel"
           id="platform-tabs-panel-harmony"
           aria-labelledby="platform-tabs-tab-harmony"
           data-harmony-panel
+          data-platform="harmony"
           hidden
         >
+          <div class="lg:grid lg:grid-cols-2 lg:gap-10">
+          <div class="min-w-0">
           <div class="flex items-start gap-3.5">
             <span class="lt-icon-chip text-primary text-[22px] shrink-0"><Icon name="harmonyos" /></span>
             <div class="min-w-0 flex-1">
               <h2 class="text-title-medium text-on-surface">HarmonyOS</h2>
             </div>
           </div>
+          <div class="mt-4 flex flex-wrap gap-1.5 items-center platform-badges" aria-live="polite">
+            <span class="inline-block px-2.5 py-0.5 rounded-sm lt-inset text-on-surface-variant text-label-medium">{t("download.badge.loading")}</span>
+          </div>
+          <div class="platform-assets mt-4 space-y-1.5">
+            <a href={releasesLatestUrl} target="_blank" rel="noopener noreferrer" class="text-body-small text-primary hover:underline">{t("download.changelog.viewOnGithub")}</a>
+          </div>
           <div class="mt-4 space-y-2 text-body-medium text-on-surface-variant">
             <p
               set:html={rich("download.install.harmony.body", {
                 hap: codeHtml(".hap"),
-                signedHap: codeHtml("luotopia-*-harmonyos-arm64-signed.hap"),
-                sideload: codeHtml("HARMONYOS-SIDELOAD.txt"),
               })}
             />
             <p class="text-body-small text-outline">{t("download.install.harmony.note")}</p>
+          </div>
+          </div>
+          <div class="min-w-0 mt-6 lg:mt-0" data-drawer-group>
+            <DownloadDrawer title={t("download.install.title")} icon="info" open>
+              <div class="flex flex-wrap gap-x-5 gap-y-2">
+                <a href="https://github.com/likuai2010/auto-installer/releases" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">{t("download.install.harmony.toolLink")}</a>
+                <a href="https://www.bilibili.com/video/BV1hkZ7YnEMd/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">{t("download.install.harmony.videoLink")}</a>
+              </div>
+              <ol class="list-decimal pl-5 space-y-3">
+                <li>{t("download.install.harmony.stepTool")}</li>
+                <li>{t("download.install.harmony.stepConnect")}</li>
+                <li>{t("download.install.harmony.stepSign")}</li>
+                <li>{t("download.install.harmony.stepRenew")}</li>
+              </ol>
+              <p class="text-body-small text-outline">{t("download.install.harmony.videoNote")}</p>
+            </DownloadDrawer>
+          </div>
           </div>
         </div>
       </div>
@@ -743,6 +770,8 @@ const i18n = {
       windowsStoreSubtitle: dataset.i18nWindowsStoreSubtitle ?? "",
       windowsZip: dataset.i18nWindowsZip ?? "",
       windowsZipCaveat: dataset.i18nWindowsZipCaveat ?? "",
+      harmonyUnavailable: dataset.i18nHarmonyUnavailable ?? "",
+      harmonyUnsigned: dataset.i18nHarmonyUnsigned ?? "",
       noNotes: dataset.i18nNoNotes ?? "",
       loading: dataset.i18nLoading ?? "",
       empty: dataset.i18nEmpty ?? "",
@@ -967,11 +996,14 @@ const i18n = {
      * the platform is already the heading of the panel the row sits in.
      */
     function assetTitle(a) {
-      return (
-        [a.archLabel || a.arch, a.formatLabel].filter(Boolean).join(" · ") ||
+      const arch = a.format === "hap" && a.arch === "unknown" ? "" : a.archLabel || a.arch;
+      const title = (
+        [arch, a.formatLabel].filter(Boolean).join(" · ") ||
         a.label ||
         a.name
       );
+      return a.format === "hap" && /(^|[-_.])unsigned([-.]|$)/i.test(a.name)
+        ? `${title} · ${copy.harmonyUnsigned}` : title;
     }
 
     /**
@@ -1237,6 +1269,9 @@ const i18n = {
           platformAssets = platformAssets.concat(byPlatform[source] || []);
         }
         const installers = platformAssets.filter((a) => !a.meta);
+        if (id === "harmony" && installers.length === 0) {
+          paintBadges(badges, "", false, copy.harmonyUnavailable);
+        }
         const storeCta = storeCtaHtml(card);
         paintAssets(assetsEl, cardAssetsHtml(id, installers, storeCta));
 
