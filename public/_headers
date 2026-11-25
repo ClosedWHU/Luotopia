@@ -11,11 +11,18 @@
 /img/*
   Cache-Control: public, max-age=604800
 
-# Markdown legal docs fetched and cached by the mobile client (versioned by
-# lastUpdated). Short max-age + Pages' automatic ETag let the client revalidate
-# cheaply while still opening instantly from its local cache.
+# Documentation Markdown and legal docs (also fetched by the mobile client).
+# Short max-age + Pages' automatic ETag allow inexpensive revalidation.
 /*.md
   Content-Type: text/markdown; charset=utf-8
+  Cache-Control: public, max-age=300
+
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=300
+
+/robots.txt
+  Content-Type: text/plain; charset=utf-8
   Cache-Control: public, max-age=300
 
 /hot-update/*

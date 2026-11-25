@@ -72,6 +72,10 @@ export function urlOfSlug(slug: string): string {
   return "/" + slug + "/";
 }
 
+export function markdownUrlOf(entry: DocEntry): string {
+  return `${urlOfSlug(pathOf(entry))}index.md`;
+}
+
 export function topicForSlug(slug: string): DocsTopic | undefined {
   return DOCS_TOPICS.find((t) => slug === `docs/${t.id}` || slug.startsWith(`docs/${t.id}/`));
 }

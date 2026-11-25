@@ -21,15 +21,16 @@ of truth for the whole project configuration, and the environment variables and
 bindings configured in the dashboard get overridden by the file — the risk far
 outweighs the benefit (see [404 handling](#404-handling)).
 
-### Legal document encoding
+### Markdown and discovery endpoint encoding
 
-`/legal/*.md` contains UTF-8 Markdown and must be served with
+`/legal/*.md` and `/docs/**/index.md` contain UTF-8 Markdown and must be served with
 `Content-Type: text/markdown; charset=utf-8`. Static hosting does not always
 preserve the headers declared by the Astro endpoint. Cloudflare sets this in
 `public/_headers`; EdgeOne sets it in `edgeone.json`, alongside
 `Cache-Control: public, max-age=300`.
-Both use the `/*.md` URL wildcard to cover translated paths such as
-`/en/legal/*.md` as well.
+Both use the `/*.md` URL wildcard to cover documentation and translated paths such as
+`/en/legal/*.md` as well. Cloudflare's `_headers` also declares UTF-8 text and a
+five-minute cache for `/llms.txt` and `/robots.txt`.
 
 ESA's documented [Pages build configuration](https://help.aliyun.com/zh/edge-security-acceleration/esa/build-pages)
 has no static response-header field. Do not assume Cloudflare's `_headers` works
@@ -39,12 +40,10 @@ rather than appending a second value:
 
 ```text
 (http.host in {"whu-homepage-esa.tsinbei.cn"}
- and http.request.uri.path contains "/legal/"
- and http.request.uri.path.file_name in {"terms.md" "privacy.md" "cross-border.md"})
+ and ends_with(http.request.uri.path, ".md"))
 ```
 
-`file_name` is the full filename including its extension, not `{"md"}`.
-This is a site setting, outside `esa.jsonc`. Matched static files bypass
+This rule covers every `.md` file and is a site setting, outside `esa.jsonc`. Matched static files bypass
 `platform/esa-routine.ts`, so changing the routine's response headers cannot fix
 these files.
 
@@ -59,6 +58,21 @@ curl -sS -D - -o /dev/null https://whu-homepage-edgeone.tsinbei.cn/legal/terms.m
 Each response should have a single Markdown Content-Type with `charset=utf-8`.
 Incorrectly decoded text already cached by the App still needs client-side
 invalidation and a fresh download.
+
+Every build generates the sitemap, robots, llms index and documentation Markdown;
+see [documentation maintenance](./docs-site.md#搜索引擎与-agent-入口). After deployment:
+
+```sh
+curl -sS https://www.whu.sb/robots.txt
+curl -sS https://www.whu.sb/sitemap-index.xml
+curl -sS https://www.whu.sb/llms.txt
+curl -sS -D - -o /dev/null https://www.whu.sb/docs/user/index.md
+```
+
+The final robots response must retain `Sitemap: https://www.whu.sb/sitemap-index.xml`.
+Cloudflare may add managed Content Signals at the edge; if a dashboard rule replaces
+robots, verify that it preserves this declaration. `llms.txt` provides content navigation,
+not crawler authorization policy.
 
 ### Build pipeline
 

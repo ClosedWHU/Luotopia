@@ -7,8 +7,9 @@ import {
 } from "../src/i18n/locales";
 import { normalizePath, pathInLocale } from "../src/i18n/routes";
 import { resolveDocsRedirect } from "./lib/docs-redirects";
+import { SITE_ORIGIN } from "../src/config/site.mjs";
 
-const MAIN_DOMAIN = "www.whu.sb";
+const MAIN_DOMAIN = new URL(SITE_ORIGIN).hostname;
 
 /* -------------------------------------------------------------------------- */
 /* Language negotiation                                                        */

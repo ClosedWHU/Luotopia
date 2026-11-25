@@ -87,6 +87,29 @@ npm run build   # astro build，全站（营销页 + 文档）一次产出
 
 ## 维护
 
+### 搜索引擎与 Agent 入口
+
+`npm run build` 同时生成以下静态产物，不需要定时任务或手动更新清单：
+
+- `/sitemap-index.xml` 与分片：由 `@astrojs/sitemap` 读取实际构建路由，
+  `tools/discovery.mjs` 根据最终 HTML 的 `noindex` / meta refresh 排除工具页与重定向页。
+  已发布的多语言页面自然包含在内，文档仍只有中文。
+- `/robots.txt`：从 Astro 的 `site` 派生 sitemap 地址。
+- `/docs/<slug>/index.md`：与 HTML 共用 content collection 的 slug、标题和正文，
+  不输出 frontmatter；加上标题和原网页地址。HTML 通过
+  `rel="alternate" type="text/markdown"` 声明该地址。
+- `/llms.txt`：项目简介读取默认语言的站点描述，文档按 `DOCS_TOPICS` 分区，
+  列表使用各篇 frontmatter 的标题、描述与排序。法律文档复用原有 Markdown 入口。
+  版本、下载包和实时状态只链接到对应页面，不复制这些动态数据。
+
+规范主域由 `src/config/site.mjs` 拥有，Astro、页面 metadata 和边缘中间件共用。
+生成与校验在镜像替换 HTML 之前执行，镜像中的 sitemap、llms 和 Markdown 原网页地址
+仍指向主站。全站外壳声明 canonical、sitemap 与 `rel="describedby"` 的 llms 入口。
+
+构建直接检查 sitemap 与可索引 HTML 的双向覆盖、llms 链接目标是否存在，
+以及每篇文档是否有 Markdown 产物和发现链接；缺失即构建失败。
+新增或修改文档只编辑内容集合，产物始终随同一次部署发布。
+
 | 改什么 | 改哪里 |
 |--------|--------|
 | 用户怎么用 App | `src/content/docs/user/` |

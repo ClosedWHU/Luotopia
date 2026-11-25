@@ -25,13 +25,14 @@
 truth，面板里配好的环境变量与绑定会被文件覆盖 —— 风险远大于收益（详见
 [404 处理](#404-处理)）。
 
-### 法律文档的字符编码
+### Markdown 与发现入口的字符编码
 
-`/legal/*.md` 是 UTF-8 Markdown，静态托管必须返回
+`/legal/*.md` 和 `/docs/**/index.md` 是 UTF-8 Markdown，静态托管必须返回
 `Content-Type: text/markdown; charset=utf-8`。Astro 端点声明的响应头不会被所有
 静态托管平台保留，因此 Cloudflare 通过 `public/_headers`、EdgeOne 通过
 `edgeone.json` 的 `headers` 显式设置，并采用 `public, max-age=300` 缓存。
-两者的 `/*.md` URL 通配规则也覆盖 `/en/legal/*.md` 等翻译版本。
+两者的 `/*.md` URL 通配规则也覆盖文档正文和 `/en/legal/*.md` 等翻译版本。
+Cloudflare 的 `_headers` 还为 `/llms.txt` 与 `/robots.txt` 声明 UTF-8 文本和 5 分钟缓存。
 
 ESA 的 [Pages 构建配置](https://help.aliyun.com/zh/edge-security-acceleration/esa/build-pages)
 没有声明静态响应头的字段；不能依赖 Cloudflare 的 `_headers` 在 ESA 上生效。
@@ -41,12 +42,10 @@ Content-Type：
 
 ```text
 (http.host in {"whu-homepage-esa.tsinbei.cn"}
- and http.request.uri.path contains "/legal/"
- and http.request.uri.path.file_name in {"terms.md" "privacy.md" "cross-border.md"})
+ and ends_with(http.request.uri.path, ".md"))
 ```
 
-`file_name` 是包含扩展名的完整文件名，不能写成 `{"md"}`。
-该规则属于站点配置，不由 `esa.jsonc` 部署。命中的静态文件不会
+该规则匹配所有 `.md` 文件，属于站点配置，不由 `esa.jsonc` 部署。命中的静态文件不会
 进入 `platform/esa-routine.ts`，因此修改函数返回头无法修正静态 Markdown。
 
 部署或调整站点规则后，对三个域名分别检查实际 GET 响应：
@@ -59,6 +58,20 @@ curl -sS -D - -o /dev/null https://whu-homepage-edgeone.tsinbei.cn/legal/terms.m
 
 三个响应都应只有一个带 `charset=utf-8` 的 Markdown Content-Type。已经保存在
 App 本地的乱码正文仍需要客户端失效缓存并重新下载。
+
+站点每次构建会自动生成 sitemap、robots、llms 索引与文档 Markdown，详见
+[文档站维护说明](./docs-site.md#搜索引擎与-agent-入口)。发布后检查：
+
+```sh
+curl -sS https://www.whu.sb/robots.txt
+curl -sS https://www.whu.sb/sitemap-index.xml
+curl -sS https://www.whu.sb/llms.txt
+curl -sS -D - -o /dev/null https://www.whu.sb/docs/user/index.md
+```
+
+`robots.txt` 应保留 `Sitemap: https://www.whu.sb/sitemap-index.xml`。
+Cloudflare 可在边缘添加托管 Content Signals；若控制台启用了覆盖 robots 的规则，
+需确认最终响应仍包含本站的 sitemap 声明。`llms.txt` 提供内容导航，不承担爬虫授权策略。
 
 ### 构建流程
 

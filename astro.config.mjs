@@ -11,6 +11,8 @@ import rehypePreMermaid from './src/plugins/rehype-pre-mermaid.mjs';
 import { redirects as docsRedirects } from './src/config/docs/redirects.mjs';
 import { misansWeights, pruneFontSubsets } from './tools/vite/font-plugins.mjs';
 import { devFixtures } from './tools/vite/dev-fixtures.mjs';
+import { SITE_ORIGIN } from './src/config/site.mjs';
+import { discoverySitemap } from './tools/discovery.mjs';
 
 /*
  * The documentation site (merged from ClosedWHU/Luotopia-Docs, see
@@ -345,9 +347,9 @@ const PUBLISHED = JSON.parse(
 );
 
 export default defineConfig({
-  site: 'https://whu.sb',
+  site: SITE_ORIGIN,
   redirects: siteRedirects,
-  integrations: [preloadSharedChunks(), assetsOnlyMirror()],
+  integrations: [preloadSharedChunks(), discoverySitemap(), assetsOnlyMirror()],
   /*
    * Site-wide markdown processor, configured for the docs collection (the
    * only markdown this project renders — legal pages are .md.ts endpoints

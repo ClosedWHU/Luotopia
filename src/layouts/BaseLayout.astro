@@ -41,9 +41,11 @@
     /** Emit `<meta name="robots" content="noindex">` — for pages that are
      *  launch/redirect utilities rather than content. */
     noindex?: boolean;
+    markdownUrl?: string;
   }
 
-  const { title, description, bare = false, noindex = false } = Astro.props;
+  const { title, description, bare = false, noindex = false, markdownUrl } = Astro.props;
+  const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 
   /*
    * `Astro.currentLocale` is the only locale input: Astro sets it from the route
@@ -73,6 +75,10 @@
     <meta name="color-scheme" content="light dark" />
     <ClientRouter fallback="swap" />
     <meta name="description" content={resolvedDescription} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="describedby" href="/llms.txt" />
+    {markdownUrl && <link rel="alternate" type="text/markdown" href={markdownUrl} />}
     {noindex && <meta name="robots" content="noindex" />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={resolvedOgDescription} />

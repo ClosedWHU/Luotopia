@@ -9,6 +9,7 @@
  * language switcher follows for its announcement templates.
  */
 import zhHans from "./zh-Hans.json";
+import { SITE_ORIGIN } from "../config/site.mjs";
 import zhHant from "./zh-Hant.json";
 import en from "./en.json";
 import ja from "./ja.json";
@@ -166,15 +167,7 @@ export function localeMeta(code: string): SiteLocale {
 /* <head>                                                                      */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Canonical origin for absolute URLs in `<head>`.
- *
- * Not read from Astro's `site` config, which is the apex `https://whu.sb`.
- * `functions/_middleware.ts` 302s the apex to `www.whu.sb`, so an `hreflang`
- * pointing at it would hand crawlers a URL that answers with a redirect — and a
- * redirect inside an alternate-locale cluster is treated as a broken alternate.
- */
-export const SITE_ORIGIN = "https://www.whu.sb";
+export { SITE_ORIGIN } from "../config/site.mjs";
 
 export interface HreflangAlternate {
   hreflang: string;
