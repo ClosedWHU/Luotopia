@@ -3179,6 +3179,12 @@ jobs:
             '@ohos:registry=https://repo.harmonyos.com/npm/' \
             > "$HOME/.npmrc"
 
+      - name: Set up Rust for HarmonyOS native libraries
+        timeout-minutes: 10
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-unknown-linux-ohos
+
       - name: Build unsigned HAP (release)
         timeout-minutes: 45
         shell: bash
