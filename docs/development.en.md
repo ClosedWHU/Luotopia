@@ -185,6 +185,18 @@ then stops sampling the page and the glass visibly flattens. So:
 - floating layers that do fade (tooltip, snackbar) use the opaque inverse surface,
   not glass
 
+The shared aurora renders at at most about 130,000 pixels; text, glass edges and
+the grid stay at native resolution. `ShaderMount.minPixelRatio` is a minimum,
+not a rendering-resolution cap on high-DPI devices. On desktop the field draws
+at up to 20 Hz at rest and 4 Hz while scrolling, returning to full rate 150 ms
+after the last scroll event. Animation phase advances by elapsed time. Coarse
+primary pointers, data saving and reduced motion retain the static field.
+The fixed background has 10% large-viewport overscan above and below, its own
+compositor layer and no edge paint containment, to cover areas exposed while
+mobile browser chrome retracts.
+Pointer lighting quantizes the soft 480px glint to 4 CSS pixels and its edge
+direction to 2 degrees, avoiding panel repaints for imperceptible pointer jitter.
+
 **Nested glass is pointless.** The parent panel already blurred the aurora; a child
 blurring again samples the parent's own fill — no visual change, one extra
 compositor layer per element. Rows inside a panel use `.lt-inset` /

@@ -33,7 +33,8 @@
 <style>
   .lt-aurora {
     position: fixed;
-    top: 0;
+    top: -10vh;
+    top: -10lvh;
     left: 0;
     right: 0;
     /*
@@ -47,22 +48,19 @@
      * visible: a strip of bare `html` canvas color shows under the field while
      * scrolling, then the aurora snaps down to cover it.
      *
-     * `100lvh` is constant through the chrome transition (it is the viewport
-     * with chrome fully retracted), so the layer is already tall enough in
-     * both states, needs no relayout mid-scroll, and the strip never exists.
-     * The extra bottom is simply behind the toolbar when chrome is expanded.
-     * `100vh` first as the fallback for engines without viewport units — on
-     * every mobile browser that has this problem, legacy `100vh` already
-     * resolves to the large viewport, so the fallback is equally correct.
+     * Keep an overscanned compositor layer, not just a large CSS box. Browser
+     * chrome can expose pixels before viewport resize/raster catches up. Paint
+     * containment on a viewport-edge layer still leaves those newly exposed
+     * tiles uncovered; promoting the complete field with room above and below
+     * gives the compositor already-painted pixels during that transition.
+     * Large viewport units keep both the field and its canvas resolution stable.
+     * Legacy mobile `vh` is also the large viewport.
      */
-    height: 100vh;
-    height: 100lvh;
+    height: 120vh;
+    height: 120lvh;
     z-index: 0;
     pointer-events: none;
-    /* `size` containment is deliberately excluded: this element is viewport-sized,
-     * and strict containment on a fixed backdrop has a history of surprising
-     * compositor clipping. */
-    contain: layout paint;
+    transform: translateZ(0);
   }
 
   /* Static fallback field. Same palette and roughly the same distribution as
@@ -244,11 +242,15 @@
    * WebGL draws and, more importantly, two thirds fewer backdrop-filter
    * invalidations across every glass surface on the page.
    *
-   * 20 is the floor where a drifting field still reads as continuous motion
-   * rather than as a slideshow.
+   * Keep 20 Hz when the page is still, where background motion is most visible.
    */
   const FPS = 20;
   const FRAME_MS = 1000 / FPS;
+  // Refracting a new field costs one filter pass per visible glass surface.
+  // During motion, spend that budget on scrolling; retain a slow live drift
+  // and return to the full draw rate as soon as the gesture settles.
+  const SCROLL_FRAME_MS = 250;
+  const SCROLL_SETTLE_MS = 150;
 
   const host = document.querySelector("[data-lt-aurora-field]");
 
@@ -256,7 +258,7 @@
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     /*
      * A phone gets one static frame, not the ticker. The loop below draws at
-     * 20 Hz for as long as the tab is visible, and every draw invalidates the
+     * up to 20 Hz while the tab is visible, and every draw invalidates the
      * backdrop of every glass surface on the page — on a handset that is the
      * whole session spent re-blurring the navbar for a background nobody is
      * studying, on the battery. `(pointer: coarse)` matches the *primary*
@@ -347,10 +349,12 @@
              */
             0,
             staticFrame ? 4200 : 0,
-            // Soft gradients need no retina sampling; 1x capped at 1080p keeps
-            // the per-frame cost near a quarter of the library default.
+            // This is a soft color field, not text or line art. The library's
+            // minimum ratio is NOT a cap: it still follows devicePixelRatio.
+            // Bound actual shader work on retina phones and desktop displays;
+            // CSS scales the field, while glass/text/grid stay at native DPI.
             1,
-            1920 * 1080,
+            480 * 270,
           );
         } catch (err) {
           // No WebGL2, or the mount threw part-way through. Either way the
@@ -378,11 +382,20 @@
           let frameValue = 0;
           let lastDraw = 0;
           let rafId = 0;
+          let lastScroll = -Infinity;
+
+          // The persisted backdrop owns this listener for the document lifetime,
+          // just like its visibility/theme listeners below. No layout or style
+          // work is performed by the scroll handler.
+          window.addEventListener("scroll", () => {
+            lastScroll = performance.now();
+          }, { passive: true });
 
           const tick = (now) => {
             rafId = requestAnimationFrame(tick);
             const elapsed = now - lastDraw;
-            if (elapsed < FRAME_MS) return;
+            const interval = now - lastScroll < SCROLL_SETTLE_MS ? SCROLL_FRAME_MS : FRAME_MS;
+            if (elapsed < interval) return;
             lastDraw = now;
             frameValue += elapsed * SPEED;
             mount.setFrame(frameValue);

@@ -464,8 +464,14 @@
           unlight(surface);
           continue;
         }
-        const x = clamp(((pointerX - rect.left) / rect.width) * 100);
-        const y = clamp(((pointerY - rect.top) / rect.height) * 100);
+        // A 480px soft glint has no visible subpixel detail. Quantize in CSS
+        // pixels (not percentages, which vary with panel size) so tiny pointer
+        // jitter does not repaint every visible glass panel. Cache below still
+        // compares the complete light, including its edge direction.
+        const localX = Math.round((pointerX - rect.left) / 4) * 4;
+        const localY = Math.round((pointerY - rect.top) / 4) * 4;
+        const x = clamp((localX / rect.width) * 100);
+        const y = clamp((localY / rect.height) * 100);
         /* 0deg is up and turns clockwise, and a gradient's bright start is the
          * side *opposite* its angle — so point away from the cursor to light the
          * edge facing it. `atan2(dx, -dy)` is the CSS convention (y down on
@@ -473,7 +479,7 @@
         const angle = ((Math.atan2(dx, -dy) * 180) / Math.PI + 540) % 360;
         const lightX = `${x.toFixed(2)}%`;
         const lightY = `${y.toFixed(2)}%`;
-        const lightAngle = `${angle.toFixed(1)}deg`;
+        const lightAngle = `${Math.round(angle / 2) * 2}deg`;
         const value = `${lightX},${lightY},${lightAngle}`;
         if (lit.get(surface) === value) continue;
         lit.set(surface, value);
