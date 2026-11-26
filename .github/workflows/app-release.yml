@@ -3181,9 +3181,20 @@ jobs:
 
       - name: Set up Rust for HarmonyOS native libraries
         timeout-minutes: 10
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-unknown-linux-ohos
+        shell: bash
+        env:
+          RUSTUP_DIST_SERVER: https://rsproxy.cn
+          RUSTUP_UPDATE_ROOT: https://rsproxy.cn/rustup
+        run: |
+          set -euo pipefail
+          curl --http1.1 --fail --location --silent --show-error \
+            --connect-timeout 15 --max-time 60 \
+            https://rsproxy.cn/rustup-init.sh -o "$RUNNER_TEMP/rustup-init.sh"
+          sh "$RUNNER_TEMP/rustup-init.sh" -y --profile minimal \
+            --default-toolchain stable --target aarch64-unknown-linux-ohos
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          echo "RUSTUP_DIST_SERVER=$RUSTUP_DIST_SERVER" >> "$GITHUB_ENV"
+          echo "RUSTUP_UPDATE_ROOT=$RUSTUP_UPDATE_ROOT" >> "$GITHUB_ENV"
 
       - name: Build unsigned HAP (release)
         timeout-minutes: 45
