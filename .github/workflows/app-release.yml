@@ -2984,8 +2984,8 @@ jobs:
       contents: write
     env:
       APP_TOKEN: ${{ secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN }}
-      # Pin CLI tools release on ErBWs/ohos-sdk (change intentionally + clear cache).
-      OHOS_CLI_VERSION: "6.1.1.280"
+      # Reuse a pinned CLI only when its version stamp and SDK target match.
+      OHOS_CLI_VERSION: "26.0.0.821"
       # OpenHarmony Flutter (CPF / openharmony-sig). Override via repo variable if needed.
       # Match the app's Flutter >=3.47 dependency baseline (Dart 3.13.5).
       OH_FLUTTER_REPO: https://gitcode.com/CPF-Flutter/flutter_flutter.git
@@ -3028,7 +3028,9 @@ jobs:
         shell: bash
         run: |
           if [ -x "$HOME/ohos-sdk/command-line-tools/bin/ohpm" ] && \
-             [ -d "$HOME/ohos-sdk/command-line-tools/sdk/default/openharmony" ]; then
+             [ -f "$HOME/ohos-sdk/.luotopia-cli-version" ] && \
+             [ "$(cat "$HOME/ohos-sdk/.luotopia-cli-version")" = "$OHOS_CLI_VERSION" ] && \
+             python3 tool/ohos/scripts/check_sdk.py "$HOME/ohos-sdk/command-line-tools/sdk"; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
             echo "HOS_SDK_HOME=$HOME/ohos-sdk/command-line-tools/sdk" >> "$GITHUB_ENV"
             echo "DEVECO_SDK_HOME=$HOME/ohos-sdk/command-line-tools/sdk" >> "$GITHUB_ENV"
@@ -3037,6 +3039,14 @@ jobs:
             echo "$HOME/ohos-sdk/command-line-tools/tool/node/bin" >> "$GITHUB_PATH"
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
+            # setup-ohos skips its download whenever ohpm already exists.
+            # Preserve an old or incomplete toolchain outside that path so it
+            # cannot silently satisfy a request for a different CLI release.
+            if [ -e "$HOME/ohos-sdk" ]; then
+              previous="$(mktemp -d "$HOME/ohos-sdk.previous.XXXXXX")"
+              mv "$HOME/ohos-sdk" "$previous/ohos-sdk"
+              echo "Previous HarmonyOS toolchain preserved in $previous"
+            fi
           fi
 
       - name: Setup HarmonyOS CLI tools
@@ -3045,6 +3055,13 @@ jobs:
         with:
           version: ${{ env.OHOS_CLI_VERSION }}
           cache: false
+
+      - name: Verify HarmonyOS SDK target
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/ohos/scripts/check_sdk.py "$HOS_SDK_HOME"
+          printf '%s\n' "$OHOS_CLI_VERSION" > "$HOME/ohos-sdk/.luotopia-cli-version"
 
       - name: Bootstrap OH Flutter
         shell: bash
