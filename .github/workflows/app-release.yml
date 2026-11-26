@@ -2979,7 +2979,7 @@ jobs:
     needs: context
     if: needs.context.outputs.build_ohos == 'true'
     runs-on: [self-hosted, Linux, X64]
-    timeout-minutes: 360
+    timeout-minutes: 90
     permissions:
       contents: write
     env:
@@ -3051,10 +3051,34 @@ jobs:
 
       - name: Setup HarmonyOS CLI tools
         if: steps.ohos-cli.outputs.ready != 'true'
-        uses: ErBWs/setup-ohos@v2
-        with:
-          version: ${{ env.OHOS_CLI_VERSION }}
-          cache: false
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Keep downloads outside the installation so interrupted transfers
+          # survive SDK validation failures. The upstream release is itself a
+          # HarmonyOS SDK mirror; verify its complete archive before extraction.
+          cache="$AGENT_TOOLSDIRECTORY/ohos-downloads/$OHOS_CLI_VERSION"
+          mkdir -p "$cache"
+          exec 9>"$cache/download.lock"
+          flock -w 30 9
+          cd "$cache"
+          archive=ohos-sdk-linux-amd64.tar.gz
+          base="https://github.com/ErBWs/ohos-sdk/releases/download/$OHOS_CLI_VERSION"
+          for file in "$archive.aa" "$archive.ab" "$archive.sha256"; do
+            curl --http1.1 --fail --location --silent --show-error \
+              --connect-timeout 15 --max-time 300 \
+              --speed-limit 262144 --speed-time 30 \
+              --continue-at - --output "$file" "$base/$file"
+          done
+          cat "$archive.aa" "$archive.ab" > "$archive"
+          sha256sum -c "$archive.sha256"
+          mkdir -p "$HOME/ohos-sdk"
+          tar -xzf "$archive" -C "$HOME/ohos-sdk"
+          echo "HOS_SDK_HOME=$HOME/ohos-sdk/command-line-tools/sdk" >> "$GITHUB_ENV"
+          echo "OHOS_NDK_HOME=$HOME/ohos-sdk/command-line-tools/sdk/default/openharmony" >> "$GITHUB_ENV"
+          echo "$HOME/ohos-sdk/command-line-tools/bin" >> "$GITHUB_PATH"
+          echo "$HOME/ohos-sdk/command-line-tools/tool/node/bin" >> "$GITHUB_PATH"
 
       - name: Verify HarmonyOS SDK target
         shell: bash
@@ -3064,6 +3088,7 @@ jobs:
           printf '%s\n' "$OHOS_CLI_VERSION" > "$HOME/ohos-sdk/.luotopia-cli-version"
 
       - name: Bootstrap OH Flutter
+        timeout-minutes: 15
         shell: bash
         run: |
           set -euo pipefail
@@ -3175,6 +3200,7 @@ jobs:
           fi
 
       - name: Build HAP (release) + sign
+        timeout-minutes: 45
         shell: bash
         run: |
           set -euo pipefail
