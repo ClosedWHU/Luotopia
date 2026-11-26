@@ -65,6 +65,8 @@ HarmonyOS 下载面板复用 App Release 的徽章、附件列表及下载代理
 
 `app-release.yml` 的正常发布和手动运行默认开启 `build_ohos`，通过自托管 Linux
 runner 构建 HAP；手动运行可取消，Apple-only / Apple 状态查询等专用流程仍跳过。
+公开 Release 只上传 `-harmonyos-arm64-unsigned.hap`，CI 不读取鸿蒙签名 Secrets。
+用户按侧载指南为自己的设备签名；本机开发签名流程仍由 App 的 `tool/ohos/SIGNING.md` 说明。
 SDK 使用 `ErBWs/ohos-sdk` 的固定版本镜像，下载分片保存在 runner 共享 toolcache，
 通过 HTTP/1.1 断点续传并在解压前校验完整归档的 SHA-256。连接超时 15 秒，单文件
 最多 5 分钟；下载速度低于 256 KiB/s 持续 30 秒时失败，保留分片供下次运行续传。

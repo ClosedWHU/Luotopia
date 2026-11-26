@@ -49,6 +49,11 @@ React or Vue here. Read [Page conventions](#page-conventions) before adding any.
 
 ### HarmonyOS build toolchain
 
+Public releases upload only `-harmonyos-arm64-unsigned.hap`; CI does not read
+HarmonyOS signing secrets. Users sign the package for their own devices using
+the sideload guide. Local development signing is documented in the App's
+`tool/ohos/SIGNING.md`.
+
 `app-release.yml` downloads the pinned SDK mirror from `ErBWs/ohos-sdk`.
 Archive parts persist in the runners' shared toolcache, resume over HTTP/1.1,
 and undergo complete-archive SHA-256 verification before extraction.

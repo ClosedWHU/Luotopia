@@ -167,7 +167,7 @@ env:
   # moves to the next patch release between two runs of the same tag, and the
   # linux arm64 leg clones Flutter from git where "stable" drifts too. Bump this
   # together with the app repo.
-  FLUTTER_VERSION: "3.47.0"
+  FLUTTER_VERSION: "3.50.1"
   # Private repo the app source is fetched from. APP_TOKEN is resolved per job as
   # `secrets.APP_REPO_TOKEN || secrets.CROSS_REPO_TOKEN` (contents: read/write on
   # the app repo). Keep it job-scoped so unrelated steps never see the token.
@@ -682,7 +682,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         if: needs.context.outputs.apple_action == 'build'
         with:
-          flutter-version: ${{ vars.APPLE_FLUTTER_VERSION || '3.47.5' }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
 
@@ -2971,9 +2971,8 @@ jobs:
         if: always()
         run: rm -rf assets render dist-checkout brew-checkout
 
-  # HarmonyOS HAP for device signing and sideloading.
-  # Self-hosted Ubuntu + ErBWs/setup-ohos (CLI/SDK mirror) + OH Flutter clone.
-  # Optional: set secrets OHOS_* for signing. Pin CLI via OHOS_CLI_VERSION if needed.
+  # Publish unsigned HarmonyOS HAPs for users to sign for their own devices.
+  # Self-hosted Linux + pinned ErBWs CLI/SDK mirror + OH Flutter clone.
   ohos:
     name: HarmonyOS HAP (sideload)
     needs: context
@@ -2987,7 +2986,7 @@ jobs:
       # Reuse a pinned CLI only when its version stamp and SDK target match.
       OHOS_CLI_VERSION: "26.0.0.821"
       # OpenHarmony Flutter (CPF / openharmony-sig). Override via repo variable if needed.
-      # Match the app's Flutter >=3.47 dependency baseline (Dart 3.13.5).
+      # OHOS keeps its independent Flutter 3.47 / Dart 3.13.5 dependency graph.
       OH_FLUTTER_REPO: https://gitcode.com/CPF-Flutter/flutter_flutter.git
       # Tag on CPF-Flutter (local branch name may differ).
       OH_FLUTTER_REF: 3.47.7+ohos-0.0.1-pre
@@ -3170,36 +3169,7 @@ jobs:
             '@ohos:registry=https://repo.harmonyos.com/npm/' \
             > "$HOME/.npmrc"
 
-      - name: Prepare optional signing materials from secrets
-        shell: bash
-        env:
-          OHOS_P12_BASE64: ${{ secrets.OHOS_P12_BASE64 }}
-          OHOS_P12_PASSWORD: ${{ secrets.OHOS_P12_PASSWORD }}
-          OHOS_P12_ALIAS: ${{ secrets.OHOS_P12_ALIAS }}
-          OHOS_APP_CERT_BASE64: ${{ secrets.OHOS_APP_CERT_BASE64 }}
-          OHOS_PROFILE_P7B_BASE64: ${{ secrets.OHOS_PROFILE_P7B_BASE64 }}
-        run: |
-          set -euo pipefail
-          SIGN_DIR="$PWD/tool/ohos/signing-ci"
-          mkdir -p "$SIGN_DIR"
-          if [ -n "${OHOS_P12_BASE64:-}" ] && [ -n "${OHOS_APP_CERT_BASE64:-}" ] && [ -n "${OHOS_PROFILE_P7B_BASE64:-}" ]; then
-            echo "$OHOS_P12_BASE64" | base64 -d > "$SIGN_DIR/app.p12"
-            echo "$OHOS_APP_CERT_BASE64" | base64 -d > "$SIGN_DIR/app-debug-cert.cer"
-            echo "$OHOS_PROFILE_P7B_BASE64" | base64 -d > "$SIGN_DIR/signed-profile.p7b"
-            echo "LUOTOPIA_OHOS_SIGN_DIR=$SIGN_DIR" >> "$GITHUB_ENV"
-            echo "LUOTOPIA_OHOS_P12=$SIGN_DIR/app.p12" >> "$GITHUB_ENV"
-            if [ -n "${OHOS_P12_PASSWORD:-}" ]; then
-              echo "LUOTOPIA_P12_PASSWORD=$OHOS_P12_PASSWORD" >> "$GITHUB_ENV"
-            fi
-            if [ -n "${OHOS_P12_ALIAS:-}" ]; then
-              echo "LUOTOPIA_P12_ALIAS=$OHOS_P12_ALIAS" >> "$GITHUB_ENV"
-            fi
-            echo "OHOS signing materials restored from secrets"
-          else
-            echo "No OHOS_* signing secrets — may produce unsigned HAP"
-          fi
-
-      - name: Build HAP (release) + sign
+      - name: Build unsigned HAP (release)
         timeout-minutes: 45
         shell: bash
         run: |
@@ -3234,24 +3204,11 @@ jobs:
           SAFE_TAG="${SAFE_TAG//+/-}"
           mkdir -p dist
           UNSIGNED="ohos/entry/build/default/outputs/default/entry-default-unsigned.hap"
-          SIGNED="ohos/entry/build/default/outputs/default/entry-default-signed.hap"
-          staged=0
-          if [ -f "$SIGNED" ]; then
-            cp -f "$SIGNED" "dist/luotopia-${SAFE_TAG}-harmonyos-arm64-signed.hap"
-            staged=1
-          fi
-          if [ -f "$UNSIGNED" ]; then
-            cp -f "$UNSIGNED" "dist/luotopia-${SAFE_TAG}-harmonyos-arm64-unsigned.hap"
-            staged=1
-            if [ ! -f "$SIGNED" ]; then
-              echo "::warning::Only unsigned HAP available; many devices reject unsigned packages."
-            fi
-          fi
-          if [ "$staged" -eq 0 ]; then
-            echo "::error::No HAP under ohos/entry/build/..."
-            find ohos -name '*.hap' 2>/dev/null || true
+          if [ ! -s "$UNSIGNED" ]; then
+            echo "::error::Unsigned HAP missing under ohos/entry/build/..."
             exit 1
           fi
+          cp -f "$UNSIGNED" "dist/luotopia-${SAFE_TAG}-harmonyos-arm64-unsigned.hap"
           ls -la dist
 
       - name: Upload HAPs to homepage release
@@ -3263,7 +3220,7 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          HAPS=(dist/*.hap)
+          HAPS=(dist/*-harmonyos-arm64-unsigned.hap)
           if [ "${#HAPS[@]}" -eq 0 ]; then
             echo "::error::No staged HAP under dist/"
             exit 1
@@ -3309,13 +3266,13 @@ jobs:
             hdc install /path/to/device-signed.hap
           A pre-signed release HAP still needs a valid signature/profile for the target device.
 
-          Built on a self-hosted Linux runner using ErBWs/setup-ohos and OpenHarmony Flutter.
+          Built on a self-hosted Linux runner using the ErBWs SDK mirror and OpenHarmony Flutter.
           EOF
           gh release upload "$TAG" dist/HARMONYOS-SIDELOAD.txt \
             --repo "$TARGET_REPO" --clobber
 
-      - name: Scrub signing materials
+      - name: Clean staged release files
         if: always()
         shell: bash
         run: |
-          rm -rf tool/ohos/signing-ci dist
+          rm -rf dist
