@@ -3156,6 +3156,16 @@ jobs:
           echo "Dart line: $dart_line"
           "$HOME/oh-flutter/bin/flutter" doctor -v || true
 
+      - name: Precache HarmonyOS engine
+        timeout-minutes: 10
+        shell: bash
+        env:
+          FLUTTER_STORAGE_BASE_URL: https://storage.flutter-io.cn
+        run: |
+          set -euo pipefail
+          "$FLUTTER_ROOT/bin/flutter" precache --ohos
+          test -s "$FLUTTER_ROOT/bin/cache/artifacts/engine/ohos-arm64-release/flutter.har"
+
       - name: Fetch native prebuilts
         env:
           GITHUB_TOKEN: ${{ env.APP_TOKEN }}
