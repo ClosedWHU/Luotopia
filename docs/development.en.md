@@ -47,6 +47,16 @@ astro dev stop
 All interaction is plain TypeScript mounted through `onPageSetup()` — there is no
 React or Vue here. Read [Page conventions](#page-conventions) before adding any.
 
+### HarmonyOS build toolchain
+
+`app-release.yml` downloads the pinned SDK mirror from `ErBWs/ohos-sdk`.
+Archive parts persist in the runners' shared toolcache, resume over HTTP/1.1,
+and undergo complete-archive SHA-256 verification before extraction.
+Connections have a 15-second deadline; each file has a five-minute deadline.
+Downloads fail after 30 seconds below 256 KiB/s, retaining parts for the next run.
+SDK installation and Flutter bootstrap each have a 15-minute limit, HAP builds
+have a 45-minute limit, and the HarmonyOS job has a 90-minute overall limit.
+
 ## Layout
 
 ```
