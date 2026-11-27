@@ -99,7 +99,7 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
   .comparison-legend li { display: flex; align-items: center; gap: .5rem; }
   .comparison-symbol { display: inline-flex; flex: 0 0 1.375rem; width: 1.375rem; height: 1.375rem; }
   .comparison-symbol :global(svg) { width: 100%; height: 100%; }
-  .comparison-native, .comparison-web { color: var(--lt-color-success); }
+  .comparison-native, .comparison-nativeWeb, .comparison-web { color: var(--lt-color-success); }
   .comparison-partial { color: var(--lt-color-warning); }
   .comparison-unsupported { color: var(--lt-color-error); }
   .comparison-unknown { color: var(--lt-color-on-surface-variant); }

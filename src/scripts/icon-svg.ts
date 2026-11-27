@@ -1,4 +1,4 @@
-const ICON_NAME_PATTERN = /^[a-z0-9_]+$/;
+const ICON_NAME_PATTERN = /^[a-z0-9_]+(?:-fill)?$/;
 
 export function assertIconName(name: string): string {
   if (!ICON_NAME_PATTERN.test(name)) {
