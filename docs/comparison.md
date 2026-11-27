@@ -18,6 +18,7 @@
 - 官网仓库：`ClosedWHU/Luotopia`，核对前提交 `2efdc9b`。
 - 客户端：`ClosedWHU/Luotopia-app`，提交 `2e15316e3e04042750c8092435bc0a0aecc33709`。
 - 官网 `src/config/features.ts` 和中文功能介绍用于发现功能；客户端路由、页面、服务和平台实现用于校验，不能仅凭营销文案评分。
+- 智慧珞珈的全校课表、课程评价、设备集成、快捷操作、账号切换和语言支持由维护者于 2026-11-27 手动核实，结果见下表。
 - 下文客户端路径均相对于客户端仓库；不复制闭源实现或第三方接口细节。
 
 ### 智慧珞珈 Android
@@ -100,34 +101,37 @@ AI 智能体、图书馆座位预约、图书馆研修室预约、武大校历�
 | 校历 | 校园公共路由与校历页面 | 武大校历入口 |
 | 图书馆座位 | `seat_reservation/` 原生 API 客户端 | 座位预约入口 |
 | 图书借阅 | `library/` OPAC 页面与服务 | 移动图书馆入口，不保证所有 OPAC 子功能等价 |
-| 体育场馆 | `sports_reservation/` 原生列表与订单；session/order/checkout WebView，标为原生 + 网页 | 场馆预约入口 |
-| 全校课表、课程评价 | `lib/app/router/campus_routes_common.dart` 对应入口 | 未确认同等功能；教学质量评价不等于选课评价社区 |
+| 体育场馆 | `sports_reservation/` 原生列表与订单；session/order/checkout WebView，标为部分原生 | 场馆预约入口 |
+| 全校课表与蹭课匹配 | `lib/app/router/campus_routes_common.dart` 对应入口 | 网页入口仅支持查询全校课表和空闲教室 |
+| 课程给分与评价 | 同上，课程评价入口 | 维护者确认不支持 |
 | 日程待办 | 珞家日程模块及预约写入 | 门户日程、待办；不推断功能等价 |
 | E 卡与付款码 | `lib/features/payment/presentation/pages/ecard_paycode_page.dart`；`luojia_ecard/` WebView | E 卡与付款码网页入口；不能由扫码原生推导付款码页面原生 |
 | 校巴、地图 | `bus/`、`campus_map/` | 校园巴士、校园地图入口 |
 | 医疗 | `medical_service/` 原生记录、报告、队列与 WebView | 医疗健康入口 |
 | 水电 | `water_electric_fee/` 原生查询与 WebView 结算 | 水电服务入口 |
-| 校园网 | `school_net/` 原生状态/套餐；充值存在网页步骤 | 个人网络自助入口 |
-| 邮箱 | `email/` Coremail 原生邮箱与网页入口 | 电子邮件入口 |
+| 校园网 | `school_net/` 原生查询与充值；`lib/app/router/campus_sub_routes.dart` 的 checkout 路由使用 `SchoolNetPaymentCheckoutPage`，支付结算为 WebView | 个人网络自助入口 |
+| 邮箱 | `email/` Coremail 原生邮箱，用户可选使用网页版；标为原生 | 电子邮件入口 |
 | 活动抢票 | `vote_ticket/` 原生列表、详情与助力 | 预约抢票入口；不推断有相同互助功能 |
 | AI 助手 | `lib/features/pages/ai/` | AI 智能体、AI 成长珈等入口；不比较模型能力 |
 | 扫码 | `lib/shared/presentation/widgets/scanner/` | 公共脚本桥接与 APK 原生扫码组件 |
 | 消息/待办 | `messages/`；`workflow_task_page.dart` 支持部分原生处理与 WebView 表单 | 门户消息与待办/已办 |
 | 学籍、证明、财务、科研、就业/资助/公寓、访客/场地、报修 | `zhihui_luojia/presentation/pages/zhihui_luojia_page.dart` 内嵌官方门户；无独立全流程实现 | 应用目录与办事大厅可见对应入口；所有业务均未提交 |
-| 小组件 | `lib/features/components/home_widgets/` 与平台工程 | 未核实 |
-| 手表 | 客户端手表集成与独立 watch 工程 | 未核实 |
-| Apple 快捷指令 | `lib/toolkit/upstream/apple_shortcuts/` | 未核实 |
-| 多账号、多语言 | 账户管理、认证组合与本地化实现 | 未核实 |
-| 桌面客户端 | 桌面平台工程与官网发行入口 | 未核实独立桌面客户端，不将 PC 网页视为客户端 |
+| 小组件 | `lib/features/components/home_widgets/` 与平台工程 | 维护者确认不支持 |
+| 快捷操作 | 客户端桌面快捷方式集成 | 维护者确认支持 |
+| 手表 | 客户端手表集成与独立 watch 工程 | 维护者确认不支持 |
+| Apple 快捷指令 | `lib/toolkit/upstream/apple_shortcuts/` | 维护者确认不支持 |
+| 多账号切换 | 账户管理与认证组合 | 不支持直接切换；需退出再登录 |
+| 多语言 | 客户端本地化实现 | 部分支持，仅中文和英文 |
+| 桌面客户端 | 桌面平台工程与官网发行入口 | 维护者确认不支持独立桌面客户端 |
 | 浏览器版 | 官网 `standaloneWeb` 明确为开发中，珞家 Web 客户端未发布 | 可通过 PC/移动浏览器访问智慧珞珈网页门户 |
 
 ## 判定与维护规则
 
-- **原生界面**：已确认的访问方式为客户端原生界面。
+- **原生**：已确认的访问方式为客户端原生界面，使用实心圆勾。完整原生客户端另有可选网页入口时仍标为原生，例如 Coremail 邮箱。
 - **网页**：已确认的访问方式为网页，包括珞家内嵌的官方门户。
-- **原生 + 网页**：部分步骤使用原生界面，部分步骤使用网页，例如体育预约、医疗、水电、E 卡、校园网、邮箱和消息/待办。网页步骤不属于功能缺失，因此不标为“部分支持”。
-- **不支持**：有明确否定依据；当前仅用于尚未发布的珞家 Web 客户端。
-- **未核实**：现有证据不足以确认访问方式或设备能力。
+- **部分原生**：部分步骤使用原生界面，部分步骤使用网页，使用空心圆勾。例如体育预约、医疗、水电、E 卡、校园网和消息/待办。此状态描述原生化程度，功能覆盖须按具体业务核对。
+- **不支持**：有明确否定依据，包括未发布的珞家 Web 客户端及维护者核实的智慧珞珈缺失能力。
+- **部分支持**：仅支持本行的一部分能力，须写明支持范围；当前用于智慧珞珈仅提供中英文的多语言能力，与“部分原生”的界面方式区分。
 
 状态描述访问方式，不评价办结成功率或体验优劣。浏览器版一行比较两款产品的浏览器入口：珞家 Web 客户端和智慧珞珈网页门户。
 
