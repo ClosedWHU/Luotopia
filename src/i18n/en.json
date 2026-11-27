@@ -35,7 +35,7 @@
   "comparison.cell.calendar": "Requires the Undergraduate School website",
   "comparison.cell.hospital": "Requires the Wuhan University Hospital WeChat account or website",
   "comparison.cell.workflow": "Native messages/some tasks; web forms",
-  "comparison.cell.portal": "Via embedded official portal",
+  "comparison.cell.portal": "Requires the Smart Luojia web portal",
   "comparison.cell.platform": "Depends on OS and version",
   "comparison.cell.planned": "Standalone web client not released",
   "comparison.row.scan": "Camera scanning",
