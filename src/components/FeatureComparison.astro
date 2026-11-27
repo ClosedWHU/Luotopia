@@ -6,7 +6,7 @@ import {
   comparisonStatusIcons,
   comparisonStatusKeys,
 } from "../config/comparison";
-import { resolveLocale, useTranslations } from "../i18n/ui";
+import { pathInLocale, resolveLocale, useTranslations } from "../i18n/ui";
 
 const t = useTranslations(resolveLocale(Astro.currentLocale));
 ---
@@ -14,7 +14,6 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
 <section id="comparison" class="relative py-24 px-4 scroll-mt-20" aria-labelledby="comparison-title">
   <div class="max-w-content mx-auto">
     <div class="text-center max-w-2xl mx-auto mb-10">
-      <p class="text-label-large text-primary mb-3">{t("comparison.eyebrow")}</p>
       <h2 id="comparison-title" class="text-headline-small sm:text-headline-medium text-on-surface mb-4">{t("comparison.title")}</h2>
       <p class="text-body-large text-on-surface-variant">{t("comparison.subtitle")}</p>
     </div>
@@ -47,8 +46,14 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
             <span class="comparison-count" aria-hidden="true">{group.rows.length}</span>
             <span class="comparison-chevron" aria-hidden="true"><Icon name="keyboard_arrow_down" /></span>
           </summary>
-          <p id={`comparison-${group.id}-note`} class="comparison-group-note text-body-small text-on-surface-variant">{t(group.note)}</p>
-          <table aria-describedby={`comparison-${group.id}-note`}>
+          {group.note && (
+            <p id={`comparison-${group.id}-note`} class="comparison-group-note text-body-small text-on-surface-variant">
+              {group.id === "devices"
+                ? <a href={pathInLocale("/features", t.locale)}>{t(group.note)}</a>
+                : t(group.note)}
+            </p>
+          )}
+          <table aria-describedby={group.note ? `comparison-${group.id}-note` : undefined}>
             <caption class="sr-only">{t(group.title)} — {t("comparison.title")}</caption>
             <colgroup><col class="comparison-feature-col" /><col /><col /></colgroup>
             <thead>
@@ -83,8 +88,6 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
         <div class="text-body-small text-on-surface-variant">
           <p>{t("comparison.method.scope")}</p>
           <p>{t("comparison.method.native")}</p>
-          <p>{t("comparison.method.limits")}</p>
-          <p>{t("comparison.method.sources")}</p>
         </div>
       </details>
     </div>
@@ -100,7 +103,6 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
   .comparison-symbol { display: inline-flex; flex: 0 0 1.375rem; width: 1.375rem; height: 1.375rem; }
   .comparison-symbol :global(svg) { width: 100%; height: 100%; }
   .comparison-native, .comparison-nativeWeb, .comparison-web { color: var(--lt-color-success); }
-  .comparison-partial { color: var(--lt-color-warning); }
   .comparison-unsupported { color: var(--lt-color-error); }
   .comparison-unknown { color: var(--lt-color-on-surface-variant); }
   .comparison-group { border-top: 1px solid var(--lt-color-outline-variant); }
