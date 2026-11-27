@@ -12,6 +12,7 @@ import AppIcon from "../AppIcon.astro";
 import FeatureCard from "../FeatureCard.astro";
 import Icon from "../Icon.astro";
 import ScreenshotCarousel from "../ScreenshotCarousel.astro";
+import FeatureComparison from "../FeatureComparison.astro";
 import DownloadButtons from "../DownloadButtons.astro";
 import { featureKeys, highlightedFeatures } from "../../config/features";
 import { resolveLocale, useTranslations } from "../../i18n/ui";
@@ -131,6 +132,8 @@ const heroSrPrefix = t("home.hero.srPrefix");
       </div>
     </div>
   </section>
+
+  <FeatureComparison />
 
   <section class="relative py-24 px-4">
     <div class="max-w-4xl mx-auto">
