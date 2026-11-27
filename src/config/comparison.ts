@@ -1,6 +1,6 @@
 import type { TranslationKey } from "../i18n/ui";
 
-export const comparisonStatuses = ["native", "nativeWeb", "web", "unsupported", "unknown"] as const;
+export const comparisonStatuses = ["native", "nativeWeb", "web", "partial", "unsupported"] as const;
 export type ComparisonStatus = (typeof comparisonStatuses)[number];
 
 interface ComparisonCell {
@@ -26,15 +26,15 @@ export const comparisonStatusKeys: Record<ComparisonStatus, TranslationKey> = {
   nativeWeb: "comparison.status.nativeWeb",
   web: "comparison.status.web",
   unsupported: "comparison.status.unsupported",
-  unknown: "comparison.status.unknown",
+  partial: "comparison.status.partial",
 };
 
 export const comparisonStatusIcons: Record<ComparisonStatus, string> = {
-  native: "check_circle",
-  nativeWeb: "check_circle-fill",
+  native: "check_circle-fill",
+  nativeWeb: "check_circle",
   web: "radio_button_unchecked",
   unsupported: "cancel",
-  unknown: "help",
+  partial: "adjust",
 };
 
 export const comparisonGroups: readonly ComparisonGroup[] = [
@@ -45,36 +45,34 @@ export const comparisonGroups: readonly ComparisonGroup[] = [
       { label: "features.item.timetable.title", luotopia: { status: "native" }, smartLuojia: { status: "web" } },
       { label: "features.item.freeClassrooms.title", luotopia: { status: "native" }, smartLuojia: { status: "web" } },
       { label: "features.item.grades.title", luotopia: { status: "native" }, smartLuojia: { status: "web" } },
-      { label: "features.item.universityCalendar.title", luotopia: { status: "native" }, smartLuojia: { status: "web" } },
+      { label: "features.item.universityCalendar.title", luotopia: { status: "native" }, smartLuojia: { status: "unsupported", note: "comparison.cell.calendar" } },
       { label: "features.item.librarySeats.title", luotopia: { status: "native" }, smartLuojia: { status: "web" } },
       { label: "features.item.libraryLoans.title", luotopia: { status: "native" }, smartLuojia: { status: "web" } },
       { label: "features.item.sportsVenues.title", luotopia: { status: "nativeWeb", note: "comparison.cell.checkout" }, smartLuojia: { status: "web" } },
-      { label: "features.item.universityTimetable.title", luotopia: { status: "native" }, smartLuojia: { status: "unknown" } },
-      { label: "features.item.courseReviews.title", luotopia: { status: "native" }, smartLuojia: { status: "unknown" } },
+      { label: "features.item.universityTimetable.title", luotopia: { status: "native" }, smartLuojia: { status: "partial", note: "comparison.cell.timetable" } },
+      { label: "features.item.courseReviews.title", luotopia: { status: "native" }, smartLuojia: { status: "unsupported" } },
       { label: "features.item.agenda.title", luotopia: { status: "native" }, smartLuojia: { status: "web", note: "comparison.cell.schedule" } },
     ],
   },
   {
     id: "campus",
     title: "comparison.group.campus",
-    note: "comparison.note.campus",
     rows: [
       { label: "features.item.ecard.title", luotopia: { status: "nativeWeb", note: "comparison.cell.ecard" }, smartLuojia: { status: "web" } },
       { label: "features.item.shuttleBus.title", luotopia: { status: "native" }, smartLuojia: { status: "web" } },
       { label: "features.item.campusMap.title", luotopia: { status: "native" }, smartLuojia: { status: "web" } },
-      { label: "features.item.hospital.title", luotopia: { status: "nativeWeb", note: "comparison.cell.medical" }, smartLuojia: { status: "web" } },
+      { label: "features.item.hospital.title", luotopia: { status: "nativeWeb", note: "comparison.cell.medical" }, smartLuojia: { status: "unsupported", note: "comparison.cell.hospital" } },
       { label: "features.item.utilities.title", luotopia: { status: "nativeWeb", note: "comparison.cell.checkout" }, smartLuojia: { status: "web" } },
-      { label: "features.item.campusNetwork.title", luotopia: { status: "nativeWeb" }, smartLuojia: { status: "web" } },
-      { label: "features.item.coremail.title", luotopia: { status: "nativeWeb", note: "comparison.cell.mail" }, smartLuojia: { status: "web" } },
+      { label: "features.item.campusNetwork.title", luotopia: { status: "nativeWeb", note: "comparison.cell.network" }, smartLuojia: { status: "web" } },
+      { label: "features.item.coremail.title", luotopia: { status: "native", note: "comparison.cell.mail" }, smartLuojia: { status: "web" } },
       { label: "comparison.row.tickets", luotopia: { status: "native" }, smartLuojia: { status: "web" } },
-      { label: "features.item.aiAssistant.title", luotopia: { status: "native" }, smartLuojia: { status: "web", note: "comparison.cell.ai" } },
-      { label: "comparison.row.scan", luotopia: { status: "native" }, smartLuojia: { status: "native", note: "comparison.cell.bridge" } },
+      { label: "features.item.aiAssistant.title", luotopia: { status: "native" }, smartLuojia: { status: "partial", note: "comparison.cell.ai" } },
+      { label: "comparison.row.scan", luotopia: { status: "native" }, smartLuojia: { status: "native" } },
     ],
   },
   {
     id: "services",
     title: "comparison.group.services",
-    note: "comparison.note.services",
     rows: [
       { label: "features.item.notifications.title", luotopia: { status: "nativeWeb", note: "comparison.cell.workflow" }, smartLuojia: { status: "web" } },
       { label: "comparison.row.enrollment", luotopia: { status: "web", note: "comparison.cell.portal" }, smartLuojia: { status: "web" } },
@@ -89,14 +87,14 @@ export const comparisonGroups: readonly ComparisonGroup[] = [
   {
     id: "devices",
     title: "comparison.group.devices",
-    note: "comparison.note.devices",
     rows: [
-      { label: "features.item.widgets.title", luotopia: { status: "native", note: "comparison.cell.platform" }, smartLuojia: { status: "unknown" } },
-      { label: "features.item.watch.title", luotopia: { status: "native", note: "comparison.cell.platform" }, smartLuojia: { status: "unknown" } },
-      { label: "features.item.appleShortcuts.title", luotopia: { status: "native", note: "comparison.cell.platform" }, smartLuojia: { status: "unknown" } },
-      { label: "features.item.multiAccount.title", luotopia: { status: "native" }, smartLuojia: { status: "unknown" } },
-      { label: "features.item.languages.title", luotopia: { status: "native" }, smartLuojia: { status: "unknown" } },
-      { label: "comparison.row.desktop", luotopia: { status: "native", note: "comparison.cell.platform" }, smartLuojia: { status: "unknown" } },
+      { label: "features.item.widgets.title", luotopia: { status: "native" }, smartLuojia: { status: "unsupported" } },
+      { label: "comparison.row.quickActions", luotopia: { status: "native" }, smartLuojia: { status: "native" } },
+      { label: "features.item.watch.title", luotopia: { status: "native" }, smartLuojia: { status: "unsupported" } },
+      { label: "features.item.appleShortcuts.title", luotopia: { status: "native" }, smartLuojia: { status: "unsupported" } },
+      { label: "features.item.multiAccount.title", luotopia: { status: "native" }, smartLuojia: { status: "unsupported", note: "comparison.cell.relogin" } },
+      { label: "features.item.languages.title", luotopia: { status: "native" }, smartLuojia: { status: "partial", note: "comparison.cell.languages" } },
+      { label: "comparison.row.desktop", luotopia: { status: "native" }, smartLuojia: { status: "unsupported" } },
       { label: "comparison.row.browser", luotopia: { status: "unsupported", note: "comparison.cell.planned" }, smartLuojia: { status: "web" } },
     ],
   },

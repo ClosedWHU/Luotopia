@@ -24,6 +24,7 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
           <h3 class="text-title-medium text-on-surface">{t("comparison.luotopia")}</h3>
           <p class="text-body-medium text-on-surface-variant mt-2">{t("comparison.strength.luotopia")}</p>
         </div>
+        <div class="comparison-divider" aria-hidden="true"><span>VS</span></div>
         <div>
           <h3 class="text-title-medium text-on-surface">{t("comparison.official")}</h3>
           <p class="text-body-medium text-on-surface-variant mt-2">{t("comparison.strength.official")}</p>
@@ -34,7 +35,7 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
         {comparisonStatuses.map((status) => (
           <li>
             <span class:list={["comparison-symbol", `comparison-${status}`]} aria-hidden="true"><Icon name={comparisonStatusIcons[status]} /></span>
-            <span>{t(comparisonStatusKeys[status])}</span>
+            <span>{t(status === "web" ? "comparison.legend.web" : comparisonStatusKeys[status])}</span>
           </li>
         ))}
       </ul>
@@ -87,37 +88,66 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
         <summary class="text-label-large">{t("comparison.method.title")}</summary>
         <div class="text-body-small text-on-surface-variant">
           <p>{t("comparison.method.scope")}</p>
-          <p>{t("comparison.method.native")}</p>
         </div>
       </details>
     </div>
-    <p class="text-body-small text-on-surface-variant text-center max-w-3xl mx-auto mt-6">{t("comparison.disclaimer")}</p>
   </div>
 </section>
 
+<script>
+  import type Lenis from "lenis";
+  import { onPageSetup } from "../scripts/page-lifecycle";
+
+  onPageSetup((signal) => {
+    const groups = document.querySelectorAll<HTMLDetailsElement>("#comparison .comparison-group");
+    groups.forEach((group) => {
+      const summary = group.querySelector("summary")!;
+      summary.addEventListener("click", (event) => {
+        event.preventDefault();
+        if (group.open) {
+          group.open = false;
+          return;
+        }
+        const top = summary.getBoundingClientRect().top;
+        groups.forEach((other) => {
+          if (other !== group) other.open = false;
+        });
+        group.open = true;
+        const scrollTop = window.scrollY + summary.getBoundingClientRect().top - top;
+        const lenis = (window as unknown as { ltLenis?: Lenis }).ltLenis;
+        if (lenis) lenis.scrollTo(scrollTop, { immediate: true, force: true });
+        else window.scrollTo(window.scrollX, scrollTop);
+      }, { signal });
+    });
+  });
+</script>
+
 <style>
-  .comparison-panel { overflow: hidden; }
-  .comparison-intro { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; padding: 2rem; }
+  .comparison-panel { overflow: hidden; overflow-anchor: none; }
+  .comparison-intro { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 2rem; padding: 2rem; }
+  .comparison-divider { display: flex; flex-direction: column; align-items: center; gap: .75rem; color: var(--lt-color-on-surface-variant); font-size: .75rem; font-weight: 600; }
+  .comparison-divider::before, .comparison-divider::after { content: ""; flex: 1; width: 1px; background: var(--lt-color-outline-variant); }
   .comparison-legend { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; padding: 1.25rem 2rem; border-top: 1px solid var(--lt-color-outline-variant); font-size: .8125rem; color: var(--lt-color-on-surface-variant); }
   .comparison-legend li { display: flex; align-items: center; gap: .5rem; }
   .comparison-symbol { display: inline-flex; flex: 0 0 1.375rem; width: 1.375rem; height: 1.375rem; }
   .comparison-symbol :global(svg) { width: 100%; height: 100%; }
   .comparison-native, .comparison-nativeWeb, .comparison-web { color: var(--lt-color-success); }
+  .comparison-partial { color: var(--lt-color-warning); }
   .comparison-unsupported { color: var(--lt-color-error); }
-  .comparison-unknown { color: var(--lt-color-on-surface-variant); }
   .comparison-group { border-top: 1px solid var(--lt-color-outline-variant); }
-  .comparison-group > summary { display: flex; align-items: center; gap: .75rem; padding: 1.25rem 2rem; cursor: pointer; list-style: none; }
+  .comparison-group > summary { display: flex; align-items: center; gap: .75rem; padding: 1.25rem 2rem; cursor: pointer; list-style: none; background: var(--lt-glass-subtle); color: var(--lt-color-on-surface); border-left: 3px solid transparent; }
+  .comparison-group[open] > summary { border-left-color: var(--lt-color-primary); color: var(--lt-color-primary); }
   .comparison-group > summary::-webkit-details-marker { display: none; }
   summary:focus-visible { outline: 2px solid var(--lt-color-primary); outline-offset: -4px; border-radius: .5rem; }
-  .comparison-count { color: var(--lt-color-on-surface-variant); font-size: .8125rem; }
+  .comparison-count { padding: .125rem .5rem; border: 1px solid var(--lt-color-outline-variant); border-radius: 999px; color: var(--lt-color-on-surface-variant); font-size: .8125rem; }
   .comparison-chevron { display: flex; margin-left: auto; }
   .comparison-group[open] .comparison-chevron { transform: rotate(180deg); }
-  .comparison-group-note { padding: 0 2rem 1.25rem; max-width: 60rem; }
+  .comparison-group-note { padding: 1rem 2rem; max-width: 60rem; }
   table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: .875rem; }
   .comparison-feature-col { width: 36%; }
   th, td { padding: 1rem 1.5rem; overflow-wrap: break-word; vertical-align: middle; border-top: 1px solid var(--lt-color-outline-variant); }
   th { text-align: left; font-weight: 500; }
-  thead th { font-weight: 600; }
+  thead th { font-weight: 600; background: var(--lt-glass-subtle); color: var(--lt-color-on-surface-variant); font-size: .8125rem; }
   td, thead th:not(:first-child) { text-align: center; }
   .comparison-ours { background: var(--lt-glass-subtle); }
   .comparison-cell { display: flex; justify-content: center; align-items: center; gap: .5rem; }
@@ -128,9 +158,11 @@ const t = useTranslations(resolveLocale(Astro.currentLocale));
   .comparison-method p { margin-top: .75rem; }
   @media (max-width: 639px) {
     .comparison-intro { grid-template-columns: 1fr; gap: 1.25rem; padding: 1.25rem; }
+    .comparison-divider { flex-direction: row; }
+    .comparison-divider::before, .comparison-divider::after { width: auto; height: 1px; }
     .comparison-legend { padding: 1rem 1.25rem; gap: .75rem 1rem; }
     .comparison-group > summary { padding: 1.25rem 1rem; }
-    .comparison-group-note { padding: 0 1rem 1rem; }
+    .comparison-group-note { padding: 1rem; }
     th, td { padding: .875rem .5rem; font-size: .8125rem; }
     .comparison-feature-col { width: 34%; }
     .comparison-cell { flex-direction: column; gap: .25rem; }
