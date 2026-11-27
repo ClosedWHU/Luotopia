@@ -1,0 +1,139 @@
+---
+import Icon from "./Icon.astro";
+import {
+  comparisonGroups,
+  comparisonStatuses,
+  comparisonStatusIcons,
+  comparisonStatusKeys,
+} from "../config/comparison";
+import { resolveLocale, useTranslations } from "../i18n/ui";
+
+const t = useTranslations(resolveLocale(Astro.currentLocale));
+---
+
+<section id="comparison" class="relative py-24 px-4 scroll-mt-20" aria-labelledby="comparison-title">
+  <div class="max-w-content mx-auto">
+    <div class="text-center max-w-2xl mx-auto mb-10">
+      <p class="text-label-large text-primary mb-3">{t("comparison.eyebrow")}</p>
+      <h2 id="comparison-title" class="text-headline-small sm:text-headline-medium text-on-surface mb-4">{t("comparison.title")}</h2>
+      <p class="text-body-large text-on-surface-variant">{t("comparison.subtitle")}</p>
+    </div>
+
+    <div class="glass rounded-group comparison-panel">
+      <div class="comparison-intro">
+        <div>
+          <h3 class="text-title-medium text-on-surface">{t("comparison.luotopia")}</h3>
+          <p class="text-body-medium text-on-surface-variant mt-2">{t("comparison.strength.luotopia")}</p>
+        </div>
+        <div>
+          <h3 class="text-title-medium text-on-surface">{t("comparison.official")}</h3>
+          <p class="text-body-medium text-on-surface-variant mt-2">{t("comparison.strength.official")}</p>
+        </div>
+      </div>
+
+      <ul class="comparison-legend" aria-label={t("comparison.legend")}>
+        {comparisonStatuses.map((status) => (
+          <li>
+            <span class:list={["comparison-symbol", `comparison-${status}`]} aria-hidden="true"><Icon name={comparisonStatusIcons[status]} /></span>
+            <span>{t(comparisonStatusKeys[status])}</span>
+          </li>
+        ))}
+      </ul>
+
+      {comparisonGroups.map((group, index) => (
+        <details class="comparison-group" open={index === 0}>
+          <summary>
+            <span class="text-title-medium">{t(group.title)}</span>
+            <span class="comparison-count" aria-hidden="true">{group.rows.length}</span>
+            <span class="comparison-chevron" aria-hidden="true"><Icon name="keyboard_arrow_down" /></span>
+          </summary>
+          <p id={`comparison-${group.id}-note`} class="comparison-group-note text-body-small text-on-surface-variant">{t(group.note)}</p>
+          <table aria-describedby={`comparison-${group.id}-note`}>
+            <caption class="sr-only">{t(group.title)} — {t("comparison.title")}</caption>
+            <colgroup><col class="comparison-feature-col" /><col /><col /></colgroup>
+            <thead>
+              <tr>
+                <th scope="col">{t("comparison.feature")}</th>
+                <th scope="col" class="comparison-ours">{t("comparison.luotopia")}</th>
+                <th scope="col">{t("comparison.official")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {group.rows.map((row) => (
+                <tr>
+                  <th scope="row">{t(row.label)}</th>
+                  {[row.luotopia, row.smartLuojia].map((cell, cellIndex) => (
+                    <td class:list={[cellIndex === 0 && "comparison-ours"]}>
+                      <span class="comparison-cell">
+                        <span class:list={["comparison-symbol", `comparison-${cell.status}`]} aria-hidden="true"><Icon name={comparisonStatusIcons[cell.status]} /></span>
+                        <span class="comparison-status">{t(comparisonStatusKeys[cell.status])}</span>
+                      </span>
+                      {cell.note && <span class="comparison-cell-note">{t(cell.note)}</span>}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </details>
+      ))}
+
+      <details class="comparison-method">
+        <summary class="text-label-large">{t("comparison.method.title")}</summary>
+        <div class="text-body-small text-on-surface-variant">
+          <p>{t("comparison.method.scope")}</p>
+          <p>{t("comparison.method.native")}</p>
+          <p>{t("comparison.method.limits")}</p>
+          <p>{t("comparison.method.sources")}</p>
+        </div>
+      </details>
+    </div>
+    <p class="text-body-small text-on-surface-variant text-center max-w-3xl mx-auto mt-6">{t("comparison.disclaimer")}</p>
+  </div>
+</section>
+
+<style>
+  .comparison-panel { overflow: hidden; }
+  .comparison-intro { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; padding: 2rem; }
+  .comparison-legend { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; padding: 1.25rem 2rem; border-top: 1px solid var(--lt-color-outline-variant); font-size: .8125rem; color: var(--lt-color-on-surface-variant); }
+  .comparison-legend li { display: flex; align-items: center; gap: .5rem; }
+  .comparison-symbol { display: inline-flex; flex: 0 0 1.375rem; width: 1.375rem; height: 1.375rem; }
+  .comparison-symbol :global(svg) { width: 100%; height: 100%; }
+  .comparison-native, .comparison-web { color: var(--lt-color-success); }
+  .comparison-partial { color: var(--lt-color-warning); }
+  .comparison-unsupported { color: var(--lt-color-error); }
+  .comparison-unknown { color: var(--lt-color-on-surface-variant); }
+  .comparison-group { border-top: 1px solid var(--lt-color-outline-variant); }
+  .comparison-group > summary { display: flex; align-items: center; gap: .75rem; padding: 1.25rem 2rem; cursor: pointer; list-style: none; }
+  .comparison-group > summary::-webkit-details-marker { display: none; }
+  summary:focus-visible { outline: 2px solid var(--lt-color-primary); outline-offset: -4px; border-radius: .5rem; }
+  .comparison-count { color: var(--lt-color-on-surface-variant); font-size: .8125rem; }
+  .comparison-chevron { display: flex; margin-left: auto; }
+  .comparison-group[open] .comparison-chevron { transform: rotate(180deg); }
+  .comparison-group-note { padding: 0 2rem 1.25rem; max-width: 60rem; }
+  table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: .875rem; }
+  .comparison-feature-col { width: 36%; }
+  th, td { padding: 1rem 1.5rem; overflow-wrap: break-word; vertical-align: middle; border-top: 1px solid var(--lt-color-outline-variant); }
+  th { text-align: left; font-weight: 500; }
+  thead th { font-weight: 600; }
+  td, thead th:not(:first-child) { text-align: center; }
+  .comparison-ours { background: var(--lt-glass-subtle); }
+  .comparison-cell { display: flex; justify-content: center; align-items: center; gap: .5rem; }
+  .comparison-status { font-size: .8125rem; color: var(--lt-color-on-surface-variant); }
+  .comparison-cell-note { display: block; margin-top: .375rem; font-size: .75rem; line-height: 1.5; color: var(--lt-color-on-surface-variant); }
+  .comparison-method { border-top: 1px solid var(--lt-color-outline-variant); padding: 1.25rem 2rem; }
+  .comparison-method summary { cursor: pointer; }
+  .comparison-method p { margin-top: .75rem; }
+  @media (max-width: 639px) {
+    .comparison-intro { grid-template-columns: 1fr; gap: 1.25rem; padding: 1.25rem; }
+    .comparison-legend { padding: 1rem 1.25rem; gap: .75rem 1rem; }
+    .comparison-group > summary { padding: 1.25rem 1rem; }
+    .comparison-group-note { padding: 0 1rem 1rem; }
+    th, td { padding: .875rem .5rem; font-size: .8125rem; }
+    .comparison-feature-col { width: 34%; }
+    .comparison-cell { flex-direction: column; gap: .25rem; }
+    .comparison-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    .comparison-cell-note { font-size: .75rem; }
+    .comparison-method { padding: 1.25rem; }
+  }
+</style>
