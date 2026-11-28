@@ -88,3 +88,32 @@ jobs:
           npx wrangler r2 object put "$R2_BUCKET/hot-update/manifest.json" \
             --file=public/hot-update/manifest.json \
             --content-type=application/json --remote
+
+  cleanup:
+    name: Keep the latest 30 catalog sync runs
+    needs: sync
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: write
+    steps:
+      - name: Delete older completed runs of this workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          CURRENT_RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          workflow_id=$(gh api "repos/$GH_REPO/actions/runs/$CURRENT_RUN_ID" --jq .workflow_id)
+          gh api --paginate --slurp \
+            "repos/$GH_REPO/actions/workflows/$workflow_id/runs?per_page=100" > runs.json
+          # Reserve one slot for this run, which has not completed yet.
+          jq -r --arg current "$CURRENT_RUN_ID" \
+            '[.[].workflow_runs[] | select((.id | tostring) != $current)]
+             | sort_by(.created_at, .id) | reverse | .[29:][]
+             | select(.status == "completed") | .id' runs.json > delete-ids.txt
+          while read -r run_id; do
+            echo "Deleting completed catalog sync run $run_id"
+            gh api --method DELETE "repos/$GH_REPO/actions/runs/$run_id"
+          done < delete-ids.txt
