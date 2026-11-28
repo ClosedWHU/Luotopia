@@ -2401,7 +2401,7 @@ jobs:
           # Core build deps (required)
           apt_retry sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             clang cmake ninja-build pkg-config \
-            libgtk-3-dev liblzma-dev libstdc++-12-dev \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev libx11-dev libxi-dev \
             libsecret-1-dev libjsoncpp-dev \
             libsoup-3.0-dev libepoxy-dev libwayland-dev \
             dpkg-dev fakeroot desktop-file-utils elfutils file patchelf pax-utils libpulse0
