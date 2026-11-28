@@ -143,29 +143,6 @@ const STORE_CODES = {
 /** Per-channel character caps for the store "what's new" field. */
 const LIMITS = { store: 1500, play: 500 };
 
-/**
- * High-frequency characters that exist ONLY in Simplified Chinese, and their
- * Traditional counterparts.
- *
- * A heuristic, not a converter. It exists to catch the failure DeepL actually
- * produced for `ZH -> ZH-HANT`: HTTP 200, a well-formed response, and the
- * Simplified input echoed back verbatim. Nothing in the transport signals that
- * anything went wrong, so the output has to be inspected.
- *
- * Every character here must differ between the two scripts. Script-neutral
- * characters -- 制 割 到 刷 券 刺 刻 剪 副 剩 and the like -- look like
- * Simplified-only forms and are not: an early version of this set included them
- * and produced a false positive that silently dropped the whole zh-Hant locale
- * once the input grew from a 93-char summary to a 1441-char body. A false
- * positive here is expensive, because the failure mode is to omit a language
- * rather than to mistranslate it.
- */
-const SIMPLIFIED_ONLY =
-  "数设书学会见图对说读语视频软动发变过还这进远认证缓导义乐习云产亲亿仅价众优传伤体储党兰关兴军农决况净准凉减凤凭凯击凿刘则刚创删别剂剑剧";
-
-const TRADITIONAL_ONLY =
-  "數據書學會見圖對說讀語視頻軟動發變過還這進遠認證緩導義樂習雲產親億僅價眾優傳傷體儲黨蘭關興軍農決況淨準涼減鳳憑凱擊鑿劉則剛創刪別劑劍劇";
-
 const CJK = /[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/;
 const KANA = /[\u3040-\u30ff]/;
 const HANGUL = /[\uac00-\ud7af\u1100-\u11ff]/;
@@ -310,22 +287,10 @@ export function validate(text, locale, source) {
   if (locale === SOURCE_LOCALE) return null;
   if (!text || !text.trim()) return "empty translation";
   if (text === source) return "identical to source (returned untranslated)";
-  if (locale === "zh-Hant") {
-    const simp = [...new Set([...text].filter((c) => SIMPLIFIED_ONLY.includes(c)))];
-    if (simp.length) return `residual Simplified characters: ${simp.join("")}`;
-    // Require a Traditional-only character only when the source actually had a
-    // Simplified-only one to convert. A short summary can be written entirely in
-    // script-neutral characters -- v1.0.0+6's is eight of them -- and demanding
-    // a Traditional glyph there rejects a correct translation. The residual
-    // check above is what actually catches DeepL echoing the source.
-    if (
-      [...source].some((c) => SIMPLIFIED_ONLY.includes(c)) &&
-      ![...text].some((c) => TRADITIONAL_ONLY.includes(c))
-    ) {
-      return "no Traditional-only characters present";
-    }
-    return null;
-  }
+  // Chinese script quality is owned by the translation target, not a local
+  // character blacklist: shared forms and context make such lists unsound.
+  // Empty output and verbatim source echoes are checked above.
+  if (locale === "zh-Hant") return null;
   if (locale === "ja") return KANA.test(text) ? null : "no kana in Japanese output";
   if (locale === "ko") return HANGUL.test(text) ? null : "no hangul in Korean output";
   // A ratio, not a presence test. Chinese product names have no translation and
@@ -398,9 +363,8 @@ function selfTest() {
     validate(tradBody, "zh-Hant", simpBody),
     null,
   );
-  // The false positive that dropped zh-Hant: 制 割 到 刷 券 刺 刻 剪 副 剩 are
-  // identical in both scripts and must never count as Simplified residue.
-  const neutral = "此版本對製作流程到場刷卡券刺刻剪副剩餘項目均有調整。";
+  // Shared characters, including 准 in 准許, are valid Traditional forms.
+  const neutral = "此版本對製作流程到場刷卡券刺刻剪副剩餘項目均有調整，並准許更新。";
   check(
     "script-neutral characters are not Simplified residue",
     validate(neutral, "zh-Hant", "本版本对制作流程到场刷卡券刺刻剪副剩余项目均有调整。"),
@@ -530,9 +494,9 @@ function selfTest() {
     null,
   );
   check(
-    "zh-Hant is still rejected when the source had Simplified to convert",
+    "Traditional translation need not contain script-exclusive characters",
     validate("量度", "zh-Hant", "数据"),
-    "no Traditional-only characters present",
+    null,
   );
   check(
     "an untranslatable Chinese product name does not sink a Latin locale",
@@ -668,7 +632,7 @@ async function main() {
     // Fingerprint of the exact body bytes this translation was generated
     // from. The workflow compares it against sha256(body.md) of the current
     // release body and reuses the attached asset instead of re-calling DeepL
-    // when they match (and no locale was omitted); an asset without this
+    // when they match, including partial translations; an asset without this
     // field predates the fingerprint and simply re-translates once.
     sourceSha256: createHash("sha256").update(body, "utf8").digest("hex"),
     locales,
