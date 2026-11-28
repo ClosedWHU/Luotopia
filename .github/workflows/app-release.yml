@@ -133,6 +133,11 @@ on:
         required: false
         type: boolean
         default: true
+      linux_ci_only:
+        description: "Validate Linux builds and caches only; skip all release publishing and other platforms"
+        required: false
+        type: boolean
+        default: false
       build_ohos:
         description: "Build HarmonyOS HAP on the self-hosted Linux runner (setup-ohos + OH Flutter)"
         required: false
@@ -406,6 +411,18 @@ jobs:
             [[ "$BUILD_NAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Apple version must be numeric x.y.z"; exit 1; }
             [[ "$BUILD_NUMBER" =~ ^[1-9][0-9]*$ ]] || { echo "::error::Apple build number must be a positive integer"; exit 1; }
           fi
+          if [ '${{ inputs.linux_ci_only }}' = true ]; then
+            BUILD_ANDROID=false
+            BUILD_WINDOWS=false
+            BUILD_MACOS=false
+            BUILD_OHOS=false
+            BUILD_IOS_TESTFLIGHT=false
+            BUILD_MACOS_TESTFLIGHT=false
+            APPLE_PLATFORMS='[]'
+            SUBMIT_STORE=false
+            BUILD_LINUX=true
+            REUSE_LINUX=false
+          fi
           echo "apple_platforms=$APPLE_PLATFORMS" >> "$GITHUB_OUTPUT"
           echo "apple_action=$APPLE_ACTION" >> "$GITHUB_OUTPUT"
           echo "distribute_apple_external=$DISTRIBUTE_APPLE_EXTERNAL" >> "$GITHUB_OUTPUT"
@@ -465,8 +482,9 @@ jobs:
       - name: Auto-generate changelog if needed
         id: changelog
         if: >-
-          (github.event_name == 'release' && github.event.release.tag_name != 'v1.0.1+14') ||
-          (github.event_name == 'workflow_dispatch' && steps.ctx.outputs.tag != 'v1.0.1+14')
+          !inputs.linux_ci_only &&
+          ((github.event_name == 'release' && github.event.release.tag_name != 'v1.0.1+14') ||
+          (github.event_name == 'workflow_dispatch' && steps.ctx.outputs.tag != 'v1.0.1+14'))
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.ctx.outputs.tag }}
@@ -577,6 +595,7 @@ jobs:
       # each build job uploads into the same tag with --clobber.
       - name: Prepare private symbols release
         id: symbols
+        if: ${{ !inputs.linux_ci_only }}
         env:
           GH_TOKEN: ${{ env.APP_TOKEN }}
           TAG: ${{ steps.ctx.outputs.tag }}
@@ -1989,7 +2008,7 @@ jobs:
   translate-notes:
     name: Translate release notes
     needs: context
-    if: needs.context.outputs.tag != ''
+    if: ${{ !inputs.linux_ci_only && needs.context.outputs.tag != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -2439,9 +2458,10 @@ jobs:
           command -v appimagetool
           appimagetool --version || true
 
-      - name: Cache Linux WPE SDK
+      - name: Restore Linux WPE SDK
         if: steps.sel.outputs.run == 'true'
-        uses: actions/cache@v6
+        id: wpe-cache
+        uses: actions/cache/restore@v6
         with:
           path: build/native/wpe/sdk
           key: Linux-${{ matrix.arch }}-wpe-${{ hashFiles('scripts/linux_wpe/Dockerfile', 'scripts/linux_wpe/build-sdk.sh', 'scripts/linux_wpe/relocate.py') }}
@@ -2453,6 +2473,15 @@ jobs:
           bash scripts/prepare_linux_wpe.sh
           echo "PKG_CONFIG_PATH=$GITHUB_WORKSPACE/build/native/wpe/sdk/lib/pkgconfig" >> "$GITHUB_ENV"
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/build/native/wpe/runtime/lib" >> "$GITHUB_ENV"
+
+      # Persist the hours-long SDK build before any Flutter/plugin/package step
+      # can fail. An exact hit is immutable and does not need saving again.
+      - name: Save Linux WPE SDK
+        if: steps.sel.outputs.run == 'true' && steps.wpe-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: build/native/wpe/sdk
+          key: ${{ steps.wpe-cache.outputs.cache-primary-key }}
 
       # The pinned fjs generation (a73359fe / precompiled_dd0cf313...) ships
       # signed aarch64-unknown-linux-gnu artifacts, so arm64 resolves from the
@@ -2562,8 +2591,23 @@ jobs:
             --no-pub \
             "${EXTRA[@]}"
 
+      - name: Verify Linux runtime bundle
+        if: inputs.linux_ci_only && steps.sel.outputs.run == 'true'
+        env:
+          ARCH: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tool -p test_linux_bundle.py -v
+          if [ "$ARCH" = arm64 ]; then
+            LIB="$PWD/build/linux/arm64/release/bundle/lib"
+            test -r "$LIB/libmdk-rockchip.so"
+            test -r "$LIB/librockchip_mpp.so.1"
+            readelf -h "$LIB/librockchip_mpp.so.1"
+            lddtree -l "$LIB/libmdk-rockchip.so"
+          fi
+
       - name: Publish Dart obfuscation symbols (private app release)
-        if: steps.sel.outputs.run == 'true'
+        if: ${{ !inputs.linux_ci_only && steps.sel.outputs.run == 'true' }}
         env:
           GH_TOKEN: ${{ env.APP_TOKEN }}
           SYM_TAG: ${{ needs.context.outputs.symbols_tag }}
@@ -2681,7 +2725,7 @@ jobs:
           ls -la dist
 
       - name: Upload Linux packages to homepage release
-        if: steps.sel.outputs.run == 'true'
+        if: ${{ !inputs.linux_ci_only && steps.sel.outputs.run == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.context.outputs.tag }}
@@ -2721,7 +2765,7 @@ jobs:
   aur:
     name: Publish luotopia-bin to AUR
     needs: [context, linux]
-    if: needs.context.outputs.build_linux == 'true' && needs.context.outputs.linux_arch == 'both' && needs.context.outputs.reuse_linux != 'true'
+    if: ${{ !inputs.linux_ci_only && needs.context.outputs.build_linux == 'true' && needs.context.outputs.linux_arch == 'both' && needs.context.outputs.reuse_linux != 'true' }}
     runs-on: ubuntu-24.04
     container: archlinux:base-devel
     permissions:
@@ -2854,7 +2898,7 @@ jobs:
     # all the same. The windows/linux success gates keep the manifests from
     # pointing at half a release.
     if: >-
-      !cancelled() &&
+      !cancelled() && !inputs.linux_ci_only &&
       needs.context.result == 'success' &&
       (needs.macos.result == 'success' || needs.macos.result == 'skipped') &&
       (needs.windows.result == 'success' || needs.windows.result == 'skipped') &&
